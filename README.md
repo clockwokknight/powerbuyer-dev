@@ -8,6 +8,7 @@
 - Vue Router v4.x - [Veiw Docs](https://next.router.vuejs.org/)
 - Vuex v4.x - [Veiw Docs](https://next.vuex.vuejs.org/)
 - Vite v2.x - [Veiw Docs](https://vitejs.dev/)
+- VueFire @latest - [View Docs](https://vuefire.vuejs.org/)
 
 ### Frameworks
 
