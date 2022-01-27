@@ -1,4 +1,4 @@
-# PowerBuyer v2.x | Vue 3 + Vite
+# PowerBuyer v2.0.x
 
 ### Version Controll
 
