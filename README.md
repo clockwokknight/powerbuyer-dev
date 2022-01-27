@@ -4,9 +4,9 @@
 
 - Node v17.3.1
 - npm v8.3.0
-- Vue v3.2.29 [Veiw Docs](https://v3.vuejs.org/)
-- Vue Router v4.x [Veiw Docs](https://next.router.vuejs.org/)
-- Vuex v4.x [Veiw Docs](https://next.vuex.vuejs.org/)
+- Vue v3.2.29 - [Veiw Docs](https://v3.vuejs.org/)
+- Vue Router v4.x - [Veiw Docs](https://next.router.vuejs.org/)
+- Vuex v4.x - [Veiw Docs](https://next.vuex.vuejs.org/)
 - Vite v2.x - [Veiw Docs](https://vitejs.dev/)
 
 ### Frameworks
