@@ -1,22 +1,22 @@
 <template>
-    <div class="flex flex-row">
+    <section class="w-[60px] text-[#ffffff]">
         <nav>
-            <ul class="flex flex-col items-center w-full menu-items text-[#fff] max-w-[55px] overflow-hidden">
+            <ul class="flex flex-col items-center w-full menu-items">
                 <router-link to="/">
-                    <li class="w-[40px] h-[40px] bg-[#027bff] text-center font-bold rounded-md pt-[7px] mt-3 text-lg">PB</li>
+                    <li class="w-[40px] h-[40px] bg-[#027bff] text-center font-bold rounded-md pt-[7px] mt-3 text-lg mb-5">PB</li>
                 </router-link>
                 <router-link to="/">
-                    <li>Dashboard</li>
+                    <li content="Dashbaord" v-tippy='{ placement : "right" }'><img src="/icons/SpaceDashboardRound.svg" /></li>
                 </router-link>
                 <router-link to="/deals">
-                    <li>Deals</li>
+                    <li content="Deals" v-tippy='{ placement : "right" }'><img src="/icons/MdPricetags.svg" /></li>
                 </router-link>
                 <router-link to="/inventory">
-                    <li>Inventory</li>
+                    <li content="Inventory" v-tippy='{ placement : "right" }'><img src="/icons/CarSport.svg" /></li>
                 </router-link>
             </ul>
         </nav>
-    </div>
+    </section>
 </template>
 
 <script>
