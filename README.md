@@ -9,6 +9,7 @@
 - Vuex v4.x - [View Docs](https://next.vuex.vuejs.org/)
 - Vite v2.x - [View Docs](https://vitejs.dev/)
 - Firebase v9.x - [npm Docs](https://www.npmjs.com/package/firebase), [View Docs](https://firebase.google.com/docs/build)
+- Axios v0.25.x
 
 ### Frameworks
 
