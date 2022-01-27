@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { createStore } from 'vuex'
+import { axios } from 'axios'
 
 //UI framework
 import naive from "naive-ui";
@@ -146,4 +147,5 @@ createApp(App)
 .use(store)
 .use(naive)
 .use(VueTippy)
+.use(axios)
 .mount('#app')
