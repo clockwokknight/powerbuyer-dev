@@ -2,6 +2,12 @@ import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { createStore } from 'vuex'
 
+//UI framework
+import naive from "naive-ui";
+
+//Tippy Tooltips
+import VueTippy from 'vue-tippy'
+
 import App from './App.vue'
 
 //App Pages
@@ -138,4 +144,6 @@ const router = createRouter({
 createApp(App)
 .use(router)
 .use(store)
+.use(naive)
+.use(VueTippy)
 .mount('#app')
