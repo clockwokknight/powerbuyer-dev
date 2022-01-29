@@ -1,5 +1,7 @@
 <template>
     <div class="dashboard">
-        <h1>Dashboard</h1>
+        <div class="w-full p-4 ">
+
+        </div>
     </div>
 </template>
