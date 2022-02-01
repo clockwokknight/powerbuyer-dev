@@ -1,10 +1,9 @@
 import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
-import { createStore } from 'vuex'
 import { axios } from 'axios'
 
 //UI framework
-import naive from "naive-ui";
+import naive from "naive-ui"
 
 //Tippy Tooltips
 import VueTippy from 'vue-tippy'
@@ -35,9 +34,6 @@ import Deal from '@/views/Deal.vue'
 
 //Tailwind CSS
 import './index.css'
-
-//Store
-const store = createStore({})
 
 //Router
 const router = createRouter({
@@ -144,7 +140,6 @@ const router = createRouter({
 
 createApp(App)
 .use(router)
-.use(store)
 .use(naive)
 .use(VueTippy)
 .use(axios)
