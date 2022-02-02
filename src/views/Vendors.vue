@@ -9,7 +9,12 @@
 				<div>Page Title</div>
 				<div class="flex">
 					<div class="mr-3">
-						<n-input round placeholder="Search..." />
+						<n-input
+							round
+							placeholder="Search..."
+							v-model:value="searchTerm"
+							v-on:input="search()"
+						/>
 					</div>
 					<div>
 						<n-button type="primary">Filter</n-button>
@@ -37,17 +42,35 @@
 			<!-- Main Body Content-->
 			<div class="h-screen overflow-auto overflow-x-hidden bg-white">
 				<!-- Body Content -->
+				<PageTabs />
 			</div>
 		</div>
 	</div>
 </template>
 
 <script>
+	import store from "@/store";
+	import { defineComponent, ref } from "vue";
+	import { mapActions } from "vuex";
+	import PageTabs from "@/components/PageTabs.vue";
 	import VendorList from "@/components/vendors/VendorList.vue";
 
-	export default {
+	export default defineComponent({
+		setup() {
+			return {
+				searchTerm: ref(""),
+			};
+		},
 		components: {
 			VendorList,
+			PageTabs,
 		},
-	};
+		methods: {
+			...mapActions(["UPDATE_VENDORS_LIST"]),
+			search() {
+				// console.log(this.searchTerm);
+				store.dispatch("UPDATE_VENDORS_LIST", this.searchTerm);
+			},
+		},
+	});
 </script>

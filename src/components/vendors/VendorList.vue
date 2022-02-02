@@ -1,24 +1,19 @@
 <template>
-	<VendorItem v-for="row in data" :key="row.id" :vendor="row" />
+	<VendorItem v-for="row in FILTERED_VENDORS" :key="row.id" :vendor="row" />
 </template>
 
 <script>
-	import { computed } from "vue";
-	import { useStore } from "vuex";
+	import { mapGetters, useStore } from "vuex";
 	import VendorItem from "./VendorItem.vue";
+
 	export default {
 		components: { VendorItem },
-		data() {
-			return {
-				data: [],
-			};
+		computed: {
+			...mapGetters(["FILTERED_VENDORS"]),
 		},
 		setup() {
 			const store = useStore();
-			store.dispatch("getVendors");
-			return {
-				data: computed(() => store.getters.vendorsFiltered),
-			};
+			store.dispatch("GET_VENDORS");
 		},
 	};
 </script>
