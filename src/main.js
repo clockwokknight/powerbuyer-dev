@@ -35,6 +35,10 @@ import Deal from '@/views/Deal.vue'
 //Tailwind CSS
 import './index.css'
 
+//Vuex
+import store from './store';
+
+
 //Router
 const router = createRouter({
     history: createWebHistory(),
@@ -141,6 +145,7 @@ const router = createRouter({
 createApp(App)
 .use(router)
 .use(naive)
+.use(store)
 .use(VueTippy)
 .use(axios)
 .mount('#app')
