@@ -1,5 +1,5 @@
 <template>
-	<div>Page Tab</div>
+	<n-tab-pane name="oasis" tab="Oasis">Wonderwall</n-tab-pane>
 </template>
 
 <script>

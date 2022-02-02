@@ -2,19 +2,58 @@
 	<div class="pageTabs">
 		<div>
 			<!-- Page tabs -->
-			<PageTab
-				v-if="GET_TABS_LIST"
-				v-for="tab in GET_TABS_LIST"
-				:info="tab"
-				:key="tab.id"
-			/>
+			<n-tabs
+				v-model:value="name"
+				type="card"
+				closable
+				@close="handleClose"
+				tab-style="min-width: 80px;"
+			>
+				<!-- <PageTab
+					v-if="GET_TABS_LIST"
+					v-for="tab in GET_TABS_LIST"
+					:info="tab"
+					:key="tab.id"
+				/> -->
+				<n-tab-pane
+					v-if="GET_TABS_LIST"
+					v-for="tab in GET_TABS_LIST"
+					name="oasis"
+					tab="Oasis"
+					>Wonderwall</n-tab-pane
+				>
+			</n-tabs>
 		</div>
 	</div>
 </template>
 <script>
+	import { ref } from "vue";
 	import { mapGetters } from "vuex";
 	import PageTab from "./PageTab.vue";
 	export default {
+		setup() {
+			const nameRef = ref(1);
+			// const message = useMessage();
+			const panelsRef = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+			function handleClose(name) {
+				const { value: panels } = panelsRef;
+				if (panels.length === 1) {
+					// message.error("The last one!");
+					return;
+				}
+				// message.info("Close " + name);
+				const index = panels.findIndex((v) => name === v);
+				panels.splice(index, 1);
+				if (nameRef.value === name) {
+					nameRef.value = panels[index];
+				}
+			}
+			return {
+				panels: panelsRef,
+				name: nameRef,
+				handleClose,
+			};
+		},
 		computed: {
 			...mapGetters(["GET_TABS_LIST"]),
 		},
