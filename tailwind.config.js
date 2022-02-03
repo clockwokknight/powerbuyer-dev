@@ -1,11 +1,8 @@
 module.exports = {
-  content: [
-      "./index.html",
-      "./src/**/*.{vue,js,ts,jsx,tsx}",
-  ],
+  content: ["./index.html", "./src/**/*.{vue,js,ts,jsx,tsx}"],
   theme: {
     extend: {},
   },
-  plugins: [],
-  important: true,
-}
+  plugins: [require("@tailwindcss/forms")],
+  // important: true,
+};

@@ -10,6 +10,7 @@
     "@vueuse/core": "^7.5.5",
     "axios": "^0.25.0",
     "firebase": "^9.6.4",
+    "v-money": "^0.8.1",
     "vue": "^3.2.25",
     "vue-router": "^4.0.12",
     "vue-tippy": "^6.0.0-alpha.44",
@@ -17,10 +18,13 @@
     "vuex": "^4.0.2"
   },
   "devDependencies": {
+    "@tailwindcss/forms": "^0.4.0",
     "@vitejs/plugin-vue": "^2.0.0",
     "autoprefixer": "^10.4.2",
     "naive-ui": "^2.24.6",
     "postcss": "^8.4.5",
+    "prettier": "^2.5.1",
+    "prettier-plugin-tailwindcss": "^0.1.4",
     "tailwindcss": "^3.0.16",
     "vite": "^2.7.2"
   }
