@@ -1,45 +1,49 @@
-import { createApp } from 'vue'
-import { createRouter, createWebHistory } from 'vue-router'
-import { axios } from 'axios'
+import { createApp } from 'vue';
+import { createRouter, createWebHistory } from 'vue-router';
+import { axios } from 'axios';
 
 //UI framework
-import naive from "naive-ui"
+import naive from "naive-ui";
 
 //Tippy Tooltips
-import VueTippy from 'vue-tippy'
+import VueTippy from 'vue-tippy';
 
-import App from './App.vue'
+import App from './App.vue';
 
 //App Pages
-import Dashboard from '@/views/Dashboard.vue'
-import Login from '@/views/Login.vue'
-import Auctions from '@/views/Auctions.vue'
-import Auction from '@/views/Auction.vue'
-import Buyers from '@/views/Buyers.vue'
-import Buyer from '@/views/Buyer.vue'
-import Lenders from '@/views/Lenders.vue'
-import Lender from '@/views/Lender.vue'
-import Inventory from '@/views/Inventory.vue'
-import Vehicle from '@/views/Vehicle.vue'
-import Vendors from '@/views/Vendors.vue'
-import Vendor from '@/views/Vendor.vue'
-import Dealers from '@/views/Dealers.vue'
-import Dealer from '@/views/Dealer.vue'
-import Lanes from '@/views/Lanes.vue'
-import LanesHistory from '@/views/LanesHistory.vue'
-import LanesManage from '@/views/LanesManage.vue'
-import Deals from '@/views/Deals.vue'
-import Deal from '@/views/Deal.vue'
+import Dashboard from '@/views/Dashboard.vue';
+import Login from '@/views/Login.vue';
+import Auctions from '@/views/Auctions.vue';
+import Auction from '@/views/Auction.vue';
+import Buyers from '@/views/Buyers.vue';
+import Buyer from '@/views/Buyer.vue';
+import Lenders from '@/views/Lenders.vue';
+import Lender from '@/views/Lender.vue';
+import Inventory from '@/views/Inventory.vue';
+import Vehicle from '@/views/Vehicle.vue';
+import Vendors from '@/views/Vendors.vue';
+import Vendor from '@/views/Vendor.vue';
+import Dealers from '@/views/Dealers.vue';
+import Dealer from '@/views/Dealer.vue';
+import Lanes from '@/views/Lanes.vue';
+import LanesHistory from '@/views/LanesHistory.vue';
+import LanesManage from '@/views/LanesManage.vue';
+import Deals from '@/views/Deals.vue';
+import Deal from '@/views/Deal.vue';
 
 
 //Tailwind CSS
-import './index.css'
+import './index.css';
+
+//Pinia
+import { createPinia } from 'pinia';
+
 
 //Router
-const router = createRouter({
+const router = createRouter( {
     history: createWebHistory(),
 
-    routes:[
+    routes: [
         {
             path: '/',
             name: 'Dashboard',
@@ -136,11 +140,12 @@ const router = createRouter({
             component: Vehicle
         }
     ]
-})
+} );
 
-createApp(App)
-.use(router)
-.use(naive)
-.use(VueTippy)
-.use(axios)
-.mount('#app')
+createApp( App )
+    .use( router )
+    .use( naive )
+    .use( createPinia() )
+    .use( VueTippy )
+    .use( axios )
+    .mount( '#app' );
