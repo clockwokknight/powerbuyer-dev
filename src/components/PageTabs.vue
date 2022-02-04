@@ -6,7 +6,7 @@
 				v-model:value="name"
 				type="card"
 				closable
-				@close="handleClose"
+				@close="CLOSE_TAB"
 				tab-style="min-width: 80px;"
 			>
 				<n-tab-pane
@@ -36,22 +36,9 @@
 
 			const tabNameRef = ref("");
 			const panelsRef = ref(store.GET_TABS);
-			function handleClose(tabId) {
-				// alert("hi");
-				store.CLOSE_TAB(tabId);
-				// const { value: panels } = panelsRef;
-				// console.log(panelsRef);
-				// console.log(panels);
-				// const index = panels.findIndex((v) => name === v);
-				// panels.splice(index, 1);
-				// if (tabNameRef.value === name) {
-				// 	tabNameRef.value = panels[index];
-				// }
-			}
 			return {
 				panels: panelsRef,
 				name: tabNameRef,
-				handleClose,
 			};
 		},
 		computed: {

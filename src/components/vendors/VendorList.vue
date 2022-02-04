@@ -1,7 +1,7 @@
 <template>
 	<VendorItem
-		v-if="GET_VENDORS"
-		v-for="vendor in GET_VENDORS"
+		v-if="GET_FILTERED_VENDORS"
+		v-for="vendor in GET_FILTERED_VENDORS"
 		:key="vendor.id"
 		:vendor="vendor"
 	/>
@@ -15,10 +15,10 @@
 		setup() {
 			const store = useVendors();
 
-			store.GET_FILTERED_VENDORS();
+			store.GET_ALL_VENDORS();
 		},
 		computed: {
-			...mapState(useVendors, ["GET_VENDORS"]),
+			...mapState(useVendors, ["GET_FILTERED_VENDORS"]),
 		},
 		components: {
 			VendorItem,

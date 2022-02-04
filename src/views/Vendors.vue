@@ -9,7 +9,13 @@
 				<div>{{ route.name }}</div>
 				<div class="flex">
 					<div class="mr-3">
-						<n-input round placeholder="Search..." />
+						<n-input
+							v-model:value="searchText"
+							@input="doSomething"
+							round
+							clearable
+							placeholder="Search..."
+						/>
 					</div>
 					<div>
 						<n-button type="primary">Filter</n-button>
@@ -47,16 +53,36 @@
 	import VendorList from "@/components/vendors/VendorList.vue";
 	import { useRoute } from "vue-router";
 	import PageTabs from "@/components/PageTabs.vue";
+	import { ref } from "vue";
+	import { mapActions, mapState } from "pinia";
+	import { useVendors } from "@/store/vendors";
 	export default {
 		setup() {
 			const route = useRoute();
 			return {
 				route,
+				searchText: ref(""),
 			};
 		},
 		components: {
 			VendorList,
 			PageTabs,
+		},
+		computed: {
+			...mapState(useVendors, ["GET_VENDORS"]),
+			// filteredList() {
+			// 	console.log(this.searchText);
+			// 	return this.GET_VENDORS.filter((vendor) =>
+			// 		vendor.company.toLowerCase().includes(this.searchText)
+			// 	);
+			// },
+		},
+		methods: {
+			...mapActions(useVendors, ["FILTER_LIST", "SET_SEARCH_TERM"]),
+			doSomething() {
+				this.SET_SEARCH_TERM(this.searchText);
+				this.FILTER_LIST(this.searchText);
+			},
 		},
 	};
 </script>
