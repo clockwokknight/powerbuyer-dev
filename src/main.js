@@ -145,5 +145,5 @@ createApp(App)
   .use(naive)
   .use(store)
   .use(VueTippy)
-  // .use(axios)
+  .use(axios)
   .mount("#app");

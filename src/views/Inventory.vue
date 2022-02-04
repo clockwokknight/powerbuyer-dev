@@ -1,5 +1,5 @@
 <script setup>
-import TextInput from "@/components/common/TextInput.vue";
+import CurrencyInput from "@/components/common/CurrencyInput.vue";
 import { ref } from "vue";
 
 const price = ref(0);
@@ -8,7 +8,6 @@ const price = ref(0);
 <template>
   <div>
     <h1>Inventory</h1>
-    <text-input v-model="price" />
-    {{ price }}
+    <currency-input v-model="price" />
   </div>
 </template>
