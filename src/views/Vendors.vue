@@ -11,7 +11,7 @@
 					<div class="mr-3">
 						<n-input
 							v-model:value="searchText"
-							@input="doSomething"
+							@input="search"
 							round
 							clearable
 							placeholder="Search..."
@@ -27,7 +27,22 @@
 			<div class="">
 				<ul>
 					<!-- Loop List-->
-					<VendorList />
+					<li
+						v-if="GET_FILTERED_VENDORS"
+						v-for="vendor in GET_FILTERED_VENDORS"
+						:key="vendor.id"
+						:vendor="vendor"
+						class="p-2 border-b-2"
+						@click="showVendor(vendor)"
+					>
+						<!-- Company Name -->
+						{{ vendor.company }}
+						<!-- City, State -->
+						{{ vendor.city }}, {{ vendor.state }}
+						<!-- Phone - Link Email -->
+						{{ vendor.phone }} -
+						<a :href="`mailto:${vendor.email}`">{{ vendor.email }}</a>
+					</li>
 				</ul>
 			</div>
 		</div>
@@ -50,7 +65,6 @@
 </template>
 
 <script>
-	import VendorList from "@/components/vendors/VendorList.vue";
 	import { useRoute } from "vue-router";
 	import PageTabs from "@/components/PageTabs.vue";
 	import { ref } from "vue";
@@ -59,17 +73,21 @@
 	export default {
 		setup() {
 			const route = useRoute();
+			const store = useVendors();
+
+			// pull in vendors
+			store.GET_ALL_VENDORS();
+
 			return {
 				route,
 				searchText: ref(""),
 			};
 		},
 		components: {
-			VendorList,
 			PageTabs,
 		},
 		computed: {
-			...mapState(useVendors, ["GET_VENDORS"]),
+			...mapState(useVendors, ["GET_VENDORS", "GET_FILTERED_VENDORS"]),
 			// filteredList() {
 			// 	console.log(this.searchText);
 			// 	return this.GET_VENDORS.filter((vendor) =>
@@ -78,10 +96,13 @@
 			// },
 		},
 		methods: {
-			...mapActions(useVendors, ["FILTER_LIST", "SET_SEARCH_TERM"]),
-			doSomething() {
+			...mapActions(useVendors, ["FILTER_LIST", "SET_SEARCH_TERM", "CREATE_NEW_TAB"]),
+			search() {
 				this.SET_SEARCH_TERM(this.searchText);
 				this.FILTER_LIST(this.searchText);
+			},
+			showVendor(vendorInfo) {
+				this.CREATE_NEW_TAB(vendorInfo);
 			},
 		},
 	};
