@@ -31,10 +31,11 @@
 	import { ref } from "vue";
 
 	export default {
-		setup() {
+		props: ["activeTab"],
+		setup(props) {
 			const store = useVendors();
 
-			const tabNameRef = ref("");
+			const tabNameRef = ref(props.activeTab);
 			const panelsRef = ref(store.GET_TABS);
 			return {
 				panels: panelsRef,
@@ -42,7 +43,7 @@
 			};
 		},
 		computed: {
-			...mapState(useVendors, ["GET_TABS"]),
+			...mapState(useVendors, ["GET_TABS", "GET_ACTIVE_TAB"]),
 		},
 		methods: {
 			...mapActions(useVendors, ["CLOSE_TAB"]),

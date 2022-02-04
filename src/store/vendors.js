@@ -65,9 +65,11 @@ export const useVendors = defineStore( 'vendors', {
                 this.$state.list.filtered = this.$state.list.all;
             }
             else {
-                // console.log(searchText)
                 this.$state.list.filtered = this.$state.list.filtered.filter( vendor => vendor.company.toLowerCase().includes(searchText) )
             }
+        },
+        SET_ACTIVE_TAB(payload) {
+            this.$state.tab.active = payload
         }
     },
 } );

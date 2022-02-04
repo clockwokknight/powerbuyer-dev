@@ -52,7 +52,7 @@
 				<div class="pageTabs">
 					<div>
 						<!-- Page tabs -->
-						<PageTabs />
+						<PageTabs :activeTab="activeTab" :key="activeTab" />
 					</div>
 				</div>
 			</div>
@@ -75,12 +75,24 @@
 			const route = useRoute();
 			const store = useVendors();
 
+			// Couldn't access refs from PageTabs, so I made a ref and this is
+			// getting passed down as a prop into <PageTabs /> so it could
+			// dynamically updated the selected tab (selected tab comes from
+			// the state )
+			const activeTab = ref(0);
+
 			// pull in vendors
 			store.GET_ALL_VENDORS();
 
 			return {
 				route,
 				searchText: ref(""),
+				activeTab,
+				showVendor(vendorInfo) {
+					store.CREATE_NEW_TAB(vendorInfo);
+					store.SET_ACTIVE_TAB(vendorInfo);
+					activeTab.value = vendorInfo.id;
+				},
 			};
 		},
 		components: {
@@ -88,21 +100,17 @@
 		},
 		computed: {
 			...mapState(useVendors, ["GET_VENDORS", "GET_FILTERED_VENDORS"]),
-			// filteredList() {
-			// 	console.log(this.searchText);
-			// 	return this.GET_VENDORS.filter((vendor) =>
-			// 		vendor.company.toLowerCase().includes(this.searchText)
-			// 	);
-			// },
 		},
 		methods: {
-			...mapActions(useVendors, ["FILTER_LIST", "SET_SEARCH_TERM", "CREATE_NEW_TAB"]),
+			...mapActions(useVendors, [
+				"FILTER_LIST",
+				"SET_SEARCH_TERM",
+				"CREATE_NEW_TAB",
+				"SET_ACTIVE_TAB",
+			]),
 			search() {
 				this.SET_SEARCH_TERM(this.searchText);
 				this.FILTER_LIST(this.searchText);
-			},
-			showVendor(vendorInfo) {
-				this.CREATE_NEW_TAB(vendorInfo);
 			},
 		},
 	};
