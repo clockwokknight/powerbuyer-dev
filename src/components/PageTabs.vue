@@ -12,10 +12,10 @@
 				<n-tab-pane
 					v-for="panel in GET_TABS"
 					:key="panel.id"
-					:tab="panel.company"
+					:tab="panel.name"
 					:name="panel.id"
 				>
-					<p>{{ panel.company }}</p>
+					<p>{{ panel.name }}</p>
 					<p>{{ panel.city }}, {{ panel.state }}</p>
 					<p>
 						{{ panel.phone }} - <a :href="`mailto:${panel.email}`">{{ panel.email }}</a>

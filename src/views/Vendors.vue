@@ -36,7 +36,7 @@
 						@click="showVendor(vendor)"
 					>
 						<!-- Company Name -->
-						{{ vendor.company }}
+						{{ vendor.name }}
 						<!-- City, State -->
 						{{ vendor.city }}, {{ vendor.state }}
 						<!-- Phone - Link Email -->

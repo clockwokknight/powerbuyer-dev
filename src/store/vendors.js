@@ -62,10 +62,11 @@ export const useVendors = defineStore( 'vendors', {
         },
         FILTER_LIST(searchText) {
             if( searchText.length < 2 ) {
+                // remove the slice in order to get all data
                 this.$state.list.filtered = this.$state.list.all;
             }
             else {
-                this.$state.list.filtered = this.$state.list.filtered.filter( vendor => vendor.company.toLowerCase().includes(searchText) )
+                this.$state.list.filtered = this.$state.list.filtered.filter( vendor => vendor.name.toLowerCase().includes(searchText) )
             }
         },
         SET_ACTIVE_TAB(payload) {
