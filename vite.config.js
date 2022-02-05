@@ -5,8 +5,13 @@ const path = require("path");
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  alias: {
-    "@": path.resolve(__dirname, "src"),
+  build: {
+    target: "esnext",
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+    },
   },
 
   plugins: [vue()],

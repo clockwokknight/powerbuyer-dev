@@ -30,6 +30,7 @@ import LanesHistory from "@/views/LanesHistory.vue";
 import LanesManage from "@/views/LanesManage.vue";
 import Deals from "@/views/Deals.vue";
 import Deal from "@/views/Deal.vue";
+import mask from "@/directives/mask";
 
 //Tailwind CSS
 import "./index.css";
@@ -143,6 +144,7 @@ const router = createRouter({
 createApp(App)
   .use(router)
   .use(naive)
+  .directive("mask", mask)
   .use(store)
   .use(VueTippy)
   .use(axios)
