@@ -1,6 +1,6 @@
 # PowerBuyer v2.0.x
 
-### Version Controll
+### Version Control
 
 - Node v17.3.1
 - npm v8.3.0
