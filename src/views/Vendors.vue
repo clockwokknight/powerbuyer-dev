@@ -52,13 +52,39 @@
 				<div class="pageTabs">
 					<div>
 						<!-- Page tabs -->
-						<PageTabs :activeTab="activeTab" :key="activeTab" />
+						<PageTabs />
 					</div>
 				</div>
 			</div>
 			<!-- Main Body Content-->
 			<div class="h-screen overflow-auto overflow-x-hidden bg-white">
 				<!-- Body Content -->
+				<div v-if="GET_ACTIVE_TAB.id">
+					<p>{{ GET_ACTIVE_TAB.accounting_code }}</p>
+					<p>{{ GET_ACTIVE_TAB.address_one }}</p>
+					<p>{{ GET_ACTIVE_TAB.address_two }}</p>
+					<p>{{ GET_ACTIVE_TAB.city }}</p>
+					<p>{{ GET_ACTIVE_TAB.comments }}</p>
+					<p>{{ GET_ACTIVE_TAB.country }}</p>
+					<p>{{ GET_ACTIVE_TAB.created_at }}</p>
+					<p>{{ GET_ACTIVE_TAB.din }}</p>
+					<p>{{ GET_ACTIVE_TAB.email }}</p>
+					<p>{{ GET_ACTIVE_TAB.id }}</p>
+					<p>{{ GET_ACTIVE_TAB.name }}</p>
+					<p>{{ GET_ACTIVE_TAB.other_phones }}</p>
+					<p>{{ GET_ACTIVE_TAB.payment_terms }}</p>
+					<p>{{ GET_ACTIVE_TAB.phone }}</p>
+					<p>{{ GET_ACTIVE_TAB.state }}</p>
+					<p>{{ GET_ACTIVE_TAB.tax_id_number }}</p>
+					<p>{{ GET_ACTIVE_TAB.trip_exp_calculation }}</p>
+					<p>{{ GET_ACTIVE_TAB.updated_at }}</p>
+					<p>{{ GET_ACTIVE_TAB.vendor_category.active }}</p>
+					<p>{{ GET_ACTIVE_TAB.vendor_category.created_at }}</p>
+					<p>{{ GET_ACTIVE_TAB.vendor_category.description }}</p>
+					<p>{{ GET_ACTIVE_TAB.vendor_category.id }}</p>
+					<p>{{ GET_ACTIVE_TAB.vendor_category.name }}</p>
+					<p>{{ GET_ACTIVE_TAB.vendor_category.updated_at }}</p>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -79,7 +105,6 @@
 			// getting passed down as a prop into <PageTabs /> so it could
 			// dynamically updated the selected tab (selected tab comes from
 			// the state )
-			const activeTab = ref(0);
 
 			// pull in vendors
 			store.GET_ALL_VENDORS();
@@ -87,11 +112,8 @@
 			return {
 				route,
 				searchText: ref(""),
-				activeTab,
 				showVendor(vendorInfo) {
 					store.CREATE_NEW_TAB(vendorInfo);
-					store.SET_ACTIVE_TAB(vendorInfo);
-					activeTab.value = vendorInfo.id;
 				},
 			};
 		},
@@ -99,15 +121,10 @@
 			PageTabs,
 		},
 		computed: {
-			...mapState(useVendors, ["GET_VENDORS", "GET_FILTERED_VENDORS"]),
+			...mapState(useVendors, ["GET_VENDORS", "GET_FILTERED_VENDORS", "GET_ACTIVE_TAB"]),
 		},
 		methods: {
-			...mapActions(useVendors, [
-				"FILTER_LIST",
-				"SET_SEARCH_TERM",
-				"CREATE_NEW_TAB",
-				"SET_ACTIVE_TAB",
-			]),
+			...mapActions(useVendors, ["FILTER_LIST", "SET_SEARCH_TERM", "CREATE_NEW_TAB"]),
 			search() {
 				this.SET_SEARCH_TERM(this.searchText);
 				this.FILTER_LIST(this.searchText);
