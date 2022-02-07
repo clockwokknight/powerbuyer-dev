@@ -1,31 +1,26 @@
 <template>
-	<li
-		class="border-b-2"
-		@mouseup="
-			SET_SELECTED_VENDOR(vendor);
-			ADD_TAB(vendor);
-		"
-	>
-		<!-- Company Name -->
-		<div class="pl-4 mb-2 mt-2 font-bold">{{ vendor.company }}</div>
-		<!-- City, State -->
-		<div class="pl-4 mb-2 mt-2 font-bold">{{ vendor.city }}</div>
-		<!-- Phone - Link Email -->
-		<div class="pl-4 mb-2 mt-2 font-bold">
-			{{ vendor.phone }}
-			<a :href="`mailto:${vendor.email}`">{{ vendor.email }}</a>
-		</div>
-	</li>
+  <li class="border-b-2 p-2" @click="showVendor(vendor)">
+    <!-- Company Name -->
+    {{ vendor.company }}
+    <!-- City, State -->
+    {{ vendor.city }}, {{ vendor.state }}
+    <!-- Phone - Link Email -->
+    {{ vendor.phone }} -
+    <a :href="`mailto:${vendor.email}`">{{ vendor.email }}</a>
+  </li>
 </template>
 
 <script>
-	import { mapActions, useStore } from "vuex";
-	const store = useStore();
+import { useVendors } from "@/store/vendors";
+import { mapActions } from "pinia";
 
-	export default {
-		props: ["vendor"],
-		methods: {
-			...mapActions(["SET_SELECTED_VENDOR", "ADD_TAB"]),
-		},
-	};
+export default {
+  props: ["vendor"],
+  methods: {
+    ...mapActions(useVendors, ["CREATE_NEW_TAB"]),
+    showVendor(vendorInfo) {
+      this.CREATE_NEW_TAB(vendorInfo);
+    },
+  },
+};
 </script>

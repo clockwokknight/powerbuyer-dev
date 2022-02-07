@@ -30,13 +30,15 @@ import LanesHistory from "@/views/LanesHistory.vue";
 import LanesManage from "@/views/LanesManage.vue";
 import Deals from "@/views/Deals.vue";
 import Deal from "@/views/Deal.vue";
-import mask from "@/directives/mask";
 
 //Tailwind CSS
 import "./index.css";
 
-//Vuex
-import store from "./store";
+//Pinia
+import { createPinia } from "pinia";
+
+//Custom Directives
+import mask from "@/directives/mask";
 
 //Router
 const router = createRouter({
@@ -145,7 +147,7 @@ createApp(App)
   .use(router)
   .use(naive)
   .directive("mask", mask)
-  .use(store)
+  .use(createPinia())
   .use(VueTippy)
   .use(axios)
   .mount("#app");

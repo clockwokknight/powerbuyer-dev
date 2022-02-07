@@ -1,7 +1,8 @@
-import { api } from '@/api/config'
+import { api } from '@/api/config';
 
 export default {
-    all() {
+    all()
+    {
         return api.get( '/vendors' );
     },
-}
+};

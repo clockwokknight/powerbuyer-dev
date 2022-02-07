@@ -1,19 +1,27 @@
 <template>
-	<VendorItem v-for="row in FILTERED_VENDORS" :key="row.id" :vendor="row" />
+  <VendorItem
+    v-if="GET_FILTERED_VENDORS"
+    v-for="vendor in GET_FILTERED_VENDORS"
+    :key="vendor.id"
+    :vendor="vendor"
+  />
 </template>
 
 <script>
-	import { mapGetters, useStore } from "vuex";
-	import VendorItem from "./VendorItem.vue";
+import { useVendors } from "@/store/vendors";
+import { mapState } from "pinia";
+import VendorItem from "./VendorItem.vue";
+export default {
+  setup() {
+    const store = useVendors();
 
-	export default {
-		components: { VendorItem },
-		computed: {
-			...mapGetters(["FILTERED_VENDORS"]),
-		},
-		setup() {
-			const store = useStore();
-			store.dispatch("GET_VENDORS");
-		},
-	};
+    store.GET_ALL_VENDORS();
+  },
+  computed: {
+    ...mapState(useVendors, ["GET_FILTERED_VENDORS"]),
+  },
+  components: {
+    VendorItem,
+  },
+};
 </script>

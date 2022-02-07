@@ -1,69 +1,73 @@
-import vendors from '@/api/vendors'
+import vendors from "@/api/vendors";
+import { defineStore } from "pinia";
 
-export default {
-    
+export const useVendors = defineStore( 'vendors', {
     state: () => ( {
-        list: [],
-        filteredList: [],
+        list: {
+            all: [],
+            filtered: []
+        },
+        tabs: [],
         tab: {
-            selected: {},
-            active: {}
+            active: {},
+            selected: {}
         },
-        tabsList: [],
-        filter: {
-            search: ''
-        }
-    }),
-    
+        searchText: ''
+    } ),
     getters: {
-        FILTERED_VENDORS(state) {
-            return state.list
+        GET_VENDORS(state) {
+            return state.list.all
         },
-        GET_TABS_LIST(state) {
-            return state.tabsList
+        GET_FILTERED_VENDORS(state) {
+            return state.list.filtered
+        },
+        GET_TABS(state) {
+            return state.tabs
+        },
+        GET_ACTIVE_TAB(state) {
+            return state.tab.active
+        },
+        GET_SELECTED_TABS(state) {
+            return state.tab.selected
         },
     },
-
-    mutations: {
-        SET_TABS( state, data ) {
-            state.tabsList = data
-        },
-        SET_VENDORS( state, data ) {
-            state.list = data
-        },
-        SET_VENDOR_TAB( state, data ) {
-            state.tab.selected = data
-        },
-        SET_FILTERED_VENDORS( state, data ) {
-            state.filteredList = data;
-        },
-        // FILTER_VENDORS( state ) {
-        //     const list = [...state.list];
-        //     state.filteredList = list
-        //     state.filteredList = (filter) => {
-        //         if (condition) {
-                    
-        //         }
-        //     }
-        // },
-    },
-
     actions: {
-        GET_VENDORS({ commit }) {
-            vendors.all().then( res => commit( 'SET_VENDORS', res.data ) )
+        SET_SEARCH_TERM(text) {
+            this.$state.searchText = text;
         },
-        SET_SELECTED_VENDOR({ commit }, vendorInfo ) {
-            commit( 'SET_VENDOR_TAB', vendorInfo )
+        GET_ALL_VENDORS() {
+            vendors.all().then( res => {
+                this.$state.list.all = res.data
+                this.$state.list.filtered = res.data
+            } )
         },
-        UPDATE_VENDORS_LIST({ commit, state }, input) {
-            let updatedList = state.list.filter(vendor => vendor.company.toLowerCase().includes(input))
-            commit( 'SET_VENDORS', updatedList );
-        },
-        ADD_TAB({ commit, state }, payload) {
-            // alert('hi')
-            const tabs = [...state.tabsList.concat( payload )]
-            commit( 'SET_TABS', tabs );
-        },
-    }
+        CREATE_NEW_TAB(payload) {
+            // if the tabs list doesn't already have the vendor information in it
+            if ( !this.$state.tabs.includes( payload ) ) {
+                // add the vendor data to the tabs list
+                this.$state.tabs = this.$state.tabs.concat(payload)
+            }
 
-}
+            // set it as the active tab
+            this.tab.active = payload;
+
+            // set it as the selected tab
+            this.tab.selected = payload;
+        },
+        SET_NEW_TABS(payload) {
+            this.$state.tabs = payload;
+        },
+        CLOSE_TAB(payload) {
+            this.$state.tabs = this.$state.tabs.filter(tab => tab.id != payload)
+        },
+        FILTER_LIST(searchText) {
+            if( searchText.length < 2 ) {
+                this.$state.list.filtered = this.$state.list.all;
+            }
+            else {
+                // console.log(searchText)
+                this.$state.list.filtered = this.$state.list.filtered.filter( vendor => vendor.company.toLowerCase().includes(searchText) )
+            }
+        }
+    },
+} );

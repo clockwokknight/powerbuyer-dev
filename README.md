@@ -5,8 +5,8 @@
 - Node v17.3.1
 - npm v8.3.0
 - Vue v3.2.29 - [View Docs](https://v3.vuejs.org/)
-- Vue Router v4.x - [View Docs](https://next.router.vuejs.org/)
-- Vuex v4.x - [View Docs](https://next.vuex.vuejs.org/)
+- Vue Router v4.x - [Veiw Docs](https://next.router.vuejs.org/)
+- Pinia v2.x - [View Docs](https://pinia.vuejs.org/)
 - Vite v2.x - [View Docs](https://vitejs.dev/)
 - Firebase v9.x - [npm Docs](https://www.npmjs.com/package/firebase), [View Docs](https://firebase.google.com/docs/build)
 - Axios v0.25.x

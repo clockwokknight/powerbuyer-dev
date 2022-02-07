@@ -12,11 +12,11 @@
     "firebase": "^9.6.4",
     "just-compare": "^2.0.1",
     "v-money3": "^3.21.0",
+    "pinia": "^2.0.11",
     "vue": "^3.2.25",
     "vue-router": "^4.0.12",
     "vue-tippy": "^6.0.0-alpha.44",
-    "vue-types": "^4.1.1",
-    "vuex": "^4.0.2"
+    "vue-types": "^4.1.1"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.4.0",

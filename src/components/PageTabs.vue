@@ -1,64 +1,52 @@
 <template>
-	<div class="pageTabs">
-		<div>
-			<!-- Page tabs -->
-			<n-tabs
-				v-model:value="name"
-				type="card"
-				closable
-				@close="handleClose"
-				tab-style="min-width: 80px;"
-			>
-				<!-- <PageTab
-					v-if="GET_TABS_LIST"
-					v-for="tab in GET_TABS_LIST"
-					:info="tab"
-					:key="tab.id"
-				/> -->
-				<n-tab-pane
-					v-if="GET_TABS_LIST"
-					v-for="tab in GET_TABS_LIST"
-					name="oasis"
-					tab="Oasis"
-					>Wonderwall</n-tab-pane
-				>
-			</n-tabs>
-		</div>
-	</div>
+  <div class="pageTabs">
+    <div>
+      <!-- Page tabs -->
+      <n-tabs
+        v-model:value="name"
+        type="card"
+        closable
+        @close="CLOSE_TAB"
+        tab-style="min-width: 80px;"
+      >
+        <n-tab-pane
+          v-for="panel in GET_TABS"
+          :key="panel.id"
+          :tab="panel.company"
+          :name="panel.id"
+        >
+          <p>{{ panel.company }}</p>
+          <p>{{ panel.city }}, {{ panel.state }}</p>
+          <p>
+            {{ panel.phone }} -
+            <a :href="`mailto:${panel.email}`">{{ panel.email }}</a>
+          </p>
+        </n-tab-pane>
+      </n-tabs>
+    </div>
+  </div>
 </template>
 <script>
-	import { ref } from "vue";
-	import { mapGetters } from "vuex";
-	import PageTab from "./PageTab.vue";
-	export default {
-		setup() {
-			const nameRef = ref(1);
-			// const message = useMessage();
-			const panelsRef = ref([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
-			function handleClose(name) {
-				const { value: panels } = panelsRef;
-				if (panels.length === 1) {
-					// message.error("The last one!");
-					return;
-				}
-				// message.info("Close " + name);
-				const index = panels.findIndex((v) => name === v);
-				panels.splice(index, 1);
-				if (nameRef.value === name) {
-					nameRef.value = panels[index];
-				}
-			}
-			return {
-				panels: panelsRef,
-				name: nameRef,
-				handleClose,
-			};
-		},
-		computed: {
-			...mapGetters(["GET_TABS_LIST"]),
-		},
-		components: {
-			PageTab,
-		},
-	};
+import { useVendors } from "@/store/vendors";
+import { mapActions, mapState } from "pinia";
+import { ref } from "vue";
+
+export default {
+  setup() {
+    const store = useVendors();
+
+    const tabNameRef = ref("");
+    const panelsRef = ref(store.GET_TABS);
+    return {
+      panels: panelsRef,
+      name: tabNameRef,
+    };
+  },
+  computed: {
+    ...mapState(useVendors, ["GET_TABS"]),
+  },
+  methods: {
+    ...mapActions(useVendors, ["CLOSE_TAB"]),
+  },
+};
 </script>

@@ -6,14 +6,15 @@
 		>
 			<!-- List search & filters -->
 			<div class="sticky top-0 p-3 bg-white">
-				<div>Page Title</div>
+				<div>{{ route.name }}</div>
 				<div class="flex">
 					<div class="mr-3">
 						<n-input
+							v-model:value="searchText"
+							@input="doSomething"
 							round
+							clearable
 							placeholder="Search..."
-							v-model:value="searchTerm"
-							v-on:input="search()"
 						/>
 					</div>
 					<div>
@@ -36,41 +37,52 @@
 				<div class="pageTabs">
 					<div>
 						<!-- Page tabs -->
+						<PageTabs />
 					</div>
 				</div>
 			</div>
 			<!-- Main Body Content-->
 			<div class="h-screen overflow-auto overflow-x-hidden bg-white">
 				<!-- Body Content -->
-				<PageTabs />
 			</div>
 		</div>
 	</div>
 </template>
 
 <script>
-	import store from "@/store";
-	import { defineComponent, ref } from "vue";
-	import { mapActions } from "vuex";
-	import PageTabs from "@/components/PageTabs.vue";
 	import VendorList from "@/components/vendors/VendorList.vue";
-
-	export default defineComponent({
+	import { useRoute } from "vue-router";
+	import PageTabs from "@/components/PageTabs.vue";
+	import { ref } from "vue";
+	import { mapActions, mapState } from "pinia";
+	import { useVendors } from "@/store/vendors";
+	export default {
 		setup() {
+			const route = useRoute();
 			return {
-				searchTerm: ref(""),
+				route,
+				searchText: ref(""),
 			};
 		},
 		components: {
 			VendorList,
 			PageTabs,
 		},
+		computed: {
+			...mapState(useVendors, ["GET_VENDORS"]),
+			// filteredList() {
+			// 	console.log(this.searchText);
+			// 	return this.GET_VENDORS.filter((vendor) =>
+			// 		vendor.company.toLowerCase().includes(this.searchText)
+			// 	);
+			// },
+		},
 		methods: {
-			...mapActions(["UPDATE_VENDORS_LIST"]),
-			search() {
-				// console.log(this.searchTerm);
-				store.dispatch("UPDATE_VENDORS_LIST", this.searchTerm);
+			...mapActions(useVendors, ["FILTER_LIST", "SET_SEARCH_TERM"]),
+			doSomething() {
+				this.SET_SEARCH_TERM(this.searchText);
+				this.FILTER_LIST(this.searchText);
 			},
 		},
-	});
+	};
 </script>
