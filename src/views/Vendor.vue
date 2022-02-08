@@ -14,8 +14,12 @@ watch(
   }
 );
 
-const { data: vendor, isFetching } = useQuery(["product", routeParamId], () =>
-  axios.get(`/vendors/${routeParamId.value}`)
+const {
+  data: vendor,
+  isFetching,
+  isLoading,
+} = useQuery(["product", routeParamId], () =>
+  axios.get(`/vendors/${routeParamId.value}`).then((res) => res.data)
 );
 </script>
 
@@ -42,8 +46,12 @@ const { data: vendor, isFetching } = useQuery(["product", routeParamId], () =>
       ></path>
     </svg>
   </div>
-  <pre class="whitespace-pre-wrap">
-        {{ vendor }}
-    </pre
-  >
+  <div class="px-4" v-if="!isLoading">
+    <div class="flex gap-x-3">Name: {{ vendor?.name }}</div>
+    <div class="flex gap-x-3">Tax ID Number: {{ vendor?.tax_id_number }}</div>
+    <div class="flex gap-x-3">Address: {{ vendor.address_one }}</div>
+    <div class="flex gap-x-3">
+      City: {{ vendor?.city }}, State: {{ vendor?.state }}
+    </div>
+  </div>
 </template>
