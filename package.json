@@ -7,13 +7,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@headlessui/vue": "^1.4.3",
     "@vueuse/core": "^7.5.5",
     "axios": "^0.25.0",
     "firebase": "^9.6.4",
     "just-compare": "^2.0.1",
-    "v-money3": "^3.21.0",
     "pinia": "^2.0.11",
+    "v-money3": "^3.21.0",
     "vue": "^3.2.25",
+    "vue-query": "^1.19.0",
     "vue-router": "^4.0.12",
     "vue-tippy": "^6.0.0-alpha.44",
     "vue-types": "^4.1.1"
