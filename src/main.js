@@ -1,6 +1,8 @@
 import { createApp } from "vue";
 
 import axios from "axios";
+import { router } from "@/routes";
+import { VueQueryPlugin } from "vue-query";
 
 //UI framework
 import naive from "naive-ui";
@@ -18,8 +20,7 @@ import { createPinia } from "pinia";
 
 //Custom Directives
 import mask from "@/directives/mask";
-import { router } from "@/routes";
-import { VueQueryPlugin } from "vue-query";
+import ObserveVisibility from "@/directives/observe-visibility";
 
 axios.defaults.baseURL = "https://gmtvinventory.com/api";
 
@@ -27,6 +28,7 @@ createApp(App)
   .use(router)
   .use(naive)
   .directive("mask", mask)
+  .directive("observe-visibility", ObserveVisibility)
   .use(createPinia())
   .use(VueTippy)
   .use(VueQueryPlugin)
