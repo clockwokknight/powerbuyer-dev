@@ -3,7 +3,7 @@
         <nav>
             <ul class="flex flex-col items-center w-full menu-items">
                 <router-link to="/">
-                    <li class="w-[40px] h-[40px] bg-[#027bff] hover:!bg-[#003874] text-center font-bold rounded-md !pt-[8px] !mt-5 text-lg !mb-5">PB</li>
+                    <li class="w-[40px] h-[40px] !bg-[#027bff] hover:!bg-[#003874] text-center font-bold rounded-md !pt-[8px] !mt-5 text-lg !mb-5">PB</li>
                 </router-link>
                 <router-link to="/">
                     <li content="Dashbaord" v-tippy='{ placement : "right", duration: 50 }'><img src="/icons/SpaceDashboardRound.svg" /></li>
