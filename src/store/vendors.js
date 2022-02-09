@@ -22,7 +22,9 @@ export const useVendors = defineStore( 'vendors', {
             return state.list.filtered
         },
         GET_TABS(state) {
-            return state.tabs
+            let tabs = [ ...state.tabs ];
+            tabs.reverse()
+            return tabs
         },
         GET_ACTIVE_TAB(state) {
             return state.tab.active
@@ -37,8 +39,9 @@ export const useVendors = defineStore( 'vendors', {
         },
         GET_ALL_VENDORS() {
             vendors.all().then( res => {
-                this.$state.list.all = res.data
-                this.$state.list.filtered = res.data
+                const data = res.data
+                this.$state.list.all = res.data.data
+                this.$state.list.filtered = [ ...this.$state.list.all ]
             } )
         },
         CREATE_NEW_TAB(payload) {
@@ -62,12 +65,15 @@ export const useVendors = defineStore( 'vendors', {
         },
         FILTER_LIST(searchText) {
             if( searchText.length < 2 ) {
+                // remove the slice in order to get all data
                 this.$state.list.filtered = this.$state.list.all;
             }
             else {
-                // console.log(searchText)
-                this.$state.list.filtered = this.$state.list.filtered.filter( vendor => vendor.company.toLowerCase().includes(searchText) )
+                this.$state.list.filtered = this.$state.list.filtered.filter( vendor => vendor.name.toLowerCase().includes(searchText) )
             }
+        },
+        SET_ACTIVE_TAB(payload) {
+            this.$state.tab.active = payload
         }
     },
 } );
