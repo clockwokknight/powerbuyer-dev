@@ -7,16 +7,18 @@ defineEmits(["click:tab"]);
   <li
     v-for="vendor in vendors"
     :key="vendor?.id"
-    class="p-2 border-b-2"
+    class="px-4 py-4 border-b even:bg-[#f8f8fa] hover:bg-gray-100"
     @click="$emit('click:tab', vendor)"
   >
     <!-- Company Name -->
     <router-link
       :to="{ name: 'SingleVendor', params: { id: vendor?.id } }"
-      active-class="text-emerald-500"
+      active-class="text-[#027bff]"
       class="block"
     >
-      {{ vendor?.name }}
+      <div><h2 class="font-semibold whitespace-nowrap truncate max-w-[250px]">{{ vendor?.name }}</h2></div>
+      <div class="text-xs ">{{ vendor.city }}, {{ vendor.state }}</div>
+      <div>{{ vendor.phone }}</div>
     </router-link>
     <!-- City, State -->
     <!--						{{ vendor.city }}, {{ vendor.state }}-->

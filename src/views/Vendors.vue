@@ -118,8 +118,8 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
       "
     >
       <!-- List search & filters -->
-      <div class="sticky top-0 p-3 bg-white">
-        <div>Vendors</div>
+      <div class="sticky top-0 p-3 bg-white border-b">
+        <div class="mb-3"><h1 class="text-xl font-bold uppercase">Vendors</h1></div>
         <div class="flex">
           <div class="mr-3">
             <n-input
@@ -134,7 +134,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
       </div>
       <!-- Main Loop List -->
       <div class="">
-        <ul>
+        <ul class="">
           <template v-if="vendorSearchResults">
             <VendorList :vendors="vendorSearchResults" @click:tab="addTab" />
           </template>
@@ -151,10 +151,10 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
                 (isVisible) => (isVisible ? vendorFetchNextPage() : null)
               "
               v-if="hasVendorNextPage"
-              class="grid place-content-center p-4 w-full"
+              class="grid w-full p-4 place-content-center"
             >
               <svg
-                class="animate-spin -ml-1 mr-3 w-6 h-6 text-emerald-500"
+                class="w-6 h-6 mr-3 -ml-1 animate-spin text-emerald-500"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -183,26 +183,20 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
       <TabGroup :selected-index="selectedIndex" @change="tabChanged">
         <div
           class="
-            overflow-x-auto overflow-y-hidden
-            overscroll-contain
-            py-2
+            overflow-x-auto
+            px-2
             bg-[#F8F8FA]
             h-[62px]
+            flex
+            items-end
           "
         >
-          <TabList class="py-1 px-4">
+          <TabList class="">
             <div ref="tabListButton" class="flex gap-x-2 flex-nowrap min-w-max">
               <tab
                 v-for="tab in tablist"
                 :key="tab.id"
-                class="
-                  relative
-                  max-w-xs
-                  focus:outline-none focus:ring
-                  ring-offset-1 ring-offset-emerald-300 ring-slate-300/20
-                  scroll-m-2
-                  rounded
-                "
+                class="relative max-w-xs rounded-t focus:outline-none scroll-m-2"
               >
                 <router-link
                   :to="{ name: 'SingleVendor', params: { id: tab?.id } }"
@@ -212,49 +206,34 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
                   <a
                     :href="href"
                     @click="navigate"
-                    class="
-                      block
-                      overflow-hidden
-                      focus:outline-none
-                      p-2
-                      rounded
-                      pr-6
-                      whitespace-nowrap
-                    "
+                    class="block px-4 py-2 pr-6 overflow-hidden border-t rounded-t border-x focus:outline-none whitespace-nowrap truncate max-w-[250px]"
                     :class="[
-                      isActive ? 'bg-white text-emerald-700' : 'bg-slate-300',
+                      isActive ? 'bg-[#027bff] text-white' : 'text-gray-700 bg-white',
                     ]"
                   >
                     {{ tab?.name }}
                   </a>
                   <span
-                    class="
-                      absolute
-                      right-0
-                      inset-y-0
-                      flex
-                      pr-1
-                      items-center
-                      rounded-r
-                    "
+                    class="absolute inset-y-0 right-0 top-[1px] flex items-center pr-1 rounded-r"
                     @click="closeTab(tab.id)"
                     :class="[
                       tablist.length === 1 && 'hidden',
-                      isActive ? 'bg-white' : 'bg-slate-300',
+                      isActive ? 'bg-[#027bff] text-white' : 'bg-slate-white',
                     ]"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      class="h-5 w-5 text-red-500"
-                      viewBox="0 0 20 20"
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                     xmlns:xlink="http://www.w3.org/1999/xlink" 
+                     class="w-5 h-5"
+                      :class="[
+                      tablist.length === 1 && 'hidden',
+                      isActive ? 'bg-[#027bff] text-white hover:text-gray-300' : 'text-gray-200 hover:text-gray-400 bg-slate-white',
+                      ]"
                       fill="currentColor"
-                    >
-                      <path
-                        fill-rule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                        clip-rule="evenodd"
-                      />
-                    </svg>
+                     viewBox="0 0 512 512">
+                     <path d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192s192-86 192-192z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"></path>
+                     <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M320 320L192 192"></path>
+                     <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M192 320l128-128"></path>
+                     </svg>
                   </span>
                 </router-link>
               </tab>
@@ -263,8 +242,8 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
         </div>
       </TabGroup>
       <!-- Main Body Content-->
-      <div class="overflow-y-auto overflow-x-hidden h-[calc(100%-62px)]">
-        <div class="h-screen bg-white">
+      <div class="overflow-y-auto overflow-x-hidden h-[calc(100%-62px)] border-t-2">
+        <div class="h-screen pt-10 bg-white">
           <router-view />
         </div>
       </div>
