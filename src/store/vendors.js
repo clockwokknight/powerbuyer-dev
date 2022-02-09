@@ -37,6 +37,9 @@ export const useVendors = defineStore( 'vendors', {
         SET_SEARCH_TERM(text) {
             this.$state.searchText = text;
         },
+        SET_VENDOR_VALUE(key, val) {
+            this.$state.tab.active[key] = val;
+        },
         GET_ALL_VENDORS() {
             vendors.all().then( res => {
                 const data = res.data

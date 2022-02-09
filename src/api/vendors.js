@@ -7,6 +7,6 @@ export default {
     },
     create(data)
     {
-        return api.post( `/vendors/${ data.id }`, data );
+        return api.post( `/vendors/update/${ data.id }`, data );
     },
 };

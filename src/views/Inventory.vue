@@ -4,6 +4,8 @@
 	import UpdatableButtonWrapper from "@/components/common/UpdatableButtonWrapper.vue";
 	import { useDebounceFn } from "@vueuse/core";
 	import MaskedInput from "@/components/common/MaskedInput.vue";
+	import { useVendors } from "@/store/vendors";
+
 	// import {co} from "@vueuse/core"
 	const obj = {
 		price: "",
