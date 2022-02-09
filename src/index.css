@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-font-family: 'Montserrat', 'sans-serif';
+  font-family: 'Montserrat', 'sans-serif';
 @apply bg-[#F5F6F6]
 }
 .menu-items li, .menu-footer {

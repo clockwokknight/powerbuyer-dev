@@ -59,8 +59,125 @@
 			<!-- Main Body Content-->
 			<div class="h-screen overflow-auto overflow-x-hidden bg-white">
 				<!-- Body Content -->
-				<div v-if="GET_ACTIVE_TAB.id">
-					<p>{{ GET_ACTIVE_TAB.accounting_code }}</p>
+				<div>
+					<div class="pl-5 mt-10">
+						<div v-if="GET_ACTIVE_TAB.id">
+							<div id="form-area">
+								<!-- <h1 class="font-bold">{{ GET_ACTIVE_TAB.name }}</h1> -->
+								<n-form>
+									<n-form-item label="Name">
+										<UpdatableButtonWrapper
+											v-model="form.name"
+											:reset-value="dataFromServer.name"
+											@input="notifyChange"
+											@save="(val) => onChange('address', val)"
+										>
+											<n-input
+												v-model:value="GET_ACTIVE_TAB.name"
+											/> </UpdatableButtonWrapper
+									></n-form-item>
+									<n-form-item label="Address">
+										<UpdatableButtonWrapper
+											v-model="form.address_one"
+											:reset-value="dataFromServer.address_one"
+											@input="notifyChange"
+											@save="(val) => onChange('address', val)"
+										>
+											<n-input
+												v-model:value="GET_ACTIVE_TAB.address_one"
+											/> </UpdatableButtonWrapper
+									></n-form-item>
+									<n-form-item label="Account No">
+										<UpdatableButtonWrapper
+											v-model="form.accounting_code"
+											:reset-value="dataFromServer.accounting_code"
+											@input="notifyChange"
+											@save="(val) => onChange('accounting_code', val)"
+										>
+											<n-input
+												v-model:value="GET_ACTIVE_TAB.accounting_code"
+											/> </UpdatableButtonWrapper
+									></n-form-item>
+									<n-form-item label="City">
+										<UpdatableButtonWrapper
+											v-model="form.city"
+											:reset-value="dataFromServer.city"
+											@input="notifyChange"
+											@save="(val) => onChange('city', val)"
+										>
+											<n-input
+												v-model:value="GET_ACTIVE_TAB.city"
+											/> </UpdatableButtonWrapper
+									></n-form-item>
+									<n-form-item label="State">
+										<UpdatableButtonWrapper
+											v-model="form.state"
+											:reset-value="dataFromServer.state"
+											@input="notifyChange"
+											@save="(val) => onChange('state', val)"
+										>
+											<n-input
+												v-model:value="GET_ACTIVE_TAB.state"
+											/> </UpdatableButtonWrapper
+									></n-form-item>
+									<n-form-item label="Payment Terms">
+										<UpdatableButtonWrapper
+											v-model="form.payment_terms"
+											:reset-value="dataFromServer.payment_terms"
+											@input="notifyChange"
+											@save="(val) => onChange('payment_terms', val)"
+										>
+											<n-input
+												v-model:value="GET_ACTIVE_TAB.payment_terms"
+											/> </UpdatableButtonWrapper
+									></n-form-item>
+									<n-form-item label="Zip">
+										<updatable-button-wrapper
+											v-model="form.zip"
+											:reset-value="dataFromServer.zip"
+											@input="notifyChange"
+											@save="(val) => onChange('zip', val)"
+										>
+											<masked-input mask="#####" v-model:value="GET_ACTIVE_TAB.zip" />
+										</updatable-button-wrapper>
+									</n-form-item>
+									<n-form-item label="Phone">
+										<updatable-button-wrapper
+											v-model="form.phone"
+											:reset-value="dataFromServer.phone"
+											@input="notifyChange"
+											@save="(val) => onChange('phone', val)"
+										>
+											<masked-input
+												mask="(###) ###-####"
+												v-model:value="GET_ACTIVE_TAB.phone"
+											/>
+										</updatable-button-wrapper>
+									</n-form-item>
+									<!-- <n-form-item label="Price">
+										<updatable-button-wrapper
+											v-model="form.price"
+											:reset-value="dataFromServer.price"
+											@input="notifyChange"
+											@save="(val) => onChange('price', val)"
+										>
+											<currency-input v-model="form.price" :loading="isLoading" />
+										</updatable-button-wrapper>
+									</n-form-item>
+									<n-form-item label="random-text">
+										<UpdatableButtonWrapper
+											v-model="form.randomText"
+											:reset-value="dataFromServer.randomText"
+											@input="notifyChange"
+											@save="(val) => onChange('randomText', val)"
+										>
+											<n-input v-model:value="GET_ACTIVE_TAB.randomText" /> </UpdatableButtonWrapper
+									></n-form-item> -->
+								</n-form>
+							</div>
+						</div>
+					</div>
+					<!-- <p>{{ GET_ACTIVE_TAB.accounting_code }}</p>
 					<p>{{ GET_ACTIVE_TAB.address_one }}</p>
 					<p>{{ GET_ACTIVE_TAB.address_two }}</p>
 					<p>{{ GET_ACTIVE_TAB.city }}</p>
@@ -70,7 +187,6 @@
 					<p>{{ GET_ACTIVE_TAB.din }}</p>
 					<p>{{ GET_ACTIVE_TAB.email }}</p>
 					<p>{{ GET_ACTIVE_TAB.id }}</p>
-					<p>{{ GET_ACTIVE_TAB.name }}</p>
 					<p>{{ GET_ACTIVE_TAB.other_phones }}</p>
 					<p>{{ GET_ACTIVE_TAB.payment_terms }}</p>
 					<p>{{ GET_ACTIVE_TAB.phone }}</p>
@@ -83,7 +199,7 @@
 					<p>{{ GET_ACTIVE_TAB.vendor_category.description }}</p>
 					<p>{{ GET_ACTIVE_TAB.vendor_category.id }}</p>
 					<p>{{ GET_ACTIVE_TAB.vendor_category.name }}</p>
-					<p>{{ GET_ACTIVE_TAB.vendor_category.updated_at }}</p>
+					<p>{{ GET_ACTIVE_TAB.vendor_category.updated_at }}</p> -->
 				</div>
 			</div>
 		</div>
@@ -92,33 +208,80 @@
 
 <script>
 	import { useRoute } from "vue-router";
-	import PageTabs from "@/components/PageTabs.vue";
-	import { ref } from "vue";
 	import { mapActions, mapState } from "pinia";
 	import { useVendors } from "@/store/vendors";
+	import { reactive, ref } from "vue";
+	import PageTabs from "@/components/PageTabs.vue";
+	import CurrencyInput from "@/components/common/CurrencyInput.vue";
+	import UpdatableButtonWrapper from "@/components/common/UpdatableButtonWrapper.vue";
+	import MaskedInput from "@/components/common/MaskedInput.vue";
+	import { useDebounceFn } from "@vueuse/core";
+	import vendors from "@/api/vendors";
+
 	export default {
+		components: {
+			CurrencyInput,
+			UpdatableButtonWrapper,
+			MaskedInput,
+			PageTabs,
+		},
 		setup() {
 			const route = useRoute();
 			const store = useVendors();
 
-			// Couldn't access refs from PageTabs, so I made a ref and this is
-			// getting passed down as a prop into <PageTabs /> so it could
-			// dynamically updated the selected tab (selected tab comes from
-			// the state )
+			// import {co} from "@vueuse/core"
+			const obj = {
+				name: "",
+				address_one: "",
+				accounting_code: "",
+				city: "",
+				state: "",
+				payment_terms: "",
+				zip: "",
+				phone: "",
+			};
+			const isLoading = ref(false);
+			const dataFromServer = reactive({
+				name: store.GET_ACTIVE_TAB.name,
+				address_one: store.GET_ACTIVE_TAB.address_one,
+				accounting_code: store.GET_ACTIVE_TAB.accounting_code,
+				city: store.GET_ACTIVE_TAB.city,
+				state: store.GET_ACTIVE_TAB.state,
+				payment_terms: store.GET_ACTIVE_TAB.payment_terms,
+				zip: store.GET_ACTIVE_TAB.zip,
+				phone: store.GET_ACTIVE_TAB.phone,
+			});
+			const form = reactive({ ...obj });
+
+			const onChange = (key, val) => {
+				isLoading.value = true;
+				// make POST api call with id to save and store data in database
+				// for only the active tab
+				const dataToSend = { ...store.GET_ACTIVE_TAB };
+				dataFromServer[key] = val;
+				// console.log(dataToSend);
+				alert("successful");
+				// vendors.create(dataToSend).then((res) => console.log("Working Properly"));
+				debounceChange();
+			};
+			const debounceChange = useDebounceFn(() => {
+				isLoading.value = false;
+			}, 1000);
 
 			// pull in vendors
 			store.GET_ALL_VENDORS();
 
 			return {
 				route,
+				form,
+				onChange,
+				dataFromServer,
+				isLoading,
 				searchText: ref(""),
 				showVendor(vendorInfo) {
 					store.CREATE_NEW_TAB(vendorInfo);
 				},
 			};
-		},
-		components: {
-			PageTabs,
 		},
 		computed: {
 			...mapState(useVendors, ["GET_VENDORS", "GET_FILTERED_VENDORS", "GET_ACTIVE_TAB"]),
@@ -129,6 +292,11 @@
 				this.SET_SEARCH_TERM(this.searchText);
 				this.FILTER_LIST(this.searchText);
 			},
+			notifyChange() {
+				this.valueChanged = true;
+				return this.valueChanged;
+			},
+			// onChange(key,x`x`x``
 		},
 	};
 </script>

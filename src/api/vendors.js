@@ -5,4 +5,8 @@ export default {
     {
         return api.get( '/vendors' );
     },
+    create(data)
+    {
+        return api.post( `/vendors/${ data.id }`, data );
+    },
 };
