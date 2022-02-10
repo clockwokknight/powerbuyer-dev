@@ -76,6 +76,13 @@ onMounted(() => {
     tablist.value = JSON.parse(res.data.tabs);
     scrollTabToView();
     ifScrollArrowNeeded();
+    if (tablist.value.length >= 1 && route.path === "/vendors") {
+      tablist.value.forEach((tab) => {
+        if (tab.active) {
+          router.push(`/vendors/${tab.id}`);
+        }
+      });
+    }
   });
 });
 
@@ -89,39 +96,63 @@ const syncTabs = useDebounceFn(() => {
 const findTabIndex = (id) => tablist.value.findIndex((tab) => tab.id === id);
 
 const closeTab = (id) => {
-  if (tablist.value.length === 1) return;
   const index = findTabIndex(id);
+  if (tablist.value.length === 1) {
+    tablist.value.splice(index, 1);
+    syncTabs();
+    router.push("/vendors");
+  } else {
+    if (parseInt(route.params?.id) === tablist.value[index].id) {
+      const activeIndex = index === 0 ? index + 1 : index - 1;
+      tablist.value = tablist.value.map(({ active, ...rest }, i) => {
+        if (i === activeIndex) {
+          return { ...rest, active: true };
+        } else return rest;
+      });
+      router.push(`/vendors/${tablist.value[activeIndex].id}`);
+    }
+    tablist.value.splice(index, 1);
 
-  if (parseInt(route.params?.id) === tablist.value[index].id) {
-    router.push(
-      `/vendors/${tablist.value[index === 0 ? index + 1 : index - 1].id}`
-    );
+    syncTabs();
+    ifScrollArrowNeeded();
   }
-  tablist.value.splice(index, 1);
-
-  syncTabs();
-  ifScrollArrowNeeded();
 };
 const addTab = (vendor) => {
   loadingBar.start();
   const index = findTabIndex(vendor.id);
   if (index === -1) {
-    tablist.value.push(vendor);
+    tablist.value = tablist.value
+      .map(({ active, ...rest }) => rest)
+      .concat([{ id: vendor?.id, name: vendor?.name, active: true }]);
     selectedIndex.value = tablist.value.length - 1;
-  } else selectedIndex.value = index;
+  } else {
+    tablist.value = tablist.value.map(({ active, ...rest }, i) => {
+      if (i === index) {
+        return { ...rest, active: true };
+      } else return rest;
+    });
+    selectedIndex.value = index;
+  }
   scrollTabToView();
   syncTabs();
 };
 
 const tabChanged = (index) => {
-  console.log({ tabChanged: index });
   selectedIndex.value = index;
+  tablist.value = tablist.value.map(({ active, ...rest }, i) => {
+    if (i === index) {
+      return { ...rest, active: true };
+    } else return rest;
+  });
   scrollTabToView();
 };
 
 watch(selectedIndex, (newValue) => {
   loadingBar.start();
-  if (parseInt(route.params?.id) !== tablist.value[newValue].id) {
+  if (
+    tablist.value.length >= 1 &&
+    parseInt(route.params?.id) !== tablist.value[newValue].id
+  ) {
     router.push(`/vendors/${tablist.value[newValue].id}`);
   }
 });
@@ -147,9 +178,12 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
   useQuery(["vendorSearch", debouncedSearchText], ({ queryKey }) => {
     if (queryKey[1] === "") return null;
     else
-      return axios
-        .get(`/vendors/search/${queryKey[1]}`)
-        .then((res) => res.data);
+      return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => {
+        if (res.data?.debug) {
+          return [];
+        }
+        return res.data;
+      });
   });
 </script>
 
@@ -187,8 +221,12 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
       <!-- Main Loop List -->
       <div class="">
         <ul class="">
-          <template v-if="vendorSearchResults">
-            <VendorList :vendors="vendorSearchResults" @click:tab="addTab" />
+          <template v-if="debouncedSearchText">
+            <VendorList
+              v-if="vendorSearchResults"
+              :vendors="vendorSearchResults"
+              @click:tab="addTab"
+            />
           </template>
 
           <template v-else>
@@ -260,7 +298,11 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
                 ref="tabListButton"
                 class="flex gap-x-2 flex-nowrap min-w-max"
               >
-                <template v-for="tab in tablist" :key="tab.id">
+                <template
+                  v-for="tab in tablist"
+                  v-if="tablist.length >= 1"
+                  :key="tab?.id"
+                >
                   <router-link
                     :to="{ name: 'SingleVendor', params: { id: tab?.id } }"
                     custom
@@ -312,10 +354,10 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
                           pr-1
                           rounded-r
                           z-10
+                          cursor-pointer
                         "
                         @click.stop="closeTab(tab.id)"
                         :class="[
-                          tablist.length === 1 && 'hidden',
                           isActive ? 'bg-primary text-white' : 'bg-slate-white',
                         ]"
                       >
@@ -324,7 +366,6 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
                           xmlns:xlink="http://www.w3.org/1999/xlink"
                           class="w-5 h-5"
                           :class="[
-                            tablist.length === 1 && 'hidden',
                             isActive
                               ? 'bg-primary text-white hover:text-gray-300'
                               : 'text-gray-200 hover:text-gray-400 bg-slate-white',

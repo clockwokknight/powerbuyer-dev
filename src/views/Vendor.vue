@@ -15,7 +15,7 @@ watch(
 );
 
 const { data: vendor, isLoading } = useQuery(["product", routeParamId], () =>
-  axios.get(`/vendors/${routeParamId.value}`).then((res) => res.data)
+  axios.get(`/vendors/${routeParamId.value ?? 1}`).then((res) => res.data)
 );
 </script>
 
