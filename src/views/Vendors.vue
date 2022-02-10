@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from "vue";
+import { onUpdated, ref, watch } from "vue";
 import { useInfiniteQuery, useQuery } from "vue-query";
 import axios from "axios";
 import { TabGroup, TabList, Tab } from "@headlessui/vue";
@@ -18,7 +18,31 @@ const debouncedSearchText = useDebounce(searchText, 500);
 
 const selectedIndex = ref(1);
 const tabListButton = ref(null);
+const tabListButtonWrapper = ref(null);
+const showScrollArrow = ref(false);
+const scrollWrapper = ref(null);
+// Left and right Click Arrow Scroll
+const ifScrollArrowNeeded = () => {
+  const wrapperWidth =
+    tabListButtonWrapper.value?.getBoundingClientRect().width;
+  const tabWidth = tabListButton.value?.getBoundingClientRect().width;
 
+  showScrollArrow.value = wrapperWidth < tabWidth;
+};
+
+onUpdated(() => {
+  ifScrollArrowNeeded();
+});
+
+const scrollTo = (type) => {
+  const scrollLeft = scrollWrapper.value.scrollLeft;
+
+  if (type === "left") {
+    scrollWrapper.value.scrollTo({ left: scrollLeft - 50, behavior: "smooth" });
+  } else {
+    scrollWrapper.value.scrollTo({ left: scrollLeft + 50, behavior: "smooth" });
+  }
+};
 // Showing All Vendors
 const {
   data: vendors,
@@ -38,7 +62,7 @@ const {
 
 // Fetching Vendor tabs based on user
 const { data: vendorTabs } = useQuery("vendorTabs", () =>
-  axios.get("/user_ui_tabs/1/vendor").then((res) => res.data)
+  axios.get("/user_ui_tabs/1/vendors").then((res) => res.data)
 );
 const tablist = ref([
   {
@@ -70,12 +94,13 @@ const addTab = (vendor) => {
     tablist.value.push(vendor);
     selectedIndex.value = tablist.value.length - 1;
   } else selectedIndex.value = index;
-  scrollTabToView(selectedIndex.value);
+  scrollTabToView();
 };
 
 const tabChanged = (index) => {
+  console.log({ tabChanged: index });
   selectedIndex.value = index;
-  scrollTabToView(index);
+  scrollTabToView();
 };
 
 watch(selectedIndex, (newValue) => {
@@ -85,10 +110,19 @@ watch(selectedIndex, (newValue) => {
   }
 });
 
-const scrollTabToView = useDebounceFn((index) => {
+const scrollTabToView = useDebounceFn(() => {
   const tabListChildren = tabListButton.value.children;
-
-  tabListChildren[index].scrollIntoView({ behavior: "smooth" });
+  for (let i = 0; i < tabListChildren.length; i++) {
+    const tabIndex = parseInt(
+      tabListChildren[i]
+        .getElementsByTagName("button")[0]
+        .getAttribute("tabindex")
+    );
+    if (tabIndex === 0) {
+      tabListChildren[i].scrollIntoView({ behavior: "smooth" });
+      break;
+    }
+  }
   loadingBar.finish();
 }, 100);
 
@@ -119,7 +153,9 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
     >
       <!-- List search & filters -->
       <div class="sticky top-0 p-3 bg-white border-b">
-        <div class="mb-3"><h1 class="text-xl font-bold uppercase">Vendors</h1></div>
+        <div class="mb-3">
+          <h1 class="text-xl font-bold uppercase">Vendors</h1>
+        </div>
         <div class="flex">
           <div class="mr-3">
             <n-input
@@ -181,68 +217,158 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
     <!-- Main Tabs App Content -->
     <div class="w-[calc(100vw-335px)] h-screen">
       <TabGroup :selected-index="selectedIndex" @change="tabChanged">
-        <div
-          class="
-            overflow-x-auto
-            px-2
-            bg-[#F8F8FA]
-            h-[62px]
-            flex
-            items-end
-          "
-        >
-          <TabList class="">
-            <div ref="tabListButton" class="flex gap-x-2 flex-nowrap min-w-max">
-              <tab
-                v-for="tab in tablist"
-                :key="tab.id"
-                class="relative max-w-xs rounded-t focus:outline-none scroll-m-2"
+        <div class="relative flex" ref="tabListButtonWrapper">
+          <button
+            class="grid place-content-center shadow bg-white h-[62px] w-8 px-2"
+            v-if="showScrollArrow"
+            @click="scrollTo('left')"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              viewBox="0 0 192 512"
+              class="w-5 h-5"
+            >
+              <path
+                d="M192 127.338v257.324c0 17.818-21.543 26.741-34.142 14.142L29.196 270.142c-7.81-7.81-7.81-20.474 0-28.284l128.662-128.662c12.599-12.6 34.142-3.676 34.142 14.142z"
+                fill="currentColor"
+              ></path>
+            </svg>
+          </button>
+          <div
+            class="overflow-x-auto bg-[#F8F8FA] h-[62px] flex items-end"
+            ref="scrollWrapper"
+          >
+            <TabList>
+              <div
+                ref="tabListButton"
+                class="flex gap-x-2 flex-nowrap min-w-max"
               >
-                <router-link
-                  :to="{ name: 'SingleVendor', params: { id: tab?.id } }"
-                  custom
-                  v-slot="{ href, route, navigate, isActive }"
-                >
-                  <a
-                    :href="href"
-                    @click="navigate"
-                    class="block px-4 py-2 pr-6 overflow-hidden border-t rounded-t border-x focus:outline-none whitespace-nowrap truncate max-w-[250px]"
-                    :class="[
-                      isActive ? 'bg-[#027bff] text-white' : 'text-gray-700 bg-white',
-                    ]"
+                <template v-for="tab in tablist" :key="tab.id">
+                  <router-link
+                    :to="{ name: 'SingleVendor', params: { id: tab?.id } }"
+                    custom
+                    v-slot="{ href, route, navigate, isActive }"
                   >
-                    {{ tab?.name }}
-                  </a>
-                  <span
-                    class="absolute inset-y-0 right-0 top-[1px] flex items-center pr-1 rounded-r"
-                    @click="closeTab(tab.id)"
-                    :class="[
-                      tablist.length === 1 && 'hidden',
-                      isActive ? 'bg-[#027bff] text-white' : 'bg-slate-white',
-                    ]"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg"
-                     xmlns:xlink="http://www.w3.org/1999/xlink" 
-                     class="w-5 h-5"
-                      :class="[
-                      tablist.length === 1 && 'hidden',
-                      isActive ? 'bg-[#027bff] text-white hover:text-gray-300' : 'text-gray-200 hover:text-gray-400 bg-slate-white',
-                      ]"
-                      fill="currentColor"
-                     viewBox="0 0 512 512">
-                     <path d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192s192-86 192-192z" fill="none" stroke="currentColor" stroke-miterlimit="10" stroke-width="32"></path>
-                     <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M320 320L192 192"></path>
-                     <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="32" d="M192 320l128-128"></path>
-                     </svg>
-                  </span>
-                </router-link>
-              </tab>
-            </div>
-          </TabList>
+                    <div class="relative">
+                      <tab
+                        class="
+                          max-w-xs
+                          rounded-t
+                          focus:outline-none
+                          scroll-mt-2
+                        "
+                      >
+                        <a
+                          :href="href"
+                          @click="navigate"
+                          class="
+                            block
+                            px-4
+                            py-2
+                            pr-6
+                            overflow-hidden
+                            border-t
+                            rounded-t
+                            border-x
+                            focus:outline-none
+                            whitespace-nowrap
+                            truncate
+                            max-w-[250px]
+                          "
+                          :class="[
+                            isActive
+                              ? 'bg-primary text-white'
+                              : 'text-gray-700 bg-white',
+                          ]"
+                        >
+                          {{ tab?.name }}
+                        </a>
+                      </tab>
+                      <span
+                        class="
+                          absolute
+                          inset-y-0
+                          right-0
+                          top-[1px]
+                          flex
+                          items-center
+                          pr-1
+                          rounded-r
+                          z-10
+                        "
+                        @click.stop="closeTab(tab.id)"
+                        :class="[
+                          tablist.length === 1 && 'hidden',
+                          isActive ? 'bg-primary text-white' : 'bg-slate-white',
+                        ]"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          xmlns:xlink="http://www.w3.org/1999/xlink"
+                          class="w-5 h-5"
+                          :class="[
+                            tablist.length === 1 && 'hidden',
+                            isActive
+                              ? 'bg-primary text-white hover:text-gray-300'
+                              : 'text-gray-200 hover:text-gray-400 bg-slate-white',
+                          ]"
+                          fill="currentColor"
+                          viewBox="0 0 512 512"
+                        >
+                          <path
+                            d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192s192-86 192-192z"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-miterlimit="10"
+                            stroke-width="32"
+                          ></path>
+                          <path
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="32"
+                            d="M320 320L192 192"
+                          ></path>
+                          <path
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="32"
+                            d="M192 320l128-128"
+                          ></path>
+                        </svg>
+                      </span></div
+                  ></router-link>
+                </template>
+              </div>
+            </TabList>
+          </div>
+          <button
+            class="grid place-content-center shadow bg-white h-[62px] w-8 px-2"
+            v-if="showScrollArrow"
+            @click="scrollTo('right')"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              viewBox="0 0 192 512"
+              class="w-5 h-5"
+            >
+              <path
+                d="M0 384.662V127.338c0-17.818 21.543-26.741 34.142-14.142l128.662 128.662c7.81 7.81 7.81 20.474 0 28.284L34.142 398.804C21.543 411.404 0 402.48 0 384.662z"
+                fill="currentColor"
+              ></path>
+            </svg>
+          </button>
         </div>
       </TabGroup>
       <!-- Main Body Content-->
-      <div class="overflow-y-auto overflow-x-hidden h-[calc(100%-62px)] border-t-2">
+      <div
+        class="overflow-y-auto overflow-x-hidden h-[calc(100%-62px)] border-t-2"
+      >
         <div class="h-screen pt-10 bg-white">
           <router-view />
         </div>
