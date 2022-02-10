@@ -20,102 +20,57 @@
 		}
 	);
 
-	let dataFromServer;
-
-	const { data: vendor, isFetching } = useQuery(
-		["product", routeParamId],
-		() =>
-			vendors.retrieve(routeParamId.value).then((res) => {
-				store.SET_SELECTED_TAB(res.data);
-				// console.log(store.GET_SELECTED_TAB);
-				dataFromServer = reactive(res.data);
-				return res.data;
-			})
-		// axios.get(`/vendors/${routeParamId.value}`).then((res) => res.data)
+	// let vendor = ref({});
+	const { data: vendor, isFetching } = useQuery(["product", routeParamId], () =>
+		vendors.retrieve(routeParamId.value).then((res) => res.data)
 	);
 
-	const expensesColumns = [
-		{
-			title: "Expenses",
-			key: "id",
-		},
-		{
-			title: "",
-			key: "amount",
-		},
-	];
-
-	const expensesData = [
-		{ id: 3, title: "130.18" },
-		{ id: 4, title: "130.19" },
-	];
-
-	const invoicesColumns = [
-		{
-			title: "Invoices",
-			key: "id",
-		},
-		{
-			title: "",
-			key: "amount",
-		},
-	];
-
-	const invoicesData = [
-		{ id: 3, title: "130.18" },
-		{ id: 4, title: "130.19" },
-	];
-
-	const pagination = false;
-
-	const obj = {
-		name: "",
-		address_one: "",
-		accounting_code: "",
-		city: "",
-		state: "",
-		payment_terms: "",
-		zip: "",
-		phone: "",
-	};
 	const isLoading = ref(false);
-	// const dataFromServer = reactive({ ...vendor.value });
-	const form = reactive({ ...vendor.value });
+	let form = reactive({});
+	let dataFromServer = reactive({});
+	watch(
+		() => vendor.value,
+		(newValue) => {
+			if (newValue) {
+				Object.keys(vendor.value).map((key) => {
+					form[key] = vendor.value[key];
+					dataFromServer[key] = vendor.value[key];
+					// console.log(dataFromServer.value);
+				});
+			}
+		}
+	);
 
 	const onChange = (key, val) => {
 		isLoading.value = true;
-		const dataToSend = { ...store.GET_SELECTED_TAB };
-		// console.log(dataToSend);
 		dataFromServer[key] = val;
 
 		const sendToAPI = {
-			id: dataToSend.id,
-			name: dataToSend.name,
+			id: dataFromServer.id,
+			name: dataFromServer.name,
 			din: "1234567890",
-			// din: dataToSend.din,
-			payment_terms: dataToSend.name,
-			address_one: dataToSend.address_one,
+			// din: dataFromServer.din,
+			payment_terms: dataFromServer.name,
+			address_one: dataFromServer.address_one,
 			address_two: "TEST",
-			// address_two: dataToSend.address_two,
-			city: dataToSend.city,
-			state: dataToSend.state,
-			country: dataToSend.country,
-			zip: dataToSend.zip,
+			// address_two: dataFromServer.address_two,
+			city: dataFromServer.city,
+			state: dataFromServer.state,
+			country: dataFromServer.country,
+			zip: dataFromServer.zip,
 			// phone: "1234567890",
-			phone: dataToSend.phone,
+			phone: dataFromServer.phone,
 			fax: "1234567890",
-			// fax: dataToSend.fax,
+			// fax: dataFromServer.fax,
 			email: "test@test.com",
-			// email: dataToSend.email,
-			trip_exp_calculation: dataToSend.trip_exp_calculation,
+			// email: dataFromServer.email,
+			trip_exp_calculation: dataFromServer.trip_exp_calculation,
 		};
 		// console.log(sendToAPI);
 		vendors.create(sendToAPI).then((res) => {
-			console.log("Working Properly");
-			store.SET_SELECTED_TAB({ ...sendToAPI });
+			console.log("Vendor Updated Successfully");
+			debounceChange();
 		});
-
-		debounceChange();
 	};
 	const debounceChange = useDebounceFn(() => {
 		isLoading.value = false;
@@ -132,35 +87,14 @@
 
 	<div class="mt-4 px-4">
 		<n-form>
-			<!-- <n-form-item label="phone">
-			<updatable-button-wrapper
-				v-model="form.phoneNumber"
-				:reset-value="vendor?.phoneNumber"
-				@save="(val) => onChange('phoneNumber', val)"
-			>
-				<masked-input mask="(###) ###-####" v-model:value="form.phoneNumber" />
-			</updatable-button-wrapper>
-		</n-form-item>
-		<n-form-item label="Price">
-			<updatable-button-wrapper
-				v-model="form.price"
-				:reset-value="vendor?.price"
-				@save="(val) => onChange('price', val)"
-			>
-				<currency-input v-model="form.price" :loading="isLoading" />
-			</updatable-button-wrapper>
-		</n-form-item> -->
 			{{ vendor?.name }}
 			<n-form-item label="Name">
 				<UpdatableButtonWrapper
 					v-model="form.name"
-					:reset-value="vendor?.name"
+					:reset-value="dataFromServer.name"
 					@save="(val) => onChange('name', val)"
 				>
-					<n-input
-						:default-value="store.GET_SELECTED_TAB.name"
-						v-model:value="form.name"
-					/> </UpdatableButtonWrapper
+					<n-input v-model:value="form.name" /> </UpdatableButtonWrapper
 			></n-form-item>
 			<n-form-item label="Address">
 				<UpdatableButtonWrapper
@@ -168,10 +102,7 @@
 					:reset-value="vendor?.address_one"
 					@save="(val) => onChange('address_one', val)"
 				>
-					<n-input
-						:default-value="store.GET_SELECTED_TAB.address_on"
-						v-model:value="form.address_one"
-					/> </UpdatableButtonWrapper
+					<n-input v-model:value="form.address_one" /> </UpdatableButtonWrapper
 			></n-form-item>
 			<n-form-item label="Account #">
 				<UpdatableButtonWrapper
@@ -180,7 +111,7 @@
 					@save="(val) => onChange('accounting_code', val)"
 				>
 					<n-input
-						:default-value="store.GET_SELECTED_TAB.accounting_code"
+						:default-value="vendor?.accounting_code"
 						v-model:value="form.accounting_code"
 					/> </UpdatableButtonWrapper
 			></n-form-item>
@@ -191,7 +122,7 @@
 					@save="(val) => onChange('city', val)"
 				>
 					<n-input
-						:default-value="store.GET_SELECTED_TAB.city"
+						:default-value="vendor?.city"
 						v-model:value="form.city"
 					/> </UpdatableButtonWrapper
 			></n-form-item>
@@ -202,7 +133,7 @@
 					@save="(val) => onChange('state', val)"
 				>
 					<n-input
-						:default-value="store.GET_SELECTED_TAB.state"
+						:default-value="vendor?.state"
 						v-model:value="form.state"
 					/> </UpdatableButtonWrapper
 			></n-form-item>
@@ -213,7 +144,7 @@
 					@save="(val) => onChange('payment_terms', val)"
 				>
 					<n-input
-						:default-value="store.GET_SELECTED_TAB.payment_terms"
+						:default-value="vendor?.payment_terms"
 						v-model:value="form.payment_terms"
 					/> </UpdatableButtonWrapper
 			></n-form-item>
@@ -224,7 +155,7 @@
 					@save="(val) => onChange('zip', val)"
 				>
 					<masked-input
-						:default-value="store.GET_SELECTED_TAB.zip"
+						:default-value="vendor?.zip"
 						mask="#####"
 						v-model:value="form.zip"
 					/>
@@ -237,7 +168,7 @@
 					@save="(val) => onChange('phone', val)"
 				>
 					<masked-input
-						:default-value="store.GET_SELECTED_TAB.phone"
+						:default-value="vendor?.phone"
 						mask="(###) ###-####"
 						v-model:value="form.phone"
 					/>
@@ -245,7 +176,7 @@
 			</n-form-item>
 		</n-form>
 	</div>
-	<div class="px-4">
+	<!-- <div class="px-4">
 		<n-data-table
 			:columns="expensesColumns"
 			:data="expensesData"
@@ -261,5 +192,5 @@
 			:pagination="pagination"
 			:bordered="false"
 		/>
-	</div>
+	</div> -->
 </template>
