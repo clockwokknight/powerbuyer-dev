@@ -13,11 +13,15 @@ defineEmits(["click:tab"]);
     <!-- Company Name -->
     <router-link
       :to="{ name: 'SingleVendor', params: { id: vendor?.id } }"
-      active-class="text-[#027bff]"
+      active-class="text-primary"
       class="block"
     >
-      <div><h2 class="font-semibold whitespace-nowrap truncate max-w-[250px]">{{ vendor?.name }}</h2></div>
-      <div class="text-xs ">{{ vendor.city }}, {{ vendor.state }}</div>
+      <div>
+        <h2 class="font-semibold whitespace-nowrap truncate max-w-[250px]">
+          {{ vendor?.name }}
+        </h2>
+      </div>
+      <div class="text-xs">{{ vendor.city }}, {{ vendor.state }}</div>
       <div>{{ vendor.phone }}</div>
     </router-link>
     <!-- City, State -->

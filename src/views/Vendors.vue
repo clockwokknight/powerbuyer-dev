@@ -1,5 +1,5 @@
 <script setup>
-import { onUpdated, ref, watch } from "vue";
+import { onMounted, onUpdated, ref, watch } from "vue";
 import { useInfiniteQuery, useQuery } from "vue-query";
 import axios from "axios";
 import { TabGroup, TabList, Tab } from "@headlessui/vue";
@@ -22,13 +22,13 @@ const tabListButtonWrapper = ref(null);
 const showScrollArrow = ref(false);
 const scrollWrapper = ref(null);
 // Left and right Click Arrow Scroll
-const ifScrollArrowNeeded = () => {
+const ifScrollArrowNeeded = useDebounceFn(() => {
   const wrapperWidth =
     tabListButtonWrapper.value?.getBoundingClientRect().width;
   const tabWidth = tabListButton.value?.getBoundingClientRect().width;
 
   showScrollArrow.value = wrapperWidth < tabWidth;
-};
+}, 500);
 
 onUpdated(() => {
   ifScrollArrowNeeded();
@@ -38,9 +38,15 @@ const scrollTo = (type) => {
   const scrollLeft = scrollWrapper.value.scrollLeft;
 
   if (type === "left") {
-    scrollWrapper.value.scrollTo({ left: scrollLeft - 50, behavior: "smooth" });
+    scrollWrapper.value.scrollTo({
+      left: scrollLeft - 150,
+      behavior: "smooth",
+    });
   } else {
-    scrollWrapper.value.scrollTo({ left: scrollLeft + 50, behavior: "smooth" });
+    scrollWrapper.value.scrollTo({
+      left: scrollLeft + 150,
+      behavior: "smooth",
+    });
   }
 };
 // Showing All Vendors
@@ -64,16 +70,22 @@ const {
 const { data: vendorTabs } = useQuery("vendorTabs", () =>
   axios.get("/user_ui_tabs/1/vendors").then((res) => res.data)
 );
-const tablist = ref([
-  {
-    id: 1,
-    name: "*** Mated Laija",
-  },
-  {
-    id: 5,
-    name: "*** Vendor Marcos",
-  },
-]);
+const tablist = ref([]);
+onMounted(() => {
+  axios.get("/user_ui_tabs/1/vendors").then((res) => {
+    tablist.value = JSON.parse(res.data.tabs);
+    scrollTabToView();
+    ifScrollArrowNeeded();
+  });
+});
+
+const syncTabs = useDebounceFn(() => {
+  axios.post("/user_ui_tabs/update", {
+    user_id: 1,
+    page: "vendors",
+    tabs: JSON.stringify(tablist.value),
+  });
+}, 1000);
 const findTabIndex = (id) => tablist.value.findIndex((tab) => tab.id === id);
 
 const closeTab = (id) => {
@@ -86,6 +98,9 @@ const closeTab = (id) => {
     );
   }
   tablist.value.splice(index, 1);
+
+  syncTabs();
+  ifScrollArrowNeeded();
 };
 const addTab = (vendor) => {
   loadingBar.start();
@@ -95,6 +110,7 @@ const addTab = (vendor) => {
     selectedIndex.value = tablist.value.length - 1;
   } else selectedIndex.value = index;
   scrollTabToView();
+  syncTabs();
 };
 
 const tabChanged = (index) => {

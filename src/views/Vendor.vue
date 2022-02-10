@@ -14,11 +14,7 @@ watch(
   }
 );
 
-const {
-  data: vendor,
-  isFetching,
-  isLoading,
-} = useQuery(["product", routeParamId], () =>
+const { data: vendor, isLoading } = useQuery(["product", routeParamId], () =>
   axios.get(`/vendors/${routeParamId.value}`).then((res) => res.data)
 );
 </script>
