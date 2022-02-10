@@ -215,6 +215,9 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
               placeholder="Search..."
             />
           </div>
+          <div>
+            <svg class="w-6 h-6 mt-1 text-gray-400 cursor-pointer hover:text-[#027bff]" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><path d="M5.5 5h13a1 1 0 0 1 .5 1.5L14 12v7l-4-3v-4L5 6.5A1 1 0 0 1 5.5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </div>
         </div>
         <!-- Filter Component -->
       </div>
@@ -271,26 +274,9 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
     <!-- Main Tabs App Content -->
     <div class="w-[calc(100vw-335px)] h-screen">
       <TabGroup :selected-index="selectedIndex" @change="tabChanged">
-        <div class="relative flex" ref="tabListButtonWrapper">
-          <button
-            class="grid place-content-center shadow bg-white h-[62px] w-8 px-2"
-            v-if="showScrollArrow"
-            @click="scrollTo('left')"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink"
-              viewBox="0 0 192 512"
-              class="w-5 h-5"
-            >
-              <path
-                d="M192 127.338v257.324c0 17.818-21.543 26.741-34.142 14.142L29.196 270.142c-7.81-7.81-7.81-20.474 0-28.284l128.662-128.662c12.599-12.6 34.142-3.676 34.142 14.142z"
-                fill="currentColor"
-              ></path>
-            </svg>
-          </button>
+        <div class="relative flex items-end" ref="tabListButtonWrapper">
           <div
-            class="overflow-x-auto bg-[#F8F8FA] h-[62px] flex items-end"
+            class="overflow-x-hidden bg-[#F8F8FA] h-[62px] flex items-end"
             ref="scrollWrapper"
           >
             <TabList>
@@ -310,12 +296,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
                   >
                     <div class="relative">
                       <tab
-                        class="
-                          max-w-xs
-                          rounded-t
-                          focus:outline-none
-                          scroll-mt-2
-                        "
+                        class="max-w-xs rounded-t focus:outline-none scroll-mt-2"
                       >
                         <a
                           :href="href"
@@ -403,23 +384,22 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
               </div>
             </TabList>
           </div>
-          <button
-            class="grid place-content-center shadow bg-white h-[62px] w-8 px-2"
-            v-if="showScrollArrow"
-            @click="scrollTo('right')"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink"
-              viewBox="0 0 192 512"
-              class="w-5 h-5"
-            >
-              <path
-                d="M0 384.662V127.338c0-17.818 21.543-26.741 34.142-14.142l128.662 128.662c7.81 7.81 7.81 20.474 0 28.284L34.142 398.804C21.543 411.404 0 402.48 0 384.662z"
-                fill="currentColor"
-              ></path>
-            </svg>
-          </button>
+          <div class="flex h-[48px] bg-[#f8f8fa]">
+              <button
+                  class="grid w-8 px-2 hover:text-[#027bff] place-content-center"
+                  v-if="showScrollArrow"
+                  @click="scrollTo('left')"
+                >
+                  <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><path d="M16.62 2.99a1.25 1.25 0 0 0-1.77 0L6.54 11.3a.996.996 0 0 0 0 1.41l8.31 8.31c.49.49 1.28.49 1.77 0s.49-1.28 0-1.77L9.38 12l7.25-7.25c.48-.48.48-1.28-.01-1.76z" fill="currentColor"></path></svg>
+                </button>
+                <button
+                  class="grid w-8 px-2 hover:text-[#027bff] place-content-center"
+                  v-if="showScrollArrow"
+                  @click="scrollTo('right')"
+                >
+                  <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><path d="M7.38 21.01c.49.49 1.28.49 1.77 0l8.31-8.31a.996.996 0 0 0 0-1.41L9.15 2.98c-.49-.49-1.28-.49-1.77 0s-.49 1.28 0 1.77L14.62 12l-7.25 7.25c-.48.48-.48 1.28.01 1.76z" fill="currentColor"></path></svg>
+                </button>
+          </div>
         </div>
       </TabGroup>
       <!-- Main Body Content-->
