@@ -10,5 +10,9 @@ export default {
         console.log(data)
         //console.log(api.post( '/vendors/store', data ))
         return api.post( '/vendors/store', data )
-    }
+    },
+    allCategories()
+    {
+        return api.get( '/vendor_categories' );
+    },
 };
