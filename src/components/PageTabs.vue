@@ -3,19 +3,19 @@
 		<div>
 			<!-- Page tabs -->
 			<div class="p-8">
-				<ul class="list-reset flex border-b">
-					<li class="-mb-px mr-1" v-if="GET_TABS" v-for="tab in GET_TABS" :key="tab.id">
+				<ul class="flex border-b list-reset">
+					<li class="mr-1 -mb-px" v-if="GET_TABS" v-for="tab in GET_TABS" :key="tab.id">
 						<a
 							@click="SET_ACTIVE_TAB(tab)"
-							:class="`bg-white inline-block ${
+							:class="`inline-block bg-white ${
 								GET_ACTIVE_TAB.id === tab.id
-									? 'border-l border-t border-r rounded-t text-blue-800'
+									? 'rounded-t border-l border-t border-r text-blue-800'
 									: 'text-blue-400 hover:text-blue-600'
 							} py-2 px-4 font-semibold`"
 							href="#"
 							>{{ tab.name }}</a
 						>
-						<button @click="CLOSE_TAB(tab.id)" class="text-red-600 font-bold">X</button>
+						<button @click="CLOSE_TAB(tab.id)" class="font-bold text-red-600">X</button>
 					</li>
 				</ul>
 			</div>

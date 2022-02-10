@@ -1,286 +1,324 @@
+<script setup>
+	import { onUpdated, ref, watch } from "vue";
+	import { useInfiniteQuery, useQuery } from "vue-query";
+	import axios from "axios";
+	import { TabGroup, TabList, Tab } from "@headlessui/vue";
+	import { useRoute, useRouter } from "vue-router";
+	import { useDebounceFn, useDebounce } from "@vueuse/core";
+
+	import { useLoadingBar } from "naive-ui";
+	import VendorList from "@/components/vendor/VendorList.vue";
+
+	const router = useRouter();
+	const route = useRoute();
+	const loadingBar = useLoadingBar();
+
+	const searchText = ref("");
+	const debouncedSearchText = useDebounce(searchText, 500);
+
+	const selectedIndex = ref(1);
+	const tabListButton = ref(null);
+	const tabListButtonWrapper = ref(null);
+	const showScrollArrow = ref(false);
+	const scrollWrapper = ref(null);
+	// Left and right Click Arrow Scroll
+	const ifScrollArrowNeeded = () => {
+		const wrapperWidth = tabListButtonWrapper.value?.getBoundingClientRect().width;
+		const tabWidth = tabListButton.value?.getBoundingClientRect().width;
+
+		showScrollArrow.value = wrapperWidth < tabWidth;
+	};
+
+	onUpdated(() => {
+		ifScrollArrowNeeded();
+	});
+
+	const scrollTo = (type) => {
+		const scrollLeft = scrollWrapper.value.scrollLeft;
+
+		if (type === "left") {
+			scrollWrapper.value.scrollTo({ left: scrollLeft - 50, behavior: "smooth" });
+		} else {
+			scrollWrapper.value.scrollTo({ left: scrollLeft + 50, behavior: "smooth" });
+		}
+	};
+	// Showing All Vendors
+	const {
+		data: vendors,
+		hasNextPage: hasVendorNextPage,
+		fetchNextPage: vendorFetchNextPage,
+	} = useInfiniteQuery(
+		"vendors",
+		({ pageParam = 1 }) => axios.get("/vendors?page=" + pageParam).then((r) => r.data),
+		{
+			getNextPageParam: (lastPage, pages) =>
+				lastPage.current_page < lastPage.last_page ? lastPage.current_page + 1 : null,
+		}
+	);
+
+	// Fetching Vendor tabs based on user
+	const { data: vendorTabs } = useQuery("vendorTabs", () =>
+		axios.get("/user_ui_tabs/1/vendors").then((res) => res.data)
+	);
+	const tablist = ref([
+		{
+			id: 1,
+			name: "*** Mated Laija",
+		},
+		{
+			id: 5,
+			name: "*** Vendor Marcos",
+		},
+	]);
+	const findTabIndex = (id) => tablist.value.findIndex((tab) => tab.id === id);
+
+	const closeTab = (id) => {
+		if (tablist.value.length === 1) return;
+		const index = findTabIndex(id);
+
+		if (parseInt(route.params?.id) === tablist.value[index].id) {
+			router.push(`/vendors/${tablist.value[index === 0 ? index + 1 : index - 1].id}`);
+		}
+		tablist.value.splice(index, 1);
+	};
+	const addTab = (vendor) => {
+		loadingBar.start();
+		const index = findTabIndex(vendor.id);
+		if (index === -1) {
+			tablist.value.push(vendor);
+			selectedIndex.value = tablist.value.length - 1;
+		} else selectedIndex.value = index;
+		scrollTabToView();
+	};
+
+	const tabChanged = (index) => {
+		console.log({ tabChanged: index });
+		selectedIndex.value = index;
+		scrollTabToView();
+	};
+
+	watch(selectedIndex, (newValue) => {
+		loadingBar.start();
+		if (parseInt(route.params?.id) !== tablist.value[newValue].id) {
+			router.push(`/vendors/${tablist.value[newValue].id}`);
+		}
+	});
+
+	const scrollTabToView = useDebounceFn(() => {
+		const tabListChildren = tabListButton.value.children;
+		for (let i = 0; i < tabListChildren.length; i++) {
+			const tabIndex = parseInt(
+				tabListChildren[i].getElementsByTagName("button")[0].getAttribute("tabindex")
+			);
+			if (tabIndex === 0) {
+				tabListChildren[i].scrollIntoView({ behavior: "smooth" });
+				break;
+			}
+		}
+		loadingBar.finish();
+	}, 100);
+
+	// Vendor Search Result
+	const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
+		["vendorSearch", debouncedSearchText],
+		({ queryKey }) => {
+			if (queryKey[1] === "") return null;
+			else return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => res.data);
+		}
+	);
+</script>
+
 <template>
 	<div class="flex w-full vendors">
 		<!-- Don't show PageItemsList on dashboard  | Current Page List -->
 		<div
-			class="relative pageItemsList min-w-[275px] max-w-[275px] h-screen overflow-auto overflow-x-hidden bg-white"
+			class="relative pageItemsList min-w-[275px] max-w-[275px] h-screen overflow-y-auto overflow-x-hidden bg-white"
 		>
 			<!-- List search & filters -->
-			<div class="sticky top-0 p-3 bg-white">
-				<div>{{ route.name }}</div>
+			<div class="sticky top-0 p-3 bg-white border-b">
+				<div class="mb-3">
+					<h1 class="text-xl font-bold uppercase">Vendors</h1>
+				</div>
 				<div class="flex">
 					<div class="mr-3">
 						<n-input
-							v-model:value="searchText"
-							@input="search"
+							v-model:value.trim="searchText"
 							round
 							clearable
 							placeholder="Search..."
 						/>
-					</div>
-					<div>
-						<n-button type="primary">Filter</n-button>
 					</div>
 				</div>
 				<!-- Filter Component -->
 			</div>
 			<!-- Main Loop List -->
 			<div class="">
-				<ul>
-					<!-- Loop List-->
-					<li
-						v-if="GET_FILTERED_VENDORS"
-						v-for="vendor in GET_FILTERED_VENDORS"
-						:key="vendor.id"
-						:vendor="vendor"
-						class="p-2 border-b-2"
-						@click="showVendor(vendor)"
-					>
-						<!-- Company Name -->
-						{{ vendor.name }}
-						<!-- City, State -->
-						{{ vendor.city }}, {{ vendor.state }}
-						<!-- Phone - Link Email -->
-						{{ vendor.phone }} -
-						<a :href="`mailto:${vendor.email}`">{{ vendor.email }}</a>
-					</li>
+				<ul class="">
+					<template v-if="vendorSearchResults">
+						<VendorList :vendors="vendorSearchResults" @click:tab="addTab" />
+					</template>
+
+					<template v-else>
+						<template
+							v-for="(vendorPage, vendorPageIdx) in vendors?.pages"
+							:key="vendorPageIdx"
+						>
+							<VendorList :vendors="vendorPage.data" @click:tab="addTab" />
+						</template>
+						<button
+							v-observe-visibility="
+								(isVisible) => (isVisible ? vendorFetchNextPage() : null)
+							"
+							v-if="hasVendorNextPage"
+							class="grid w-full p-4 place-content-center"
+						>
+							<svg
+								class="w-6 h-6 mr-3 -ml-1 animate-spin text-emerald-500"
+								xmlns="http://www.w3.org/2000/svg"
+								fill="none"
+								viewBox="0 0 24 24"
+							>
+								<circle
+									class="opacity-25"
+									cx="12"
+									cy="12"
+									r="10"
+									stroke="currentColor"
+									stroke-width="4"
+								></circle>
+								<path
+									class="opacity-75"
+									fill="currentColor"
+									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+								></path>
+							</svg>
+						</button>
+					</template>
 				</ul>
 			</div>
 		</div>
 		<!-- Main Tabs App Content -->
-		<div class="w-full h-screen">
-			<div class="flex justify-between w-full h-14">
-				<div class="pageTabs">
-					<div>
-						<!-- Page tabs -->
-						<PageTabs />
-					</div>
-				</div>
-			</div>
-			<!-- Main Body Content-->
-			<div class="h-screen overflow-auto overflow-x-hidden bg-white">
-				<!-- Body Content -->
-				<div>
-					<div class="pl-5 mt-10">
-						<div :key="GET_ACTIVE_TAB" v-if="GET_ACTIVE_TAB.id">
-							<div id="form-area">
-								<n-form>
-									<n-form-item label="Name">
-										<UpdatableButtonWrapper
-											v-model="form.name"
-											:reset-value="GET_ACTIVE_TAB.name"
-											@save="(val) => onChange('name', val)"
-										>
-											<n-input
-												v-model:value="form.name"
-												:default-value="GET_ACTIVE_TAB.name"
-											/> </UpdatableButtonWrapper
-									></n-form-item>
-									<n-form-item label="Address">
-										<UpdatableButtonWrapper
-											v-model="form.address_one"
-											:reset-value="GET_ACTIVE_TAB.address_one"
-											@save="(val) => onChange('address', val)"
-										>
-											<n-input
-												v-model:value="form.address_one"
-												:default-value="GET_ACTIVE_TAB.address_one"
-											/> </UpdatableButtonWrapper
-									></n-form-item>
-									<n-form-item label="Account No">
-										<UpdatableButtonWrapper
-											v-model="form.accounting_code"
-											:reset-value="GET_ACTIVE_TAB.accounting_code"
-											@save="(val) => onChange('accounting_code', val)"
-										>
-											<n-input
-												v-model:value="form.accounting_code"
-												:default-value="GET_ACTIVE_TAB.accounting_code"
-											/> </UpdatableButtonWrapper
-									></n-form-item>
-									<n-form-item label="City">
-										<UpdatableButtonWrapper
-											v-model="form.city"
-											:reset-value="GET_ACTIVE_TAB.city"
-											@save="(val) => onChange('city', val)"
-										>
-											<n-input
-												v-model:value="form.city"
-												:default-value="GET_ACTIVE_TAB.city"
-											/> </UpdatableButtonWrapper
-									></n-form-item>
-									<n-form-item label="State">
-										<UpdatableButtonWrapper
-											v-model="form.state"
-											:reset-value="GET_ACTIVE_TAB.state"
-											@save="(val) => onChange('state', val)"
-										>
-											<n-input
-												v-model:value="form.state"
-												:default-value="GET_ACTIVE_TAB.state"
-											/> </UpdatableButtonWrapper
-									></n-form-item>
-									<n-form-item label="Payment Terms">
-										<UpdatableButtonWrapper
-											v-model="form.payment_terms"
-											:reset-value="GET_ACTIVE_TAB.payment_terms"
-											@save="(val) => onChange('payment_terms', val)"
-										>
-											<n-input
-												v-model:value="form.payment_terms"
-												:default-value="GET_ACTIVE_TAB.payment_terms"
-											/> </UpdatableButtonWrapper
-									></n-form-item>
-									<n-form-item label="Zip">
-										<updatable-button-wrapper
-											v-model="form.zip"
-											:reset-value="GET_ACTIVE_TAB.zip"
-											@save="(val) => onChange('zip', val)"
-										>
-											<masked-input
-												mask="#####"
-												v-model:value="form.zip"
-												:default-value="GET_ACTIVE_TAB.zip"
-											/>
-										</updatable-button-wrapper>
-									</n-form-item>
-									<n-form-item label="Phone">
-										<updatable-button-wrapper
-											v-model="form.phone"
-											:reset-value="GET_ACTIVE_TAB.phone"
-											@save="(val) => onChange('phone', val)"
-										>
-											<masked-input
-												mask="(###) ###-####"
-												v-model:value="form.phone"
-												:default-value="GET_ACTIVE_TAB.phone"
-											/>
-										</updatable-button-wrapper>
-									</n-form-item>
-								</n-form>
+		<div class="w-[calc(100vw-335px)] h-screen">
+			<TabGroup :selected-index="selectedIndex" @change="tabChanged">
+				<div class="relative flex" ref="tabListButtonWrapper">
+					<button
+						class="grid place-content-center shadow bg-white h-[62px] w-8 px-2"
+						v-if="showScrollArrow"
+						@click="scrollTo('left')"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							xmlns:xlink="http://www.w3.org/1999/xlink"
+							viewBox="0 0 192 512"
+							class="w-5 h-5"
+						>
+							<path
+								d="M192 127.338v257.324c0 17.818-21.543 26.741-34.142 14.142L29.196 270.142c-7.81-7.81-7.81-20.474 0-28.284l128.662-128.662c12.599-12.6 34.142-3.676 34.142 14.142z"
+								fill="currentColor"
+							></path>
+						</svg>
+					</button>
+					<div
+						class="overflow-x-auto bg-[#F8F8FA] h-[62px] flex items-end"
+						ref="scrollWrapper"
+					>
+						<TabList>
+							<div ref="tabListButton" class="flex gap-x-2 flex-nowrap min-w-max">
+								<template v-for="tab in tablist" :key="tab.id">
+									<router-link
+										:to="{ name: 'SingleVendor', params: { id: tab?.id } }"
+										custom
+										v-slot="{ href, route, navigate, isActive }"
+									>
+										<div class="relative">
+											<tab class="max-w-xs rounded-t focus:outline-none scroll-mt-2">
+												<a
+													:href="href"
+													@click="navigate"
+													class="block px-4 py-2 pr-6 overflow-hidden border-t rounded-t border-x focus:outline-none whitespace-nowrap truncate max-w-[250px]"
+													:class="[
+														isActive ? 'bg-primary text-white' : 'text-gray-700 bg-white',
+													]"
+												>
+													{{ tab?.name }}
+												</a>
+											</tab>
+											<span
+												class="absolute inset-y-0 right-0 top-[1px] flex items-center pr-1 rounded-r z-10"
+												@click.stop="closeTab(tab.id)"
+												:class="[
+													tablist.length === 1 && 'hidden',
+													isActive ? 'bg-primary text-white' : 'bg-slate-white',
+												]"
+											>
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													xmlns:xlink="http://www.w3.org/1999/xlink"
+													class="w-5 h-5"
+													:class="[
+														tablist.length === 1 && 'hidden',
+														isActive
+															? 'bg-primary text-white hover:text-gray-300'
+															: 'text-gray-200 hover:text-gray-400 bg-slate-white',
+													]"
+													fill="currentColor"
+													viewBox="0 0 512 512"
+												>
+													<path
+														d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192s192-86 192-192z"
+														fill="none"
+														stroke="currentColor"
+														stroke-miterlimit="10"
+														stroke-width="32"
+													></path>
+													<path
+														fill="none"
+														stroke="currentColor"
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="32"
+														d="M320 320L192 192"
+													></path>
+													<path
+														fill="none"
+														stroke="currentColor"
+														stroke-linecap="round"
+														stroke-linejoin="round"
+														stroke-width="32"
+														d="M192 320l128-128"
+													></path>
+												</svg>
+											</span></div
+									></router-link>
+								</template>
 							</div>
-						</div>
+						</TabList>
 					</div>
-					<!-- <p>{{ GET_ACTIVE_TAB.accounting_code }}</p>
-					<p>{{ GET_ACTIVE_TAB.address_one }}</p>
-					<p>{{ GET_ACTIVE_TAB.address_two }}</p>
-					<p>{{ GET_ACTIVE_TAB.city }}</p>
-					<p>{{ GET_ACTIVE_TAB.comments }}</p>
-					<p>{{ GET_ACTIVE_TAB.country }}</p>
-					<p>{{ GET_ACTIVE_TAB.created_at }}</p>
-					<p>{{ GET_ACTIVE_TAB.din }}</p>
-					<p>{{ GET_ACTIVE_TAB.email }}</p>
-					<p>{{ GET_ACTIVE_TAB.id }}</p>
-					<p>{{ GET_ACTIVE_TAB.other_phones }}</p>
-					<p>{{ GET_ACTIVE_TAB.payment_terms }}</p>
-					<p>{{ GET_ACTIVE_TAB.phone }}</p>
-					<p>{{ GET_ACTIVE_TAB.state }}</p>
-					<p>{{ GET_ACTIVE_TAB.tax_id_number }}</p>
-					<p>{{ GET_ACTIVE_TAB.trip_exp_calculation }}</p>
-					<p>{{ GET_ACTIVE_TAB.updated_at }}</p>
-					<p>{{ GET_ACTIVE_TAB.vendor_category.active }}</p>
-					<p>{{ GET_ACTIVE_TAB.vendor_category.created_at }}</p>
-					<p>{{ GET_ACTIVE_TAB.vendor_category.description }}</p>
-					<p>{{ GET_ACTIVE_TAB.vendor_category.id }}</p>
-					<p>{{ GET_ACTIVE_TAB.vendor_category.name }}</p>
-					<p>{{ GET_ACTIVE_TAB.vendor_category.updated_at }}</p> -->
+					<button
+						class="grid place-content-center shadow bg-white h-[62px] w-8 px-2"
+						v-if="showScrollArrow"
+						@click="scrollTo('right')"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							xmlns:xlink="http://www.w3.org/1999/xlink"
+							viewBox="0 0 192 512"
+							class="w-5 h-5"
+						>
+							<path
+								d="M0 384.662V127.338c0-17.818 21.543-26.741 34.142-14.142l128.662 128.662c7.81 7.81 7.81 20.474 0 28.284L34.142 398.804C21.543 411.404 0 402.48 0 384.662z"
+								fill="currentColor"
+							></path>
+						</svg>
+					</button>
+				</div>
+			</TabGroup>
+			<!-- Main Body Content-->
+			<div class="overflow-y-auto overflow-x-hidden h-[calc(100%-62px)] border-t-2">
+				<div class="h-screen pt-10 bg-white">
+					<router-view />
 				</div>
 			</div>
 		</div>
 	</div>
 </template>
-
-<script>
-	import { useRoute } from "vue-router";
-	import { mapActions, mapState } from "pinia";
-	import { useVendors } from "@/store/vendors";
-	import { reactive, ref } from "vue";
-	import PageTabs from "@/components/PageTabs.vue";
-	import CurrencyInput from "@/components/common/CurrencyInput.vue";
-	import UpdatableButtonWrapper from "@/components/common/UpdatableButtonWrapper.vue";
-	import MaskedInput from "@/components/common/MaskedInput.vue";
-	import { useDebounceFn } from "@vueuse/core";
-	import vendors from "@/api/vendors";
-
-	export default {
-		components: {
-			CurrencyInput,
-			UpdatableButtonWrapper,
-			MaskedInput,
-			PageTabs,
-		},
-		setup() {
-			const route = useRoute();
-			const store = useVendors();
-
-			// import {co} from "@vueuse/core"
-			const obj = {
-				name: "",
-				address_one: "",
-				accounting_code: "",
-				city: "",
-				state: "",
-				payment_terms: "",
-				zip: null,
-				phone: "",
-			};
-			const isLoading = ref(false);
-
-			const onChange = (key, val) => {
-				isLoading.value = true;
-				// make POST api call with id to save and store data in database
-				// for only the active tab
-				console.log(val);
-				const dataToSend = { ...store.GET_ACTIVE_TAB };
-				dataToSend[key] = val;
-
-				const sendToAPI = {
-					id: dataToSend.id,
-					name: dataToSend.name,
-					din: "Change These Later",
-					// din: dataToSend.din,
-					payment_terms: dataToSend.name,
-					address_one: dataToSend.address_one,
-					address_two: dataToSend.address_two,
-					city: dataToSend.city,
-					state: dataToSend.state,
-					country: dataToSend.country,
-					zip: dataToSend.zip,
-					phone: dataToSend.phone,
-					fax: 1234567890,
-					email: dataToSend.email,
-					trip_exp_calculation: dataToSend.trip_exp_calculation,
-				};
-
-				vendors.create(sendToAPI).then((res) => console.log("Working Properly"));
-				debounceChange();
-			};
-			const debounceChange = useDebounceFn(() => {
-				isLoading.value = false;
-			}, 1000);
-
-			// pull in vendors
-			store.GET_ALL_VENDORS();
-
-			return {
-				route,
-				form: reactive({ ...store.GET_ACTIVE_TAB }),
-				onChange,
-				isLoading,
-				searchText: ref(""),
-				showVendor(vendorInfo) {
-					store.CREATE_NEW_TAB(vendorInfo);
-				},
-			};
-		},
-		computed: {
-			...mapState(useVendors, ["GET_VENDORS", "GET_FILTERED_VENDORS", "GET_ACTIVE_TAB"]),
-		},
-		methods: {
-			...mapActions(useVendors, ["FILTER_LIST", "SET_SEARCH_TERM", "CREATE_NEW_TAB"]),
-			search() {
-				this.SET_SEARCH_TERM(this.searchText);
-				this.FILTER_LIST(this.searchText);
-			},
-		},
-	};
-</script>
