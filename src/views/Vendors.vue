@@ -93,9 +93,9 @@ const closeTab = (id) => {
   const index = findTabIndex(id);
 
   if (parseInt(route.params?.id) === tablist.value[index].id) {
-    router.push(
-      `/vendors/${tablist.value[index === 0 ? index + 1 : index - 1].id}`
-    );
+    const activeIndex = index === 0 ? index + 1 : index - 1;
+
+    router.push(`/vendors/${tablist.value[activeIndex].id}`);
   }
   tablist.value.splice(index, 1);
 
@@ -147,9 +147,12 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
   useQuery(["vendorSearch", debouncedSearchText], ({ queryKey }) => {
     if (queryKey[1] === "") return null;
     else
-      return axios
-        .get(`/vendors/search/${queryKey[1]}`)
-        .then((res) => res.data);
+      return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => {
+        if (res.data?.debug) {
+          return [];
+        }
+        return res.data;
+      });
   });
 </script>
 
@@ -187,8 +190,12 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
       <!-- Main Loop List -->
       <div class="">
         <ul class="">
-          <template v-if="vendorSearchResults">
-            <VendorList :vendors="vendorSearchResults" @click:tab="addTab" />
+          <template v-if="debouncedSearchText">
+            <VendorList
+              v-if="vendorSearchResults"
+              :vendors="vendorSearchResults"
+              @click:tab="addTab"
+            />
           </template>
 
           <template v-else>
