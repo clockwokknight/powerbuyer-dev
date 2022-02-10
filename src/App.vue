@@ -1,4 +1,6 @@
 <template>
+<n-message-provider>
+
   <div class="bg-[#fff] h-screen overflow-hidden w-full">
     <div class="flex w-full h-full">
       <aside class="w-[60px] bg-[#202124] sticky top-0 left-0 z-10">
@@ -12,6 +14,7 @@
     </div>
   </div>
   <VueQueryDevTools />
+</n-message-provider>
 </template>
 
 <script setup>
