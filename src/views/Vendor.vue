@@ -34,17 +34,39 @@
 		// axios.get(`/vendors/${routeParamId.value}`).then((res) => res.data)
 	);
 
-	// const obj = {
-	// 	price: "",
-	// 	randomText: "",
-	// 	phoneNumber: "",
-	// };
+	const expensesColumns = [
+		{
+			title: "Expenses",
+			key: "id",
+		},
+		{
+			title: "",
+			key: "amount",
+		},
+	];
 
-	// const getSelectedData = (attr) => {
-	// 	setTimeout(() => {
-	// 		return store.GET_SELECTED_TAB.attr;
-	// 	}, 2000);
-	// };
+	const expensesData = [
+		{ id: 3, title: "130.18" },
+		{ id: 4, title: "130.19" },
+	];
+
+	const invoicesColumns = [
+		{
+			title: "Invoices",
+			key: "id",
+		},
+		{
+			title: "",
+			key: "amount",
+		},
+	];
+
+	const invoicesData = [
+		{ id: 3, title: "130.18" },
+		{ id: 4, title: "130.19" },
+	];
+
+	const pagination = false;
 
 	const obj = {
 		name: "",
@@ -132,7 +154,7 @@
 			<n-form-item label="Name">
 				<UpdatableButtonWrapper
 					v-model="form.name"
-					:reset-value="vendor.name"
+					:reset-value="vendor?.name"
 					@save="(val) => onChange('name', val)"
 				>
 					<n-input
@@ -222,5 +244,22 @@
 				</updatable-button-wrapper>
 			</n-form-item>
 		</n-form>
+	</div>
+	<div class="px-4">
+		<n-data-table
+			:columns="expensesColumns"
+			:data="expensesData"
+			:pagination="pagination"
+			:bordered="false"
+		/>
+	</div>
+
+	<div class="px-4">
+		<n-data-table
+			:columns="invoicesColumns"
+			:data="invoicesData"
+			:pagination="pagination"
+			:bordered="false"
+		/>
 	</div>
 </template>
