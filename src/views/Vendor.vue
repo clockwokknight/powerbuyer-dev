@@ -20,12 +20,15 @@
 		}
 	);
 
+	let dataFromServer;
+
 	const { data: vendor, isFetching } = useQuery(
 		["product", routeParamId],
 		() =>
 			vendors.retrieve(routeParamId.value).then((res) => {
 				store.SET_SELECTED_TAB(res.data);
 				// console.log(store.GET_SELECTED_TAB);
+				dataFromServer = reactive(res.data);
 				return res.data;
 			})
 		// axios.get(`/vendors/${routeParamId.value}`).then((res) => res.data)
@@ -54,7 +57,7 @@
 		phone: "",
 	};
 	const isLoading = ref(false);
-	const dataFromServer = reactive({ ...vendor.value });
+	// const dataFromServer = reactive({ ...vendor.value });
 	const form = reactive({ ...vendor.value });
 
 	const onChange = (key, val) => {
@@ -129,7 +132,7 @@
 			<n-form-item label="Name">
 				<UpdatableButtonWrapper
 					v-model="form.name"
-					:reset-value="vendor?.name"
+					:reset-value="vendor.name"
 					@save="(val) => onChange('name', val)"
 				>
 					<n-input
