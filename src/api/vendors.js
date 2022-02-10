@@ -5,6 +5,10 @@ export default {
     {
         return api.get( '/vendors' );
     },
+    retrieve(id)
+    {
+        return api.get( `/vendors/${ id }`);
+    },
     create(data)
     {
         return api.post( `/vendors/update/${ data.id }`, data );
