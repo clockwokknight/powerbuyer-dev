@@ -1,11 +1,12 @@
 <template>
 
-
+<div content="Create New Vendor" v-tippy='{ placement : "right", duration: 50  }'>
 <n-button @click="doShowOuter">
     <n-icon>
         <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><path d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z" fill="currentColor"></path></svg>
     </n-icon>
 </n-button>
+</div>
   <n-drawer v-model:show="showOuter" :width="500">
     <n-drawer-content title="Add Vendor">
     <n-form
