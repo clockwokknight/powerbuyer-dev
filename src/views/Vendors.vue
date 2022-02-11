@@ -205,7 +205,14 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
     >
       <!-- List search & filters -->
       <div class="sticky top-0 p-3 bg-white border-b">
-        <div class="mb-3"><h1 class="text-xl font-bold uppercase"><n-space>Vendors<AddVendor/></n-space></h1> </div>
+        <div class="flex justify-between mb-3">
+          <h1 class="text-xl font-bold uppercase">
+            Vendors
+          </h1>
+          <div>
+            <AddVendor/>
+          </div>
+        </div>
         <div class="flex">
           <div class="mr-3">
             <n-input
