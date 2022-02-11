@@ -26,6 +26,7 @@
           placeholder="Select Payment Term"
           :options="paymenttermslist"
           v-model:value="formValue.paymentterms"
+          filterable
         />
         </n-form-item>
         <n-form-item label="Vendor Category" path="vendorcategory">
@@ -33,6 +34,7 @@
           placeholder="Select Vendor Category"
           :options="vendorcategorylist"
           v-model:value="formValue.vendorcategory"
+          filterable
         />
         </n-form-item>
         <n-form-item label="Tax ID" path="taxid">
@@ -54,26 +56,28 @@
           placeholder="Select State"
           :options="statelist"
           v-model:value="formValue.state"
+          filterable
           />
 
         </n-form-item>
         <n-form-item  label="ZIP Code" path="zip">
-          <n-input type="number" min-length="2"  placeholder="Enter Zip" clearable v-model:value="formValue.zip" />
+          <n-input type="text" min-length="2" maxlength="5" placeholder="Enter Zip" clearable v-model:value="formValue.zip" />
         </n-form-item>
         </n-space>
         <n-form-item label="Phone Number" path="phone">
         <masked-input mask="(###) ###-####"  placeholder="Enter Phone Number" clearable v-model:value="formValue.phone" />
         </n-form-item>
-        <n-form-item label="Email" path="email">
-        <n-input type="text" min-length="2"  placeholder="Enter Email" clearable v-model:value.trim="formValue.email" />
+        <n-form-item  label="Email" path="email" required="true" 
+          :feedback="feedback" :validation-status="success">
+        <n-input  minlength="2" maxlength="64" :input-props="{ type: 'email' }" placeholder="Enter Email" pattern=".+@beststartupever\.com" clearable v-model:value="formValue.email" />
         </n-form-item>
         <n-form-item label="Fax" path="fax">
         <masked-input mask="(###) ###-####"  placeholder="Enter Fax #" clearable v-model:value.trim="formValue.fax" />
         </n-form-item>
         <n-form-item label="Comments" path="comments">
-        <n-input type="text" min-length="2"  placeholder="Enter Comments" clearable v-model:value.trim="formValue.comments" />
+        <n-input type="textarea" show-count placeholder="Enter Comments" clearable v-model:value.trim="formValue.comments" />
         </n-form-item>
-  
+        <p>{{feedback}}</p>
     </n-form>
   
       <template #footer>
@@ -87,7 +91,7 @@
 
 
 <script>
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent, ref, onMounted, computed } from 'vue'
 import vendors from "@/api/vendors";
 import payments from "@/api/paymentterms";
 import states from "@/api/states";
@@ -105,8 +109,10 @@ export default defineComponent({
     
     const paymenttermslist = ref([]);
 
-    const vendorcategorylist = ref([]);
-  
+    const vendorcategorylist = ref([]);  
+
+    let feedback = ref('')
+    let status = ref('')
     
     states.all().then(({ data }) => (statelist.value = data.map(el => el.name).map(
        (v) => ({
@@ -128,14 +134,25 @@ export default defineComponent({
           value: v
        })
     )))
-
+    function validateEmail(v){
+      if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(v)) {
+          console.log('success')
+          //this.msg['email'] = 'Please enter a valid email address';
+      } else {
+          console.log('nope')
+          feedback = 'Please enter a valid email address.'
+          status = 'error'
+          //console.log('validate email plz')
+          //this.msg['email'] = '';
+      }
+    } 
     function addVendor(){
       
 
       formRef.value.validate((errors) => {
+        
+      validateEmail(this.formValue.email)
           if (!errors) {
-
-            //console.log(this.formValue)
 
             if (this.formValue.vendorcategory == 'Service Provider'){ 
               var vendorid = 1 }
@@ -161,9 +178,8 @@ export default defineComponent({
                 fax: this.formValue.fax || 0,
                 email: this.formValue.email,
             }
-            //console.log(data)
-            vendors.add(data).then( res => {
-                    console.log(res)
+
+            vendors.add(data).then( res => {                  
                     message.success("Successfully added vendor!")
                     showOuterRef.value = false;
                 }).finally(res =>{
@@ -190,7 +206,7 @@ export default defineComponent({
             //message.success('Valid')
           } else {
             console.log(errors)
-            //message.error('Invalid')
+            //validateEmail(this.formValue.email)
               }
             })
       
@@ -220,6 +236,9 @@ export default defineComponent({
         statelist,
         paymenttermslist,
         vendorcategorylist,
+
+        feedback,
+        status,
         
         rules: {
           fullname: {
@@ -280,15 +299,6 @@ export default defineComponent({
         
         },
         addVendor,
-
-        // handleValidateClick (e) {
-        // console.log('making it')
-        
-        // e.preventDefault()
-        
-        //   },
-      
-        
 
         showOuter: showOuterRef,
 
