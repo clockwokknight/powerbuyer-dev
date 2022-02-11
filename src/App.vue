@@ -32,3 +32,6 @@ const userMenu = [
   },
 ];
 </script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800&family=Open+Sans:wght@300;400;700&display=swap');
+</style>

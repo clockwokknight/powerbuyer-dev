@@ -13,4 +13,14 @@ export default {
     {
         return api.post( `/vendors/update/${ data.id }`, data );
     },
+    add(data)
+    {   
+        console.log(data)
+        //console.log(api.post( '/vendors/store', data ))
+        return api.post( '/vendors/store', data )
+    },
+    allCategories()
+    {
+        return api.get( '/vendor_categories' );
+    },
 };
