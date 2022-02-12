@@ -19,9 +19,10 @@ import LanesHistory from "@/views/LanesHistory.vue";
 import LanesManage from "@/views/LanesManage.vue";
 import Deals from "@/views/Deals.vue";
 import Deal from "@/views/Deal.vue";
+import OtherSystemMenus from "@/views/OtherSystemMenus.vue";
 import VendorHome from "@/components/vendor/VendorHome.vue";
 
-export const router = createRouter({
+export const router = createRouter( {
   history: createWebHistory(),
 
   routes: [
@@ -127,5 +128,10 @@ export const router = createRouter({
       name: "Vehicle",
       component: Vehicle,
     },
+    {
+      path: "/system",
+      name: "System",
+      component: OtherSystemMenus,
+    },
   ],
-});
+} );
