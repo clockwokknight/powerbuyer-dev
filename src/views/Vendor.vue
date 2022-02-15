@@ -10,6 +10,7 @@
 	import MaskedInput from "@/components/common/MaskedInput.vue";
 	import VendorExpenses from "@/components/vendor/VendorExpenses.vue";
 	import VendorInvoices from "@/components/vendor/VendorInvoices.vue";
+	import VendorContacts from "@/components/vendor/VendorContacts.vue";
 	import CurrencyInput from "@/components/common/CurrencyInput.vue";
 	import { useVendors } from "@/store/vendors";
 	import setup from "naive-ui/lib/radio/src/use-radio";
@@ -34,14 +35,6 @@
 
 	const route = useRoute();
 	const store = useVendors();
-	let expenseItems = ref([]);
-	let expenseItemsData = ref([]);
-	let vendorContacts = ref([]);
-	let vendorContactsData = ref([]);
-	let vendorPayments = ref([]);
-	let vendorPaymentsData = ref([]);
-	let expenses = ref([]);
-	let expensesData = ref([]);
 
 	const statelist = ref([]);
     
@@ -161,121 +154,6 @@
 			//debounceChange();
 		});
 	};
-
-	
-
-	
-	
-const vendorContactsColumns = [
-		{
-			title: "Name",
-			key: "name",
-		},
-		{
-			title: "Phone",
-			key: "phone",
-		},
-		{
-			title: "Email",
-			key: "email",
-		},
-		{
-			title: "Position",
-			key: "position",
-		},
-		{
-			title: "",
-			key: "edit",
-			render(row) {
-				return h(
-					NButton,
-					{
-						strong: true,
-						tertiary: true,
-						size: "medium",
-						onClick: () => console.log(row),
-					},
-					{ default: () => "View/Edit" }
-				);
-			},
-		},
-	];
-	const vendorPaymentsColumns = [
-		{
-			title: "Inv #",
-			key: "inv_no",
-		},
-		{
-			title: "Check Number",
-			key: "check_number",
-		},
-		{
-			title: "Amount",
-			key: "amount",
-		},
-		{
-			title: "Status",
-			key: "status",
-		},
-		{
-			title: "Payment Date",
-			key: "payment_date",
-		},
-		{
-			title: "",
-			key: "edit",
-			render(row) {
-				return h(
-					NButton,
-					{
-						strong: true,
-						tertiary: true,
-						size: "medium",
-						onClick: () => console.log(row),
-					},
-					{ default: () => "View/Edit" }
-				);
-			},
-		},
-	];
-	const expensesColumns = [
-		{
-			title: "Inv #",
-			key: "inv_no",
-		},
-		{
-			title: "Check Number",
-			key: "check_number",
-		},
-		{
-			title: "Amount",
-			key: "amount",
-		},
-		{
-			title: "Status",
-			key: "status",
-		},
-		{
-			title: "Payment Date",
-			key: "payment_date",
-		},
-		{
-			title: "",
-			key: "edit",
-			render(row) {
-				return h(
-					NButton,
-					{
-						strong: true,
-						tertiary: true,
-						size: "medium",
-						onClick: () => console.log(row),
-					},
-					{ default: () => "View/Edit" }
-				);
-			},
-		},
-	];
 
 	// LOAD TABLE DATA
 </script>
@@ -627,56 +505,6 @@ const vendorContactsColumns = [
 
 </div>
 
-<!-- EXPENSE ITEMS TABLE DATA - begin -->
-	<div class="px-4">
-		<h2 class="font-bold">Expense Items</h2>
-		<n-data-table
-			:columns="expenseItemsColumns"
-			:data="expenseItemsData"
-			:pagination="true"
-			:bordered="true"
-		/>
-	</div>
-	<!-- EXPENSE ITEMS TABLE DATA - end -->
-	<!-- VENDOR CONTACTS DATA - begin -->
-	<div class="px-4">
-		<h2 class="font-bold">Vendor Contacts</h2>
-		<n-data-table
-			:columns="vendorContactsColumns"
-			:data="vendorContactsData"
-			:pagination="true"
-			:bordered="true"
-		/>
-	</div>
-	<!-- VENDOR CONTACTS DATA - end -->
-	<!-- VENDOR PAYMENTS DATA - begin -->
-	<div class="px-4">
-		<h2 class="font-bold">Vendor Payments</h2>
-		<n-data-table
-			:columns="vendorPaymentsColumns"
-			:data="vendorPaymentsData"
-			:pagination="true"
-			:bordered="true"
-		/>
-	</div>
-	<!-- VENDOR PAYMENTS DATA - end -->
-	<!-- EXPENSES DATA - begin -->
-	<div class="px-4">
-		<h2 class="font-bold">Expenses</h2>
-		<n-data-table
-			:columns="expensesColumns"
-			:data="expensesData"
-			:pagination="true"
-			:bordered="true"
-		/>
-	</div>
-	<!-- EXPENSES DATA - end -->
-	<!-- <div class="px-4">
-		<n-data-table
-			:columns="invoicesColumns"
-			:data="invoicesData"
-			:pagination="pagination"
-			:bordered="false"
-		/>
-	</div> -->
+<VendorContacts/>
+<VendorExpenses/>
 </template>

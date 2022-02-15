@@ -5,6 +5,10 @@ export default {
     {
         return api.get( '/expenses' );
     },
+    getItems(id)
+    {
+        return api.get( `/expense_items/${id}` );
+    },
     update()
     {
         
