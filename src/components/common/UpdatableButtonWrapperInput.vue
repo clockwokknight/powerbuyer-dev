@@ -1,47 +1,46 @@
 <script setup>
-import { toRef, watch, ref, onUpdated, onMounted } from "vue";
-import compare from "just-compare";
+import { ref } from "vue";
+
 
 const props = defineProps({
-  modelValue: [String, Number],
-  shouldUpdate: {
+  loadingValue: {
     type: Boolean,
-    default: false,
   },
+  defaultValue: [String, Number],
+  modelValue: [String, Number],
   resetValue: {
-    type: [String, Number, Object],
+    type: [String, Number],
   },
 
 });
 
-const emits = defineEmits(["save", "update:modelValue", "revert"]);
-const isDirty = ref(false);
+const emits = defineEmits(["save", "update:modelValue", "reset"]);
 
+const show = ref(false);
 
-onUpdated(() => {
-
-  // if(props.modelValue != undefined)
-  // {
-  //  // console.log('test?')
-     //isDirty.value = !compare(props.resetValue, props.modelValue)
-  // }
-  
-});
+const handleKeyUp = () => {
+    return show.value = true;
+}
 
 const triggerUpdate = (value) => {
   emits("save", value);
-  isDirty.value = false;
+  show.value = false;
 };
 
 const reset = () => {
-  emits("revert")
-  emits("update:modelValue", props.resetValue);
+  
+  emits("reset", props.resetValue);
+  show.value = false;
 };
 </script>
 <template>
   <div class="relative">
-    <slot></slot>
-
+    
+    <n-input  class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0" 
+											v-model:value="modelValue"
+											:loading="loadingValue"
+                      @keyup="handleKeyUp"
+										/> 
     <transition
       enter-active-class="transition"
       enter-from-class="opacity-0"
@@ -52,7 +51,7 @@ const reset = () => {
     >
       <div
         class="absolute -right-12 pl-3 flex gap-x-2 inset-y-0 items-center"
-        v-if="shouldUpdate"
+        v-if="show"
       >
         <span class="grid place-content-center">
           <button @click="triggerUpdate(modelValue)">
