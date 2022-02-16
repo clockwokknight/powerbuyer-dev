@@ -192,7 +192,7 @@ watch(
 		() => {
 			routeParamId.value = route.params?.id;
             vendors.retrieveContacts(routeParamId.value).then( res => { 
-				console.log(res)
+				
                 if (res.data.length >= 1) {
                     tableData.value = res.data;
 					
@@ -220,7 +220,7 @@ vendors.retrieveContacts(routeParamId.value).then( res => {
 
         
 const doShowOuter = (row) => {
-	console.log(row.id)
+	
     formValue.value.vendor_id = row.id
     formValue.value.first_name = row.first_name
     formValue.value.last_name = row.last_name
@@ -234,24 +234,33 @@ const doShowOuter = (row) => {
     
 }
 
-
+function getContacts () {
+	console.log('getcontact')
+	vendors.retrieveContacts(routeParamId.value).then( res => { 
+	
+                if (res.data.length >= 1) {
+                    tableData.value = res.data;
+					
+                }
+                else {
+                    tableData.value = [];
+                }
+            })
+}
 
 function updateVendor(key, val){
-		console.log(key)
-		console.log(val)
+
 		const data = {
 			[key]: formValue.value[key],
 		};
-		console.log(data)
-		// console.log(sendToAPI);
+
 		vendors.updateContacts(data, formValue.value.vendor_id).then((res) => {
-			console.log("Vendor Updated Successfully");
+			
 			//isLoading.value = false;
 			handleKeyDown(key)
 			update.value++
 			//debounceChange();
 		}).finally((res) => {
-			//console.log(update.value)
 			vendors.retrieveContacts(routeParamId.value).then( res => { 
                 if (res.data.length >= 1) {
                     tableData.value = res.data;

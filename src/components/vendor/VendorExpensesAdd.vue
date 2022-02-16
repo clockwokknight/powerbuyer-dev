@@ -13,11 +13,29 @@
     <n-form
     :model="formValue"
     :label-width="90"
-    :rules="rules"
     size="medium"
     ref="formRef"
     >   
-      <n-form-item label="Name" path="name" class="pt-0">
+    <n-form-item label="VIN" path="vin" class="pt-0">
+      <n-select 
+										placeholder="Search VIN"
+										:options="vehiclelist"
+										v-model:value="formValue.vin"
+										filterable
+										/>
+        <!-- <n-input type="text" min-length="2" placeholder="Enter VIN" clearable v-model:value.trim="formValue.name" /> -->
+        </n-form-item>
+        <n-form-item label="Expense Item(s)" disabled path="expense_item" class="pt-0">
+        <n-dynamic-input
+        v-model:value="value"
+        placeholder="Please type Expense Item here"
+        :options="vehicelist"
+        :min="1"
+        :max="20"
+        />
+        </n-form-item>
+        
+        <n-form-item label="Name" path="name" class="pt-0">
         <n-input type="text" min-length="2" placeholder="Enter Name" clearable v-model:value.trim="formValue.name" />
         </n-form-item>
        
@@ -44,7 +62,8 @@
 
 <script>
 import { defineComponent, ref } from 'vue'
-import vendors from "@/api/vendors";
+import vehicles from "@/api/vehicles";
+import deals from "@/api/deals";
 import { useMessage } from 'naive-ui'
 import MaskedInput from "@/components/common/MaskedInput.vue";
 
@@ -55,109 +74,30 @@ export default defineComponent({
     const formRef = ref(null)
     const message = useMessage()    
 
-    let feedback = ref('')
-    let status = ref('')
+    const vehiclelist = ref([]);
 
-    function validateEmail(v){
-      if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(v)) {
-          console.log('success')
-          //this.msg['email'] = 'Please enter a valid email address';
-      } else {
-          console.log('nope')
-          feedback = 'Please enter a valid email address.'
-          status = 'error'
-          //console.log('validate email plz')
-          //this.msg['email'] = '';
-      }
-    } 
-    function addExpense(){
-      
+    deals.all().then( res => { 
 
-      formRef.value.validate((errors) => {
-    console.log(route.params?.id)
-      validateEmail(this.formValue.email)
-          if (!errors) {
-
-                const data = {
-                vendor_id: route.params?.id,
-                name: this.formValue.name,
-                description: this.formValue.description,
-                type: this.formValue.type,
-                amount: this.formValue.amount,
-
-            }
-
-            vendors.addContacts(data).then( res => {                  
-                    message.success("Successfully added contact!")
-                    showOuterRef.value = false;
-                }).finally(res =>{
-                    this.formValue.id=0,
-                    this.formValue.name= '',
-                    this.formValue.description= '',
-                    this.formValue.type= '',
-                    this.formValue.amount= ''
-
-                    
-                    
-                }).catch(err => {
-                    console.log(err)
-                    //message.warning("Error!")
-                })
+    vehiclelist.value = res.data.data.map(
+       (v) => ({
+          label: v.vin,
+          value: v.id
+       }))
             
-            //message.success('Valid')
-          } else {
-            console.log(errors)
-            //validateEmail(this.formValue.email)
-              }
-            })
-      
+    })
 
-        //else error
+    function addExpense(){
+      var deal_id = this.formValue.vin // this passes value which is id, rather than vin. see how vehicle list is pulled.
+      console.log(deal_id)
     }
     
     return {
         formRef,
         formValue: ref({
-          fullname: '',
-          taxid: '',
-          din: '',
-          address: '',
-          addresstwo: '',
-          paymentterms: '',
-          vendorcategory: '',
-          phone: '',
-          email: '',
-          state: '',
-          city: '',
-          zip: '',
-          fax: '',
-          comments: '',
+
         }),
         
-        rules: {
-          name: {
-            required: true,
-            message: 'Please enter a Name',
-            trigger: ['input']
-          },
-          description: {
-            required: false,
-            message: 'Please enter a valid Description',
-            trigger: ['input']
-          },
-          type: {
-            required: true,
-            message: 'Please enter a valid type',
-            trigger: ['input']
-          },
-          amount: {
-            required: true,
-            message: 'Please select a valid amount',
-            trigger: ['input']
-          },
-          
-        
-        },
+        vehiclelist,
         addExpense,
 
         showOuter: showOuterRef,

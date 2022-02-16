@@ -55,11 +55,13 @@ import { useMessage } from 'naive-ui'
 import MaskedInput from "@/components/common/MaskedInput.vue";
 
 export default defineComponent({
+  emits: ['getContacts'],
   setup () {
     const showOuterRef = ref(false)
     const route = useRoute();
     const formRef = ref(null)
     const message = useMessage()    
+    
 
     function addVendor(){
       
@@ -82,52 +84,31 @@ export default defineComponent({
             
             vendors.addContacts(filteredData).then( res => {                  
                     message.success("Successfully added contact!")
-                    showOuterRef.value = false;
+
+                    
+                    
                 }).finally(res =>{
-                    // this.formValue.id=0,
-                    // this.formValue.first_name= '',
-                    // this.formValue.last_name= '',
-                    // this.formValue.office_phone= '',
-                    // this.formValue.cell_phone= '',
-                    // this.formValue.email= '',
-                    // this.formValue.job_title= ''
-                    
-                    
+                  showOuterRef.value = false;
                 }).catch(err => {
                     console.log(err)
-                    //message.warning("Error!")
+                    
                 })
             
-            //message.success('Valid')
+            
           } else {
             console.log(errors)
-            //validateEmail(this.formValue.email)
+            
               }
             })
-      
 
-        //else error
     }
     
     return {
         formRef,
         formValue: ref({
-          fullname: '',
-          taxid: '',
-          din: '',
-          address: '',
-          addresstwo: '',
-          paymentterms: '',
-          vendorcategory: '',
-          phone: '',
-          email: '',
-          state: '',
-          city: '',
-          zip: '',
-          fax: '',
-          comments: '',
-        }),
         
+
+        }),
         rules: {
           first_name: {
             required: true,

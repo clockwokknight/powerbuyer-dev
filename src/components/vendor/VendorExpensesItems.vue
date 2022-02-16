@@ -1,10 +1,10 @@
 <template>
 <n-message-provider>
 <div class="mt-4 px-4 font-sans antialiased">
-    <div class="pb-4 justify-end"><VendorExpensesAdd  /></div>
+    <div class="pb-4 justify-end"><VendorExpensesItemsAdd  /></div>
     
 		<div class="py-8 px-8 rounded-lg border-2 ">
-			<div><p class="text-2xl font-bold pb-8">Expenses</p></div>
+			<div><p class="text-2xl font-bold pb-8">Expense Items</p></div>
 		<n-data-table class="rounded-lg"
 			:columns="columns"
 			:data="tableData"
@@ -16,7 +16,7 @@
 	</div>
 
       <n-drawer v-model:show="showOuterRef" :width="500">
-    <n-drawer-content title="Expense Details">
+    <n-drawer-content title="Expense Item Details">
         <n-form
     :model="formValue"
     :label-width="90"
@@ -109,7 +109,7 @@ import vendors from "@/api/vendors";
 import expenses from "@/api/expenses";
 import MaskedInput from "@/components/common/MaskedInput.vue";
 import UpdatableButtonWrapper from "@/components/common/UpdatableButtonWrapper.vue";
-import VendorExpensesAdd from "@/components/vendor/VendorExpensesAdd.vue";
+import VendorExpensesItemsAdd from "@/components/vendor/VendorExpensesItemsAdd.vue";
 
 const tableData = ref([]);
 const showOuterRef = ref(false)
@@ -149,21 +149,21 @@ watch(
 		
 		() => {
 			routeParamId.value = route.params?.id;
-            expenses.all().then( res => { 
-				
-                tableData.value = res.data;
+            expenses.getItems(1).then( res => { 
+
+                tableData.value = [res.data];
             
-			})
+            })
 			
 		}
 		
 );
-
-expenses.all().then( res => { 
-				console.log(res.data)
-                tableData.value = res.data;
+// this needs to pass vendor id.
+expenses.getItems(1).then( res => { 
+				console.log(res)
+                tableData.value = [res.data];
             
-})
+            })
 
         
 const doShowOuter = (row) => {
@@ -184,37 +184,30 @@ const doShowOuter = (row) => {
 
 
 function updateVendor(key, val){
-      dataFromServer[key] = val;
-
-		const sendToAPI = {
-			id: dataFromServer.id,
-			name: dataFromServer.name,
-			din: dataFromServer.din,
-			payment_terms: dataFromServer.payment_terms,
-			accounting_code: dataFromServer.accounting_code,
-			address_one: dataFromServer.address_one,
-			address_two: dataFromServer.address_two,
-			city: dataFromServer.city,
-			state: dataFromServer.state,
-			country: dataFromServer.country,
-			zip: dataFromServer.zip,
-			phone: dataFromServer.phone,
-			fax: dataFromServer.fax,
-			email: dataFromServer.email,
-			comment: dataFromServer.comment,
-			trip_exp_calculation: dataFromServer.trip_exp_calculation,
+		console.log(key)
+		console.log(val)
+		const data = {
+			[key]: formValue.value[key],
 		};
+
 		// console.log(sendToAPI);
-		vendors.create(sendToAPI, 2).then((res) => {
+		vendors.updateContacts(data, formValue.value.vendor_id).then((res) => {
 			console.log("Vendor Updated Successfully");
 			//isLoading.value = false;
 			handleKeyDown(key)
+			update.value++
 			//debounceChange();
-			expenses.all().then( res => { 
-				console.log(res.data)
-                tableData.value = res.data;
-            
-			})
+		}).finally((res) => {
+			//console.log(update.value)
+			vendors.retrieveContacts(routeParamId.value).then( res => { 
+                if (res.data.length >= 1) {
+                    tableData.value = res.data;
+					
+                }
+                else {
+                    tableData.value = [];
+                }
+            })
 		});
 
     
@@ -232,23 +225,13 @@ const columns = [
                     //fixed: 'left'
                 },
                 {
-                    title: 'Amount',
-                    key: 'amount',
-                    //fixed: 'left'
-                },
-				{
-                    title: 'Status',
+                    title: 'Expense Type',
                     key: 'expense_type_id',
                     //fixed: 'left'
                 },
-				{
-                    title: 'DOS',
-                    key: 'expense_date',
-                    //fixed: 'left'
-                },
-				{
-                    title: 'Inv #',
-                    key: 'invoice_number',
+                {
+                    title: 'Amount',
+                    key: 'amount',
                     //fixed: 'left'
                 },
                 {

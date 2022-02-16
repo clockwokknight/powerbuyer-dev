@@ -8,8 +8,9 @@
 	import { useDebounceFn } from "@vueuse/core";
 	import UpdatableButtonWrapper from "@/components/common/UpdatableButtonWrapper.vue";
 	import MaskedInput from "@/components/common/MaskedInput.vue";
+	import VendorExpensesItems from "@/components/vendor/VendorExpensesItems.vue";
 	import VendorExpenses from "@/components/vendor/VendorExpenses.vue";
-	import VendorInvoices from "@/components/vendor/VendorInvoices.vue";
+	import VendorPayments from "@/components/vendor/VendorPayments.vue";
 	import VendorContacts from "@/components/vendor/VendorContacts.vue";
 	import CurrencyInput from "@/components/common/CurrencyInput.vue";
 	import { useVendors } from "@/store/vendors";
@@ -506,5 +507,7 @@
 </div>
 
 <VendorContacts/>
+<VendorExpensesItems/>
 <VendorExpenses/>
+<VendorPayments/>
 </template>
