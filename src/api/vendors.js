@@ -16,12 +16,11 @@ export default {
     addContacts(data)
     {   
         console.log(data)
-        //console.log(api.post( '/vendors/store', data ))
         return api.post( '/vendor_contacts', data )
     },
     updateContacts(data, id)
     {
-        return api.post( `/vendor_contacts/'${id}`, data )
+        return api.put( `/vendor_contacts/${id}`, data )
     },
     retrieve(id)
     {

@@ -49,6 +49,7 @@
 
 <script>
 import { defineComponent, ref } from 'vue'
+import { useRoute } from "vue-router";
 import vendors from "@/api/vendors";
 import { useMessage } from 'naive-ui'
 import MaskedInput from "@/components/common/MaskedInput.vue";
@@ -56,54 +57,40 @@ import MaskedInput from "@/components/common/MaskedInput.vue";
 export default defineComponent({
   setup () {
     const showOuterRef = ref(false)
-
+    const route = useRoute();
     const formRef = ref(null)
     const message = useMessage()    
 
-    let feedback = ref('')
-    let status = ref('')
-
-    function validateEmail(v){
-      if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(v)) {
-          console.log('success')
-          //this.msg['email'] = 'Please enter a valid email address';
-      } else {
-          console.log('nope')
-          feedback = 'Please enter a valid email address.'
-          status = 'error'
-          //console.log('validate email plz')
-          //this.msg['email'] = '';
-      }
-    } 
     function addVendor(){
       
 
       formRef.value.validate((errors) => {
-    console.log(route.params?.id)
-      validateEmail(this.formValue.email)
+
           if (!errors) {
 
                 const data = {
                 vendor_id: route.params?.id,
-                first_name: this.formValue.first_name,
-                last_name: this.formValue.last_name,
+                first_name: this.formValue.first_name || '',
+                last_name: this.formValue.last_name || '',
                 office_phone: this.formValue.office_phone,
-                cell_phone: this.formValue.cell_phone,
-                email: this.formValue.email,
-                job_title: this.formValue.job_title,
+                cell_phone: this.formValue.cell_phone || '',
+                email: this.formValue.email || '',
+                job_title: this.formValue.job_title || '',
             }
-
-            vendors.addContacts(data).then( res => {                  
+            let filteredData = Object.fromEntries(Object.entries(data).filter(value => value[1]))
+            console.log(filteredData)
+            
+            vendors.addContacts(filteredData).then( res => {                  
                     message.success("Successfully added contact!")
                     showOuterRef.value = false;
                 }).finally(res =>{
-                    this.formValue.id=0,
-                    this.formValue.first_name= '',
-                    this.formValue.last_name= '',
-                    this.formValue.office_phone= '',
-                    this.formValue.cell_phone= '',
-                    this.formValue.email= '',
-                    this.formValue.job_title= ''
+                    // this.formValue.id=0,
+                    // this.formValue.first_name= '',
+                    // this.formValue.last_name= '',
+                    // this.formValue.office_phone= '',
+                    // this.formValue.cell_phone= '',
+                    // this.formValue.email= '',
+                    // this.formValue.job_title= ''
                     
                     
                 }).catch(err => {

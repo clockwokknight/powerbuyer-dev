@@ -10,6 +10,7 @@
 			:data="tableData"
 			:pagination="pagination"
 			:bordered="false"
+			:key="update"
 		/>
 
 		</div>
@@ -149,6 +150,7 @@ import VendorAdd from "@/components/vendor/VendorContactsAdd.vue";
 const tableData = ref([]);
 const showOuterRef = ref(false)
 const route = useRoute();
+const update = ref(0);
 
 const isLoading = ref(false)
 
@@ -190,8 +192,10 @@ watch(
 		() => {
 			routeParamId.value = route.params?.id;
             vendors.retrieveContacts(routeParamId.value).then( res => { 
-                if (res.data.length == 1) {
+				console.log(res)
+                if (res.data.length >= 1) {
                     tableData.value = res.data;
+					
                 }
                 else {
                     tableData.value = [];
@@ -204,18 +208,19 @@ watch(
 );
 
 vendors.retrieveContacts(routeParamId.value).then( res => { 
-                if (res.data.length == 1) {
+	
+                if (res.data.length >= 1) {
                     tableData.value = res.data;
+					
                 }
                 else {
                     tableData.value = [];
                 }
-            
             })
 
         
 const doShowOuter = (row) => {
-
+	console.log(row.id)
     formValue.value.vendor_id = row.id
     formValue.value.first_name = row.first_name
     formValue.value.last_name = row.last_name
@@ -232,32 +237,30 @@ const doShowOuter = (row) => {
 
 
 function updateVendor(key, val){
-      dataFromServer[key] = val;
-
-		const sendToAPI = {
-			id: dataFromServer.id,
-			name: dataFromServer.name,
-			din: dataFromServer.din,
-			payment_terms: dataFromServer.payment_terms,
-			accounting_code: dataFromServer.accounting_code,
-			address_one: dataFromServer.address_one,
-			address_two: dataFromServer.address_two,
-			city: dataFromServer.city,
-			state: dataFromServer.state,
-			country: dataFromServer.country,
-			zip: dataFromServer.zip,
-			phone: dataFromServer.phone,
-			fax: dataFromServer.fax,
-			email: dataFromServer.email,
-			comment: dataFromServer.comment,
-			trip_exp_calculation: dataFromServer.trip_exp_calculation,
+		console.log(key)
+		console.log(val)
+		const data = {
+			[key]: formValue.value[key],
 		};
+		console.log(data)
 		// console.log(sendToAPI);
-		vendors.create(sendToAPI, 2).then((res) => {
+		vendors.updateContacts(data, formValue.value.vendor_id).then((res) => {
 			console.log("Vendor Updated Successfully");
 			//isLoading.value = false;
 			handleKeyDown(key)
+			update.value++
 			//debounceChange();
+		}).finally((res) => {
+			//console.log(update.value)
+			vendors.retrieveContacts(routeParamId.value).then( res => { 
+                if (res.data.length >= 1) {
+                    tableData.value = res.data;
+					
+                }
+                else {
+                    tableData.value = [];
+                }
+            })
 		});
 
     
