@@ -1,17 +1,23 @@
 <template>
-  <div class="bg-[#fff] h-screen overflow-hidden w-full">
-    <div class="flex w-full h-full">
-      <aside class="w-[60px] bg-[#202124] sticky top-0 left-0 z-10">
-        <MainMenu />
-      </aside>
-      <section class="flex h-full relative w-full bg-[#F8F8FA]">
-        <n-loading-bar-provider>
-          <router-view />
-        </n-loading-bar-provider>
-      </section>
-    </div>
-  </div>
-  <VueQueryDevTools />
+  <n-loading-bar-provider>
+    <n-message-provider>
+      <n-notification-provider>
+        <n-dialog-provider>
+          <div class="bg-[#fff] h-screen overflow-hidden w-full">
+            <div class="flex w-full h-full">
+              <aside class="w-[60px] bg-[#202124] sticky top-0 left-0 z-10">
+                <MainMenu />
+              </aside>
+              <section class="flex h-full relative w-full bg-[#F8F8FA]">
+                <router-view />
+              </section>
+            </div>
+          </div>
+          <VueQueryDevTools />
+        </n-dialog-provider>
+      </n-notification-provider>
+    </n-message-provider>
+  </n-loading-bar-provider>
 </template>
 
 <script setup>

@@ -26,6 +26,9 @@
                 <router-link to="/auctions">
                     <li content="Auctions" v-tippy='{ placement : "right", duration: 50  }'><img src="/icons/GavelRound.svg" /></li>
                 </router-link>
+                <router-link to="/system">
+                    <li content="More Items" v-tippy='{ placement : "right", duration: 50  }'><img src="/icons/OverflowMenuVertical.svg" /></li>
+                </router-link>
             </ul>
         </nav>
     </section>
