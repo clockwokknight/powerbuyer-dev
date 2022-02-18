@@ -24,7 +24,7 @@ import VendorHome from "@/components/vendor/VendorHome.vue";
 import BuyerHome from "@/components/buyer/BuyerHome.vue";
 import AuctionHome from "@/components/auction/AuctionHome.vue";
 
-export const router = createRouter({
+export const router = createRouter( {
   history: createWebHistory(),
 
   routes: [
@@ -150,4 +150,4 @@ export const router = createRouter({
       component: OtherSystemMenus,
     },
   ],
-});
+} );

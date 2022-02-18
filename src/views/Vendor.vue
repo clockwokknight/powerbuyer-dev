@@ -145,11 +145,7 @@ const submitValue = (key) => {
               "
             >
               <n-input
-                class="
-                  rounded-md
-                  border-2
-                  hover:border-sky-500 hover:ring-0 hover:ring-sky-500
-                "
+                class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
                 v-model:value="form.name"
                 :loading="isLoading"
                 @focus="currentActiveField = 'name'"
@@ -170,11 +166,7 @@ const submitValue = (key) => {
                 >
                   <n-input
                     style="width: 220px"
-                    class="
-                      rounded-md
-                      border-2
-                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
-                    "
+                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
                     :default-value="vendor?.din"
                     v-model:value="form.din"
                     @focus="currentActiveField = 'din'"
@@ -196,11 +188,7 @@ const submitValue = (key) => {
                 >
                   <n-select
                     style="width: 220px"
-                    class="
-                      rounded-md
-                      border-2
-                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
-                    "
+                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
                     placeholder="Select Payment Term"
                     :options="paymentTermOptions"
                     v-model:value="form.payment_terms"
@@ -226,11 +214,7 @@ const submitValue = (key) => {
                 >
                   <n-input
                     style="width: 500px"
-                    class="
-                      rounded-md
-                      border-2
-                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
-                    "
+                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
                     v-model:value="form.accounting_code"
                     @focus="currentActiveField = 'accounting_code'"
                     :loading="isLoading"
@@ -255,11 +239,7 @@ const submitValue = (key) => {
                 >
                   <n-select
                     style="width: 220px"
-                    class="
-                      rounded-md
-                      border-2
-                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
-                    "
+                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
                     placeholder="Select Vendor Category"
                     :options="vendorCategoryOptions"
                     v-model:value="form.vendor_category_id"
@@ -282,11 +262,7 @@ const submitValue = (key) => {
                 >
                   <n-input
                     style="width: 500px"
-                    class="
-                      rounded-md
-                      border-2
-                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
-                    "
+                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
                     v-model:value="form.tax_id_number"
                     @focus="currentActiveField = 'tax_id_number'"
                     :loading="isLoading"
@@ -310,11 +286,7 @@ const submitValue = (key) => {
                 >
                   <n-input
                     style="width: 500px"
-                    class="
-                      rounded-md
-                      border-2
-                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
-                    "
+                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
                     v-model:value="form.address_one"
                     @focus="currentActiveField = 'address_one'"
                     :loading="isLoading"
@@ -338,11 +310,7 @@ const submitValue = (key) => {
                 >
                   <n-input
                     style="width: 220px"
-                    class="
-                      rounded-md
-                      border-2
-                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
-                    "
+                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
                     v-model:value="form.address_two"
                     @focus="currentActiveField = 'address_two'"
                     :loading="isLoading"
@@ -365,11 +333,7 @@ const submitValue = (key) => {
                 >
                   <n-input
                     style="width: 220px"
-                    class="
-                      rounded-md
-                      border-2
-                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
-                    "
+                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
                     v-model:value="form.city"
                     @focus="currentActiveField = 'city'"
                     :loading="isLoading"
@@ -391,11 +355,7 @@ const submitValue = (key) => {
                 >
                   <n-select
                     style="width: 220px"
-                    class="
-                      rounded-md
-                      border-2
-                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
-                    "
+                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
                     placeholder="Select State"
                     :options="statesList"
                     v-model:value="form.state"
@@ -418,11 +378,7 @@ const submitValue = (key) => {
                   "
                 >
                   <masked-input
-                    class="
-                      rounded-md
-                      border-2
-                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
-                    "
+                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
                     mask="#####"
                     style="width: 220px"
                     v-model:value="form.zip"
@@ -449,11 +405,7 @@ const submitValue = (key) => {
                   <n-input
                     type="email"
                     style="width: 220px"
-                    class="
-                      rounded-md
-                      border-2
-                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
-                    "
+                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
                     v-model:value="form.email"
                     @focus="currentActiveField = 'email'"
                     :loading="isLoading"
@@ -553,16 +505,7 @@ const submitValue = (key) => {
         <n-space>
           <button
             style="height: 140px; max-width: 120px"
-            class="
-              rounded
-              border-2 border-gray-400
-              bg-transparent
-              py-2
-              px-4
-              font-semibold
-              text-gray-700
-              hover:border-transparent hover:bg-blue-500 hover:text-white
-            "
+            class="rounded border-2 border-gray-400 bg-transparent py-2 px-4 font-semibold text-gray-700 hover:border-transparent hover:bg-blue-500 hover:text-white"
           >
             <div>
               <n-icon>
@@ -582,16 +525,7 @@ const submitValue = (key) => {
           </button>
           <button
             style="height: 140px; max-width: 120px"
-            class="
-              rounded
-              border-2 border-gray-400
-              bg-transparent
-              py-2
-              px-4
-              font-semibold
-              text-gray-700
-              hover:border-transparent hover:bg-blue-500 hover:text-white
-            "
+            class="rounded border-2 border-gray-400 bg-transparent py-2 px-4 font-semibold text-gray-700 hover:border-transparent hover:bg-blue-500 hover:text-white"
           >
             <div>
               <n-icon>
@@ -611,17 +545,7 @@ const submitValue = (key) => {
           </button>
           <button
             style="height: 140px; max-width: 120px"
-            class="
-              min-w-20px
-              rounded
-              border-2 border-gray-400
-              bg-transparent
-              py-2
-              px-4
-              font-semibold
-              text-gray-700
-              hover:border-transparent hover:bg-blue-500 hover:text-white
-            "
+            class="min-w-20px rounded border-2 border-gray-400 bg-transparent py-2 px-4 font-semibold text-gray-700 hover:border-transparent hover:bg-blue-500 hover:text-white"
           >
             <div>
               <n-icon>
