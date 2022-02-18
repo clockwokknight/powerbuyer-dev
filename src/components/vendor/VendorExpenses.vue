@@ -2,7 +2,7 @@
 <n-message-provider>
 <div class="mt-4 px-4 font-sans antialiased">
     <div class="pb-4 justify-end"><VendorExpensesAdd  /></div>
-    
+
 		<div class="py-8 px-8 rounded-lg border-2 ">
 			<div><p class="text-2xl font-bold pb-8">Expenses</p></div>
 		<n-data-table class="rounded-lg"
@@ -22,7 +22,7 @@
     :label-width="90"
     size="medium"
     ref="formRef"
-    >   
+    >
         <n-form-item label="Name" class="pr-12">
 									<UpdatableButtonWrapper
 										v-model="formValue.name"
@@ -31,7 +31,7 @@
 										@revert="handleKeyDown('name')"
 										@save="(val) => updateVendor('name', val)"
 									>
-										<n-input style="width:400px;" class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0" 
+										<n-input style="width:400px;" class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0"
 											:default-value="formValue.name"
                                             type="text"
 											v-model:value="formValue.name"
@@ -47,7 +47,7 @@
 										@revert="handleKeyDown('description')"
 										@save="(val) => updateVendor('description', val)"
 									>
-										<n-input style="width:400px;" class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0" 
+										<n-input style="width:400px;" class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0"
 											:default-value="formValue.description"
                                             type="text"
 											v-model:value="formValue.description"
@@ -64,7 +64,7 @@
 										@revert="handleKeyDown('expense_type_id')"
 										@save="(val) => updateVendor('expense_type_id', val)"
 									>
-										<n-input style="width:400px;" class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0" 
+										<n-input style="width:400px;" class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0"
 											:default-value="formValue.expense_type_id"
                                             type="text"
                                             placeholder="Enter Type"
@@ -82,7 +82,7 @@
 										@revert="handleKeyDown('amount')"
 										@save="(val) => updateVendor('amount', val)"
 									>
-										<n-input style="width:400px;" class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0" 
+										<n-input style="width:400px;" class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0"
 											:default-value="formValue.amount"
                                             type="text"
 											v-model:value="formValue.amount"
@@ -91,12 +91,12 @@
 											@keyup="handleKeyUp('amount')"
 										/> </UpdatableButtonWrapper>
         </n-form-item>
-        
-        
+
+
     </n-form>
 
     </n-drawer-content>
-    
+
   </n-drawer>
 </n-message-provider>
 </template>
@@ -123,7 +123,7 @@ const formValue = ref({
 		description: '',
 		type: '',
 		amount: ''
-          
+
         })
 
 const show = ref({
@@ -131,10 +131,10 @@ const show = ref({
         description: false,
         type: false,
         amount: false,
-          
+
         })
 
-const routeParamId = ref(route.params?.id);    
+const routeParamId = ref(route.params?.id);
 
 const handleKeyUp = (val) => {
 		show.value[val] = true;
@@ -146,26 +146,26 @@ const handleKeyDown = (val) => {
 
 watch(
 		() => route.params?.id,
-		
+
 		() => {
 			routeParamId.value = route.params?.id;
-            expenses.all().then( res => { 
-				
+            expenses.all().then( res => {
+
                 tableData.value = res.data;
-            
+
 			})
-			
+
 		}
-		
+
 );
 
-expenses.all().then( res => { 
+expenses.all().then( res => {
 				console.log(res.data)
                 tableData.value = res.data;
-            
+
 })
 
-        
+
 const doShowOuter = (row) => {
     console.log(row)
     console.log(formValue.value.name)
@@ -178,7 +178,7 @@ const doShowOuter = (row) => {
 
     console.log(formValue.value)
     showOuterRef.value = true;
-    
+
 }
 
 
@@ -210,16 +210,16 @@ function updateVendor(key, val){
 			//isLoading.value = false;
 			handleKeyDown(key)
 			//debounceChange();
-			expenses.all().then( res => { 
+			expenses.all().then( res => {
 				console.log(res.data)
                 tableData.value = res.data;
-            
+
 			})
 		});
 
-    
+
 }
-        
+
 const columns = [
                 {
                     title: 'Name',
@@ -259,7 +259,7 @@ const columns = [
                             NButton,
                             {
                                 strong: true,
-                                
+
                                 size: "medium",
                                 onClick: () => doShowOuter(row),
                             },
@@ -267,14 +267,14 @@ const columns = [
                         );
                     },
                 },
-     
+
 
             ]
 const pagination = { pageSize: 10 }
 
 
 
-       
-    
+
+
 
 </script>

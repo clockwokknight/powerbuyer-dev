@@ -2,19 +2,14 @@
 import { useMutation, useQuery, useQueryClient } from "vue-query";
 import { useRoute } from "vue-router";
 import { computed, reactive, ref, watch } from "vue";
-import vendors from "@/api/vendors";
-import payments from "@/api/paymentterms";
 import states from "@/api/states";
-import { onClickOutside, useDebounceFn } from "@vueuse/core";
 import UpdatableButtonWrapper from "@/components/common/UpdatableButtonWrapper.vue";
 import MaskedInput from "@/components/common/MaskedInput.vue";
 import VendorExpensesItems from "@/components/vendor/VendorExpensesItems.vue";
 import VendorExpenses from "@/components/vendor/VendorExpenses.vue";
 import VendorPayments from "@/components/vendor/VendorPayments.vue";
 import VendorContacts from "@/components/vendor/VendorContacts.vue";
-import CurrencyInput from "@/components/common/CurrencyInput.vue";
 import { useVendors } from "@/store/vendors";
-import setup from "naive-ui/lib/radio/src/use-radio";
 import { getVendorById, useVendorCategories } from "@/hooks/vendor";
 import axios from "axios";
 import { pick } from "@/lib/helper";
@@ -52,7 +47,6 @@ const vendorCategoryOptions = computed(() =>
     []
   )
 );
-const vendorWrapper = ref(null);
 const { data: paymentTerms } = useQuery("paymentTerms", () =>
   axios.get("/payment_terms").then((res) => res.data)
 );
@@ -63,10 +57,18 @@ const paymentTermOptions = computed(() =>
   }))
 );
 
-const { data: statesList } = useQuery("states", () =>
-  axios
-    .get("/states")
-    .then((res) => res.data?.map((el) => ({ label: el.name, value: el.name })))
+const { data: statesList } = useQuery(
+  "states",
+  () =>
+    axios
+      .get("/states")
+      .then((res) =>
+        res.data?.map((el) => ({ label: el.name, value: el.name }))
+      ),
+  {
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  }
 );
 const { data: vendor } = getVendorById(routeParamId);
 const queryClient = useQueryClient();
@@ -79,7 +81,6 @@ const { isLoading, mutateAsync } = useMutation(
   }
 );
 let form = reactive({});
-let dataFromServer = reactive({});
 
 watch(
   vendor,
@@ -121,6 +122,7 @@ const submitValue = (key) => {
       currentActiveField.value = null;
     });
   }
+  currentActiveField.value = null;
 };
 
 // LOAD TABLE DATA
@@ -128,7 +130,6 @@ const submitValue = (key) => {
 
 <template>
   <div class="mt-4 px-4 pb-8 antialiased">
-    {{ vendor }}
     <div class="rounded-lg border-4 bg-slate-100 bg-gray-50 py-8 px-8">
       <div class="border-10 flex rounded-md border-gray-500">
         <div>
@@ -161,8 +162,8 @@ const submitValue = (key) => {
             <n-space>
               <n-form-item label="DIN" class="pr-12">
                 <UpdatableButtonWrapper
-                  @save="submitValue('name')"
-                  @revert="resetValue('name')"
+                  @save="submitValue('din')"
+                  @revert="resetValue('din')"
                   :should-visible="
                     currentActiveField && currentActiveField === 'din'
                   "
@@ -179,7 +180,8 @@ const submitValue = (key) => {
                     @focus="currentActiveField = 'din'"
                     :loading="isLoading"
                     :disabled="
-                      currentActiveField && currentActiveField !== 'din'
+                      (currentActiveField && currentActiveField !== 'din') ||
+                      isLoading
                     "
                   />
                 </UpdatableButtonWrapper>
@@ -204,247 +206,288 @@ const submitValue = (key) => {
                     v-model:value="form.payment_terms"
                     @focus="currentActiveField = 'payment_terms'"
                     :disabled="
-                      currentActiveField &&
-                      currentActiveField !== 'payment_terms'
+                      (currentActiveField &&
+                        currentActiveField !== 'payment_terms') ||
+                      isLoading
                     "
                     filterable
                   /> </UpdatableButtonWrapper
               ></n-form-item>
             </n-space>
-            <!--            <n-space>-->
-            <!--              <n-form-item label="Account #">-->
-            <!--                <UpdatableButtonWrapper-->
-            <!--                  v-model="form.accounting_code"-->
-            <!--                  :reset-value="vendor?.accounting_code"-->
-            <!--                  :shouldUpdate="show.accounting_code"-->
-            <!--                  @revert="handleKeyDown('accounting_code')"-->
-            <!--                  @save="(val) => onChange('accounting_code', val)"-->
-            <!--                >-->
-            <!--                  <n-input-->
-            <!--                    style="width: 500px"-->
-            <!--                    class="-->
-            <!--                      rounded-md-->
-            <!--                      border-2-->
-            <!--                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500-->
-            <!--                    "-->
-            <!--                    :default-value="vendor?.accounting_code"-->
-            <!--                    v-model:value="form.accounting_code"-->
-            <!--                    :loading="isLoading"-->
-            <!--                    @keyup="handleKeyUp('accounting_code')"-->
-            <!--                  /> </UpdatableButtonWrapper-->
-            <!--              ></n-form-item>-->
-            <!--            </n-space>-->
-            <!--            <n-space>-->
-            <!--              <n-form-item label="Vendor Category" class="pr-12">-->
-            <!--                <UpdatableButtonWrapper-->
-            <!--                  v-model="form.vendor_category"-->
-            <!--                  :reset-value="vendor?.vendor_category.name"-->
-            <!--                  :shouldUpdate="show.vendor_category"-->
-            <!--                  @revert="handleKeyDown('vendor_category')"-->
-            <!--                  @save="(val) => onChange('vendor_category', val)"-->
-            <!--                >-->
-            <!--                  <n-select-->
-            <!--                    style="width: 220px"-->
-            <!--                    class="-->
-            <!--                      rounded-md-->
-            <!--                      border-2-->
-            <!--                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500-->
-            <!--                    "-->
-            <!--                    placeholder="Select Vendor Category"-->
-            <!--                    :options="vendorCategoryOptions"-->
-            <!--                    :loading="isLoading"-->
-            <!--                    @update:value="handleKeyUp('vendor_category')"-->
-            <!--                    v-model:value="form.vendor_category"-->
-            <!--                    filterable-->
-            <!--                  />-->
-            <!--                </UpdatableButtonWrapper>-->
-            <!--              </n-form-item>-->
+            <n-space>
+              <n-form-item label="Account #">
+                <UpdatableButtonWrapper
+                  @save="submitValue('accounting_code')"
+                  @revert="resetValue('accounting_code')"
+                  :should-visible="
+                    currentActiveField &&
+                    currentActiveField === 'accounting_code'
+                  "
+                >
+                  <n-input
+                    style="width: 500px"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
+                    v-model:value="form.accounting_code"
+                    @focus="currentActiveField = 'accounting_code'"
+                    :loading="isLoading"
+                    :disabled="
+                      (currentActiveField &&
+                        currentActiveField !== 'accounting_code') ||
+                      isLoading
+                    "
+                  />
+                </UpdatableButtonWrapper>
+              </n-form-item>
+            </n-space>
+            <n-space>
+              <n-form-item label="Vendor Category" class="pr-12">
+                <UpdatableButtonWrapper
+                  :should-visible="
+                    currentActiveField &&
+                    currentActiveField === 'vendor_category_id'
+                  "
+                  @save="submitValue('vendor_category_id')"
+                  @revert="resetValue('vendor_category_id')"
+                >
+                  <n-select
+                    style="width: 220px"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
+                    placeholder="Select Vendor Category"
+                    :options="vendorCategoryOptions"
+                    v-model:value="form.vendor_category_id"
+                    @focus="currentActiveField = 'vendor_category_id'"
+                    :disabled="
+                      (currentActiveField &&
+                        currentActiveField !== 'vendor_category_id') ||
+                      isLoading
+                    "
+                    filterable
+                  /> </UpdatableButtonWrapper
+              ></n-form-item>
+              <n-form-item label="Tax ID #">
+                <UpdatableButtonWrapper
+                  @save="submitValue('tax_id_number')"
+                  @revert="resetValue('tax_id_number')"
+                  :should-visible="
+                    currentActiveField && currentActiveField === 'tax_id_number'
+                  "
+                >
+                  <n-input
+                    style="width: 500px"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
+                    v-model:value="form.tax_id_number"
+                    @focus="currentActiveField = 'tax_id_number'"
+                    :loading="isLoading"
+                    :disabled="
+                      (currentActiveField &&
+                        currentActiveField !== 'tax_id_number') ||
+                      isLoading
+                    "
+                  />
+                </UpdatableButtonWrapper>
+              </n-form-item>
+            </n-space>
+            <n-space>
+              <n-form-item label="Address 1" class="pr-12">
+                <UpdatableButtonWrapper
+                  @save="submitValue('address_one')"
+                  @revert="resetValue('address_one')"
+                  :should-visible="
+                    currentActiveField && currentActiveField === 'address_one'
+                  "
+                >
+                  <n-input
+                    style="width: 500px"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
+                    v-model:value="form.address_one"
+                    @focus="currentActiveField = 'address_one'"
+                    :loading="isLoading"
+                    :disabled="
+                      (currentActiveField &&
+                        currentActiveField !== 'address_one') ||
+                      isLoading
+                    "
+                  />
+                </UpdatableButtonWrapper>
+              </n-form-item>
+            </n-space>
+            <n-space>
+              <n-form-item label="Address 2" class="pr-12">
+                <UpdatableButtonWrapper
+                  @save="submitValue('address_two')"
+                  @revert="resetValue('address_two')"
+                  :should-visible="
+                    currentActiveField && currentActiveField === 'address_two'
+                  "
+                >
+                  <n-input
+                    style="width: 220px"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
+                    v-model:value="form.address_two"
+                    @focus="currentActiveField = 'address_two'"
+                    :loading="isLoading"
+                    :disabled="
+                      (currentActiveField &&
+                        currentActiveField !== 'address_two') ||
+                      isLoading
+                    "
+                  />
+                </UpdatableButtonWrapper>
+              </n-form-item>
 
-            <!--              <n-form-item label="Tax ID #">-->
-            <!--                <UpdatableButtonWrapper-->
-            <!--                  v-model="form.tax_id_number"-->
-            <!--                  :reset-value="vendor?.tax_id_number"-->
-            <!--                  :shouldUpdate="show.tax_id_number"-->
-            <!--                  @revert="handleKeyDown('tax_id_number')"-->
-            <!--                  @save="(val) => onChange('tax_id_number', val)"-->
-            <!--                >-->
-            <!--                  <n-input-->
-            <!--                    style="width: 220px"-->
-            <!--                    class="-->
-            <!--                      rounded-md-->
-            <!--                      border-2-->
-            <!--                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500-->
-            <!--                    "-->
-            <!--                    :default-value="vendor?.tax_id_number"-->
-            <!--                    v-model:value="form.tax_id_number"-->
-            <!--                    :loading="isLoading"-->
-            <!--                    @keyup="handleKeyUp('tax_id_number')"-->
-            <!--                  /> </UpdatableButtonWrapper-->
-            <!--              ></n-form-item>-->
-            <!--            </n-space>-->
-            <!--            <n-space>-->
-            <!--              <n-form-item label="Address" class="pr-12">-->
-            <!--                <UpdatableButtonWrapper-->
-            <!--                  v-model="form.address_one"-->
-            <!--                  :reset-value="vendor?.address_one"-->
-            <!--                  :shouldUpdate="show.address_one"-->
-            <!--                  @revert="handleKeyDown('address_one')"-->
-            <!--                  @save="(val) => onChange('address_one', val)"-->
-            <!--                >-->
-            <!--                  <n-input-->
-            <!--                    style="width: 500px"-->
-            <!--                    class="-->
-            <!--                      rounded-md-->
-            <!--                      border-2-->
-            <!--                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500-->
-            <!--                    "-->
-            <!--                    v-model:value="form.address_one"-->
-            <!--                    :loading="isLoading"-->
-            <!--                    @keyup="handleKeyUp('address_one')"-->
-            <!--                  />-->
-            <!--                </UpdatableButtonWrapper>-->
-            <!--              </n-form-item>-->
-            <!--            </n-space>-->
+              <n-form-item label="City" class="pr-12">
+                <UpdatableButtonWrapper
+                  @save="submitValue('city')"
+                  @revert="resetValue('city')"
+                  :should-visible="
+                    currentActiveField && currentActiveField === 'city'
+                  "
+                >
+                  <n-input
+                    style="width: 220px"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
+                    v-model:value="form.city"
+                    @focus="currentActiveField = 'city'"
+                    :loading="isLoading"
+                    :disabled="
+                      (currentActiveField && currentActiveField !== 'city') ||
+                      isLoading
+                    "
+                  />
+                </UpdatableButtonWrapper>
+              </n-form-item>
 
-            <!--            <n-space>-->
-            <!--              <n-form-item label="Address Two" class="pr-12">-->
-            <!--                <UpdatableButtonWrapper-->
-            <!--                  v-model="form.address_two"-->
-            <!--                  :reset-value="vendor?.address_two"-->
-            <!--                  :shouldUpdate="show.address_two"-->
-            <!--                  @revert="handleKeyDown('address_two')"-->
-            <!--                  @save="(val) => onChange('address_two', val)"-->
-            <!--                >-->
-            <!--                  <n-input-->
-            <!--                    style="width: 220px"-->
-            <!--                    class="-->
-            <!--                      rounded-md-->
-            <!--                      border-2-->
-            <!--                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500-->
-            <!--                    "-->
-            <!--                    :default-value="vendor?.address_two"-->
-            <!--                    v-model:value="form.address_two"-->
-            <!--                    :loading="isLoading"-->
-            <!--                    @keyup="handleKeyUp('address_two')"-->
-            <!--                  /> </UpdatableButtonWrapper-->
-            <!--              ></n-form-item>-->
-            <!--              <n-form-item label="City" class="pr-12">-->
-            <!--                <UpdatableButtonWrapper-->
-            <!--                  v-model="form.city"-->
-            <!--                  :shouldUpdate="show.city"-->
-            <!--                  @revert="handleKeyDown('city')"-->
-            <!--                  :reset-value="vendor?.city"-->
-            <!--                  @save="(val) => onChange('city', val)"-->
-            <!--                >-->
-            <!--                  <n-input-->
-            <!--                    style="width: 220px"-->
-            <!--                    class="-->
-            <!--                      rounded-md-->
-            <!--                      border-2-->
-            <!--                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500-->
-            <!--                    "-->
-            <!--                    :default-value="vendor?.city"-->
-            <!--                    v-model:value="form.city"-->
-            <!--                    :loading="isLoading"-->
-            <!--                    @keyup="handleKeyUp('city')"-->
-            <!--                  /> </UpdatableButtonWrapper-->
-            <!--              ></n-form-item>-->
+              <n-form-item label="State" class="pr-12">
+                <UpdatableButtonWrapper
+                  @save="submitValue('state')"
+                  @revert="resetValue('state')"
+                  :should-visible="
+                    currentActiveField && currentActiveField === 'state'
+                  "
+                >
+                  <n-select
+                    style="width: 220px"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
+                    placeholder="Select State"
+                    :options="statesList"
+                    v-model:value="form.state"
+                    @focus="currentActiveField = 'state'"
+                    :loading="isLoading"
+                    :disabled="
+                      (currentActiveField && currentActiveField !== 'state') ||
+                      isLoading
+                    "
+                    filterable
+                  /> </UpdatableButtonWrapper
+              ></n-form-item>
 
-            <!--              <n-form-item label="State" class="pr-12">-->
-            <!--                <UpdatableButtonWrapper-->
-            <!--                  v-model="form.state"-->
-            <!--                  :reset-value="vendor?.state"-->
-            <!--                  :shouldUpdate="show.state"-->
-            <!--                  @revert="handleKeyDown('state')"-->
-            <!--                  @save="(val) => onChange('state', val)"-->
-            <!--                >-->
-            <!--                  <n-select-->
-            <!--                    style="width: 220px"-->
-            <!--                    class="-->
-            <!--                      rounded-md-->
-            <!--                      border-2-->
-            <!--                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500-->
-            <!--                    "-->
-            <!--                    placeholder="Select State"-->
-            <!--                    :options="statelist"-->
-            <!--                    :loading="isLoading"-->
-            <!--                    @update:value="handleKeyUp('state')"-->
-            <!--                    v-model:value="form.state"-->
-            <!--                    filterable-->
-            <!--                  /> </UpdatableButtonWrapper-->
-            <!--              ></n-form-item>-->
+              <n-form-item label="Zip" class="pr-12">
+                <updatable-button-wrapper
+                  @save="submitValue('zip')"
+                  @revert="resetValue('zip')"
+                  :should-visible="
+                    currentActiveField && currentActiveField === 'zip'
+                  "
+                >
+                  <masked-input
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
+                    mask="#####"
+                    style="width: 220px"
+                    v-model:value="form.zip"
+                    @focus="currentActiveField = 'zip'"
+                    :loading="isLoading"
+                    :disabled="
+                      (currentActiveField && currentActiveField !== 'zip') ||
+                      isLoading
+                    "
+                  />
+                </updatable-button-wrapper>
+              </n-form-item>
+            </n-space>
 
-            <!--              <n-form-item label="Zip" class="pr-12">-->
-            <!--                <updatable-button-wrapper-->
-            <!--                  v-model="form.zip"-->
-            <!--                  :shouldUpdate="show.zip"-->
-            <!--                  @revert="handleKeyDown('zip')"-->
-            <!--                  :reset-value="vendor?.zip"-->
-            <!--                  @save="(val) => onChange('zip', val)"-->
-            <!--                >-->
-            <!--                  <masked-input-->
-            <!--                    class="-->
-            <!--                      rounded-md-->
-            <!--                      border-2-->
-            <!--                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500-->
-            <!--                    "-->
-            <!--                    :default-value="vendor?.zip"-->
-            <!--                    mask="#####"-->
-            <!--                    style="width: 220px"-->
-            <!--                    :loading="isLoading"-->
-            <!--                    @keyup="handleKeyUp('zip')"-->
-            <!--                    v-model:value="form.zip"-->
-            <!--                  />-->
-            <!--                </updatable-button-wrapper>-->
-            <!--              </n-form-item>-->
-            <!--            </n-space>-->
-
-            <!--            <n-space>-->
-            <!--              <n-form-item label="Email" class="pr-12">-->
-            <!--                <UpdatableButtonWrapper-->
-            <!--                  v-model="form.email"-->
-            <!--                  :shouldUpdate="show.email"-->
-            <!--                  @revert="handleKeyDown('email')"-->
-            <!--                  :reset-value="vendor?.email"-->
-            <!--                  @save="(val) => onChange('email', val)"-->
-            <!--                >-->
-            <!--                  <n-input-->
-            <!--                    style="width: 220px"-->
-            <!--                    class="-->
-            <!--                      rounded-md-->
-            <!--                      border-2-->
-            <!--                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500-->
-            <!--                    "-->
-            <!--                    :loading="isLoading"-->
-            <!--                    @keyup="handleKeyUp('email')"-->
-            <!--                    v-model:value="form.email"-->
-            <!--                  />-->
-            <!--                </UpdatableButtonWrapper>-->
-            <!--              </n-form-item>-->
-            <!--              <n-form-item label="Phone" class="pr-12">-->
-            <!--                <updatable-button-wrapper-->
-            <!--                  v-model="form.phone"-->
-            <!--                  :shouldUpdate="show.phone"-->
-            <!--                  @revert="handleKeyDown('phone')"-->
-            <!--                  :reset-value="vendor?.phone"-->
-            <!--                  @save="(val) => onChange('phone', val)"-->
-            <!--                >-->
-            <!--                  <masked-input-->
-            <!--                    style="width: 220px"-->
-            <!--                    class="-->
-            <!--                      rounded-md-->
-            <!--                      border-2-->
-            <!--                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500-->
-            <!--                    "-->
-            <!--                    :default-value="vendor?.phone"-->
-            <!--                    mask="(###) ###-####"-->
-            <!--                    :loading="isLoading"-->
-            <!--                    @keyup="handleKeyUp('phone')"-->
-            <!--                    v-model:value="form.phone"-->
-            <!--                  />-->
-            <!--                </updatable-button-wrapper>-->
-            <!--              </n-form-item>-->
-            <!--            </n-space>-->
+            <n-space>
+              <n-form-item label="Email" class="pr-12">
+                <UpdatableButtonWrapper
+                  @save="submitValue('email')"
+                  @revert="resetValue('email')"
+                  :should-visible="
+                    currentActiveField && currentActiveField === 'email'
+                  "
+                >
+                  <n-input
+                    type="email"
+                    style="width: 220px"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
+                    v-model:value="form.email"
+                    @focus="currentActiveField = 'email'"
+                    :loading="isLoading"
+                    :disabled="
+                      (currentActiveField && currentActiveField !== 'email') ||
+                      isLoading
+                    "
+                  />
+                </UpdatableButtonWrapper>
+              </n-form-item>
+              <!--              <n-form-item label="Phone" class="pr-12">-->
+              <!--                <updatable-button-wrapper-->
+              <!--                  v-model="form.phone"-->
+              <!--                  :shouldUpdate="show.phone"-->
+              <!--                  @revert="handleKeyDown('phone')"-->
+              <!--                  :reset-value="vendor?.phone"-->
+              <!--                  @save="(val) => onChange('phone', val)"-->
+              <!--                >-->
+              <!--                  <masked-input-->
+              <!--                    style="width: 220px"-->
+              <!--                    class="-->
+              <!--                      rounded-md-->
+              <!--                      border-2-->
+              <!--                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500-->
+              <!--                    "-->
+              <!--                    :default-value="vendor?.phone"-->
+              <!--                    mask="(###) ###-####"-->
+              <!--                    :loading="isLoading"-->
+              <!--                    @keyup="handleKeyUp('phone')"-->
+              <!--                    v-model:value="form.phone"-->
+              <!--                  />-->
+              <!--                </updatable-button-wrapper>-->
+              <!--              </n-form-item>-->
+            </n-space>
             <!--            <n-space>-->
             <!--              <n-form-item label="Fax">-->
             <!--                <updatable-button-wrapper-->
@@ -568,7 +611,6 @@ const submitValue = (key) => {
           </button>
           <button
             style="height: 140px; max-width: 120px"
-            ref="vendorWrapper"
             class="
               min-w-20px
               rounded

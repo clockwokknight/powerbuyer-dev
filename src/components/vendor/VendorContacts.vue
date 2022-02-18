@@ -1,325 +1,243 @@
+<script setup>
+import { h, ref, watch } from "vue";
+import { useRoute } from "vue-router";
+import { NButton, useMessage } from "naive-ui";
+import MaskedInput from "@/components/common/MaskedInput.vue";
+import VendorAdd from "@/components/vendor/VendorContactsAdd.vue";
+import { useMutation, useQuery, useQueryClient } from "vue-query";
+import axios from "axios";
+import { api } from "@/api/config";
+import { objectFilter, pick } from "@/lib/helper";
+
+const showOuterRef = ref(false);
+const route = useRoute();
+const update = ref(0);
+const queryClient = useQueryClient();
+const message = useMessage();
+
+const rules = {
+  first_name: {
+    required: true,
+    message: "Please enter the First Name",
+    trigger: ["input"],
+  },
+  last_name: {
+    required: true,
+    message: "Please enter the First Name",
+    trigger: ["input"],
+  },
+};
+
+const formValue = ref({
+  vendor_id: 0,
+  first_name: "",
+  last_name: "",
+  cell_phone: "",
+  office_phone: "",
+  email: "",
+  job_title: "",
+});
+
+const routeParamId = ref(route.params?.id);
+
+const { data: vendorContacts } = useQuery(
+  ["vendorContacts", routeParamId],
+  ({ queryKey }) =>
+    axios
+      .get(`/vendor_contacts/by_vendor/${queryKey[1]}`)
+      .then((res) => (Array.isArray(res.data) ? res.data : []))
+);
+
+watch(
+  () => route.params?.id,
+  () => {
+    routeParamId.value = route.params?.id;
+  }
+);
+
+const doShowOuter = (row) => {
+  formValue.value = pick(row, [
+    "cell_phone",
+    "email",
+    "first_name",
+    "id",
+    "job_title",
+    "last_name",
+    "office_phone",
+  ]);
+
+  showOuterRef.value = true;
+};
+
+const { isLoading, mutate } = useMutation(
+  ({ id, ...rest }) => api.put(`/vendor_contacts/${id}`, rest),
+  {
+    onSuccess() {
+      queryClient.invalidateQueries(["vendorContacts", route.params?.id]);
+      message.success("Contact updated Successfully");
+    },
+  }
+);
+
+function updateVendor() {
+  mutate(objectFilter(formValue.value, (key, value) => value));
+  showOuterRef.value = false;
+}
+
+const columns = [
+  {
+    title: "Name",
+    key: "first_name",
+    //fixed: 'left'
+  },
+  {
+    title: "Cell",
+    key: "cell_phone",
+    //fixed: 'left'
+  },
+  {
+    title: "Email",
+    key: "email",
+    //fixed: 'left'
+  },
+  {
+    title: "Position",
+    key: "job_title",
+    //fixed: 'left'
+  },
+  {
+    title: "",
+    key: "edit",
+    render(row) {
+      return h(
+        NButton,
+        {
+          strong: true,
+
+          size: "medium",
+          onClick: () => doShowOuter(row),
+        },
+        { default: () => "View / Edit" }
+      );
+    },
+  },
+];
+const pagination = { pageSize: 10 };
+</script>
 <template>
-<n-message-provider>
-<div class="mt-4 px-4 font-sans antialiased">
-    <div class="pb-4 justify-end"><VendorAdd  /></div>
-    
-		<div class="py-8 px-8 rounded-lg border-2 ">
-			<div><p class="text-2xl font-bold pb-8">Contacts</p></div>
-		<n-data-table class="rounded-lg"
-			:columns="columns"
-			:data="tableData"
-			:pagination="pagination"
-			:bordered="false"
-			:key="update"
-		/>
+  <div class="mt-4 px-4 font-sans">
+    <div class="pb-4 justify-end"><VendorAdd /></div>
 
-		</div>
-	</div>
+    <div class="py-8 px-8 rounded-lg border-2">
+      <div><p class="text-2xl font-bold pb-8">Contacts</p></div>
+      <n-data-table
+        class="rounded-lg"
+        :columns="columns"
+        :data="vendorContacts"
+        :pagination="pagination"
+        :bordered="false"
+        :key="update"
+      />
+    </div>
+  </div>
 
-      <n-drawer v-model:show="showOuterRef" :width="500">
+  <n-drawer v-model:show="showOuterRef" :width="500">
     <n-drawer-content title="Vendor Details">
-        <n-form
-    :model="formValue"
-    :label-width="90"
-    size="medium"
-    ref="formRef"
-    >   
-        <n-form-item label="First Name" class="pr-12">
-									<UpdatableButtonWrapper
-										v-model="formValue.first_name"
-										:reset-value="formValue.first_name"
-										:shouldUpdate="show.first_name"
-										@revert="handleKeyDown('first_name')"
-										@save="(val) => updateVendor('first_name', val)"
-									>
-										<n-input style="width:400px;" class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0" 
-											:default-value="formValue.first_name"
-                                            type="text"
-											v-model:value="formValue.first_name"
-											:loading="isLoading"
-											@keyup="handleKeyUp('first_name')"
-										/> </UpdatableButtonWrapper>
-		</n-form-item>
-        <n-form-item label="Last Name" class="pr-12">
-									<UpdatableButtonWrapper
-										v-model="formValue.last_name"
-										:reset-value="formValue.last_name"
-										:shouldUpdate="show.last_name"
-										@revert="handleKeyDown('last_name')"
-										@save="(val) => updateVendor('last_name', val)"
-									>
-										<n-input style="width:400px;" class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0" 
-											:default-value="formValue.last_name"
-                                            type="text"
-											v-model:value="formValue.last_name"
-											:loading="isLoading"
-											@keyup="handleKeyUp('last_name')"
-										/> </UpdatableButtonWrapper>
+      <n-form
+        :model="formValue"
+        :rules="rules"
+        :label-width="90"
+        size="medium"
+        ref="formRef"
+        :disabled="isLoading"
+        @submit.prevent="updateVendor"
+      >
+        <n-form-item label="First Name" class="pr-12" path="first_name">
+          <n-input
+            style="width: 400px"
+            class="
+              border-2
+              rounded-md
+              hover:border-sky-500 hover:ring-sky-500 hover:ring-0
+            "
+            :default-value="formValue.first_name"
+            type="text"
+            v-model:value="formValue.first_name"
+          />
+        </n-form-item>
+        <n-form-item label="Last Name" class="pr-12" path="last_name">
+          <n-input
+            style="width: 400px"
+            class="
+              border-2
+              rounded-md
+              hover:border-sky-500 hover:ring-sky-500 hover:ring-0
+            "
+            type="text"
+            v-model:value="formValue.last_name"
+          />
         </n-form-item>
 
         <n-form-item label="Email" class="pr-12">
-									<UpdatableButtonWrapper
-										v-model="formValue.email"
-										:reset-value="formValue.email"
-										:shouldUpdate="show.email"
-										@revert="handleKeyDown('email')"
-										@save="(val) => updateVendor('email', val)"
-									>
-										<n-input style="width:400px;" class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0" 
-											:default-value="formValue.email"
-                                            type="text"
-                                            placeholder="Enter Email"
-											v-model:value="formValue.email"
-											:loading="isLoading"
-											@keyup="handleKeyUp('email')"
-										/> </UpdatableButtonWrapper>
+          <n-input
+            style="width: 400px"
+            class="
+              border-2
+              rounded-md
+              hover:border-sky-500 hover:ring-sky-500 hover:ring-0
+            "
+            type="text"
+            placeholder="Enter Email"
+            v-model:value="formValue.email"
+          />
         </n-form-item>
 
         <n-form-item label="Position" class="pr-12">
-									<UpdatableButtonWrapper
-										v-model="formValue.job_title"
-										:reset-value="formValue.job_title"
-										:shouldUpdate="show.job_title"
-										@revert="handleKeyDown('job_title')"
-										@save="(val) => updateVendor('job_title', val)"
-									>
-										<n-input style="width:400px;" class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0" 
-											:default-value="formValue.job_title"
-                                            type="text"
-											v-model:value="formValue.job_title"
-											:loading="isLoading"
-                                            placeholder="Enter Job Title"
-											@keyup="handleKeyUp('job_title')"
-										/> </UpdatableButtonWrapper>
+          <n-input
+            style="width: 400px"
+            class="
+              border-2
+              rounded-md
+              hover:border-sky-500 hover:ring-sky-500 hover:ring-0
+            "
+            :default-value="formValue.job_title"
+            type="text"
+            v-model:value="formValue.job_title"
+            placeholder="Enter Job Title"
+          />
         </n-form-item>
-       
+
         <n-form-item label="Cell Phone" class="pr-12">
-									<updatable-button-wrapper
-										v-model="formValue.cell_phone"
-										:shouldUpdate="show.cell_phone"
-										@revert="handleKeyDown('cell_phone')"
-										:reset-value="formValue.cell_phone"
-										@save="(val) => updateVendor('cell_phone', val)"
-									>
-										<masked-input style="width:400px;" class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0" 
-											:default-value="formValue.cell_phone"
-											mask="(###) ###-####"
-											:loading="isLoading"
-											@keyup="handleKeyUp('cell_phone')"
-											v-model:value="formValue.cell_phone"
-										/>
-									</updatable-button-wrapper>
-		</n-form-item>
+          <masked-input
+            style="width: 400px"
+            class="
+              border-2
+              rounded-md
+              hover:border-sky-500 hover:ring-sky-500 hover:ring-0
+            "
+            :default-value="formValue.cell_phone"
+            mask="(###) ###-####"
+            v-model:value="formValue.cell_phone"
+          />
+        </n-form-item>
 
-		<n-form-item label="Office Phone" class="pr-12">
-									<updatable-button-wrapper
-										v-model="formValue.office_phone"
-										:shouldUpdate="show.office_phone"
-										@revert="handleKeyDown('office_phone')"
-										:reset-value="formValue.office_phone"
-										@save="(val) => updateVendor('office_phone', val)"
-									>
-										<masked-input style="width:400px;" class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0" 
-											:default-value="formValue.office_phone"
-											mask="(###) ###-####"
-											:loading="isLoading"
-											@keyup="handleKeyUp('office_phone')"
-											v-model:value="formValue.office_phone"
-										/>
-									</updatable-button-wrapper>
-		</n-form-item>
-        
-        
-    </n-form>
-
+        <n-form-item label="Office Phone" class="pr-12">
+          <masked-input
+            style="width: 400px"
+            class="
+              border-2
+              rounded-md
+              hover:border-sky-500 hover:ring-sky-500 hover:ring-0
+            "
+            :default-value="formValue.office_phone"
+            mask="(###) ###-####"
+            v-model:value="formValue.office_phone"
+          />
+        </n-form-item>
+      </n-form>
+      <template #footer>
+        <n-button size="large" @click="updateVendor">Update</n-button>
+      </template>
     </n-drawer-content>
-    
   </n-drawer>
-</n-message-provider>
 </template>
-
-<script setup>
-import { h, defineComponent, ref, watch, onUpdated } from 'vue'
-import { useRoute } from "vue-router";
-import { NTag, NButton, useMessage } from 'naive-ui'
-import vendors from "@/api/vendors";
-import MaskedInput from "@/components/common/MaskedInput.vue";
-import UpdatableButtonWrapper from "@/components/common/UpdatableButtonWrapper.vue";
-import VendorAdd from "@/components/vendor/VendorContactsAdd.vue";
-
-const tableData = ref([]);
-const showOuterRef = ref(false)
-const route = useRoute();
-const update = ref(0);
-
-const isLoading = ref(false)
-
-const formValue = ref({
-        vendor_id: 0,
-        fullname: '',
-        first_name: '',
-        last_name: '',
-        cell_phone: '',
-        office_phone: '',
-        email: '',
-        job_title: '',
-          
-        })
-const show = ref({
-
-        first_name: false,
-        last_name: false,
-        cell_phone: false,
-        office_phone: false,
-        email: false,
-        job_title: false,
-          
-        })
-
-const routeParamId = ref(route.params?.id);    
-
-const handleKeyUp = (val) => {
-		show.value[val] = true;
-	}
-
-const handleKeyDown = (val) => {
-		show.value[val] = false;
-	}
-
-watch(
-		() => route.params?.id,
-		
-		() => {
-			routeParamId.value = route.params?.id;
-            vendors.retrieveContacts(routeParamId.value).then( res => { 
-				
-                if (res.data.length >= 1) {
-                    tableData.value = res.data;
-					
-                }
-                else {
-                    tableData.value = [];
-                }
-            
-            })
-			
-		}
-		
-);
-
-vendors.retrieveContacts(routeParamId.value).then( res => { 
-	
-                if (res.data.length >= 1) {
-                    tableData.value = res.data;
-					
-                }
-                else {
-                    tableData.value = [];
-                }
-            })
-
-        
-const doShowOuter = (row) => {
-	
-    formValue.value.vendor_id = row.id
-    formValue.value.first_name = row.first_name
-    formValue.value.last_name = row.last_name
-    formValue.value.cell_phone = row.cell_phone
-    formValue.value.office_phone = row.office_phone
-    formValue.value.job_title = row.job_title
-    formValue.value.email = row.email
-    formValue.value.fax = row.fax
-
-    showOuterRef.value = true;
-    
-}
-
-function getContacts () {
-	console.log('getcontact')
-	vendors.retrieveContacts(routeParamId.value).then( res => { 
-	
-                if (res.data.length >= 1) {
-                    tableData.value = res.data;
-					
-                }
-                else {
-                    tableData.value = [];
-                }
-            })
-}
-
-function updateVendor(key, val){
-
-		const data = {
-			[key]: formValue.value[key],
-		};
-
-		vendors.updateContacts(data, formValue.value.vendor_id).then((res) => {
-			
-			//isLoading.value = false;
-			handleKeyDown(key)
-			update.value++
-			//debounceChange();
-		}).finally((res) => {
-			vendors.retrieveContacts(routeParamId.value).then( res => { 
-                if (res.data.length >= 1) {
-                    tableData.value = res.data;
-					
-                }
-                else {
-                    tableData.value = [];
-                }
-            })
-		});
-
-    
-}
-        
-const columns = [
-                {
-                    title: 'Name',
-                    key: 'first_name',
-                    //fixed: 'left'
-                },
-                {
-                    title: 'Cell',
-                    key: 'cell_phone',
-                    //fixed: 'left'
-                },
-                {
-                    title: 'Email',
-                    key: 'email',
-                    //fixed: 'left'
-                },
-                {
-                    title: 'Position',
-                    key: 'job_title',
-                    //fixed: 'left'
-                },
-                {
-                    title: "",
-                    key: "edit",
-                    render(row) {
-                        return h(
-                            NButton,
-                            {
-                                strong: true,
-                                
-                                size: "medium",
-                                onClick: () => doShowOuter(row),
-                            },
-                            { default: () => "View / Edit" }
-                        );
-                    },
-                },
-     
-
-            ]
-const pagination = { pageSize: 10 }
-
-
-
-       
-    
-
-</script>
