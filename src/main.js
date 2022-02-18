@@ -24,7 +24,7 @@ import ObserveVisibility from "@/directives/observe-visibility";
 
 axios.defaults.baseURL = "https://gmtvinventory.com/api";
 
-createApp(App)
+createApp( App )
   .use(router)
   .use(naive)
   .directive("mask", mask)

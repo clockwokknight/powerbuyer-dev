@@ -1,35 +1,24 @@
 <script setup>
-import { toRef, watch, ref, onUpdated } from "vue";
-import compare from "just-compare";
+import { ref } from "vue";
+import { onClickOutside } from "@vueuse/core";
 
-const props = defineProps({
-  modelValue: [String, Number],
-  shouldUpdate: {
-    type: Boolean,
-    default: true,
-  },
-  resetValue: {
-    type: [String, Number],
-  },
-});
+defineProps(["shouldVisible"]);
 
-const emits = defineEmits(["save", "update:modelValue"]);
-const isDirty = ref(false);
+// const
+const inputRef = ref(null);
+const emits = defineEmits(["save", "revert"]);
 
-onUpdated(() => {
-  isDirty.value = !compare(props.resetValue, props.modelValue);
-});
-
-const triggerUpdate = (value) => emits("save", value);
+const triggerUpdate = () => {
+  emits("save");
+};
 
 const reset = () => {
-  emits("update:modelValue", props.resetValue);
+  emits("revert");
 };
 </script>
 <template>
   <div class="relative">
     <slot></slot>
-
     <transition
       enter-active-class="transition"
       enter-from-class="opacity-0"
@@ -39,38 +28,55 @@ const reset = () => {
       leave-to-class="opacity-0"
     >
       <div
-        class="absolute -right-20 pl-3 flex gap-x-2 inset-y-0 items-center"
-        v-if="shouldUpdate && isDirty"
+        class="absolute -right-12 pl-3 flex gap-x-2 inset-y-0 items-center"
+        v-if="shouldVisible"
       >
         <span class="grid place-content-center">
-          <button @click="triggerUpdate(modelValue)">
+          <button @click="triggerUpdate">
             <svg
+              class="w-4 h-4 text-gray-[#027BFF] hover:text-[#013975]"
               xmlns="http://www.w3.org/2000/svg"
-              class="h-7 w-7 text-emerald-500"
-              viewBox="0 0 20 20"
-              fill="currentColor"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              viewBox="0 0 24 24"
             >
               <path
-                fill-rule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                clip-rule="evenodd"
-              />
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8zm3.88-11.71L10 14.17l-1.88-1.88a.996.996 0 1 0-1.41 1.41l2.59 2.59c.39.39 1.02.39 1.41 0L17.3 9.7a.996.996 0 0 0 0-1.41c-.39-.39-1.03-.39-1.42 0z"
+                fill="currentColor"
+              ></path>
             </svg>
           </button>
         </span>
         <span class="grid place-content-center">
           <button @click="reset">
             <svg
+              class="w-4 h-4 text-gray-200 hover:text-red-600"
               xmlns="http://www.w3.org/2000/svg"
-              class="h-7 w-7 text-red-600"
-              viewBox="0 0 20 20"
-              fill="currentColor"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              viewBox="0 0 512 512"
             >
               <path
-                fill-rule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                clip-rule="evenodd"
-              />
+                d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192s192-86 192-192z"
+                fill="none"
+                stroke="currentColor"
+                stroke-miterlimit="10"
+                stroke-width="32"
+              ></path>
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="32"
+                d="M320 320L192 192"
+              ></path>
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="32"
+                d="M192 320l128-128"
+              ></path>
             </svg>
           </button>
         </span></div

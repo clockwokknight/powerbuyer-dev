@@ -21,6 +21,8 @@ import Deals from "@/views/Deals.vue";
 import Deal from "@/views/Deal.vue";
 import OtherSystemMenus from "@/views/OtherSystemMenus.vue";
 import VendorHome from "@/components/vendor/VendorHome.vue";
+import BuyerHome from "@/components/buyer/BuyerHome.vue";
+import AuctionHome from "@/components/auction/AuctionHome.vue";
 
 export const router = createRouter( {
   history: createWebHistory(),
@@ -40,21 +42,35 @@ export const router = createRouter( {
       path: "/auctions",
       name: "Auctions",
       component: Auctions,
-    },
-    {
-      path: "/auction",
-      name: "Auction",
-      component: Auction,
+      children: [
+        {
+          path: "",
+          name: "AuctionHome",
+          component: AuctionHome,
+        },
+        {
+          path: ":id",
+          name: "SingleAuction",
+          component: Auction,
+        },
+      ],
     },
     {
       path: "/buyers",
       name: "Buyers",
       component: Buyers,
-    },
-    {
-      path: "/buyer",
-      name: "Buyer",
-      component: Buyer,
+      children: [
+        {
+          path: "",
+          name: "BuyerHome",
+          component: BuyerHome,
+        },
+        {
+          path: ":id",
+          name: "SingleBuyer",
+          component: Buyer,
+        },
+      ],
     },
     {
       path: "/lenders",

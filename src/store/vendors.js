@@ -29,13 +29,19 @@ export const useVendors = defineStore( 'vendors', {
         GET_ACTIVE_TAB(state) {
             return state.tab.active
         },
-        GET_SELECTED_TABS(state) {
+        GET_SELECTED_TAB(state) {
             return state.tab.selected
         },
     },
     actions: {
         SET_SEARCH_TERM(text) {
             this.$state.searchText = text;
+        },
+        SET_VENDOR_VALUE(key, val) {
+            this.$state.tab.active[key] = val;
+        },
+        SET_CURRENT_VENDOR(payload) {
+            this.$state.tab.selected = payload;
         },
         GET_ALL_VENDORS() {
             vendors.all().then( res => {
@@ -74,6 +80,9 @@ export const useVendors = defineStore( 'vendors', {
         },
         SET_ACTIVE_TAB(payload) {
             this.$state.tab.active = payload
+        },
+        SET_SELECTED_TAB(payload) {
+            this.$state.tab.selected = payload
         }
     },
 } );
