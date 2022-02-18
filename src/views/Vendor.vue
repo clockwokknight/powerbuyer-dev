@@ -646,6 +646,6 @@ const submitValue = (key) => {
 
   <VendorContacts />
   <VendorExpensesItems />
-  <VendorExpenses />
+  <!--  <VendorExpenses />-->
   <VendorPayments />
 </template>
