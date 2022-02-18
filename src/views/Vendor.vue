@@ -46,6 +46,8 @@ const vendorCategoryOptions = computed(() =>
       ),
     []
   )
+const { data: vendor, isLoading } = useQuery(["product", routeParamId], () =>
+  axios.get(`/vendors/${routeParamId.value ?? 1}`).then((res) => res.data)
 );
 const { data: paymentTerms } = useQuery("paymentTerms", () =>
   axios.get("/payment_terms").then((res) => res.data)

@@ -1,6 +1,7 @@
 import { api } from "@/api/config";
 
 export default {
+<<<<<<< 132-vendor-update-page
   all() {
     return api.get("/vendors");
   },

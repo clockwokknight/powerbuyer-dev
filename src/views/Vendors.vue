@@ -12,6 +12,7 @@ import VendorList from "@/components/vendor/VendorList.vue";
 import AddVendor from "@/components/vendor/AddVendor.vue";
 import { getVendorById, useVendors } from "@/hooks/vendor";
 
+
 const router = useRouter();
 const route = useRoute();
 const loadingBar = useLoadingBar();
@@ -61,6 +62,25 @@ const {
 
 const tablist = ref([]);
 
+onMounted(() => {
+  axios.get("/user_ui_tabs/1/vendors").then((res) => {
+    tablist.value = JSON.parse(res.data.tabs);
+    scrollTabToView();
+    ifScrollArrowNeeded();
+    if (tablist.value.length >= 1 && route.path === "/vendors") {
+      tablist.value.forEach((tab) => {
+        if (tab.active) {
+          router.push(`/vendors/${tab.id}`);
+        }
+      });
+    }
+  });
+});
+// Fetching Vendor tabs based on user
+const { data: vendorTabs } = useQuery("vendorTabs", () =>
+  axios.get("/user_ui_tabs/1/vendors").then((res) => res.data)
+);
+const tablist = ref([]);
 onMounted(() => {
   axios.get("/user_ui_tabs/1/vendors").then((res) => {
     tablist.value = JSON.parse(res.data.tabs);
@@ -440,6 +460,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
             </button>
           </div>
         </header>
+
       </TabGroup>
       <!-- Main Body Content-->
       <div
