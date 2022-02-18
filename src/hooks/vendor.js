@@ -33,6 +33,18 @@ export const getVendorById = (paramId) =>
     axios.get(`/vendors/${paramId.value}`).then((res) => res.data)
   );
 
+export const getVendorExpenseItems = (routeParamId) =>
+  useQuery(
+    ["vendorExpenseItems", routeParamId],
+    ({ queryKey }) =>
+      axios
+        .get(`/expense_items/vendor/${queryKey[1]}`)
+        .then((res) => (Array.isArray(res.data) ? res.data : [])),
+    {
+      retry: 0,
+    }
+  );
+
 export const getExpenseTypes = () =>
   useQuery(
     "expense_types",
