@@ -10,8 +10,9 @@ import Lenders from "@/views/Lenders.vue";
 import Lender from "@/views/Lender.vue";
 import Inventory from "@/views/Inventory.vue";
 import Vehicle from "@/views/Vehicle.vue";
-import Vendors from "@/views/Vendors.vue";
-import Vendor from "@/views/Vendor.vue";
+const Vendors = () => import("@/views/Vendors.vue");
+const Vendor = () => import("@/views/Vendor.vue");
+const VendorHome = () => import("@/components/vendor/VendorHome.vue");
 import Dealers from "@/views/Dealers.vue";
 import Dealer from "@/views/Dealer.vue";
 import Lanes from "@/views/Lanes.vue";
@@ -20,11 +21,10 @@ import LanesManage from "@/views/LanesManage.vue";
 import Deals from "@/views/Deals.vue";
 import Deal from "@/views/Deal.vue";
 import OtherSystemMenus from "@/views/OtherSystemMenus.vue";
-import VendorHome from "@/components/vendor/VendorHome.vue";
 import BuyerHome from "@/components/buyer/BuyerHome.vue";
 import AuctionHome from "@/components/auction/AuctionHome.vue";
 
-export const router = createRouter( {
+export const router = createRouter({
   history: createWebHistory(),
 
   routes: [
@@ -150,4 +150,4 @@ export const router = createRouter( {
       component: OtherSystemMenus,
     },
   ],
-} );
+});

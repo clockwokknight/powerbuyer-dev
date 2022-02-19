@@ -15,7 +15,7 @@ export const useVendorCategories = () =>
           : null,
     }
   );
-export const useVendors = () =>
+export const getVendors = () =>
   useInfiniteQuery(
     "vendors",
     ({ pageParam = 1 }) =>
@@ -31,28 +31,4 @@ export const useVendors = () =>
 export const getVendorById = (paramId) =>
   useQuery(["vendor", paramId], () =>
     axios.get(`/vendors/${paramId.value}`).then((res) => res.data)
-  );
-
-export const getVendorExpenseItems = (routeParamId) =>
-  useQuery(
-    ["vendorExpenseItems", routeParamId],
-    ({ queryKey }) =>
-      axios
-        .get(`/expense_items/vendor/${queryKey[1]}`)
-        .then((res) => (Array.isArray(res.data) ? res.data : [])),
-    {
-      retry: 0,
-    }
-  );
-
-export const getExpenseTypes = () =>
-  useQuery(
-    "expense_types",
-    () => axios.get("/expense_types").then((res) => res.data),
-    {
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
-      refetchInterval: false,
-      refetchIntervalInBackground: false,
-    }
   );

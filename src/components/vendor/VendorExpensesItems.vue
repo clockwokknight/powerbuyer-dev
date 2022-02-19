@@ -8,7 +8,8 @@ import CurrencyInput from "@/components/common/CurrencyInput.vue";
 import { useMutation, useQuery, useQueryClient } from "vue-query";
 import axios from "axios";
 import { objectFilter, pick } from "@/lib/helper";
-import { getExpenseTypes, getVendorExpenseItems } from "@/hooks/vendor";
+import { getExpenseTypes, getVendorExpenseItems } from "@/hooks/expense";
+import ActionButtons from "@/components/vendor/ActionButtons.vue";
 
 const showOuterRef = ref(false);
 const route = useRoute();
@@ -83,6 +84,15 @@ const { isLoading, mutate } = useMutation(
   }
 );
 
+const { mutate: deleteExpenseItem } = useMutation(
+  (id) => axios.delete(`/expense_items/${id}`),
+  {
+    onSuccess: () => {
+      queryClient.invalidateQueries(["vendorExpenseItems", route.params?.id]);
+    },
+  }
+);
+
 async function updateVendor() {
   try {
     await formRef.value.validate();
@@ -103,7 +113,7 @@ const columns = [
   },
   {
     title: "Expense Type",
-    key: "expense_type_id",
+    key: "expense_type.name",
     //fixed: 'left'
   },
   {
@@ -115,12 +125,10 @@ const columns = [
     title: "",
     key: "edit",
     render(row) {
-      return h(NButton, {
-        strong: true,
-
-        size: "medium",
-        onClick: () => doShowOuter(row),
-        innerHTML: `<svg class="h-6 w-6 text-gray-300 hover:text-[#027BFF]" xmlns=“http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><g fill="none"><path d="M13.94 5L19 10.06L9.062 20a2.25 2.25 0 0 1-.999.58l-5.116 1.395a.75.75 0 0 1-.92-.921l1.395-5.116a2.25 2.25 0 0 1 .58-.999L13.938 5zm7.09-2.03a3.578 3.578 0 0 1 0 5.06l-.97.97L15 3.94l.97-.97a3.578 3.578 0 0 1 5.06 0z" fill="currentColor"></path></g></svg>`,
+      return h(ActionButtons, {
+        row,
+        onEdit: () => doShowOuter(row),
+        onConfirm: () => deleteExpenseItem(row.id),
       });
     },
   },

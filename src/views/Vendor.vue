@@ -1,14 +1,16 @@
 <script setup>
 import { useMutation, useQuery, useQueryClient } from "vue-query";
 import { useRoute } from "vue-router";
-import { computed, reactive, ref, watch } from "vue";
+import { computed, defineAsyncComponent, reactive, ref, watch } from "vue";
 import states from "@/api/states";
 import UpdatableButtonWrapper from "@/components/common/UpdatableButtonWrapper.vue";
 import MaskedInput from "@/components/common/MaskedInput.vue";
 import VendorExpensesItems from "@/components/vendor/VendorExpensesItems.vue";
 import VendorExpenses from "@/components/vendor/VendorExpenses.vue";
 import VendorPayments from "@/components/vendor/VendorPayments.vue";
-import VendorContacts from "@/components/vendor/VendorContacts.vue";
+const VendorContacts = defineAsyncComponent({
+  loader: () => import("@/components/vendor/VendorContacts.vue"),
+});
 import { useVendors } from "@/store/vendors";
 import { getVendorById, useVendorCategories } from "@/hooks/vendor";
 import axios from "axios";
@@ -145,7 +147,11 @@ const submitValue = (key) => {
               "
             >
               <n-input
-                class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+                class="
+                  rounded-md
+                  border-2
+                  hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                "
                 v-model:value="form.name"
                 :loading="isLoading"
                 @focus="currentActiveField = 'name'"
@@ -166,7 +172,11 @@ const submitValue = (key) => {
                 >
                   <n-input
                     style="width: 220px"
-                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
                     :default-value="vendor?.din"
                     v-model:value="form.din"
                     @focus="currentActiveField = 'din'"
@@ -188,7 +198,11 @@ const submitValue = (key) => {
                 >
                   <n-select
                     style="width: 220px"
-                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
                     placeholder="Select Payment Term"
                     :options="paymentTermOptions"
                     v-model:value="form.payment_terms"
@@ -214,7 +228,11 @@ const submitValue = (key) => {
                 >
                   <n-input
                     style="width: 500px"
-                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
                     v-model:value="form.accounting_code"
                     @focus="currentActiveField = 'accounting_code'"
                     :loading="isLoading"
@@ -239,7 +257,11 @@ const submitValue = (key) => {
                 >
                   <n-select
                     style="width: 220px"
-                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
                     placeholder="Select Vendor Category"
                     :options="vendorCategoryOptions"
                     v-model:value="form.vendor_category_id"
@@ -262,7 +284,11 @@ const submitValue = (key) => {
                 >
                   <n-input
                     style="width: 500px"
-                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
                     v-model:value="form.tax_id_number"
                     @focus="currentActiveField = 'tax_id_number'"
                     :loading="isLoading"
@@ -286,7 +312,11 @@ const submitValue = (key) => {
                 >
                   <n-input
                     style="width: 500px"
-                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
                     v-model:value="form.address_one"
                     @focus="currentActiveField = 'address_one'"
                     :loading="isLoading"
@@ -310,7 +340,11 @@ const submitValue = (key) => {
                 >
                   <n-input
                     style="width: 220px"
-                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
                     v-model:value="form.address_two"
                     @focus="currentActiveField = 'address_two'"
                     :loading="isLoading"
@@ -333,7 +367,11 @@ const submitValue = (key) => {
                 >
                   <n-input
                     style="width: 220px"
-                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
                     v-model:value="form.city"
                     @focus="currentActiveField = 'city'"
                     :loading="isLoading"
@@ -355,7 +393,11 @@ const submitValue = (key) => {
                 >
                   <n-select
                     style="width: 220px"
-                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
                     placeholder="Select State"
                     :options="statesList"
                     v-model:value="form.state"
@@ -378,7 +420,11 @@ const submitValue = (key) => {
                   "
                 >
                   <masked-input
-                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
                     mask="#####"
                     style="width: 220px"
                     v-model:value="form.zip"
@@ -405,7 +451,11 @@ const submitValue = (key) => {
                   <n-input
                     type="email"
                     style="width: 220px"
-                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
                     v-model:value="form.email"
                     @focus="currentActiveField = 'email'"
                     :loading="isLoading"
@@ -416,55 +466,61 @@ const submitValue = (key) => {
                   />
                 </UpdatableButtonWrapper>
               </n-form-item>
-              <!--              <n-form-item label="Phone" class="pr-12">-->
-              <!--                <updatable-button-wrapper-->
-              <!--                  v-model="form.phone"-->
-              <!--                  :shouldUpdate="show.phone"-->
-              <!--                  @revert="handleKeyDown('phone')"-->
-              <!--                  :reset-value="vendor?.phone"-->
-              <!--                  @save="(val) => onChange('phone', val)"-->
-              <!--                >-->
-              <!--                  <masked-input-->
-              <!--                    style="width: 220px"-->
-              <!--                    class="-->
-              <!--                      rounded-md-->
-              <!--                      border-2-->
-              <!--                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500-->
-              <!--                    "-->
-              <!--                    :default-value="vendor?.phone"-->
-              <!--                    mask="(###) ###-####"-->
-              <!--                    :loading="isLoading"-->
-              <!--                    @keyup="handleKeyUp('phone')"-->
-              <!--                    v-model:value="form.phone"-->
-              <!--                  />-->
-              <!--                </updatable-button-wrapper>-->
-              <!--              </n-form-item>-->
+              <n-form-item label="Phone" class="pr-12">
+                <updatable-button-wrapper
+                  @save="submitValue('phone')"
+                  @revert="resetValue('phone')"
+                  :should-visible="
+                    currentActiveField && currentActiveField === 'phone'
+                  "
+                >
+                  <masked-input
+                    style="width: 220px"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
+                    mask="(###) ###-####"
+                    @focus="currentActiveField = 'phone'"
+                    :loading="isLoading"
+                    :disabled="
+                      (currentActiveField && currentActiveField !== 'phone') ||
+                      isLoading
+                    "
+                    v-model:value="form.phone"
+                  />
+                </updatable-button-wrapper>
+              </n-form-item>
             </n-space>
-            <!--            <n-space>-->
-            <!--              <n-form-item label="Fax">-->
-            <!--                <updatable-button-wrapper-->
-            <!--                  v-model="form.fax"-->
-            <!--                  :reset-value="vendor?.fax"-->
-            <!--                  :shouldUpdate="show.fax"-->
-            <!--                  @revert="handleKeyDown('fax')"-->
-            <!--                  @save="(val) => onChange('fax', val)"-->
-            <!--                >-->
-            <!--                  <masked-input-->
-            <!--                    style="width: 220px"-->
-            <!--                    class="-->
-            <!--                      rounded-md-->
-            <!--                      border-2-->
-            <!--                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500-->
-            <!--                    "-->
-            <!--                    :default-value="vendor?.fax"-->
-            <!--                    mask="(###) ###-####"-->
-            <!--                    :loading="isLoading"-->
-            <!--                    @keyup="handleKeyUp('fax')"-->
-            <!--                    v-model:value="form.fax"-->
-            <!--                  />-->
-            <!--                </updatable-button-wrapper>-->
-            <!--              </n-form-item>-->
-            <!--            </n-space>-->
+            <n-space>
+              <n-form-item label="Fax">
+                <updatable-button-wrapper
+                  @save="submitValue('fax')"
+                  @revert="resetValue('fax')"
+                  :should-visible="
+                    currentActiveField && currentActiveField === 'fax'
+                  "
+                >
+                  <masked-input
+                    style="width: 220px"
+                    class="
+                      rounded-md
+                      border-2
+                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500
+                    "
+                    mask="(###) ###-####"
+                    @focus="currentActiveField = 'fax'"
+                    :loading="isLoading"
+                    :disabled="
+                      (currentActiveField && currentActiveField !== 'fax') ||
+                      isLoading
+                    "
+                    v-model:value="form.fax"
+                  />
+                </updatable-button-wrapper>
+              </n-form-item>
+            </n-space>
             <!--            <n-form-item label="Comments">-->
             <!--              <UpdatableButtonWrapper-->
             <!--                v-model="form.comments"-->
@@ -505,7 +561,16 @@ const submitValue = (key) => {
         <n-space>
           <button
             style="height: 140px; max-width: 120px"
-            class="rounded border-2 border-gray-400 bg-transparent py-2 px-4 font-semibold text-gray-700 hover:border-transparent hover:bg-blue-500 hover:text-white"
+            class="
+              rounded
+              border-2 border-gray-400
+              bg-transparent
+              py-2
+              px-4
+              font-semibold
+              text-gray-700
+              hover:border-transparent hover:bg-blue-500 hover:text-white
+            "
           >
             <div>
               <n-icon>
@@ -525,7 +590,16 @@ const submitValue = (key) => {
           </button>
           <button
             style="height: 140px; max-width: 120px"
-            class="rounded border-2 border-gray-400 bg-transparent py-2 px-4 font-semibold text-gray-700 hover:border-transparent hover:bg-blue-500 hover:text-white"
+            class="
+              rounded
+              border-2 border-gray-400
+              bg-transparent
+              py-2
+              px-4
+              font-semibold
+              text-gray-700
+              hover:border-transparent hover:bg-blue-500 hover:text-white
+            "
           >
             <div>
               <n-icon>
@@ -545,7 +619,17 @@ const submitValue = (key) => {
           </button>
           <button
             style="height: 140px; max-width: 120px"
-            class="min-w-20px rounded border-2 border-gray-400 bg-transparent py-2 px-4 font-semibold text-gray-700 hover:border-transparent hover:bg-blue-500 hover:text-white"
+            class="
+              min-w-20px
+              rounded
+              border-2 border-gray-400
+              bg-transparent
+              py-2
+              px-4
+              font-semibold
+              text-gray-700
+              hover:border-transparent hover:bg-blue-500 hover:text-white
+            "
           >
             <div>
               <n-icon>
@@ -568,8 +652,13 @@ const submitValue = (key) => {
     </div>
   </div>
 
-  <VendorContacts />
+  <Suspense>
+    <template #default>
+      <VendorContacts />
+    </template>
+    <template #fallback> Loading... </template>
+  </Suspense>
   <VendorExpensesItems />
-  <!--  <VendorExpenses />-->
+  <VendorExpenses />
   <VendorPayments />
 </template>
