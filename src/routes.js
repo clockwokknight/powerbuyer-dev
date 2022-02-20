@@ -1,11 +1,11 @@
 import { createRouter, createWebHistory } from "vue-router";
 //App Pages
-import Dashboard from "@/views/Dashboard.vue";
+const Dashboard = () => import("@/views/Dashboard.vue");
 import Login from "@/views/Login.vue";
 import Auctions from "@/views/Auctions.vue";
 import Auction from "@/views/Auction.vue";
-import Buyers from "@/views/Buyers.vue";
-import Buyer from "@/views/Buyer.vue";
+const Buyers = () => import("@/views/Buyers.vue");
+const Buyer = () => import("@/views/Buyer.vue");
 import Lenders from "@/views/Lenders.vue";
 import Lender from "@/views/Lender.vue";
 import Inventory from "@/views/Inventory.vue";

@@ -41,7 +41,7 @@ const formValue = ref({
 
 const routeParamId = ref(route.params?.id);
 
-const { data: vendorContacts } = useQuery(
+const { data: vendorContacts, isLoading: isVendorContactLoading } = useQuery(
   ["vendorContacts", routeParamId],
   ({ queryKey }) =>
     axios
@@ -52,7 +52,9 @@ const { data: vendorContacts } = useQuery(
 watch(
   () => route.params?.id,
   () => {
-    routeParamId.value = route.params?.id;
+    if (route.params?.id) {
+      routeParamId.value = route.params?.id;
+    }
   }
 );
 
@@ -143,6 +145,7 @@ const pagination = { pageSize: 10 };
         :pagination="pagination"
         :bordered="false"
         :key="update"
+        :loading="isVendorContactLoading || isLoading"
       />
     </div>
   </div>

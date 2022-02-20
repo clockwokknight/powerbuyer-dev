@@ -44,7 +44,7 @@ watch(
   () => route.params?.id,
 
   () => {
-    routeParamId.value = route.params?.id;
+    if (route.params?.id) routeParamId.value = route.params?.id;
   }
 );
 const { data: expenseItems } = getVendorExpenseItems(routeParamId);
@@ -59,7 +59,7 @@ const expenseTypeOptions = computed(() =>
 );
 
 const doShowOuter = (row) => {
-  form.value = pick(row, [
+  const obj = pick(row, [
     "vendor_id",
     "id",
     "name",
@@ -67,7 +67,8 @@ const doShowOuter = (row) => {
     "amount",
     "expense_type_id",
   ]);
-
+  obj.amount = parseFloat(obj.amount);
+  form.value = obj;
   showOuterRef.value = true;
 };
 

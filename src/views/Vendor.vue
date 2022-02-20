@@ -30,7 +30,9 @@ watch(
   () => route.params?.id,
 
   () => {
-    routeParamId.value = route.params?.id;
+    if (route.params?.id) {
+      routeParamId.value = route.params?.id;
+    }
   }
 );
 

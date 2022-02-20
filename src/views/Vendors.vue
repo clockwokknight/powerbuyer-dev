@@ -11,6 +11,7 @@ import VendorList from "@/components/vendor/VendorList.vue";
 
 import AddVendor from "@/components/vendor/AddVendor.vue";
 import { getVendorById, getVendors } from "@/hooks/vendor";
+import Spinner from "@/components/common/Spinner.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -55,6 +56,7 @@ const scrollTo = (type) => {
 // Showing All Vendors
 const {
   data: vendors,
+  isLoading: isVendorsLoading,
   hasNextPage: hasVendorNextPage,
   fetchNextPage: vendorFetchNextPage,
 } = getVendors();
@@ -236,6 +238,12 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
       </div>
       <!-- Main Loop List -->
       <div class="">
+        <div
+          class="grid place-content-center h-20 w-full"
+          v-if="isVendorSearchFetching || isVendorsLoading"
+        >
+          <Spinner />
+        </div>
         <ul class="">
           <template v-if="debouncedSearchText">
             <VendorList
@@ -259,26 +267,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
               v-if="hasVendorNextPage"
               class="grid w-full place-content-center p-4"
             >
-              <svg
-                class="mr-3 -ml-1 h-6 w-6 animate-spin text-emerald-500"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  class="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  stroke-width="4"
-                ></circle>
-                <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
+              <Spinner />
             </button>
           </template>
         </ul>

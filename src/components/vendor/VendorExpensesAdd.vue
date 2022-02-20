@@ -63,6 +63,7 @@ const rules = {
       }
     },
   },
+
   expense_items: {
     name: {
       required: true,
@@ -115,6 +116,7 @@ const handleSearch = (query) => {
 async function addExpense() {
   try {
     await formRef.value.validate();
+    console.log(form.value);
   } catch (e) {}
 }
 
@@ -169,7 +171,7 @@ const onCreateExpenseItems = () => {
           <n-select
             placeholder="Search VIN"
             :options="searchVinResultOptions || dealOptions"
-            v-model:value="form.vin"
+            v-model:value="form.deal_id"
             :loading="isLoading"
             filterable
             clearable
@@ -188,8 +190,9 @@ const onCreateExpenseItems = () => {
           class="my-5 custom-dynamic-input"
           @create="onCreateExpenseItems"
           #="{ index, value }"
+          show-sort-button
         >
-          <div class="bg-gray-200 rounded p-3">
+          <div class="bg-gray-200/50 rounded p-3">
             <n-form-item
               ignore-path-change
               :path="`expense_items[${index}].name`"
@@ -201,10 +204,11 @@ const onCreateExpenseItems = () => {
                 @keydown.enter.prevent
               />
             </n-form-item>
-            <n-form-item label="description">
+            <n-form-item label="Description">
               <n-input
                 type="textarea"
                 v-model:value="form.expense_items[index].description"
+                @keydown.enter.prevent
               />
             </n-form-item>
             <n-form-item
@@ -231,10 +235,18 @@ const onCreateExpenseItems = () => {
           </div>
         </n-dynamic-input>
 
-        <n-form-item label="Cost" path="cost" class="pt-0">
+        <n-form-item label="Cost" path="cost">
           <currency-input clearable v-model="form.cost" />
         </n-form-item>
-
+        <n-form-item label="Invoice Number">
+          <n-input clearable v-model:value="form.invoice_number" />
+        </n-form-item>
+        <n-form-item label="Expense Date">
+          <n-date-picker
+            v-model:value="form.expense_date"
+            format="yyyy-MM-dd"
+          />
+        </n-form-item>
         <n-form-item label="Notes">
           <n-input
             placeholder="Notes"
