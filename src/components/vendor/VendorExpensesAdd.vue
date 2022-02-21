@@ -16,7 +16,7 @@ const props = defineProps({
   },
   isLoading: Boolean,
 });
-const emits = defineEmits(["submit", "update:show"]);
+const emits = defineEmits(["submit", "update:show", "delete"]);
 const message = useMessage();
 
 const expenseItemsOptions = computed(

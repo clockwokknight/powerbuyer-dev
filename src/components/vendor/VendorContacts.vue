@@ -40,6 +40,7 @@ const formValue = ref({
 });
 
 const routeParamId = ref(route.params?.id);
+const showModal = ref(false);
 
 const { data: vendorContacts, isLoading: isVendorContactLoading } = useQuery(
   ["vendorContacts", routeParamId],
@@ -96,6 +97,11 @@ function updateVendor() {
   showOuterRef.value = false;
 }
 
+const deleteContact = () => {
+  deleteVendorContact(formValue.value.id);
+  showOuterRef.value = false;
+};
+
 const columns = [
   {
     title: "Name",
@@ -124,7 +130,6 @@ const columns = [
       return h(ActionButtons, {
         row,
         onEdit: () => doShowOuter(row),
-        onConfirm: () => deleteVendorContact(row.id),
       });
     },
   },
@@ -134,10 +139,10 @@ const pagination = { pageSize: 10 };
 </script>
 <template>
   <div class="mt-4 px-4 font-sans">
-    <div class="pb-4 justify-end"><VendorAdd /></div>
+    <div class="justify-end pb-4"><VendorAdd /></div>
 
-    <div class="py-8 px-8 rounded-lg border-2">
-      <div><p class="text-2xl font-bold pb-8">Contacts</p></div>
+    <div class="rounded-lg border-2 py-8 px-8">
+      <div><p class="pb-8 text-2xl font-bold">Contacts</p></div>
       <n-data-table
         class="rounded-lg"
         :columns="columns"
@@ -164,11 +169,7 @@ const pagination = { pageSize: 10 };
         <n-form-item label="First Name" class="pr-12" path="first_name">
           <n-input
             style="width: 400px"
-            class="
-              border-2
-              rounded-md
-              hover:border-sky-500 hover:ring-sky-500 hover:ring-0
-            "
+            class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
             :default-value="formValue.first_name"
             type="text"
             v-model:value="formValue.first_name"
@@ -177,11 +178,7 @@ const pagination = { pageSize: 10 };
         <n-form-item label="Last Name" class="pr-12" path="last_name">
           <n-input
             style="width: 400px"
-            class="
-              border-2
-              rounded-md
-              hover:border-sky-500 hover:ring-sky-500 hover:ring-0
-            "
+            class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
             type="text"
             v-model:value="formValue.last_name"
           />
@@ -190,11 +187,7 @@ const pagination = { pageSize: 10 };
         <n-form-item label="Email" class="pr-12">
           <n-input
             style="width: 400px"
-            class="
-              border-2
-              rounded-md
-              hover:border-sky-500 hover:ring-sky-500 hover:ring-0
-            "
+            class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
             type="text"
             placeholder="Enter Email"
             v-model:value="formValue.email"
@@ -204,11 +197,7 @@ const pagination = { pageSize: 10 };
         <n-form-item label="Position" class="pr-12">
           <n-input
             style="width: 400px"
-            class="
-              border-2
-              rounded-md
-              hover:border-sky-500 hover:ring-sky-500 hover:ring-0
-            "
+            class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
             :default-value="formValue.job_title"
             type="text"
             v-model:value="formValue.job_title"
@@ -219,11 +208,7 @@ const pagination = { pageSize: 10 };
         <n-form-item label="Cell Phone" class="pr-12">
           <masked-input
             style="width: 400px"
-            class="
-              border-2
-              rounded-md
-              hover:border-sky-500 hover:ring-sky-500 hover:ring-0
-            "
+            class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
             :default-value="formValue.cell_phone"
             mask="(###) ###-####"
             v-model:value="formValue.cell_phone"
@@ -233,11 +218,7 @@ const pagination = { pageSize: 10 };
         <n-form-item label="Office Phone" class="pr-12">
           <masked-input
             style="width: 400px"
-            class="
-              border-2
-              rounded-md
-              hover:border-sky-500 hover:ring-sky-500 hover:ring-0
-            "
+            class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
             :default-value="formValue.office_phone"
             mask="(###) ###-####"
             v-model:value="formValue.office_phone"
@@ -245,8 +226,25 @@ const pagination = { pageSize: 10 };
         </n-form-item>
       </n-form>
       <template #footer>
-        <n-button size="large" @click="updateVendor">Update</n-button>
+        <div class="flex gap-x-4">
+          <n-button size="large" type="error" @click="showModal = true"
+            >Delete</n-button
+          >
+          <n-button size="large" @click="updateVendor">Update</n-button>
+        </div>
       </template>
+      <n-modal
+        v-model:show="showModal"
+        @positive-click="deleteContact"
+        content="Are you sure you want to delete?"
+        positive-text="Yes"
+        preset="dialog"
+        type="error"
+        @mask-click="showModal = false"
+        @negative-click="showModal = false"
+        negative-text="Cancel"
+        title="Delete"
+      />
     </n-drawer-content>
   </n-drawer>
 </template>
