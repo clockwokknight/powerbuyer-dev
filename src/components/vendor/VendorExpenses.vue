@@ -141,7 +141,8 @@ const onSubmitForm = (formValue) => {
     <VendorExpensesAdd
       :show-drawer="visibleForm"
       :row="formRow"
-      :isLoading="createExpenseLoading || updateExpenseLoading"
+      v-if="formRow?.vendor_id"
+      :isLoading="false"
       @submit="onSubmitForm"
       @update:show="
         (val) => {

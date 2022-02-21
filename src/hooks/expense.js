@@ -35,6 +35,7 @@ export const getExpenseTypes = () =>
     "expense_types",
     () => axios.get("/expense_types").then((res) => res.data),
     {
+      retry: 0,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
       refetchInterval: false,

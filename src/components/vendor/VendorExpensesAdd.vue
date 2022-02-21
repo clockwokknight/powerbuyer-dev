@@ -19,11 +19,6 @@ const props = defineProps({
 const emits = defineEmits(["submit", "update:show"]);
 const message = useMessage();
 
-const { data: expenseItems } = getVendorExpenseItems(
-  String(props.row?.vendor_id),
-  { enabled: !!props.row?.vendor_id }
-);
-
 const expenseItemsOptions = computed(
   () =>
     expenseItems.value?.map((item) => ({
@@ -65,7 +60,16 @@ const initialForm = {
 const form = ref({ ...initialForm });
 const showDrawer = toRef(props, "showDrawer");
 watch(showDrawer, (newValue) => {
-  if (newValue) form.value = { ...form.value, ...props.row };
+  if (newValue) {
+    form.value = { ...form.value, ...props.row };
+    vendor_id.value = form.value?.vendor_id;
+  }
+});
+
+const vendor_id = ref(props.row?.vendor_id);
+
+const { data: expenseItems } = getVendorExpenseItems(vendor_id, {
+  enabled: showDrawer,
 });
 const rules = {
   deal_id: {
@@ -118,7 +122,7 @@ const dealOptions = computed(() =>
 const searchVinSelect = ref("");
 const debouncedSearchVin = useDebounce(searchVinSelect, 500);
 
-const { data: searchDealResult, isLoading } =
+const { data: searchDealResult, isLoading: isVendorSearchLoading } =
   searchDealByVin(debouncedSearchVin);
 const searchVinResultOptions = computed(() =>
   searchDealResult.value?.map((deal) => ({
@@ -177,7 +181,7 @@ const updateShow = (show) => {
             placeholder="Search VIN"
             :options="searchVinResultOptions || dealOptions"
             v-model:value="form.deal_id"
-            :loading="isLoading"
+            :loading="isLoading || isVendorSearchLoading"
             filterable
             clearable
             remote
