@@ -1,13 +1,17 @@
 import { useInfiniteQuery, useQuery } from "vue-query";
 import axios from "axios";
 
-export const getVendorExpenseItems = (vendor_id) =>
+export const getVendorExpenseItems = (
+  vendor_id,
+  { enabled } = { enabled: true }
+) =>
   useQuery(
     ["vendorExpenseItems", vendor_id],
     ({ queryKey }) =>
       axios.get(`/expense_items/vendor/${queryKey[1]}`).then((res) => res.data),
     {
       retry: 0,
+      enabled,
     }
   );
 

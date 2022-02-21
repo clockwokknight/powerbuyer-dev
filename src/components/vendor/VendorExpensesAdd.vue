@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, watch, toRef } from "vue";
 import { useMessage } from "naive-ui";
 import { getAllDeals, searchDealByVin } from "@/hooks/deals";
 import { useDebounce } from "@vueuse/core";
@@ -8,19 +8,30 @@ import CurrencyInput from "@/components/common/CurrencyInput.vue";
 import { getExpenseTypes, getVendorExpenseItems } from "@/hooks/expense";
 import { pick } from "@/lib/helper";
 
-const visible = ref(false);
-const route = useRoute();
-const routeParamId = ref(route.params?.id);
+const props = defineProps({
+  showDrawer: Boolean,
+  row: {
+    type: Object,
+    default: null,
+  },
+  isLoading: Boolean,
+});
+const emits = defineEmits(["submit", "update:show"]);
+const message = useMessage();
 
-const { data: expenseItems } = getVendorExpenseItems(routeParamId);
+const { data: expenseItems } = getVendorExpenseItems(
+  String(props.row?.vendor_id),
+  { enabled: !!props.row?.vendor_id }
+);
 
-const expenseItemsOptions = computed(() =>
-  expenseItems.value?.map((item) => ({
-    label: item.name,
-    value: JSON.stringify(
-      pick(item, ["name", "description", "amount", "expense_type_id"])
-    ),
-  }))
+const expenseItemsOptions = computed(
+  () =>
+    expenseItems.value?.map((item) => ({
+      label: item.name,
+      value: JSON.stringify(
+        pick(item, ["name", "description", "amount", "expense_type_id"])
+      ),
+    })) ?? []
 );
 
 const { data: expense_types } = getExpenseTypes();
@@ -33,7 +44,8 @@ const expenseTypeOptions = computed(() =>
 );
 
 const formRef = ref(null);
-const form = ref({
+
+const initialForm = {
   deal_id: null,
   vendor_id: null,
   cost: 0,
@@ -48,8 +60,13 @@ const form = ref({
     //   expense_type_id: null,
     // },
   ],
+};
+
+const form = ref({ ...initialForm });
+const showDrawer = toRef(props, "showDrawer");
+watch(showDrawer, (newValue) => {
+  if (newValue) form.value = { ...form.value, ...props.row };
 });
-const message = useMessage();
 const rules = {
   deal_id: {
     required: true,
@@ -113,15 +130,14 @@ const searchVinResultOptions = computed(() =>
 const handleSearch = (query) => {
   searchVinSelect.value = query;
 };
-async function addExpense() {
+async function submitExpense() {
   try {
     await formRef.value.validate();
-    console.log(form.value);
+    emits("submit", form.value);
   } catch (e) {}
 }
 
 const onVisibleForm = () => {
-  visible.value = !visible.value;
   routeParamId.value = route.params?.id;
   form.value.vendor_id = parseInt(route.params?.id);
 };
@@ -140,32 +156,21 @@ const onCreateExpenseItems = () => {
     expense_type_id: null,
   };
 };
+const updateShow = (show) => {
+  emits("update:show", show);
+  form.value = { ...initialForm };
+};
 </script>
 <template>
-  <n-button @click="onVisibleForm">
-    <n-icon>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        xmlns:xlink="http://www.w3.org/1999/xlink"
-        viewBox="0 0 24 24"
-      >
-        <path
-          d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"
-          fill="currentColor"
-        ></path>
-      </svg>
-    </n-icon>
-    Add Expense
-  </n-button>
-  <n-drawer v-model:show="visible" :width="500">
+  <n-drawer :show="showDrawer" @update:show="updateShow" :width="500">
     <n-drawer-content title="Add Expense">
       <n-form
         :model="form"
         :rules="rules"
         :label-width="90"
-        @submit.prevent="addExpense"
         size="medium"
         ref="formRef"
+        :disabled="isLoading"
       >
         <n-form-item label="VIN" path="deal_id" class="pt-0">
           <n-select
@@ -183,16 +188,18 @@ const onCreateExpenseItems = () => {
           :options="expenseItemsOptions"
           filterable
           @update-value="onExpenseSelect"
+          :disabled="isLoading"
+          :loading="isLoading"
         />
 
         <n-dynamic-input
           v-model:value="form.expense_items"
-          class="my-5 custom-dynamic-input"
+          class="custom-dynamic-input my-5"
           @create="onCreateExpenseItems"
           #="{ index, value }"
           show-sort-button
         >
-          <div class="bg-gray-200/50 rounded p-3">
+          <div class="rounded bg-gray-200/50 p-3">
             <n-form-item
               ignore-path-change
               :path="`expense_items[${index}].name`"
@@ -201,6 +208,8 @@ const onCreateExpenseItems = () => {
             >
               <n-input
                 v-model:value="form.expense_items[index].name"
+                :loading="isLoading"
+                :disabled="isLoading"
                 @keydown.enter.prevent
               />
             </n-form-item>
@@ -208,6 +217,8 @@ const onCreateExpenseItems = () => {
               <n-input
                 type="textarea"
                 v-model:value="form.expense_items[index].description"
+                :loading="isLoading"
+                :disabled="isLoading"
                 @keydown.enter.prevent
               />
             </n-form-item>
@@ -221,6 +232,8 @@ const onCreateExpenseItems = () => {
                 :options="expenseTypeOptions"
                 filterable
                 v-model:value="form.expense_items[index].expense_type_id"
+                :loading="isLoading"
+                :disabled="isLoading"
                 @keydown.enter.prevent
               />
             </n-form-item>
@@ -230,21 +243,30 @@ const onCreateExpenseItems = () => {
               :rule="rules.expense_items.amount"
               label="Amount"
             >
-              <CurrencyInput v-model="form.expense_items[index].amount" />
+              <CurrencyInput
+                v-model="form.expense_items[index].amount"
+                :loading="isLoading"
+                :disabled="isLoading"
+              />
             </n-form-item>
           </div>
         </n-dynamic-input>
 
         <n-form-item label="Cost" path="cost">
-          <currency-input clearable v-model="form.cost" />
+          <currency-input clearable v-model="form.cost" :loading="isLoading" />
         </n-form-item>
         <n-form-item label="Invoice Number">
-          <n-input clearable v-model:value="form.invoice_number" />
+          <n-input
+            clearable
+            v-model:value="form.invoice_number"
+            :loading="isLoading"
+          />
         </n-form-item>
         <n-form-item label="Expense Date">
           <n-date-picker
             v-model:value="form.expense_date"
             format="yyyy-MM-dd"
+            :loading="isLoading"
           />
         </n-form-item>
         <n-form-item label="Notes">
@@ -253,13 +275,12 @@ const onCreateExpenseItems = () => {
             type="textarea"
             clearable
             v-model:value="form.notes"
+            :loading="isLoading"
           />
         </n-form-item>
-
-        <button type="submit" class="invisible">Add</button>
       </n-form>
       <template #footer>
-        <n-button size="large" @click="addExpense">Add</n-button>
+        <n-button size="large" @click="submitExpense">Submit</n-button>
       </template>
     </n-drawer-content>
   </n-drawer>
