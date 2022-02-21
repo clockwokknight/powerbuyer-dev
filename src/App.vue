@@ -3,7 +3,7 @@
     <n-message-provider>
       <n-notification-provider>
         <n-dialog-provider>
-          <div class="h-screen w-full overflow-hidden bg-[#fff]">
+          <div class="h-screen w-full overflow-hidden bg-[#fff] antialiased">
             <div class="flex h-full w-full">
               <aside class="sticky top-0 left-0 z-10 w-[60px] bg-[#202124]">
                 <MainMenu />

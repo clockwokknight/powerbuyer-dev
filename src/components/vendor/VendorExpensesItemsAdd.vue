@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref, watch } from "vue";
 import { useMessage } from "naive-ui";
-import { getExpenseTypes } from "@/hooks/vendor";
+import { getExpenseTypes } from "@/hooks/expense";
 import CurrencyInput from "@/components/common/CurrencyInput.vue";
 import { useRoute } from "vue-router";
 import { useMutation, useQueryClient } from "vue-query";

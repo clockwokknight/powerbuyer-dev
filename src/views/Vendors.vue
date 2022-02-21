@@ -10,7 +10,8 @@ import { useLoadingBar } from "naive-ui";
 import VendorList from "@/components/vendor/VendorList.vue";
 
 import AddVendor from "@/components/vendor/AddVendor.vue";
-import { getVendorById, useVendors } from "@/hooks/vendor";
+import { getVendorById, getVendors } from "@/hooks/vendor";
+import Spinner from "@/components/common/Spinner.vue";
 
 const router = useRouter();
 const route = useRoute();
@@ -55,9 +56,10 @@ const scrollTo = (type) => {
 // Showing All Vendors
 const {
   data: vendors,
+  isLoading: isVendorsLoading,
   hasNextPage: hasVendorNextPage,
   fetchNextPage: vendorFetchNextPage,
-} = useVendors();
+} = getVendors();
 
 const tablist = ref([]);
 
@@ -181,7 +183,15 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
   <div class="vendors flex w-full">
     <!-- Don't show PageItemsList on dashboard  | Current Page List -->
     <aside
-      class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-y-auto overflow-x-hidden bg-white"
+      class="
+        pageItemsList
+        relative
+        h-screen
+        min-w-[275px]
+        max-w-[275px]
+        overflow-y-auto overflow-x-hidden
+        bg-white
+      "
     >
       <div class="sticky top-0 border-b bg-white p-3">
         <div class="mb-3 flex justify-between">
@@ -201,7 +211,14 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
           </div>
           <div content="Filter" v-tippy="{ placement: 'right', duration: 50 }">
             <svg
-              class="mt-1 h-6 w-6 cursor-pointer text-gray-400 hover:text-[#027bff]"
+              class="
+                mt-1
+                h-6
+                w-6
+                cursor-pointer
+                text-gray-400
+                hover:text-[#027bff]
+              "
               xmlns="http://www.w3.org/2000/svg"
               xmlns:xlink="http://www.w3.org/1999/xlink"
               viewBox="0 0 24 24"
@@ -221,6 +238,12 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
       </div>
       <!-- Main Loop List -->
       <div class="">
+        <div
+          class="grid place-content-center h-20 w-full"
+          v-if="isVendorSearchFetching || isVendorsLoading"
+        >
+          <Spinner />
+        </div>
         <ul class="">
           <template v-if="debouncedSearchText">
             <VendorList
@@ -244,26 +267,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
               v-if="hasVendorNextPage"
               class="grid w-full place-content-center p-4"
             >
-              <svg
-                class="mr-3 -ml-1 h-6 w-6 animate-spin text-emerald-500"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  class="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  stroke-width="4"
-                ></circle>
-                <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
+              <Spinner />
             </button>
           </template>
         </ul>
@@ -293,7 +297,14 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
                     v-slot="{ href, route, navigate, isActive }"
                   >
                     <div
-                      class="relative grid place-content-center overflow-hidden rounded border-x border-t"
+                      class="
+                        relative
+                        grid
+                        place-content-center
+                        overflow-hidden
+                        rounded
+                        border-x border-t
+                      "
                     >
                       <tab
                         class="max-w-xs scroll-mt-2 focus:outline-none"
@@ -306,13 +317,34 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
                         <a
                           :href="href"
                           @click="navigate"
-                          class="block max-w-[250px] overflow-hidden truncate whitespace-nowrap px-4 py-2 pr-6 focus:outline-none"
+                          class="
+                            block
+                            max-w-[250px]
+                            overflow-hidden
+                            truncate
+                            whitespace-nowrap
+                            px-4
+                            py-2
+                            pr-6
+                            focus:outline-none
+                          "
                         >
                           {{ tab?.name }}
                         </a>
                       </tab>
                       <span
-                        class="absolute inset-y-0 right-0 top-[1px] z-10 flex cursor-pointer items-center rounded-r pr-1"
+                        class="
+                          absolute
+                          inset-y-0
+                          right-0
+                          top-[1px]
+                          z-10
+                          flex
+                          cursor-pointer
+                          items-center
+                          rounded-r
+                          pr-1
+                        "
                         @click.stop="closeTab(tab.id)"
                         :class="[
                           isActive ? 'bg-primary text-white' : 'bg-slate-white',

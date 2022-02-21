@@ -115,7 +115,6 @@ export default defineComponent({
           let filteredData = Object.fromEntries(
             Object.entries(data).filter((value) => value[1])
           );
-          console.log(filteredData);
 
           vendors
             .addContacts(filteredData)
@@ -149,7 +148,7 @@ export default defineComponent({
         },
         last_name: {
           required: true,
-          message: "Please enter the First Name",
+          message: "Please enter the Last Name",
           trigger: ["input"],
         },
         cell_phone: {

@@ -1,14 +1,16 @@
 <script setup>
 import { useMutation, useQuery, useQueryClient } from "vue-query";
 import { useRoute } from "vue-router";
-import { computed, reactive, ref, watch } from "vue";
+import { computed, defineAsyncComponent, reactive, ref, watch } from "vue";
 import states from "@/api/states";
 import UpdatableButtonWrapper from "@/components/common/UpdatableButtonWrapper.vue";
 import MaskedInput from "@/components/common/MaskedInput.vue";
 import VendorExpensesItems from "@/components/vendor/VendorExpensesItems.vue";
 import VendorExpenses from "@/components/vendor/VendorExpenses.vue";
 import VendorPayments from "@/components/vendor/VendorPayments.vue";
-import VendorContacts from "@/components/vendor/VendorContacts.vue";
+const VendorContacts = defineAsyncComponent({
+  loader: () => import("@/components/vendor/VendorContacts.vue"),
+});
 import { useVendors } from "@/store/vendors";
 import { getVendorById, useVendorCategories } from "@/hooks/vendor";
 import axios from "axios";
@@ -28,7 +30,9 @@ watch(
   () => route.params?.id,
 
   () => {
-    routeParamId.value = route.params?.id;
+    if (route.params?.id) {
+      routeParamId.value = route.params?.id;
+    }
   }
 );
 
@@ -129,7 +133,7 @@ const submitValue = (key) => {
 </script>
 
 <template>
-  <div class="mt-4 px-4 pb-8 antialiased">
+  <div class="mt-4 px-4 pb-8">
     <div class="rounded-lg border-4 bg-slate-100 bg-gray-50 py-8 px-8">
       <div class="border-10 flex rounded-md border-gray-500">
         <div>
@@ -416,55 +420,53 @@ const submitValue = (key) => {
                   />
                 </UpdatableButtonWrapper>
               </n-form-item>
-              <!--              <n-form-item label="Phone" class="pr-12">-->
-              <!--                <updatable-button-wrapper-->
-              <!--                  v-model="form.phone"-->
-              <!--                  :shouldUpdate="show.phone"-->
-              <!--                  @revert="handleKeyDown('phone')"-->
-              <!--                  :reset-value="vendor?.phone"-->
-              <!--                  @save="(val) => onChange('phone', val)"-->
-              <!--                >-->
-              <!--                  <masked-input-->
-              <!--                    style="width: 220px"-->
-              <!--                    class="-->
-              <!--                      rounded-md-->
-              <!--                      border-2-->
-              <!--                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500-->
-              <!--                    "-->
-              <!--                    :default-value="vendor?.phone"-->
-              <!--                    mask="(###) ###-####"-->
-              <!--                    :loading="isLoading"-->
-              <!--                    @keyup="handleKeyUp('phone')"-->
-              <!--                    v-model:value="form.phone"-->
-              <!--                  />-->
-              <!--                </updatable-button-wrapper>-->
-              <!--              </n-form-item>-->
+              <n-form-item label="Phone" class="pr-12">
+                <updatable-button-wrapper
+                  @save="submitValue('phone')"
+                  @revert="resetValue('phone')"
+                  :should-visible="
+                    currentActiveField && currentActiveField === 'phone'
+                  "
+                >
+                  <masked-input
+                    style="width: 220px"
+                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+                    mask="(###) ###-####"
+                    @focus="currentActiveField = 'phone'"
+                    :loading="isLoading"
+                    :disabled="
+                      (currentActiveField && currentActiveField !== 'phone') ||
+                      isLoading
+                    "
+                    v-model:value="form.phone"
+                  />
+                </updatable-button-wrapper>
+              </n-form-item>
             </n-space>
-            <!--            <n-space>-->
-            <!--              <n-form-item label="Fax">-->
-            <!--                <updatable-button-wrapper-->
-            <!--                  v-model="form.fax"-->
-            <!--                  :reset-value="vendor?.fax"-->
-            <!--                  :shouldUpdate="show.fax"-->
-            <!--                  @revert="handleKeyDown('fax')"-->
-            <!--                  @save="(val) => onChange('fax', val)"-->
-            <!--                >-->
-            <!--                  <masked-input-->
-            <!--                    style="width: 220px"-->
-            <!--                    class="-->
-            <!--                      rounded-md-->
-            <!--                      border-2-->
-            <!--                      hover:border-sky-500 hover:ring-0 hover:ring-sky-500-->
-            <!--                    "-->
-            <!--                    :default-value="vendor?.fax"-->
-            <!--                    mask="(###) ###-####"-->
-            <!--                    :loading="isLoading"-->
-            <!--                    @keyup="handleKeyUp('fax')"-->
-            <!--                    v-model:value="form.fax"-->
-            <!--                  />-->
-            <!--                </updatable-button-wrapper>-->
-            <!--              </n-form-item>-->
-            <!--            </n-space>-->
+            <n-space>
+              <n-form-item label="Fax">
+                <updatable-button-wrapper
+                  @save="submitValue('fax')"
+                  @revert="resetValue('fax')"
+                  :should-visible="
+                    currentActiveField && currentActiveField === 'fax'
+                  "
+                >
+                  <masked-input
+                    style="width: 220px"
+                    class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+                    mask="(###) ###-####"
+                    @focus="currentActiveField = 'fax'"
+                    :loading="isLoading"
+                    :disabled="
+                      (currentActiveField && currentActiveField !== 'fax') ||
+                      isLoading
+                    "
+                    v-model:value="form.fax"
+                  />
+                </updatable-button-wrapper>
+              </n-form-item>
+            </n-space>
             <!--            <n-form-item label="Comments">-->
             <!--              <UpdatableButtonWrapper-->
             <!--                v-model="form.comments"-->
@@ -568,8 +570,13 @@ const submitValue = (key) => {
     </div>
   </div>
 
-  <VendorContacts />
+  <Suspense>
+    <template #default>
+      <VendorContacts />
+    </template>
+    <template #fallback> Loading... </template>
+  </Suspense>
   <VendorExpensesItems />
-  <!--  <VendorExpenses />-->
+  <VendorExpenses />
   <VendorPayments />
 </template>

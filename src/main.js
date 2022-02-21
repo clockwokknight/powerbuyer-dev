@@ -13,7 +13,7 @@ import VueTippy from "vue-tippy";
 import App from "./App.vue";
 
 //Tailwind CSS
-import "./index.css";
+import "./index.scss";
 
 //Pinia
 import { createPinia } from "pinia";
@@ -24,7 +24,7 @@ import ObserveVisibility from "@/directives/observe-visibility";
 
 axios.defaults.baseURL = "https://gmtvinventory.com/api";
 
-createApp( App )
+createApp(App)
   .use(router)
   .use(naive)
   .directive("mask", mask)
