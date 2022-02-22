@@ -6,27 +6,55 @@ import { useDebounce } from "@vueuse/core";
 import { useRoute } from "vue-router";
 import CurrencyInput from "@/components/common/CurrencyInput.vue";
 import { getExpenseTypes, getVendorExpenseItems } from "@/hooks/expense";
-import { pick } from "@/lib/helper";
+import { objectFilter, omit, pick } from "@/lib/helper";
+import dayjs from "dayjs";
+import { useMutation, useQueryClient } from "vue-query";
+import axios from "axios";
 
-const props = defineProps({
-  showDrawer: Boolean,
-  row: {
-    type: Object,
-    default: null,
-  },
-  isLoading: Boolean,
-});
-const emits = defineEmits(["submit", "update:show", "delete"]);
 const message = useMessage();
+const queryClient = useQueryClient();
+const route = useRoute();
 
-const expenseItemsOptions = computed(
-  () =>
+const showDrawer = ref(false);
+const formRef = ref(null);
+const initialForm = {
+  deal_id: null,
+  vendor_id: null,
+  cost: 0,
+  expense_date: null,
+  invoice_number: "",
+  expense_items: [
+    // {
+    //   name: "",
+    //   description: "",
+    //   amount: 0,
+    //   expense_type_id: null,
+    // },
+  ],
+};
+const form = ref({ ...initialForm });
+
+const vendor_id = ref(route.params?.id);
+
+watch(
+  () => route.params?.id,
+  () => {
+    if (route.params?.id) {
+      vendor_id.value = route.params?.id;
+      form.value.vendor_id = parseInt(route.params?.id);
+    }
+  },
+  { immediate: true }
+);
+const expenseItemsOptions = computed(() =>
+  [{ label: "+ Add new", value: "add" }].concat(
     expenseItems.value?.map((item) => ({
       label: item.name,
       value: JSON.stringify(
         pick(item, ["name", "description", "amount", "expense_type_id"])
       ),
-    })) ?? []
+    }))
+  )
 );
 
 const { data: expense_types } = getExpenseTypes();
@@ -38,35 +66,18 @@ const expenseTypeOptions = computed(() =>
   }))
 );
 
-const formRef = ref(null);
-
-const initialForm = {
-  deal_id: null,
-  vendor_id: null,
-  cost: 0,
-  expense_date: null,
-  invoice_number: "",
-  notes: "",
-  expense_items: [
-    // {
-    //   name: "",
-    //   description: "",
-    //   amount: 0,
-    //   expense_type_id: null,
-    // },
-  ],
-};
-
-const form = ref({ ...initialForm });
-const showDrawer = toRef(props, "showDrawer");
-watch(showDrawer, (newValue) => {
-  if (newValue) {
-    form.value = { ...form.value, ...props.row };
-    vendor_id.value = form.value?.vendor_id;
-  }
-});
-
-const vendor_id = ref(props.row?.vendor_id);
+watch(
+  () => form.value?.expense_items,
+  (newFormValue) => {
+    if (newFormValue.length > 0) {
+      form.value.cost = newFormValue?.reduce(
+        (prev, curr) => prev + curr.amount,
+        0
+      );
+    }
+  },
+  { deep: true }
+);
 
 const { data: expenseItems } = getVendorExpenseItems(vendor_id, {
   enabled: showDrawer,
@@ -134,22 +145,72 @@ const searchVinResultOptions = computed(() =>
 const handleSearch = (query) => {
   searchVinSelect.value = query;
 };
+
+const { mutateAsync: createExpense, isLoading } = useMutation((data) =>
+  axios.post("/expenses", data)
+);
+
+const onCreateExpense = (formValue) => {
+  const { expense_items, ...rest } = formValue;
+  if (expense_items.length > 0) {
+    const msg = message.loading("Submitting", { duration: 10000 });
+    Promise.all(
+      expense_items.map(async (item) => {
+        return new Promise(async (resolve) => {
+          setTimeout(async () => {
+            let obj = {
+              ...rest,
+              ...omit(item, ["expense_type_id"]),
+            };
+            obj = objectFilter(obj, (key, value) => value);
+            await createExpense(obj);
+            resolve("working");
+          }, 1000);
+        });
+      })
+    ).then(() => {
+      showDrawer.value = false;
+      queryClient.invalidateQueries(["expensesByVendor", vendor_id]);
+      msg.type = "success";
+      msg.content = "Expense Created Successfully";
+      setTimeout(() => {
+        msg.destroy();
+      }, 3000);
+    });
+  }
+};
+
 async function submitExpense() {
   try {
     await formRef.value.validate();
-    emits("submit", form.value);
-  } catch (e) {}
+    // const modifiedForm = omit(form.value, ['cost'])
+    const modifiedForm = { ...form.value };
+    if (modifiedForm.expense_date)
+      modifiedForm.expense_date = dayjs(modifiedForm.expense_date).format(
+        "YYYY-MM-DD"
+      );
+    else delete modifiedForm.expense_date;
+
+    modifiedForm.expense_items = modifiedForm.expense_items.map((item) => ({
+      ...omit(item, ["showSelect", "expense_type_id"]),
+      type: String(item.expense_type_id),
+    }));
+    onCreateExpense(modifiedForm);
+  } catch (e) {
+    message.error("Invalid data");
+  }
 }
 
-const onVisibleForm = () => {
-  routeParamId.value = route.params?.id;
-  form.value.vendor_id = parseInt(route.params?.id);
-};
+const onExpenseSelect = (value, index) => {
+  let obj = {};
+  if (value === "add") {
+    obj = { ...onCreateExpenseItems() };
+  } else {
+    obj = JSON.parse(value);
+    obj.amount = parseFloat(obj.amount);
+  }
 
-const onExpenseSelect = (value) => {
-  const obj = JSON.parse(value);
-  obj.amount = parseFloat(obj.amount);
-  form.value.expense_items = form.value.expense_items.concat([obj]);
+  form.value.expense_items[index] = { ...obj, showSelect: false };
 };
 
 const onCreateExpenseItems = () => {
@@ -158,15 +219,27 @@ const onCreateExpenseItems = () => {
     description: "",
     amount: 0,
     expense_type_id: null,
+    showSelect: true,
   };
-};
-const updateShow = (show) => {
-  emits("update:show", show);
-  form.value = { ...initialForm };
 };
 </script>
 <template>
-  <n-drawer :show="showDrawer" @update:show="updateShow" :width="500">
+  <n-button @click="showDrawer = true">
+    <n-icon>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"
+          fill="currentColor"
+        ></path>
+      </svg>
+    </n-icon>
+    Add Expense
+  </n-button>
+  <n-drawer v-model:show="showDrawer" :width="500">
     <n-drawer-content title="Add Expense">
       <n-form
         :model="form"
@@ -188,13 +261,6 @@ const updateShow = (show) => {
             @search="handleSearch"
           />
         </n-form-item>
-        <n-select
-          :options="expenseItemsOptions"
-          filterable
-          @update-value="onExpenseSelect"
-          :disabled="isLoading"
-          :loading="isLoading"
-        />
 
         <n-dynamic-input
           v-model:value="form.expense_items"
@@ -210,7 +276,16 @@ const updateShow = (show) => {
               :rule="rules.expense_items.name"
               label="Name"
             >
+              <n-select
+                :options="expenseItemsOptions"
+                filterable
+                @update-value="(val) => onExpenseSelect(val, index)"
+                :disabled="isLoading"
+                :loading="isLoading"
+                v-if="form.expense_items[index].showSelect"
+              />
               <n-input
+                v-else
                 v-model:value="form.expense_items[index].name"
                 :loading="isLoading"
                 :disabled="isLoading"
@@ -257,7 +332,12 @@ const updateShow = (show) => {
         </n-dynamic-input>
 
         <n-form-item label="Cost" path="cost">
-          <currency-input clearable v-model="form.cost" :loading="isLoading" />
+          <currency-input
+            clearable
+            v-model="form.cost"
+            :loading="isLoading"
+            disabled
+          />
         </n-form-item>
         <n-form-item label="Invoice Number">
           <n-input
@@ -270,15 +350,6 @@ const updateShow = (show) => {
           <n-date-picker
             v-model:value="form.expense_date"
             format="yyyy-MM-dd"
-            :loading="isLoading"
-          />
-        </n-form-item>
-        <n-form-item label="Notes">
-          <n-input
-            placeholder="Notes"
-            type="textarea"
-            clearable
-            v-model:value="form.notes"
             :loading="isLoading"
           />
         </n-form-item>
