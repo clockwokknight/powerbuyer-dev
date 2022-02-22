@@ -26,10 +26,6 @@ watch(
 
 const { data: expensesData } = getExpensesByVendor(routeParamId);
 
-const { mutate: updateExpense, isLoading: updateExpenseLoading } = useMutation(
-  ({ id, ...data }) => axios.post("/expenses", data)
-);
-
 const columns = [
   {
     title: "Name",
@@ -76,10 +72,6 @@ const pagination = { pageSize: 10 };
 const visibleForm = ref(false);
 
 const formRow = ref(null);
-const showAddExpenseForm = () => {
-  formRow.value = { vendor_id: parseInt(route.params?.id) };
-  visibleForm.value = true;
-};
 
 const showEditExpenseForm = (row) => {
   const obj = pick(row, [
@@ -91,16 +83,6 @@ const showEditExpenseForm = (row) => {
     "vendor_id",
   ]);
   console.log({ row });
-  // formRow.value = row;
-  // visibleForm.value = true;
-};
-
-const onSubmitForm = (formValue) => {
-  if (formValue?.id) {
-    console.log(formValue);
-  } else {
-    onCreateExpense(formValue);
-  }
 };
 </script>
 <template>

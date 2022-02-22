@@ -17,6 +17,7 @@ const route = useRoute();
 
 const showDrawer = ref(false);
 const formRef = ref(null);
+const isLoading = ref(false);
 const initialForm = {
   deal_id: null,
   vendor_id: null,
@@ -46,6 +47,10 @@ watch(
   },
   { immediate: true }
 );
+
+const { data: expenseItems } = getVendorExpenseItems(vendor_id, {
+  enabled: showDrawer,
+});
 const expenseItemsOptions = computed(() =>
   [{ label: "+ Add new", value: "add" }].concat(
     expenseItems.value?.map((item) => ({
@@ -58,7 +63,6 @@ const expenseItemsOptions = computed(() =>
 );
 
 const { data: expense_types } = getExpenseTypes();
-
 const expenseTypeOptions = computed(() =>
   expense_types.value?.map((expense) => ({
     label: expense.name,
@@ -79,9 +83,6 @@ watch(
   { deep: true }
 );
 
-const { data: expenseItems } = getVendorExpenseItems(vendor_id, {
-  enabled: showDrawer,
-});
 const rules = {
   deal_id: {
     required: true,
@@ -146,7 +147,7 @@ const handleSearch = (query) => {
   searchVinSelect.value = query;
 };
 
-const { mutateAsync: createExpense, isLoading } = useMutation((data) =>
+const { mutateAsync: createExpense } = useMutation((data) =>
   axios.post("/expenses", data)
 );
 
@@ -154,6 +155,7 @@ const onCreateExpense = (formValue) => {
   const { expense_items, ...rest } = formValue;
   if (expense_items.length > 0) {
     const msg = message.loading("Submitting", { duration: 10000 });
+    isLoading.value = true;
     Promise.all(
       expense_items.map(async (item) => {
         return new Promise(async (resolve) => {
@@ -170,9 +172,12 @@ const onCreateExpense = (formValue) => {
       })
     ).then(() => {
       showDrawer.value = false;
-      queryClient.invalidateQueries(["expensesByVendor", vendor_id]);
+      queryClient.invalidateQueries(["expensesByVendor", vendor_id.value]);
+      console.log(["expensesByVendor", vendor_id]);
       msg.type = "success";
       msg.content = "Expense Created Successfully";
+      isLoading.value = false;
+      form.value = { ...initialForm };
       setTimeout(() => {
         msg.destroy();
       }, 3000);
@@ -355,7 +360,13 @@ const onCreateExpenseItems = () => {
         </n-form-item>
       </n-form>
       <template #footer>
-        <n-button size="large" @click="submitExpense">Submit</n-button>
+        <n-button
+          :disabled="isLoading"
+          :loading="isLoading"
+          size="large"
+          @click="submitExpense"
+          >Submit</n-button
+        >
       </template>
     </n-drawer-content>
   </n-drawer>
