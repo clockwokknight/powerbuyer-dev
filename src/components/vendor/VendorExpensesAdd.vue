@@ -62,12 +62,23 @@ const expenseItemsOptions = computed(() =>
   )
 );
 
-const { data: expense_types } = getExpenseTypes();
+const {
+  data: expense_types,
+  hasNextPage: hasExpenseTypeNextPage,
+  fetchNextPage: fetchNextExpenseTypePage,
+} = getExpenseTypes();
+
 const expenseTypeOptions = computed(() =>
-  expense_types.value?.map((expense) => ({
-    label: expense.name,
-    value: expense.id,
-  }))
+  expense_types.value?.pages.reduce(
+    (prev, current) =>
+      prev.concat(
+        current?.data.map((expense) => ({
+          label: expense.name,
+          value: expense.id,
+        })) ?? []
+      ),
+    []
+  )
 );
 
 watch(
@@ -96,7 +107,10 @@ const rules = {
       }
     },
   },
-
+  expense_date: {
+    required: true,
+    message: "Date is required",
+  },
   expense_items: {
     name: {
       required: true,
@@ -351,7 +365,7 @@ const onCreateExpenseItems = () => {
             :loading="isLoading"
           />
         </n-form-item>
-        <n-form-item label="Expense Date">
+        <n-form-item label="Expense Date" path="expense_date">
           <n-date-picker
             v-model:value="form.expense_date"
             format="yyyy-MM-dd"

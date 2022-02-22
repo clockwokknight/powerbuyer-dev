@@ -9,6 +9,8 @@ import axios from "axios";
 import { objectFilter, omit, pick } from "@/lib/helper";
 import { useQueryClient } from "vue-query";
 import ActionButtons from "@/components/vendor/ActionButtons.vue";
+import VendorExpenseEdit from "@/components/vendor/VendorExpenseEdit.vue";
+import dayjs from "dayjs";
 
 const route = useRoute();
 const message = useMessage();
@@ -28,13 +30,13 @@ const { data: expensesData } = getExpensesByVendor(routeParamId);
 
 const columns = [
   {
-    title: "Name",
-    key: "name",
+    title: "VIN",
+    key: "vin",
     //fixed: 'left'
   },
   {
-    title: "Description",
-    key: "description",
+    title: "Name",
+    key: "name",
     //fixed: 'left'
   },
   {
@@ -69,23 +71,36 @@ const columns = [
 ];
 const pagination = { pageSize: 10 };
 
-const visibleForm = ref(false);
+const visibleEditForm = ref(false);
 
 const formRow = ref(null);
 
 const showEditExpenseForm = (row) => {
   const obj = pick(row, [
-    "amount",
+    "name",
     "deal_id",
     "description",
     "expense_date",
     "id",
     "vendor_id",
+    "invoice_number",
+    "cost",
   ]);
-  console.log({ row });
+  obj.type = parseInt(row.type);
+  obj.amount = parseFloat(row.amount);
+  if (obj?.expense_date) {
+    obj.expense_date = dayjs(obj.expense_date).valueOf();
+  }
+  formRow.value = { ...obj };
+  visibleEditForm.value = true;
 };
 </script>
 <template>
+  <VendorExpenseEdit
+    :show-drawer="visibleEditForm"
+    :initial-data="formRow"
+    @update:show="visibleEditForm = false"
+  />
   <div class="mt-4 px-4 font-sans">
     <div class="justify-end pb-4">
       <VendorExpensesAdd />

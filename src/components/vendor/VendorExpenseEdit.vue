@@ -4,21 +4,29 @@ import { useDebounce } from "@vueuse/core";
 import { getAllDeals, searchDealByVin } from "@/hooks/deals";
 import { getExpenseTypes, getVendorExpenseItems } from "@/hooks/expense";
 import CurrencyInput from "@/components/common/CurrencyInput.vue";
-import { pick } from "@/lib/helper";
-import { useMutation } from "vue-query";
+import { objectFilter, pick } from "@/lib/helper";
+import { useMutation, useQueryClient } from "vue-query";
 import axios from "axios";
+import dayjs from "dayjs";
+import { useMessage } from "naive-ui";
 
-const props = defineProps(["showDrawer", "initialForm"]);
+const props = defineProps(["showDrawer", "initialData"]);
 const emits = defineEmits(["update:show"]);
+
+const message = useMessage();
+const queryClient = useQueryClient();
 
 const initialForm = {
   deal_id: null,
   vendor_id: null,
   amount: 0,
+  description: "",
   expense_date: null,
   invoice_number: "",
+  type: null,
 };
 const form = ref({ ...initialForm });
+const formRef = ref(null);
 const vendor_id = ref();
 const searchVinSelect = ref("");
 const debouncedSearchVin = useDebounce(searchVinSelect, 500);
@@ -26,21 +34,39 @@ const debouncedSearchVin = useDebounce(searchVinSelect, 500);
 const showDrawer = toRef(props, "showDrawer");
 watch(showDrawer, (newValue) => {
   if (newValue) {
-    form.value = { ...props.initialForm };
+    form.value = { ...props.initialData };
+  } else {
+    form.value = { ...initialForm };
   }
 });
 // Mutations
 const { mutate: updateExpense, isLoading: updateExpenseLoading } = useMutation(
-  ({ id, ...data }) => axios.post("/expenses", data)
+  ({ id, ...data }) => axios.put(`/expenses/${id}`, data),
+  {
+    onSuccess() {
+      queryClient.invalidateQueries(["expensesByVendor", vendor_id.value]);
+    },
+  }
 );
 
 // Queries
-const { data: expense_types } = getExpenseTypes();
+const {
+  data: expense_types,
+  hasNextPage: hasExpenseTypeNextPage,
+  fetchNextPage: fetchNextExpenseTypePage,
+} = getExpenseTypes();
+
 const expenseTypeOptions = computed(() =>
-  expense_types.value?.map((expense) => ({
-    label: expense.name,
-    value: expense.id,
-  }))
+  expense_types.value?.pages.reduce(
+    (prev, current) =>
+      prev.concat(
+        current?.data.map((expense) => ({
+          label: expense.name,
+          value: expense.id,
+        })) ?? []
+      ),
+    []
+  )
 );
 
 // const { data: expenseItems } = getVendorExpenseItems(vendor_id, {
@@ -106,6 +132,46 @@ const rules = {
     required: true,
     message: "Expense type is required",
   },
+  expense_date: {
+    required: true,
+    message: "Date is required",
+  },
+  description: {
+    required: true,
+    message: "Description is required",
+  },
+};
+
+const submitForm = async () => {
+  try {
+    await formRef.value.validate();
+    let obj = { ...form.value };
+    obj.type = String(form.value.type);
+    if (obj.expense_date) {
+      obj.expense_date = dayjs(obj.expense_date).format("YYYY-MM-DD");
+    }
+    // obj = objectFilter(obj, (key, value) => value)
+    updateExpense(obj);
+    emits("update:show", false);
+    message.success("Expense updated successfully.");
+  } catch (e) {}
+};
+
+/**
+ *
+ * @param {Event} e Event
+ */
+const handleExpenseTypeSelectScroll = (e) => {
+  const currentTarget = e.currentTarget;
+
+  if (
+    currentTarget.scrollTop + currentTarget.offsetHeight >=
+    currentTarget.scrollHeight
+  ) {
+    if (hasExpenseTypeNextPage.value) {
+      fetchNextExpenseTypePage.value();
+    }
+  }
 };
 </script>
 
@@ -144,7 +210,7 @@ const rules = {
             @keydown.enter.prevent
           />
         </n-form-item>
-        <n-form-item label="Description">
+        <n-form-item label="Description" path="description">
           <n-input
             type="textarea"
             v-model:value="form.description"
@@ -156,8 +222,9 @@ const rules = {
           <n-select
             :options="expenseTypeOptions"
             filterable
-            v-model:value="form.expense_items[index].expense_type_id"
+            v-model:value="form.type"
             :loading="updateExpenseLoading"
+            @scroll="handleExpenseTypeSelectScroll"
             @keydown.enter.prevent
           />
         </n-form-item>
@@ -174,7 +241,7 @@ const rules = {
             :loading="updateExpenseLoading"
           />
         </n-form-item>
-        <n-form-item label="Expense Date">
+        <n-form-item label="Expense Date" path="expense_date">
           <n-date-picker
             v-model:value="form.expense_date"
             format="yyyy-MM-dd"
@@ -183,7 +250,13 @@ const rules = {
         </n-form-item>
       </n-form>
       <template #footer>
-        <n-button size="large">Update</n-button>
+        <n-button
+          size="large"
+          :disabled="updateExpenseLoading"
+          :loading="updateExpenseLoading"
+          @click.prevent="submitForm"
+          >Update</n-button
+        >
       </template>
     </n-drawer-content>
   </n-drawer>

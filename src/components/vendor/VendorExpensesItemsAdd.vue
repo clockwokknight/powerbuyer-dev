@@ -52,13 +52,23 @@ const rules = {
     message: "Please select a valid amount",
   },
 };
-const { data: expense_types } = getExpenseTypes();
+const {
+  data: expense_types,
+  hasNextPage: hasExpenseTypeNextPage,
+  fetchNextPage: fetchNextExpenseTypePage,
+} = getExpenseTypes();
 
 const expenseTypeOptions = computed(() =>
-  expense_types.value?.map((expense) => ({
-    label: expense.name,
-    value: expense.id,
-  }))
+  expense_types.value?.pages.reduce(
+    (prev, current) =>
+      prev.concat(
+        current?.data.map((expense) => ({
+          label: expense.name,
+          value: expense.id,
+        })) ?? []
+      ),
+    []
+  )
 );
 
 const onSubmitForm = async () => {
@@ -73,6 +83,22 @@ const onSubmitForm = async () => {
 const updateShow = (show) => {
   emits("update:show", show);
   // form.value = { ...initialForm };
+};
+/**
+ *
+ * @param {Event} e Event
+ */
+const handleExpenseTypeSelectScroll = (e) => {
+  const currentTarget = e.currentTarget;
+
+  if (
+    currentTarget.scrollTop + currentTarget.offsetHeight >=
+    currentTarget.scrollHeight
+  ) {
+    if (hasExpenseTypeNextPage.value) {
+      fetchNextExpenseTypePage.value();
+    }
+  }
 };
 </script>
 <template>
@@ -111,6 +137,7 @@ const updateShow = (show) => {
             filterable
             clearable
             :loading="isLoading"
+            @scroll="handleExpenseTypeSelectScroll"
           />
         </n-form-item>
         <n-form-item label="Amount" path="amount">

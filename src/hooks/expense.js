@@ -31,10 +31,16 @@ export const getExpensesByVendor = (vendor_id) =>
   );
 
 export const getExpenseTypes = () =>
-  useQuery(
+  useInfiniteQuery(
     "expense_types",
-    () => axios.get("/expense_types").then((res) => res.data),
+    ({ pageParam = 1 }) =>
+      axios.get("/expense_types?&page=" + pageParam).then((res) => res.data),
     {
+      getNextPageParam: (lastPage, pages) =>
+        lastPage.current_page < lastPage.last_page
+          ? lastPage.current_page + 1
+          : null,
+
       retry: 0,
       refetchOnMount: false,
       refetchOnWindowFocus: false,
