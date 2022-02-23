@@ -53,7 +53,11 @@ const scrollTo = (type) => {
   }
 };
 // Showing All Vendors
-const { data: auctions } = getAuctions();
+const {
+  data: auctions,
+  hasNextPage: hasAuctionNextPage,
+  fetchNextPage: fetchAuctionNextPage,
+} = getAuctions();
 
 const tablist = ref([]);
 
@@ -184,21 +188,13 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
 </script>
 
 <template>
-  <div class="flex w-full vendors">
+  <div class="vendors flex w-full">
     <!-- Don't show PageItemsList on dashboard  | Current Page List -->
     <aside
-      class="
-        pageItemsList
-        relative
-        h-screen
-        min-w-[275px]
-        max-w-[275px]
-        overflow-y-auto overflow-x-hidden
-        bg-white
-      "
+      class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-y-auto overflow-x-hidden bg-white"
     >
-      <div class="sticky top-0 p-3 bg-white border-b">
-        <div class="flex justify-between mb-3">
+      <div class="sticky top-0 border-b bg-white p-3">
+        <div class="mb-3 flex justify-between">
           <h1 class="text-xl font-bold uppercase">Auctions</h1>
           <!--          <div>-->
           <!--            <AddVendor />-->
@@ -252,7 +248,40 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
           </template>
 
           <template v-else>
-            <AuctionsList :auctions="auctions" @click:tab="addTab" />
+            <template
+              v-for="(auctionPage, auctionPageIdx) in auctions?.pages"
+              :key="auctionPageIdx"
+            >
+              <AuctionsList :auctions="auctionPage.data" @click:tab="addTab" />
+            </template>
+            <button
+              v-observe-visibility="
+                (isVisible) => (isVisible ? fetchAuctionNextPage() : null)
+              "
+              v-if="hasAuctionNextPage"
+              class="grid w-full place-content-center p-4"
+            >
+              <svg
+                class="mr-3 -ml-1 h-6 w-6 animate-spin text-emerald-500"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+            </button>
           </template>
         </ul>
       </div>
@@ -281,14 +310,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
                     v-slot="{ href, route, navigate, isActive }"
                   >
                     <div
-                      class="
-                        relative
-                        grid
-                        place-content-center
-                        rounded
-                        border-t border-x
-                        overflow-hidden
-                      "
+                      class="relative grid place-content-center overflow-hidden rounded border-x border-t"
                     >
                       <tab
                         class="max-w-xs scroll-mt-2 focus:outline-none"
@@ -301,34 +323,13 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
                         <a
                           :href="href"
                           @click="navigate"
-                          class="
-                            block
-                            max-w-[250px]
-                            overflow-hidden
-                            truncate
-                            whitespace-nowrap
-                            px-4
-                            py-2
-                            pr-6
-                            focus:outline-none
-                          "
+                          class="block max-w-[250px] overflow-hidden truncate whitespace-nowrap px-4 py-2 pr-6 focus:outline-none"
                         >
                           {{ tab?.name }}
                         </a>
                       </tab>
                       <span
-                        class="
-                          absolute
-                          inset-y-0
-                          right-0
-                          top-[1px]
-                          z-10
-                          flex
-                          cursor-pointer
-                          items-center
-                          rounded-r
-                          pr-1
-                        "
+                        class="absolute inset-y-0 right-0 top-[1px] z-10 flex cursor-pointer items-center rounded-r pr-1"
                         @click.stop="closeTab(tab.id)"
                         :class="[
                           isActive ? 'bg-primary text-white' : 'bg-slate-white',
@@ -337,7 +338,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           xmlns:xlink="http://www.w3.org/1999/xlink"
-                          class="w-5 h-5"
+                          class="h-5 w-5"
                           :class="[
                             isActive
                               ? 'bg-primary text-white hover:text-gray-300'
@@ -383,7 +384,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
               @click="scrollTo('left')"
             >
               <svg
-                class="w-4 h-4"
+                class="h-4 w-4"
                 xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink"
                 viewBox="0 0 24 24"
@@ -400,7 +401,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
               @click="scrollTo('right')"
             >
               <svg
-                class="w-4 h-4"
+                class="h-4 w-4"
                 xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink"
                 viewBox="0 0 24 24"
@@ -418,7 +419,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
       <div
         class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden border-t-2"
       >
-        <main class="min-h-full pt-10 bg-white">
+        <main class="min-h-full bg-white pt-10">
           <router-view />
         </main>
       </div>

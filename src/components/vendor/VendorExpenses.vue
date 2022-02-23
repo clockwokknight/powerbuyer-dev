@@ -1,34 +1,26 @@
 <script setup>
-import { h, defineComponent, ref, watch, onUpdated } from "vue";
+import { h, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { NTag, NButton, useMessage } from "naive-ui";
-import vendors from "@/api/vendors";
-import MaskedInput from "@/components/common/MaskedInput.vue";
-import UpdatableButtonWrapper from "@/components/common/UpdatableButtonWrapper.vue";
 import VendorExpensesAdd from "@/components/vendor/VendorExpensesAdd.vue";
 import { getExpensesByVendor } from "@/hooks/expense";
 import { useMutation } from "vue-query";
 import axios from "axios";
-import { objectFilter } from "@/lib/helper";
+import { objectFilter, omit, pick } from "@/lib/helper";
+import { useQueryClient } from "vue-query";
+import ActionButtons from "@/components/vendor/ActionButtons.vue";
+import VendorExpenseEdit from "@/components/vendor/VendorExpenseEdit.vue";
+import dayjs from "dayjs";
 
-const showOuterRef = ref(false);
 const route = useRoute();
+const message = useMessage();
 
 const isLoading = ref(false);
-
-const formValue = ref({
-  vendor_id: 0,
-  name: "",
-  description: "",
-  type: "",
-  amount: "",
-});
 
 const routeParamId = ref(route.params?.id);
 
 watch(
   () => route.params?.id,
-
   () => {
     if (route.params?.id) routeParamId.value = route.params?.id;
   }
@@ -36,27 +28,15 @@ watch(
 
 const { data: expensesData } = getExpensesByVendor(routeParamId);
 
-const { mutate: createExpense, isLoading: createExpenseLoading } = useMutation(
-  (data) => axios.post("/expenses", data),
-  {
-    onSuccess() {
-      visibleForm.value = false;
-    },
-  }
-);
-const { mutate: updateExpense, isLoading: updateExpenseLoading } = useMutation(
-  ({ id, ...data }) => axios.post("/expenses", data)
-);
-
 const columns = [
   {
-    title: "Name",
-    key: "name",
+    title: "VIN",
+    key: "vin",
     //fixed: 'left'
   },
   {
-    title: "Description",
-    key: "description",
+    title: "Name",
+    key: "name",
     //fixed: 'left'
   },
   {
@@ -83,73 +63,48 @@ const columns = [
     title: "",
     key: "edit",
     render(row) {
-      return h(
-        NButton,
-        {
-          strong: true,
-
-          size: "medium",
-          onClick: () => showEditExpenseForm(row),
-        },
-        { default: () => "View / Edit" }
-      );
+      return h(ActionButtons, {
+        onEdit: () => showEditExpenseForm(row),
+      });
     },
   },
 ];
 const pagination = { pageSize: 10 };
 
-const visibleForm = ref(false);
+const visibleEditForm = ref(false);
 
 const formRow = ref(null);
-const showAddExpenseForm = () => {
-  formRow.value = { vendor_id: parseInt(route.params?.id) };
-  visibleForm.value = true;
-};
 
 const showEditExpenseForm = (row) => {
-  formRow.value = row;
-  visibleForm.value = true;
-};
-const onSubmitForm = (formValue) => {
-  const { expense_items, ...rest } = formValue;
-  if (rest?.id) {
-    console.log(formValue);
-  } else {
-    createExpense(objectFilter(rest, (key, value) => value));
+  const obj = pick(row, [
+    "name",
+    "deal_id",
+    "description",
+    "expense_date",
+    "id",
+    "vendor_id",
+    "invoice_number",
+    "cost",
+  ]);
+  obj.type = parseInt(row.type);
+  obj.amount = parseFloat(row.amount);
+  if (obj?.expense_date) {
+    obj.expense_date = dayjs(obj.expense_date).valueOf();
   }
+  formRow.value = { ...obj };
+  visibleEditForm.value = true;
 };
 </script>
 <template>
+  <VendorExpenseEdit
+    :show-drawer="visibleEditForm"
+    :initial-data="formRow"
+    @update:show="visibleEditForm = false"
+  />
   <div class="mt-4 px-4 font-sans">
     <div class="justify-end pb-4">
-      <n-button @click="showAddExpenseForm">
-        <n-icon>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            xmlns:xlink="http://www.w3.org/1999/xlink"
-            viewBox="0 0 24 24"
-          >
-            <path
-              d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"
-              fill="currentColor"
-            ></path>
-          </svg>
-        </n-icon>
-        Add Expense
-      </n-button>
+      <VendorExpensesAdd />
     </div>
-    <VendorExpensesAdd
-      :show-drawer="visibleForm"
-      :row="formRow"
-      v-if="formRow?.vendor_id"
-      :isLoading="false"
-      @submit="onSubmitForm"
-      @update:show="
-        (val) => {
-          visibleForm = val;
-        }
-      "
-    />
 
     <div class="rounded-lg border-2 py-8 px-8">
       <div><p class="pb-8 text-2xl font-bold">Expenses</p></div>

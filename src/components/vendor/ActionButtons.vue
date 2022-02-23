@@ -9,21 +9,14 @@ const themeOverrides = {
 };
 
 defineEmits(["edit", "confirm"]);
-const showModal = ref(false);
 </script>
 
 <template>
-  <div class="flex items-center gap-x-3 justify-center">
+  <div class="flex items-center justify-center gap-x-3">
     <n-button @click="$emit('edit')" class="group">
       <n-icon
         ><svg
-          class="
-            h-6
-            w-6
-            text-gray-300
-            transition-colors
-            group-hover:text-primary
-          "
+          class="h-6 w-6 text-gray-300 transition-colors group-hover:text-primary"
           xmlns="http://www.w3.org/2000/svg"
           xmlns:xlink="http://www.w3.org/1999/xlink"
           viewBox="0 0 24 24"
@@ -36,22 +29,6 @@ const showModal = ref(false);
           </g></svg
       ></n-icon>
     </n-button>
-
-    <n-button type="error" secondary @click="showModal = !showModal">
-      Delete
-    </n-button>
-    <n-modal
-      v-model:show="showModal"
-      @positive-click="$emit('confirm')"
-      content="Are you sure you want to delete?"
-      positive-text="Yes"
-      preset="dialog"
-      type="error"
-      @mask-click="showModal = false"
-      @negative-click="showModal = false"
-      negative-text="Cancel"
-      title="Delete"
-    />
   </div>
 </template>
 

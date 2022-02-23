@@ -1,34 +1,41 @@
 <script setup>
-import { computed, ref, watch } from "vue";
-import { useMessage } from "naive-ui";
+import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { getExpenseTypes } from "@/hooks/expense";
 import CurrencyInput from "@/components/common/CurrencyInput.vue";
 import { useRoute } from "vue-router";
-import { useMutation, useQueryClient } from "vue-query";
-import axios from "axios";
-import { objectFilter } from "@/lib/helper";
 
 const route = useRoute();
 
-const showOuterRef = ref(false);
-const formRef = ref(null);
-const message = useMessage();
-const queryClient = useQueryClient();
+const props = defineProps({
+  showDrawer: Boolean,
+  row: {
+    type: Object,
+    default: null,
+  },
+  isLoading: Boolean,
+});
+const emits = defineEmits(["submit", "update:show", "delete"]);
 
-const initalForm = {
-  vendor_id: parseInt(route.params?.id),
+const formRef = ref(null);
+const showModal = ref(false);
+
+const initialForm = {
   name: "",
   description: "",
   expense_type_id: null,
   amount: 0,
 };
 const form = ref({
-  ...initalForm,
+  ...initialForm,
 });
 watch(
-  () => route.params?.id,
+  () => props.showDrawer,
   () => {
-    form.value.vendor_id = parseInt(route.params?.id);
+    if (props.showDrawer) {
+      form.value = { ...initialForm, ...props.row };
+    } else {
+      form.value = { ...initialForm };
+    }
   }
 );
 const rules = {
@@ -45,57 +52,60 @@ const rules = {
     message: "Please select a valid amount",
   },
 };
-const { data: expense_types } = getExpenseTypes();
+const {
+  data: expense_types,
+  hasNextPage: hasExpenseTypeNextPage,
+  fetchNextPage: fetchNextExpenseTypePage,
+} = getExpenseTypes();
 
 const expenseTypeOptions = computed(() =>
-  expense_types.value?.map((expense) => ({
-    label: expense.name,
-    value: expense.id,
-  }))
+  expense_types.value?.pages.reduce(
+    (prev, current) =>
+      prev.concat(
+        current?.data.map((expense) => ({
+          label: expense.name,
+          value: expense.id,
+        })) ?? []
+      ),
+    []
+  )
 );
-const { mutate, isLoading } = useMutation(
-  (data) => axios.post("/expense_items", data),
-  {
-    onSuccess() {
-      queryClient.invalidateQueries([
-        "vendorExpenseItems",
-        String(form.value.vendor_id),
-      ]);
-      form.value = { ...initalForm };
-      showOuterRef.value = false;
-    },
-  }
-);
-const addExpense = async () => {
+
+const onSubmitForm = async () => {
   try {
     await formRef.value.validate();
-    mutate(objectFilter(form.value, (key, value) => value));
+    emits("submit", form.value);
+    // mutate(objectFilter(form.value, (key, value) => value));
   } catch {}
 
   //message.success('Valid')
 };
+const updateShow = (show) => {
+  emits("update:show", show);
+  // form.value = { ...initialForm };
+};
+/**
+ *
+ * @param {Event} e Event
+ */
+const handleExpenseTypeSelectScroll = (e) => {
+  const currentTarget = e.currentTarget;
+
+  if (
+    currentTarget.scrollTop + currentTarget.offsetHeight >=
+    currentTarget.scrollHeight
+  ) {
+    if (hasExpenseTypeNextPage.value) {
+      fetchNextExpenseTypePage.value();
+    }
+  }
+};
 </script>
 <template>
-  <n-button @click="showOuterRef = !showOuterRef">
-    <n-icon>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        xmlns:xlink="http://www.w3.org/1999/xlink"
-        viewBox="0 0 24 24"
-      >
-        <path
-          d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"
-          fill="currentColor"
-        ></path>
-      </svg>
-    </n-icon>
-    Add Expense Item
-  </n-button>
-  <n-drawer v-model:show="showOuterRef" :width="500">
+  <n-drawer :show="showDrawer" @update:show="updateShow" :width="500">
     <n-drawer-content title="Add Expense Item">
       <n-form
         :model="form"
-        @submit.prevent="addExpense"
         :rules="rules"
         size="medium"
         ref="formRef"
@@ -127,6 +137,7 @@ const addExpense = async () => {
             filterable
             clearable
             :loading="isLoading"
+            @scroll="handleExpenseTypeSelectScroll"
           />
         </n-form-item>
         <n-form-item label="Amount" path="amount">
@@ -142,8 +153,30 @@ const addExpense = async () => {
         >
       </n-form>
       <template #footer>
-        <n-button size="large" @click="addExpense()">Add</n-button>
+        <div class="flex gap-x-4">
+          <n-button
+            size="large"
+            type="error"
+            v-if="form?.id"
+            @click="showModal = true"
+          >
+            Delete
+          </n-button>
+          <n-button size="large" @click="onSubmitForm">Submit</n-button>
+        </div>
       </template>
     </n-drawer-content>
   </n-drawer>
+  <n-modal
+    v-model:show="showModal"
+    @positive-click="$emit('delete', form?.id)"
+    content="Are you sure you want to delete?"
+    positive-text="Yes"
+    preset="dialog"
+    type="error"
+    @mask-click="showModal = false"
+    @negative-click="showModal = false"
+    negative-text="Cancel"
+    title="Delete"
+  />
 </template>
