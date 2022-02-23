@@ -21,7 +21,14 @@ export const getExpensesByVendor = (vendor_id) =>
     ({ queryKey, pageParam = 1 }) =>
       axios
         .get(`/expenses/vendor/${queryKey[1]}?page=${pageParam}`)
-        .then((r) => r.data),
+        .then((res) => {
+          if (Array.isArray(res.data?.data)) return [];
+          return Object.entries(res.data.data).map(([key, value]) => ({
+            deal_id: key,
+            vin: value[0].vin,
+            children: value,
+          }));
+        }),
     {
       getNextPageParam: (lastPage, pages) =>
         lastPage.current_page < lastPage.last_page

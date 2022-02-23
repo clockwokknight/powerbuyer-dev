@@ -27,7 +27,6 @@ const initialForm = {
 };
 const form = ref({ ...initialForm });
 const formRef = ref(null);
-const vendor_id = ref();
 const searchVinSelect = ref("");
 const debouncedSearchVin = useDebounce(searchVinSelect, 500);
 
@@ -44,7 +43,12 @@ const { mutate: updateExpense, isLoading: updateExpenseLoading } = useMutation(
   ({ id, ...data }) => axios.put(`/expenses/${id}`, data),
   {
     onSuccess() {
-      queryClient.invalidateQueries(["expensesByVendor", vendor_id.value]);
+      queryClient.invalidateQueries([
+        "expensesByVendor",
+        String(form.value.vendor_id),
+      ]);
+      emits("update:show", false);
+      message.success("Expense updated successfully.");
     },
   }
 );
@@ -140,6 +144,10 @@ const rules = {
     required: true,
     message: "Description is required",
   },
+  invoice_number: {
+    required: true,
+    message: "Invoice Number is required",
+  },
 };
 
 const submitForm = async () => {
@@ -152,8 +160,6 @@ const submitForm = async () => {
     }
     // obj = objectFilter(obj, (key, value) => value)
     updateExpense(obj);
-    emits("update:show", false);
-    message.success("Expense updated successfully.");
   } catch (e) {}
 };
 
@@ -234,7 +240,7 @@ const handleExpenseTypeSelectScroll = (e) => {
             :loading="updateExpenseLoading"
           />
         </n-form-item>
-        <n-form-item label="Invoice Number">
+        <n-form-item label="Invoice Number" path="invoice_number">
           <n-input
             clearable
             v-model:value="form.invoice_number"

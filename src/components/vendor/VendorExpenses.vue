@@ -1,5 +1,5 @@
 <script setup>
-import { h, ref, watch } from "vue";
+import { computed, h, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { NTag, NButton, useMessage } from "naive-ui";
 import VendorExpensesAdd from "@/components/vendor/VendorExpensesAdd.vue";
@@ -26,7 +26,10 @@ watch(
   }
 );
 
-const { data: expensesData } = getExpensesByVendor(routeParamId);
+const { data: expensesData, isLoading: expensesDataLoading } =
+  getExpensesByVendor(routeParamId);
+
+// const expenseDataComputed = computed(() => expensesData.value ? )
 
 const columns = [
   {
@@ -45,11 +48,6 @@ const columns = [
     //fixed: 'left'
   },
   {
-    title: "Status",
-    key: "expense_type_id",
-    //fixed: 'left'
-  },
-  {
     title: "DOS",
     key: "expense_date",
     //fixed: 'left'
@@ -63,9 +61,11 @@ const columns = [
     title: "",
     key: "edit",
     render(row) {
-      return h(ActionButtons, {
-        onEdit: () => showEditExpenseForm(row),
-      });
+      return row?.children
+        ? h("div")
+        : h(ActionButtons, {
+            onEdit: () => showEditExpenseForm(row),
+          });
     },
   },
 ];
@@ -111,10 +111,10 @@ const showEditExpenseForm = (row) => {
       <n-data-table
         class="rounded-lg"
         :columns="columns"
-        :data="expensesData?.pages[0]?.data"
+        :data="expensesData?.pages[0]"
         :pagination="pagination"
         :bordered="false"
-        v-if="expensesData"
+        :loading="expensesDataLoading"
       />
     </div>
   </div>
