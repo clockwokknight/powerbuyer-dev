@@ -30,7 +30,7 @@ const { data: expensesData, isLoading: expensesDataLoading } =
   getExpensesByVendor(routeParamId);
 
 // const expenseDataComputed = computed(() => expensesData.value ? )
-
+const rowKey = (row) => row?.deal_id;
 const columns = [
   {
     title: "VIN",
@@ -115,6 +115,7 @@ const showEditExpenseForm = (row) => {
         :pagination="pagination"
         :bordered="false"
         :loading="expensesDataLoading"
+        :row-key="rowKey"
       />
     </div>
   </div>
