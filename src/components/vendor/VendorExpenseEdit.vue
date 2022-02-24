@@ -73,20 +73,6 @@ const expenseTypeOptions = computed(() =>
   )
 );
 
-// const { data: expenseItems } = getVendorExpenseItems(vendor_id, {
-//   enabled: showDrawer,
-// });
-// const expenseItemsOptions = computed(() =>
-//   [{ label: "+ Add new", value: "add" }].concat(
-//     expenseItems.value?.map((item) => ({
-//       label: item.name,
-//       value: JSON.stringify(
-//         pick(item, ["name", "description", "amount", "expense_type_id"])
-//       ),
-//     }))
-//   )
-// );
-
 const { data: deals } = getAllDeals();
 const dealOptions = computed(() =>
   deals.value?.pages.reduce(
@@ -117,10 +103,13 @@ const searchVinResultOptions = computed(() =>
 // Form Rules
 const rules = {
   deal_id: {
+    type: "number",
     required: true,
     message: "Please select a VIN",
+    trigger: ["blur", "change"],
   },
   amount: {
+    type: "number",
     required: true,
     validator(rule, value) {
       if (value <= 0.01) {
@@ -134,9 +123,12 @@ const rules = {
   },
   type: {
     required: true,
+    type: "number",
     message: "Expense type is required",
+    trigger: ["blur", "change"],
   },
   expense_date: {
+    type: "number",
     required: true,
     message: "Date is required",
   },
@@ -187,14 +179,13 @@ const handleExpenseTypeSelectScroll = (e) => {
     @update:show="$emit('update:show', false)"
     :width="500"
   >
-    <n-drawer-content title="Add Expense">
+    <n-drawer-content title="Update Expense">
       <n-form
         :model="form"
         :rules="rules"
         :label-width="90"
         size="medium"
         ref="formRef"
-        :disabled="updateExpenseLoading"
       >
         <n-form-item label="VIN" path="deal_id" class="pt-0">
           <n-select
@@ -203,7 +194,6 @@ const handleExpenseTypeSelectScroll = (e) => {
             v-model:value="form.deal_id"
             :loading="updateExpenseLoading || isVendorSearchLoading"
             filterable
-            clearable
             remote
             @search="handleSearch"
           />
@@ -242,7 +232,6 @@ const handleExpenseTypeSelectScroll = (e) => {
         </n-form-item>
         <n-form-item label="Invoice Number" path="invoice_number">
           <n-input
-            clearable
             v-model:value="form.invoice_number"
             :loading="updateExpenseLoading"
           />

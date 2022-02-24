@@ -110,6 +110,7 @@ const showEditExpenseForm = (row) => {
       <div><p class="pb-8 text-2xl font-bold">Expenses</p></div>
       <n-data-table
         class="rounded-lg"
+        striped
         :columns="columns"
         :data="expensesData?.pages[0]"
         :pagination="pagination"

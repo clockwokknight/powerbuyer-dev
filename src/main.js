@@ -24,6 +24,16 @@ import ObserveVisibility from "@/directives/observe-visibility";
 
 axios.defaults.baseURL = "https://gmtvinventory.com/api";
 
+const vueQueryPluginOptions = {
+  queryClientConfig: {
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+      },
+    },
+  },
+};
+
 createApp(App)
   .use(router)
   .use(naive)
@@ -31,5 +41,5 @@ createApp(App)
   .directive("observe-visibility", ObserveVisibility)
   .use(createPinia())
   .use(VueTippy)
-  .use(VueQueryPlugin)
+  .use(VueQueryPlugin, vueQueryPluginOptions)
   .mount("#app");
