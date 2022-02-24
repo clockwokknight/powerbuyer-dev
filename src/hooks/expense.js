@@ -1,5 +1,6 @@
 import { useInfiniteQuery, useQuery } from "vue-query";
 import axios from "axios";
+import { format } from "v-money3";
 
 export const getVendorExpenseItems = (
   vendor_id,
@@ -26,6 +27,9 @@ export const getExpensesByVendor = (vendor_id) =>
           return Object.entries(res.data.data).map(([key, value]) => ({
             deal_id: key,
             vin: value[0].vin,
+            amount: format(
+              value.reduce((prev, curr) => prev + parseFloat(curr.amount), 0)
+            ),
             children: value,
           }));
         }),

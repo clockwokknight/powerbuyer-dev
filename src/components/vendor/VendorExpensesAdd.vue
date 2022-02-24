@@ -38,11 +38,15 @@ const form = ref({ ...initialForm });
 const vendor_id = ref(route.params?.id);
 
 watch(
-  () => route.params?.id,
-  () => {
-    if (route.params?.id) {
-      vendor_id.value = route.params?.id;
-      form.value.vendor_id = parseInt(route.params?.id);
+  showDrawer,
+  (newValue) => {
+    if (newValue) {
+      if (route.params?.id) {
+        vendor_id.value = route.params?.id;
+        form.value.vendor_id = parseInt(route.params?.id);
+      }
+    } else {
+      form.value = { ...initialForm };
     }
   },
   { immediate: true }
@@ -89,6 +93,8 @@ watch(
         (prev, curr) => prev + curr.amount,
         0
       );
+    } else {
+      form.value.cost = 0;
     }
   },
   { deep: true }
@@ -96,29 +102,43 @@ watch(
 
 const rules = {
   deal_id: {
+    type: "number",
     required: true,
+    trigger: ["blur", "change"],
     message: "Please select a VIN",
   },
   cost: {
+    type: "number",
     required: true,
     validator(rule, value) {
       if (value <= 0.01) {
         return new Error("Amount should be more than 0.01");
       }
     },
+    trigger: "change",
   },
   expense_date: {
+    type: "number",
     required: true,
     message: "Date is required",
+    trigger: ["blur", "change"],
+  },
+  invoice_number: {
+    required: true,
+    message: "Invoice Number is required",
+    trigger: "input",
   },
   expense_items: {
     name: {
       required: true,
       message: "Name is required",
+      trigger: "input",
     },
     expense_type_id: {
+      type: "number",
       required: true,
       message: "Expense type is required",
+      trigger: "blur",
     },
     amount: {
       required: true,
@@ -127,6 +147,7 @@ const rules = {
           return new Error("Amount should be more than 0.01");
         }
       },
+      trigger: "input",
     },
   },
 };
@@ -187,7 +208,6 @@ const onCreateExpense = (formValue) => {
     ).then(() => {
       showDrawer.value = false;
       queryClient.invalidateQueries(["expensesByVendor", vendor_id.value]);
-      console.log(["expensesByVendor", vendor_id]);
       msg.type = "success";
       msg.content = "Expense Created Successfully";
       isLoading.value = false;
@@ -263,12 +283,11 @@ const onCreateExpenseItems = () => {
       <n-form
         :model="form"
         :rules="rules"
-        :label-width="90"
         size="medium"
         ref="formRef"
         :disabled="isLoading"
       >
-        <n-form-item label="VIN" path="deal_id" class="pt-0">
+        <n-form-item label="VIN" path="deal_id">
           <n-select
             placeholder="Search VIN"
             :options="searchVinResultOptions || dealOptions"
@@ -358,7 +377,7 @@ const onCreateExpenseItems = () => {
             disabled
           />
         </n-form-item>
-        <n-form-item label="Invoice Number">
+        <n-form-item label="Invoice Number" path="invoice_number">
           <n-input
             clearable
             v-model:value="form.invoice_number"
@@ -369,7 +388,6 @@ const onCreateExpenseItems = () => {
           <n-date-picker
             v-model:value="form.expense_date"
             format="yyyy-MM-dd"
-            :loading="isLoading"
           />
         </n-form-item>
       </n-form>

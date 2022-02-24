@@ -1,25 +1,24 @@
 <script setup>
-import { useMutation, useQuery, useQueryClient } from "vue-query";
+import { useMutation, useQueryClient } from "vue-query";
 import { useRoute } from "vue-router";
 import { computed, defineAsyncComponent, reactive, ref, watch } from "vue";
-import states from "@/api/states";
 import UpdatableButtonWrapper from "@/components/common/UpdatableButtonWrapper.vue";
 import MaskedInput from "@/components/common/MaskedInput.vue";
 import VendorExpensesItems from "@/components/vendor/VendorExpensesItems.vue";
 import VendorExpenses from "@/components/vendor/VendorExpenses.vue";
 import VendorPayments from "@/components/vendor/VendorPayments.vue";
-const VendorContacts = defineAsyncComponent({
-  loader: () => import("@/components/vendor/VendorContacts.vue"),
-});
-import { useVendors } from "@/store/vendors";
 import { getVendorById, useVendorCategories } from "@/hooks/vendor";
 import axios from "axios";
 import { pick } from "@/lib/helper";
 import compare from "just-compare";
 import { useMessage } from "naive-ui";
+import { getPaymentTerms, getStates } from "@/hooks/common_query";
+
+const VendorContacts = defineAsyncComponent({
+  loader: () => import("@/components/vendor/VendorContacts.vue"),
+});
 
 const route = useRoute();
-const store = useVendors();
 const message = useMessage();
 
 const currentActiveField = ref(null);
@@ -51,9 +50,7 @@ const vendorCategoryOptions = computed(() =>
     []
   )
 );
-const { data: paymentTerms } = useQuery("paymentTerms", () =>
-  axios.get("/payment_terms").then((res) => res.data)
-);
+const { data: paymentTerms } = getPaymentTerms();
 const paymentTermOptions = computed(() =>
   paymentTerms.value?.map((payment) => ({
     label: payment.name,
@@ -61,19 +58,7 @@ const paymentTermOptions = computed(() =>
   }))
 );
 
-const { data: statesList } = useQuery(
-  "states",
-  () =>
-    axios
-      .get("/states")
-      .then((res) =>
-        res.data?.map((el) => ({ label: el.name, value: el.name }))
-      ),
-  {
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
-  }
-);
+const { data: statesList } = getStates();
 const { data: vendor } = getVendorById(routeParamId);
 const queryClient = useQueryClient();
 const { isLoading, mutateAsync } = useMutation(
