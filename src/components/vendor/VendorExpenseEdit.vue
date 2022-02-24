@@ -27,6 +27,7 @@ const initialForm = {
 };
 const form = ref({ ...initialForm });
 const formRef = ref(null);
+const showModal = ref(false);
 const searchVinSelect = ref("");
 const debouncedSearchVin = useDebounce(searchVinSelect, 500);
 
@@ -52,6 +53,18 @@ const { mutate: updateExpense, isLoading: updateExpenseLoading } = useMutation(
     },
   }
 );
+
+const { mutateAsync: deleteExpense, isLoading: deleteExpenseLoading } =
+  useMutation((id) => axios.delete("/expenses/" + id), {
+    onSuccess() {
+      emits("update:show", false);
+      queryClient.invalidateQueries([
+        "expensesByVendor",
+        String(form.value.vendor_id),
+      ]);
+      message.success("Expense deleted successfully.");
+    },
+  });
 
 // Queries
 const {
@@ -171,6 +184,8 @@ const handleExpenseTypeSelectScroll = (e) => {
     }
   }
 };
+
+const isLoading = computed(() => updateExpenseLoading || deleteExpenseLoading);
 </script>
 
 <template>
@@ -186,6 +201,7 @@ const handleExpenseTypeSelectScroll = (e) => {
         :label-width="90"
         size="medium"
         ref="formRef"
+        :disabled="isLoading"
       >
         <n-form-item label="VIN" path="deal_id" class="pt-0">
           <n-select
@@ -245,14 +261,37 @@ const handleExpenseTypeSelectScroll = (e) => {
         </n-form-item>
       </n-form>
       <template #footer>
-        <n-button
-          size="large"
-          :disabled="updateExpenseLoading"
-          :loading="updateExpenseLoading"
-          @click.prevent="submitForm"
-          >Update</n-button
-        >
+        <div class="flex gap-x-4">
+          <n-button
+            size="large"
+            :disabled="isLoading"
+            :loading="isLoading"
+            type="error"
+            @click="showModal = true"
+          >
+            Delete</n-button
+          >
+          <n-button
+            size="large"
+            :disabled="isLoading"
+            :loading="isLoading"
+            @click.prevent="submitForm"
+            >Update</n-button
+          >
+        </div>
       </template>
     </n-drawer-content>
   </n-drawer>
+  <n-modal
+    v-model:show="showModal"
+    @positive-click="deleteExpense(form?.id)"
+    content="Are you sure you want to delete?"
+    positive-text="Yes"
+    preset="dialog"
+    type="error"
+    @mask-click="showModal = false"
+    @negative-click="showModal = false"
+    negative-text="Cancel"
+    title="Delete"
+  />
 </template>

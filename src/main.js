@@ -24,6 +24,10 @@ import ObserveVisibility from "@/directives/observe-visibility";
 
 axios.defaults.baseURL = "https://gmtvinventory.com/api";
 
+/**
+ *
+ * @type VueQueryPluginOptions
+ */
 const vueQueryPluginOptions = {
   queryClientConfig: {
     defaultOptions: {
