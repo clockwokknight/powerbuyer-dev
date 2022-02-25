@@ -159,7 +159,7 @@ const errors = ref({});
 </script>
 
 <template>
-  <n-button @click="openDrawer = !openDrawer">
+  <n-button @click="showDrawer = !showDrawer">
     <n-icon>
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -324,8 +324,8 @@ const errors = ref({});
             v-model:value="form.comments"
           />
         </n-form-item>
-        <div class="sticky bottom-0 z-20 bg-white border-t py-3 mt-auto">
-          <n-button attr-type="submit" class="grid w-fit ml-auto">
+        <div class="sticky bottom-0 z-20 mt-auto border-t bg-white py-3">
+          <n-button attr-type="submit" class="ml-auto grid w-fit">
             Add
           </n-button>
         </div>

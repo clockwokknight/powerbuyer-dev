@@ -89,7 +89,7 @@ async function addVendor() {
 
 /**
  *
- * @param {Event} e Event
+ * @param {} e Event
  */
 const handleVendorCategorySelectScroll = (e) => {
   const currentTarget = e.currentTarget;
@@ -174,10 +174,7 @@ const rules = {
 };
 </script>
 <template>
-  <div
-    content="Create New Vendor"
-    v-tippy="{ placement: 'right', duration: 50 }"
-  >
+  <div content="Create New Vendor" v-tippy="{ placement: 'right', duration: 50 }">
     <n-button @click="showDrawer = true">
       <n-icon>
         <svg
