@@ -14,6 +14,8 @@ import MaskedInput from "@/components/common/MaskedInput.vue";
 import VendorExpensesItems from "@/components/vendor/VendorExpensesItems.vue";
 import VendorExpenses from "@/components/vendor/VendorExpenses.vue";
 import VendorPayments from "@/components/vendor/VendorPayments.vue";
+import CustomInput from "@/components/common/CustomInput.vue";
+import Tabs from "@/components/common/Tabs.vue";
 
 const VendorContacts = defineAsyncComponent({
   loader: () => import("@/components/vendor/VendorContacts.vue"),
@@ -27,6 +29,25 @@ const currentActiveField = ref(null);
 const routeParamId = ref(route.params?.id);
 
 let form = reactive({});
+
+const vendorTabs = ref([
+  {
+    title: "EXPENSES",
+    value: "expenses",
+  },
+  {
+    title: "EXPENSE ITEMS",
+    value: "expense-items",
+  },
+  {
+    title: "PAYMENTS",
+    value: "payments",
+  },
+  {
+    title: "CONTACTS",
+    value: "contacts",
+  },
+]);
 
 const { data: vendorCategory } = useVendorCategories();
 const vendorCategoryOptions = computed(() =>
@@ -115,12 +136,158 @@ function submitValue(key) {
 </script>
 
 <template>
-  <div class="mt-4 px-4 pb-8">
-    <div class="__vendor-card rounded-lg border-4 bg-white p-12">
-      <!-- left side -->
+  <div class="__vendor-card grid grid-cols-2 rounded-xl border-2 bg-white p-12">
+    <!-- left side -->
 
-      <!-- right side -->
+    <div class="__form">
+      <h3 class="font-bold translate-x-4 mb-4">VENDOR</h3>
 
+      <CustomInput
+        type="header"
+        :value="vendor?.name"
+        v-model="form.name"
+        placeholder="Company Name"
+        @save="submitValue('name')"
+        @cancel="resetValue('name')"
+        @focus="currentActiveField = 'name'"
+      />
+
+      <div class="grid grid-cols-12 gap-4 mt-12">
+        <!-- row 1 -->
+        <div class="col-span-6">
+          <CustomInput
+            label="Address"
+            :value="vendor?.address_one"
+            v-model="form.address_one"
+            placeholder=""
+            @save="submitValue('address_one')"
+            @cancel="resetValue('address_one')"
+            @focus="currentActiveField = 'address_one'"
+          />
+        </div>
+        <div class="col-span-6">
+          <CustomInput
+            label="Address 2"
+            :value="vendor?.address_two"
+            v-model="form.address_two"
+            placeholder=""
+            @save="submitValue('address_two')"
+            @cancel="resetValue('address_two')"
+            @focus="currentActiveField = 'address_two'"
+          />
+        </div>
+        <!-- row 2 -->
+        <div class="col-span-4">
+          <CustomInput
+            label="City"
+            :value="vendor?.city"
+            v-model="form.city"
+            placeholder=""
+            @save="submitValue('city')"
+            @cancel="resetValue('city')"
+            @focus="currentActiveField = 'city'"
+          />
+        </div>
+        <div class="col-span-4">
+          <CustomInput
+            type="select"
+            label="State"
+            :options="stateList"
+            :value="vendor?.state"
+            v-model="form.state"
+            placeholder=""
+            @save="submitValue('state')"
+            @cancel="resetValue('state')"
+            @focus="currentActiveField = 'state'"
+          />
+        </div>
+        <div class="col-span-4">
+          <CustomInput
+            label="Zip Code"
+            :value="vendor?.zip"
+            v-model="form.zip"
+            placeholder=""
+            @save="submitValue('zip')"
+            @cancel="resetValue('zip')"
+            @focus="currentActiveField = 'zip'"
+          />
+        </div>
+        <!-- row 3 -->
+        <div class="col-span-4">
+          <CustomInput
+            label="Email"
+            :value="vendor?.email"
+            v-model="form.email"
+            placeholder=""
+            @save="submitValue('email')"
+            @cancel="resetValue('email')"
+            @focus="currentActiveField = 'email'"
+          />
+        </div>
+        <div class="col-span-4">
+          <CustomInput
+            label="Phone"
+            placeholder="(###) ### ####"
+            :value="vendor?.phone"
+            v-model="form.phone"
+            @save="submitValue('phone')"
+            @cancel="resetValue('phone')"
+            @focus="currentActiveField = 'phone'"
+          />
+        </div>
+        <div class="col-span-4">
+          <CustomInput
+            label="Fax"
+            :value="vendor?.fax"
+            v-model="form.fax"
+            placeholder=""
+            @save="submitValue('fax')"
+            @cancel="resetValue('fax')"
+            @focus="currentActiveField = 'fax'"
+          />
+        </div>
+        <!-- row 4 -->
+        <div class="col-span-4">
+          <CustomInput
+            label="DIN"
+            :value="vendor?.din"
+            v-model="form.din"
+            placeholder=""
+            @save="submitValue('din')"
+            @cancel="resetValue('din')"
+            @focus="currentActiveField = 'din'"
+          />
+        </div>
+        <div class="col-span-4">
+          <CustomInput
+            label="Tax ID"
+            :value="vendor?.tax_id_number"
+            v-model="form.text_id_number"
+            placeholder=""
+            @save="submitValue('tax_id_number')"
+            @cancel="resetValue('tax_id_number')"
+            @focus="currentActiveField = 'tax_id_number'"
+          />
+        </div>
+        <div class="col-span-4">
+          <CustomInput
+            type="select"
+            label="Vendor Category"
+            :options="opts"
+            :value="vendor?.vendor_category_id"
+            v-model="form.vendor_category_id"
+            placeholder=""
+            @save="submitValue('vendor_category_id')"
+            @cancel="resetValue('vendor_category_id')"
+            @focus="currentActiveField = 'vendor_category_id'"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- right side -->
+
+    <div class="flex flex-col justify-between">
       <div class="__invoice-info">
         <div class="flex justify-end">
           <p class="text-sm font-bold">Open Invoices</p>
@@ -129,7 +296,6 @@ function submitValue(key) {
           <p class="font-bold text-[2.5rem]">$10,193</p>
         </div>
       </div>
-
       <div class="__invoice-buttons flex justify-end items-center w-full">
         <button class="__invoice-button bg-lightergray hover:bg-lightgray text-primary">
           <svg class="fill-primary" viewBox="0 0 24 24">
@@ -159,14 +325,15 @@ function submitValue(key) {
     </div>
   </div>
 
-  <Suspense>
+  <Tabs :items="vendorTabs" class="bg-white rounded-xl border-2 border-gray-200 mt-12" />
+
+  <!--Suspense>
     <template #default><VendorContacts /></template>
     <template #fallback> Loading... </template>
   </Suspense>
-
   <VendorExpensesItems />
   <VendorExpenses />
-  <VendorPayments />
+  <VendorPayments /-->
 </template>
 
 <style lang="scss">
