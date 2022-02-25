@@ -34,11 +34,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="__tabs h-20 px-4 w-full flex">
+  <div class="__tabs h-[60px] px-4 w-full flex">
     <div
       v-for="(item, index) in tabItems"
       :key="index"
-      class="__tab-item h-full max-w-md text-center flex flex-col justify-center items-center px-2 mx-4 cursor-pointer"
+      class="__tab-item h-full max-w-md text-center flex flex-col justify-center items-center px-1 mx-4 cursor-pointer"
       @click="
         (e) => {
           $emit('click', item.value);
@@ -48,7 +48,7 @@ onMounted(() => {
     >
       <span class="tracking-widest font-bold text-xs">{{ item.title }}</span>
       <div
-        class="__indicator duration-200 h-1 bg-transparent translate-y-[29px]"
+        class="__indicator duration-200 h-1 bg-transparent translate-y-[19px]"
         :class="active === index ? '!w-16 !bg-primary' : 'w-0 bg-gray-300'"
       ></div>
     </div>
