@@ -1,16 +1,15 @@
 <script setup>
 import { onUpdated, ref, watch, onMounted } from "vue";
-import { useInfiniteQuery, useQuery } from "vue-query";
-import axios from "axios";
-import { TabGroup, TabList, Tab } from "@headlessui/vue";
 import { useRoute, useRouter } from "vue-router";
-import { useDebounceFn, useDebounce } from "@vueuse/core";
-
+import { useInfiniteQuery, useQuery } from "vue-query";
 import { useLoadingBar } from "naive-ui";
-import VendorList from "@/components/vendor/VendorList.vue";
-
-import AddVendor from "@/components/vendor/AddVendor.vue";
+import { TabGroup, TabList, Tab } from "@headlessui/vue";
+import { useDebounceFn, useDebounce } from "@vueuse/core";
 import { getVendorById, getVendors } from "@/hooks/vendor";
+import axios from "axios";
+
+import VendorList from "@/components/vendor/VendorList.vue";
+import AddVendor from "@/components/vendor/AddVendor.vue";
 import Spinner from "@/components/common/Spinner.vue";
 
 const router = useRouter();
@@ -27,8 +26,7 @@ const showScrollArrow = ref(false);
 const scrollWrapper = ref(null);
 // Left and right Click Arrow Scroll
 const ifScrollArrowNeeded = useDebounceFn(() => {
-  const wrapperWidth =
-    tabListButtonWrapper.value?.getBoundingClientRect().width;
+  const wrapperWidth = tabListButtonWrapper.value?.getBoundingClientRect().width;
   const tabWidth = tabListButton.value?.getBoundingClientRect().width;
 
   showScrollArrow.value = wrapperWidth < tabWidth;
@@ -153,9 +151,7 @@ const scrollTabToView = useDebounceFn(() => {
   const tabListChildren = tabListButton.value.children;
   for (let i = 0; i < tabListChildren.length; i++) {
     const tabIndex = parseInt(
-      tabListChildren[i]
-        .getElementsByTagName("button")[0]
-        .getAttribute("tabindex")
+      tabListChildren[i].getElementsByTagName("button")[0].getAttribute("tabindex")
     );
     if (tabIndex === 0) {
       tabListChildren[i].scrollIntoView({ behavior: "smooth" });
@@ -166,8 +162,9 @@ const scrollTabToView = useDebounceFn(() => {
 }, 100);
 
 // Vendor Search Result
-const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
-  useQuery(["vendorSearch", debouncedSearchText], ({ queryKey }) => {
+const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
+  ["vendorSearch", debouncedSearchText],
+  ({ queryKey }) => {
     if (queryKey[1] === "") return null;
     else
       return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => {
@@ -176,12 +173,14 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
         }
         return res.data;
       });
-  });
+  }
+);
 </script>
 
 <template>
   <div class="vendors flex w-full">
     <!-- Don't show PageItemsList on dashboard  | Current Page List -->
+
     <aside
       class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-y-auto overflow-x-hidden bg-white"
     >
@@ -203,9 +202,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
           </div>
           <div content="Filter" v-tippy="{ placement: 'right', duration: 50 }">
             <svg
-              class="mt-1 h-6 w-6 cursor-pointer text-gray-400 hover:text-[#027bff]"
-              xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink"
+              class="mt-1 h-6 w-6 cursor-pointer text-gray-400 hover:text-primary"
               viewBox="0 0 24 24"
             >
               <path
@@ -261,7 +258,9 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
         </ul>
       </div>
     </aside>
+
     <!-- Main Tabs App Content -->
+
     <section class="h-screen w-[calc(100vw-335px)]">
       <TabGroup :selected-index="selectedIndex" @change="tabChanged">
         <header class="relative flex items-end" ref="tabListButtonWrapper">
@@ -270,13 +269,10 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
             ref="scrollWrapper"
           >
             <TabList>
-              <nav
-                ref="tabListButton"
-                class="flex min-w-max flex-nowrap gap-x-2"
-              >
+              <nav ref="tabListButton" class="flex min-w-max flex-nowrap gap-x-2">
                 <template
-                  v-for="tab in tablist"
                   v-if="tablist.length >= 1"
+                  v-for="tab in tablist"
                   :key="tab?.id"
                 >
                   <router-link
@@ -290,9 +286,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
                       <tab
                         class="max-w-xs scroll-mt-2 focus:outline-none"
                         :class="[
-                          isActive
-                            ? 'bg-primary text-white'
-                            : 'bg-white text-gray-700',
+                          isActive ? 'bg-primary text-white' : 'bg-white text-gray-700',
                         ]"
                       >
                         <a
@@ -306,9 +300,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
                       <span
                         class="absolute inset-y-0 right-0 top-[1px] z-10 flex cursor-pointer items-center rounded-r pr-1"
                         @click.stop="closeTab(tab.id)"
-                        :class="[
-                          isActive ? 'bg-primary text-white' : 'bg-slate-white',
-                        ]"
+                        :class="[isActive ? 'bg-primary text-white' : 'bg-slate-white']"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -391,10 +383,8 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
         </header>
       </TabGroup>
       <!-- Main Body Content-->
-      <div
-        class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden border-t-2"
-      >
-        <main class="min-h-full bg-white pt-10">
+      <div class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden border-t-2">
+        <main class="min-h-full bg-lightergray p-24">
           <router-view />
         </main>
       </div>
