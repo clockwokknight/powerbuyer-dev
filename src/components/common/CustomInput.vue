@@ -178,7 +178,7 @@ function handleButtonHover(name) {}
         "
       >
         <div
-          class="flex items-center duration-200 w-full rounded-lg border-[1px]"
+          class="flex items-center duration-200 w-full rounded-md border-[1px]"
           :class="`
             ${saved && 'ping'}
             ${

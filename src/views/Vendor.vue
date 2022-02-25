@@ -160,20 +160,21 @@ onMounted(() => {
   >
     <!-- left side -->
 
-    <div class="__form col-span-8">
-      <h3 class="font-bold translate-x-4 mb-4">VENDOR</h3>
+    <div class="__form flex flex-col justify-between col-span-8">
+      <div class="__title">
+        <h3 class="font-bold translate-x-4 mb-4">VENDOR</h3>
+        <CustomInput
+          type="header"
+          :value="vendor?.name"
+          v-model="form.name"
+          placeholder="Company Name"
+          @save="submitValue('name')"
+          @cancel="resetValue('name')"
+          @focus="currentActiveField = 'name'"
+        />
+      </div>
 
-      <CustomInput
-        type="header"
-        :value="vendor?.name"
-        v-model="form.name"
-        placeholder="Company Name"
-        @save="submitValue('name')"
-        @cancel="resetValue('name')"
-        @focus="currentActiveField = 'name'"
-      />
-
-      <div class="grid grid-cols-12 gap-4 mt-12">
+      <div class="__form grid grid-cols-12 gap-4 mt-12">
         <!-- row 1 -->
         <div class="col-span-6">
           <CustomInput
@@ -309,22 +310,37 @@ onMounted(() => {
     <!-- right side -->
 
     <div class="col-span-4 flex flex-col justify-between items-end">
-      <div class="__invoice-info">
+      <div class="__invoice-info max-w-[232px]">
         <div class="flex justify-end">
           <p class="text-sm font-bold">Open Invoices</p>
         </div>
-        <div class="flex justify-end pb-20">
+        <div class="flex justify-end">
           <p class="font-bold text-2xl">$10,193</p>
         </div>
       </div>
 
-      <div class="__invoice-buttons flex flex-col justify-center items-end min-w-max">
-        <button class="__invoice-button">
-          <span><b>+</b> Add payment</span>
-        </button>
-        <button class="__invoice-button">
-          <span><b>+</b> Create expense</span>
-        </button>
+      <div class="flex-col justify-between align-end max-w-[232px]">
+        <CustomInput
+          type="select"
+          label="Payment Terms"
+          :options="paymentTermOptions"
+          :value="vendor?.payment_terms"
+          v-model="form.payment_terms"
+          placeholder=""
+          @save="submitValue('payment_terms')"
+          @cancel="resetValue('payment_terms')"
+          @focus="currentActiveField = 'payment_terms'"
+        />
+        <div
+          class="__invoice-buttons flex flex-col justify-center items-end min-w-max max-w-full mt-[60px]"
+        >
+          <button class="__invoice-button">
+            <span><b>+</b> Add payment</span>
+          </button>
+          <button class="__invoice-button">
+            <span><b>+</b> Create expense</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
