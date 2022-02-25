@@ -1,7 +1,7 @@
 <script setup>
-import { computed, defineAsyncComponent, reactive, ref, watch } from "vue";
+import { computed, onMounted, defineAsyncComponent, reactive, ref, watch } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { useMutation, useQueryClient } from "vue-query";
-import { useRoute } from "vue-router";
 import { getVendorById, useVendorCategories } from "@/hooks/vendor";
 import { pick } from "@/lib/helper";
 import { useMessage } from "naive-ui";
@@ -22,6 +22,8 @@ const VendorContacts = defineAsyncComponent({
 });
 
 const route = useRoute();
+const router = useRouter();
+
 const message = useMessage();
 const queryClient = useQueryClient();
 
@@ -137,11 +139,25 @@ function submitValue(key) {
   currentActiveField.value = null;
 }
 
+function handleTabClick(e) {
+  window.location.hash = e;
+}
+
+function handleScroll(e) {
+  console.log(e);
+}
+
+onMounted(() => {
+  console.log("mounted vendors");
+});
 // LOAD TABLE DATA
 </script>
 
 <template>
-  <div class="__vendor-card grid grid-cols-12 rounded-xl border-2 bg-white p-6">
+  <div
+    @scroll="handleScroll(e)"
+    class="__vendor-card grid grid-cols-12 rounded-xl border-2 bg-white p-6"
+  >
     <!-- left side -->
 
     <div class="__form col-span-8">
@@ -331,8 +347,9 @@ function submitValue(key) {
   </div>
 
   <Tabs
+    class="bg-white rounded-xl border-2 border-gray-200 mt-4 !sticky"
     :items="vendorTabs"
-    class="sticky bg-white rounded-xl border-2 border-gray-200 mt-4"
+    @click="handleTabClick"
   />
 
   <VendorExpenses />

@@ -176,7 +176,7 @@ function handleButtonHover(name) {}
         "
       >
         <div
-          class="flex items-center duration-200 w-full rounded-xl border-2"
+          class="flex items-center duration-200 w-full rounded-lg border-2"
           :class="`
             ${saved && 'ping'}
             ${
@@ -241,7 +241,7 @@ function handleButtonHover(name) {}
             <input
               ref="input"
               v-if="type === 'header'"
-              class="bg-transparent outline-none w-full pl-1 py-1 text-3xl font-bold placeholder:text-gray-300"
+              class="text-ellipsis bg-transparent outline-none w-full pl-1 py-1 text-3xl font-bold placeholder:text-gray-300"
               :value="value"
               :placeholder="placeholder || 'Header'"
               :disabled="!editing"
@@ -358,7 +358,7 @@ function handleButtonHover(name) {}
 <style>
 .n-base-suffix__arrow {
   transition: 400ms cubic-bezier(0.22, 1, 0.36, 1) !important;
-  transform: scale(1.5) translateX(v-bind(caretX)) !important;
+  transform: scale(1.2) translateX(v-bind(caretX)) !important;
 }
 .n-base-suffix__arrow svg path {
   fill: v-bind(caretFill) !important;

@@ -128,8 +128,9 @@ const onDeleteExpenseItem = (id) => {
   visibleForm.value = false;
 };
 </script>
+
 <template>
-  <div class="-mt-4 font-sans antialiased">
+  <div id="expense-items" class="-mt-4 font-sans antialiased">
     <div class="flex justify-end items-center translate-y-[68px] pr-10">
       <n-button @click="showCreateForm">
         <n-icon>

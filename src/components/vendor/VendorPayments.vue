@@ -1,111 +1,3 @@
-<template>
-  <n-message-provider>
-    <div class="-mt-4 font-sans antialiased">
-      <div class="flex justify-end items-center translate-y-[68px] pr-10">
-        <VendorPaymentsAdd />
-      </div>
-
-      <div class="rounded-xl border-2 py-8 px-8 bg-white">
-        <div><p class="text-2xl font-bold pb-8">Payments</p></div>
-        <n-data-table
-          class="rounded-lg"
-          :columns="columns"
-          :data="tableData"
-          :pagination="pagination"
-          :bordered="false"
-        />
-      </div>
-    </div>
-
-    <n-drawer v-model:show="showOuterRef" :width="500">
-      <n-drawer-content title="Payment Details">
-        <n-form :model="formValue" :label-width="90" size="medium" ref="formRef">
-          <n-form-item label="Inv #" class="pr-12">
-            <UpdatableButtonWrapper
-              v-model="formValue.invoice_number"
-              :reset-value="formValue.invoice_number"
-              :shouldUpdate="show.invoice_number"
-              @revert="handleKeyDown('invoice_number')"
-              @save="(val) => updateVendor('invoice_number', val)"
-            >
-              <n-input
-                style="width: 400px"
-                class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0"
-                :default-value="formValue.invoice_number"
-                type="text"
-                v-model:value="formValue.invoice_number"
-                :loading="isLoading"
-                @keyup="handleKeyUp('invoice_number')"
-              />
-            </UpdatableButtonWrapper>
-          </n-form-item>
-          <n-form-item label="Check Number" class="pr-12">
-            <UpdatableButtonWrapper
-              v-model="formValue.check_number"
-              :reset-value="formValue.check_number"
-              :shouldUpdate="show.check_number"
-              @revert="handleKeyDown('check_number')"
-              @save="(val) => updateVendor('check_number', val)"
-            >
-              <n-input
-                style="width: 400px"
-                class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0"
-                :default-value="formValue.check_number"
-                type="text"
-                v-model:value="formValue.check_number"
-                :loading="isLoading"
-                @keyup="handleKeyUp('check_number')"
-              />
-            </UpdatableButtonWrapper>
-          </n-form-item>
-
-          <n-form-item label="Amount" class="pr-12">
-            <UpdatableButtonWrapper
-              v-model="formValue.amount"
-              :reset-value="formValue.amount"
-              :shouldUpdate="show.amount"
-              @revert="handleKeyDown('amount')"
-              @save="(val) => updateVendor('amount', val)"
-            >
-              <n-input
-                style="width: 400px"
-                class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0"
-                :default-value="formValue.amount"
-                type="text"
-                v-model:value="formValue.amount"
-                :loading="isLoading"
-                placeholder="Enter Amount"
-                @keyup="handleKeyUp('amount')"
-              />
-            </UpdatableButtonWrapper>
-          </n-form-item>
-
-          <n-form-item label="Status" class="pr-12">
-            <UpdatableButtonWrapper
-              v-model="formValue.payment_status_id"
-              :reset-value="formValue.payment_status_id"
-              :shouldUpdate="show.payment_status_id"
-              @revert="handleKeyDown('payment_status_id')"
-              @save="(val) => updateVendor('payment_status_id', val)"
-            >
-              <n-input
-                style="width: 400px"
-                class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0"
-                :default-value="formValue.payment_status_id"
-                type="text"
-                placeholder="Enter Type"
-                v-model:value="formValue.payment_status_id"
-                :loading="isLoading"
-                @keyup="handleKeyUp('payment_status_id')"
-              />
-            </UpdatableButtonWrapper>
-          </n-form-item>
-        </n-form>
-      </n-drawer-content>
-    </n-drawer>
-  </n-message-provider>
-</template>
-
 <script setup>
 import { h, defineComponent, ref, watch, onUpdated } from "vue";
 import { useRoute } from "vue-router";
@@ -225,3 +117,113 @@ const columns = [
 ];
 const pagination = { pageSize: 10 };
 </script>
+
+<template>
+  <div id="payments">
+    <n-message-provider>
+      <div class="-mt-4 font-sans antialiased">
+        <div class="flex justify-end items-center translate-y-[68px] pr-10">
+          <VendorPaymentsAdd />
+        </div>
+
+        <div class="rounded-xl border-2 py-8 px-8 bg-white">
+          <div><p class="text-2xl font-bold pb-8">Payments</p></div>
+          <n-data-table
+            class="rounded-lg"
+            :columns="columns"
+            :data="tableData"
+            :pagination="pagination"
+            :bordered="false"
+          />
+        </div>
+      </div>
+
+      <n-drawer v-model:show="showOuterRef" :width="500">
+        <n-drawer-content title="Payment Details">
+          <n-form :model="formValue" :label-width="90" size="medium" ref="formRef">
+            <n-form-item label="Inv #" class="pr-12">
+              <UpdatableButtonWrapper
+                v-model="formValue.invoice_number"
+                :reset-value="formValue.invoice_number"
+                :shouldUpdate="show.invoice_number"
+                @revert="handleKeyDown('invoice_number')"
+                @save="(val) => updateVendor('invoice_number', val)"
+              >
+                <n-input
+                  style="width: 400px"
+                  class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0"
+                  :default-value="formValue.invoice_number"
+                  type="text"
+                  v-model:value="formValue.invoice_number"
+                  :loading="isLoading"
+                  @keyup="handleKeyUp('invoice_number')"
+                />
+              </UpdatableButtonWrapper>
+            </n-form-item>
+            <n-form-item label="Check Number" class="pr-12">
+              <UpdatableButtonWrapper
+                v-model="formValue.check_number"
+                :reset-value="formValue.check_number"
+                :shouldUpdate="show.check_number"
+                @revert="handleKeyDown('check_number')"
+                @save="(val) => updateVendor('check_number', val)"
+              >
+                <n-input
+                  style="width: 400px"
+                  class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0"
+                  :default-value="formValue.check_number"
+                  type="text"
+                  v-model:value="formValue.check_number"
+                  :loading="isLoading"
+                  @keyup="handleKeyUp('check_number')"
+                />
+              </UpdatableButtonWrapper>
+            </n-form-item>
+
+            <n-form-item label="Amount" class="pr-12">
+              <UpdatableButtonWrapper
+                v-model="formValue.amount"
+                :reset-value="formValue.amount"
+                :shouldUpdate="show.amount"
+                @revert="handleKeyDown('amount')"
+                @save="(val) => updateVendor('amount', val)"
+              >
+                <n-input
+                  style="width: 400px"
+                  class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0"
+                  :default-value="formValue.amount"
+                  type="text"
+                  v-model:value="formValue.amount"
+                  :loading="isLoading"
+                  placeholder="Enter Amount"
+                  @keyup="handleKeyUp('amount')"
+                />
+              </UpdatableButtonWrapper>
+            </n-form-item>
+
+            <n-form-item label="Status" class="pr-12">
+              <UpdatableButtonWrapper
+                v-model="formValue.payment_status_id"
+                :reset-value="formValue.payment_status_id"
+                :shouldUpdate="show.payment_status_id"
+                @revert="handleKeyDown('payment_status_id')"
+                @save="(val) => updateVendor('payment_status_id', val)"
+              >
+                <n-input
+                  style="width: 400px"
+                  class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0"
+                  :default-value="formValue.payment_status_id"
+                  type="text"
+                  placeholder="Enter Type"
+                  v-model:value="formValue.payment_status_id"
+                  :loading="isLoading"
+                  @keyup="handleKeyUp('payment_status_id')"
+                />
+              </UpdatableButtonWrapper>
+            </n-form-item>
+          </n-form>
+        </n-drawer-content>
+      </n-drawer>
+    </n-message-provider>
+  </div>
+</template>

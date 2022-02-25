@@ -41,7 +41,7 @@ onMounted(() => {
       class="__tab-item h-full max-w-md text-center flex flex-col justify-center items-center px-2 mx-4 cursor-pointer"
       @click="
         (e) => {
-          $emit('click', e);
+          $emit('click', item.value);
           active = index;
         }
       "
