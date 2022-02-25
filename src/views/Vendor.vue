@@ -36,12 +36,12 @@ const vendorTabs = ref([
     value: "#expenses",
   },
   {
-    title: "EXPENSE ITEMS",
-    value: "#expense-items",
-  },
-  {
     title: "PAYMENTS",
     value: "#payments",
+  },
+  {
+    title: "EXPENSE ITEMS",
+    value: "#expense-items",
   },
   {
     title: "CONTACTS",
@@ -141,10 +141,10 @@ function submitValue(key) {
 </script>
 
 <template>
-  <div class="__vendor-card grid grid-cols-2 rounded-xl border-2 bg-white p-12">
+  <div class="__vendor-card grid grid-cols-12 rounded-xl border-2 bg-white p-6">
     <!-- left side -->
 
-    <div class="__form">
+    <div class="__form col-span-8">
       <h3 class="font-bold translate-x-4 mb-4">VENDOR</h3>
 
       <CustomInput
@@ -292,7 +292,7 @@ function submitValue(key) {
 
     <!-- right side -->
 
-    <div class="flex flex-col justify-between">
+    <div class="col-span-4 flex flex-col justify-between">
       <div class="__invoice-info">
         <div class="flex justify-end">
           <p class="text-sm font-bold">Open Invoices</p>
@@ -301,7 +301,7 @@ function submitValue(key) {
           <p class="font-bold text-[2.5rem]">$10,193</p>
         </div>
       </div>
-      <div class="__invoice-buttons flex justify-end items-center w-full">
+      <div class="__invoice-buttons flex flex-col justify-center items-end w-full">
         <button class="__invoice-button bg-lightergray hover:bg-lightgray text-primary">
           <svg class="fill-primary" viewBox="0 0 24 24">
             <path
@@ -330,21 +330,24 @@ function submitValue(key) {
     </div>
   </div>
 
-  <Tabs :items="vendorTabs" class="bg-white rounded-xl border-2 border-gray-200 mt-12" />
+  <Tabs
+    :items="vendorTabs"
+    class="sticky bg-white rounded-xl border-2 border-gray-200 mt-4"
+  />
 
+  <VendorExpenses />
+  <VendorPayments />
+  <VendorExpensesItems />
   <Suspense>
     <template #default><VendorContacts /></template>
     <template #fallback> Loading... </template>
   </Suspense>
-  <VendorExpensesItems />
-  <VendorExpenses />
-  <VendorPayments />
 </template>
 
 <style lang="scss">
 .__invoice-button {
   transition-timing-function: ease;
-  @apply h-12 ml-6 flex justify-between items-center duration-[300ms] pl-2 pr-6 py-2 rounded-full tracking-wider font-bold;
+  @apply h-10 mt-[14px] flex justify-between items-center duration-[300ms] pl-3 pr-6 py-[11px] rounded-full font-bold;
   &:hover {
     svg {
       @apply scale-[1.3] rotate-90;
@@ -352,7 +355,7 @@ function submitValue(key) {
   }
   svg {
     transition-timing-function: $overshoot;
-    @apply mr-4 h-full duration-[400ms];
+    @apply mr-2 h-full duration-[400ms];
   }
 }
 </style>

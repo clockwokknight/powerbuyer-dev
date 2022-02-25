@@ -180,7 +180,6 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
 <template>
   <div class="vendors flex w-full">
     <!-- Don't show PageItemsList on dashboard  | Current Page List -->
-
     <aside
       class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-y-auto overflow-x-hidden bg-white"
     >
@@ -384,7 +383,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
       </TabGroup>
       <!-- Main Body Content-->
       <div class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden border-t-2">
-        <main class="min-h-full bg-lightergray p-24">
+        <main class="min-h-full bg-lightergray p-6">
           <router-view />
         </main>
       </div>

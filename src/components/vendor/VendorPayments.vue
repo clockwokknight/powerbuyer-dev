@@ -1,11 +1,11 @@
 <template>
   <n-message-provider>
-    <div class="mt-4 font-sans antialiased">
+    <div class="-mt-4 font-sans antialiased">
       <div class="flex justify-end items-center translate-y-[68px] pr-10">
         <VendorPaymentsAdd />
       </div>
 
-      <div class="rounded-lg border-2 py-8 px-8 bg-white">
+      <div class="rounded-xl border-2 py-8 px-8 bg-white">
         <div><p class="text-2xl font-bold pb-8">Payments</p></div>
         <n-data-table
           class="rounded-lg"

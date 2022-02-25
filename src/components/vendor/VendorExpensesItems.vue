@@ -129,7 +129,7 @@ const onDeleteExpenseItem = (id) => {
 };
 </script>
 <template>
-  <div class="mt-4 font-sans antialiased">
+  <div class="-mt-4 font-sans antialiased">
     <div class="flex justify-end items-center translate-y-[68px] pr-10">
       <n-button @click="showCreateForm">
         <n-icon>
@@ -156,7 +156,7 @@ const onDeleteExpenseItem = (id) => {
       @delete="onDeleteExpenseItem"
     />
 
-    <div class="rounded-lg border-2 py-8 px-8 bg-white">
+    <div class="rounded-xl border-2 py-8 px-8 bg-white">
       <div><p class="pb-8 text-2xl font-bold">Expense Items</p></div>
       <n-data-table
         class="rounded-lg"

@@ -138,12 +138,12 @@ const columns = [
 const pagination = { pageSize: 10 };
 </script>
 <template>
-  <div class="_vendor-contacts mt-4">
+  <div class="_vendor-contacts -mt-4">
     <div class="flex justify-end items-center translate-y-[68px] pr-10">
       <VendorAdd />
     </div>
 
-    <div class="rounded-lg border-2 py-8 px-8 bg-white">
+    <div class="rounded-xl border-2 py-8 px-8 bg-white">
       <div><p class="pb-8 text-2xl font-bold">Contacts</p></div>
       <n-data-table
         class="rounded-lg"

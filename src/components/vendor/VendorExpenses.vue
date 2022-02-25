@@ -102,12 +102,12 @@ const showEditExpenseForm = (row) => {
     :initial-data="formRow"
     @update:show="visibleEditForm = false"
   />
-  <div class="mt-4 font-sans">
+  <div class="-mt-4 font-sans">
     <div class="flex justify-end items-center translate-y-[68px] pr-10">
       <VendorExpensesAdd />
     </div>
 
-    <div class="rounded-lg border-2 py-8 px-8 bg-white">
+    <div class="rounded-xl border-2 py-8 px-8 bg-white">
       <div><p class="pb-8 text-2xl font-bold">Expenses</p></div>
       <n-data-table
         class="rounded-lg"
