@@ -347,7 +347,7 @@ onMounted(() => {
   </div>
 
   <Tabs
-    class="bg-white rounded-xl border-2 border-gray-200 mt-4 !sticky"
+    class="bg-white rounded-xl border-2 border-gray-200 mt-4 sticky top-0 z-50"
     :items="vendorTabs"
     @click="handleTabClick"
   />
