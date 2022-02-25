@@ -138,7 +138,7 @@ const pagination = { pageSize: 10 };
 </script>
 
 <template>
-  <div id="contacts" class="_vendor-contacts">
+  <div id="contacts" class="_vendor-contacts scroll-smooth">
     <div class="-mt-4">
       <div class="flex justify-end items-center translate-y-[68px] pr-10">
         <VendorAdd />

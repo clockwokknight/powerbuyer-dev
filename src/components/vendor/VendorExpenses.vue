@@ -98,7 +98,7 @@ const showEditExpenseForm = (row) => {
 </script>
 
 <template>
-  <div id="expenses">
+  <div id="expenses" class="scroll-smooth">
     <VendorExpenseEdit
       :show-drawer="visibleEditForm"
       :initial-data="formRow"

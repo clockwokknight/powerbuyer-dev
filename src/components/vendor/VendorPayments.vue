@@ -119,7 +119,7 @@ const pagination = { pageSize: 10 };
 </script>
 
 <template>
-  <div id="payments">
+  <div id="payments" class="scroll-smooth">
     <n-message-provider>
       <div class="-mt-4 font-sans antialiased">
         <div class="flex justify-end items-center translate-y-[68px] pr-10">
