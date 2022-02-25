@@ -5,17 +5,13 @@ import axios from "axios";
 import { TabGroup, TabList, Tab } from "@headlessui/vue";
 import { useRoute, useRouter } from "vue-router";
 import { useDebounceFn, useDebounce } from "@vueuse/core";
-
-import { useLoadingBar } from "naive-ui";
 import VendorList from "@/components/vendor/VendorList.vue";
 
 import AddVendor from "@/components/vendor/AddVendor.vue";
 import { getVendorById, getVendors } from "@/hooks/vendor";
-import Spinner from "@/components/common/Spinner.vue";
 
 const router = useRouter();
 const route = useRoute();
-const loadingBar = useLoadingBar();
 
 const searchText = ref("");
 const debouncedSearchText = useDebounce(searchText, 500);
@@ -110,7 +106,6 @@ const closeTab = (id) => {
   }
 };
 const addTab = (vendor) => {
-  loadingBar.start();
   const index = findTabIndex(vendor.id);
   if (index === -1) {
     tablist.value = tablist.value
@@ -140,7 +135,6 @@ const tabChanged = (index) => {
 };
 
 watch(selectedIndex, (newValue) => {
-  loadingBar.start();
   if (
     tablist.value.length >= 1 &&
     parseInt(route.params?.id) !== tablist.value[newValue].id
@@ -162,7 +156,6 @@ const scrollTabToView = useDebounceFn(() => {
       break;
     }
   }
-  loadingBar.finish();
 }, 100);
 
 // Vendor Search Result
@@ -255,7 +248,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
               v-if="hasVendorNextPage"
               class="grid w-full place-content-center p-4"
             >
-              <Spinner />
+              <n-spin size="small" />
             </button>
           </template>
         </ul>

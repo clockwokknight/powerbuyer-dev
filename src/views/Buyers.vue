@@ -5,16 +5,12 @@ import axios from "axios";
 import { TabGroup, TabList, Tab } from "@headlessui/vue";
 import { useRoute, useRouter } from "vue-router";
 import { useDebounceFn, useDebounce } from "@vueuse/core";
-
-import { useLoadingBar } from "naive-ui";
-
 import BuyerList from "@/components/buyer/BuyerList.vue";
 import AddBuyer from "@/components/buyer/AddBuyer.vue";
 import { getBuyers } from "@/hooks/buyer";
 
 const router = useRouter();
 const route = useRoute();
-const loadingBar = useLoadingBar();
 
 const searchText = ref("");
 const debouncedSearchText = useDebounce(searchText, 500);
@@ -29,7 +25,6 @@ const ifScrollArrowNeeded = useDebounceFn(() => {
   const wrapperWidth =
     tabListButtonWrapper.value?.getBoundingClientRect().width;
   const tabWidth = tabListButton.value?.getBoundingClientRect().width;
-
   showScrollArrow.value = wrapperWidth < tabWidth;
 }, 500);
 
@@ -120,7 +115,6 @@ const closeTab = (id) => {
   }
 };
 const addTab = (buyer) => {
-  loadingBar.start();
   const index = findTabIndex(buyer.id);
   if (index === -1) {
     tablist.value = tablist.value
@@ -156,7 +150,6 @@ const tabChanged = (index) => {
 };
 
 watch(selectedIndex, (newValue) => {
-  loadingBar.start();
   if (
     tablist.value.length >= 1 &&
     parseInt(route.params?.id) !== tablist.value[newValue].id
@@ -178,7 +171,6 @@ const scrollTabToView = useDebounceFn(() => {
       break;
     }
   }
-  loadingBar.finish();
 }, 100);
 
 // Vendor Search Result
@@ -196,22 +188,14 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
 </script>
 
 <template>
-  <div class="flex w-full vendors">
+  <div class="vendors flex w-full">
     <!-- Don't show PageItemsList on dashboard  | Current Page List -->
     <div
-      class="
-        relative
-        pageItemsList
-        min-w-[275px]
-        max-w-[275px]
-        h-screen
-        overflow-y-auto overflow-x-hidden
-        bg-white
-      "
+      class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-y-auto overflow-x-hidden bg-white"
     >
       <!-- List search & filters -->
-      <div class="sticky top-0 p-3 bg-white border-b">
-        <div class="flex justify-between mb-3">
+      <div class="sticky top-0 border-b bg-white p-3">
+        <div class="mb-3 flex justify-between">
           <h1 class="text-xl font-bold uppercase">Buyers</h1>
           <div>
             <AddBuyer />
@@ -228,14 +212,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
           </div>
           <div>
             <svg
-              class="
-                w-6
-                h-6
-                mt-1
-                text-gray-400
-                cursor-pointer
-                hover:text-[#027bff]
-              "
+              class="mt-1 h-6 w-6 cursor-pointer text-gray-400 hover:text-[#027bff]"
               xmlns="http://www.w3.org/2000/svg"
               xmlns:xlink="http://www.w3.org/1999/xlink"
               viewBox="0 0 24 24"
@@ -276,10 +253,10 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
                 (isVisible) => (isVisible ? buyerNextPage() : null)
               "
               v-if="hasBuyerNextPage"
-              class="grid w-full p-4 place-content-center"
+              class="grid w-full place-content-center p-4"
             >
               <svg
-                class="w-6 h-6 mr-3 -ml-1 animate-spin text-emerald-500"
+                class="mr-3 -ml-1 h-6 w-6 animate-spin text-emerald-500"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -304,17 +281,17 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
       </div>
     </div>
     <!-- Main Tabs App Content -->
-    <div class="w-[calc(100vw-335px)] h-screen">
+    <div class="h-screen w-[calc(100vw-335px)]">
       <TabGroup :selected-index="selectedIndex" @change="tabChanged">
         <div class="relative flex items-end" ref="tabListButtonWrapper">
           <div
-            class="overflow-x-hidden bg-[#F8F8FA] h-[62px] flex items-end"
+            class="flex h-[62px] items-end overflow-x-hidden bg-[#F8F8FA]"
             ref="scrollWrapper"
           >
             <TabList>
               <div
                 ref="tabListButton"
-                class="flex gap-x-2 flex-nowrap min-w-max"
+                class="flex min-w-max flex-nowrap gap-x-2"
               >
                 <template
                   v-for="tab in tablist"
@@ -328,52 +305,23 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
                   >
                     <div class="relative">
                       <tab
-                        class="
-                          max-w-xs
-                          rounded-t
-                          focus:outline-none
-                          scroll-mt-2
-                        "
+                        class="max-w-xs scroll-mt-2 rounded-t focus:outline-none"
                       >
                         <a
                           :href="href"
                           @click="navigate"
-                          class="
-                            block
-                            px-4
-                            py-2
-                            pr-6
-                            overflow-hidden
-                            border-t
-                            rounded-t
-                            border-x
-                            focus:outline-none
-                            whitespace-nowrap
-                            truncate
-                            max-w-[250px]
-                          "
+                          class="block max-w-[250px] overflow-hidden truncate whitespace-nowrap rounded-t border-x border-t px-4 py-2 pr-6 focus:outline-none"
                           :class="[
                             isActive
                               ? 'bg-primary text-white'
-                              : 'text-gray-700 bg-white',
+                              : 'bg-white text-gray-700',
                           ]"
                         >
                           {{ tab?.name }}
                         </a>
                       </tab>
                       <span
-                        class="
-                          absolute
-                          inset-y-0
-                          right-0
-                          top-[1px]
-                          flex
-                          items-center
-                          pr-1
-                          rounded-r
-                          z-10
-                          cursor-pointer
-                        "
+                        class="absolute inset-y-0 right-0 top-[1px] z-10 flex cursor-pointer items-center rounded-r pr-1"
                         @click.stop="closeTab(tab.id)"
                         :class="[
                           isActive ? 'bg-primary text-white' : 'bg-slate-white',
@@ -382,11 +330,11 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           xmlns:xlink="http://www.w3.org/1999/xlink"
-                          class="w-5 h-5"
+                          class="h-5 w-5"
                           :class="[
                             isActive
                               ? 'bg-primary text-white hover:text-gray-300'
-                              : 'text-gray-200 hover:text-gray-400 bg-slate-white',
+                              : 'bg-slate-white text-gray-200 hover:text-gray-400',
                           ]"
                           fill="currentColor"
                           viewBox="0 0 512 512"
@@ -423,12 +371,12 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
           </div>
           <div class="flex h-[48px] bg-[#f8f8fa]">
             <button
-              class="grid w-8 px-2 hover:text-[#027bff] place-content-center"
+              class="grid w-8 place-content-center px-2 hover:text-[#027bff]"
               v-if="showScrollArrow"
               @click="scrollTo('left')"
             >
               <svg
-                class="w-4 h-4"
+                class="h-4 w-4"
                 xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink"
                 viewBox="0 0 24 24"
@@ -440,12 +388,12 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
               </svg>
             </button>
             <button
-              class="grid w-8 px-2 hover:text-[#027bff] place-content-center"
+              class="grid w-8 place-content-center px-2 hover:text-[#027bff]"
               v-if="showScrollArrow"
               @click="scrollTo('right')"
             >
               <svg
-                class="w-4 h-4"
+                class="h-4 w-4"
                 xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink"
                 viewBox="0 0 24 24"
@@ -461,9 +409,9 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
       </TabGroup>
       <!-- Main Body Content-->
       <div
-        class="overflow-y-auto overflow-x-hidden h-[calc(100%-62px)] border-t-2"
+        class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden border-t-2"
       >
-        <div class="pt-10 bg-white min-h-full">
+        <div class="min-h-full bg-white pt-10">
           <router-view />
         </div>
       </div>

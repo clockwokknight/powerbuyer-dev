@@ -5,6 +5,7 @@
         <n-dialog-provider>
           <div class="h-screen w-full overflow-hidden bg-[#fff] antialiased">
             <div class="flex h-full w-full">
+              <LoadingContent />
               <aside class="sticky top-0 left-0 z-10 w-[60px] bg-[#202124]">
                 <MainMenu />
               </aside>
@@ -23,6 +24,7 @@
 <script setup>
 import MainMenu from "@/components/MainMenu.vue";
 import { VueQueryDevTools } from "vue-query/devtools";
+import LoadingContent from "@/components/common/LoadingContent.vue";
 const userMenu = [
   {
     label: "Profile",

@@ -151,3 +151,15 @@ export const router = createRouter({
     },
   ],
 });
+
+router.beforeEach(async (to, from, next) => {
+  const loading = window["$loading"] || null;
+  loading && loading.start();
+  next();
+  loading && loading.finish();
+});
+
+router.afterEach(() => {
+  const loading = window["$loading"] || null;
+  loading && loading.finish();
+});
