@@ -138,10 +138,12 @@ const columns = [
 const pagination = { pageSize: 10 };
 </script>
 <template>
-  <div class="mt-4 px-4 font-sans">
-    <div class="justify-end pb-4"><VendorAdd /></div>
+  <div class="_vendor-contacts mt-4">
+    <div class="flex justify-end items-center translate-y-[68px] pr-10">
+      <VendorAdd />
+    </div>
 
-    <div class="rounded-lg border-2 py-8 px-8">
+    <div class="rounded-lg border-2 py-8 px-8 bg-white">
       <div><p class="pb-8 text-2xl font-bold">Contacts</p></div>
       <n-data-table
         class="rounded-lg"
@@ -227,9 +229,7 @@ const pagination = { pageSize: 10 };
       </n-form>
       <template #footer>
         <div class="flex gap-x-4">
-          <n-button size="large" type="error" @click="showModal = true"
-            >Delete</n-button
-          >
+          <n-button size="large" type="error" @click="showModal = true">Delete</n-button>
           <n-button size="large" @click="updateVendor">Update</n-button>
         </div>
       </template>

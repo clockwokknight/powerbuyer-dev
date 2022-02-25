@@ -28,24 +28,24 @@ const queryClient = useQueryClient();
 const currentActiveField = ref(null);
 const routeParamId = ref(route.params?.id);
 
-let form = reactive({});
+let form = ref({});
 
 const vendorTabs = ref([
   {
     title: "EXPENSES",
-    value: "expenses",
+    value: "#expenses",
   },
   {
     title: "EXPENSE ITEMS",
-    value: "expense-items",
+    value: "#expense-items",
   },
   {
     title: "PAYMENTS",
-    value: "payments",
+    value: "#payments",
   },
   {
     title: "CONTACTS",
-    value: "contacts",
+    value: "#contacts",
   },
 ]);
 
@@ -78,6 +78,7 @@ const { isLoading, mutateAsync } = useMutation(
   (data) => axios.put(`/vendors/${vendor.value.id}`, data),
   {
     onSuccess() {
+      console.log("successfully mutated data");
       queryClient.invalidateQueries(["vendor", routeParamId.value]);
     },
   }
@@ -119,11 +120,15 @@ watch(vendor, (newValue) => {
 });
 
 function resetValue(key) {
+  console.log("resetting value...");
+  console.log("old value", vendor.value[key]);
   form[key] = vendor.value[key];
   currentActiveField.value = null;
 }
 
 function submitValue(key) {
+  console.log("submitting value");
+  console.log("new value: ", form[key]);
   if (!compare(vendor.value[key], form[key])) {
     mutateAsync({ [key]: form[key] }).then(() => {
       currentActiveField.value = null;
@@ -192,7 +197,7 @@ function submitValue(key) {
           <CustomInput
             type="select"
             label="State"
-            :options="stateList"
+            :options="statesList"
             :value="vendor?.state"
             v-model="form.state"
             placeholder=""
@@ -273,7 +278,7 @@ function submitValue(key) {
           <CustomInput
             type="select"
             label="Vendor Category"
-            :options="opts"
+            :options="vendorCategoryOptions"
             :value="vendor?.vendor_category_id"
             v-model="form.vendor_category_id"
             placeholder=""
@@ -327,13 +332,13 @@ function submitValue(key) {
 
   <Tabs :items="vendorTabs" class="bg-white rounded-xl border-2 border-gray-200 mt-12" />
 
-  <!--Suspense>
+  <Suspense>
     <template #default><VendorContacts /></template>
     <template #fallback> Loading... </template>
   </Suspense>
   <VendorExpensesItems />
   <VendorExpenses />
-  <VendorPayments /-->
+  <VendorPayments />
 </template>
 
 <style lang="scss">

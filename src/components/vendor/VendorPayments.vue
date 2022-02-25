@@ -1,9 +1,11 @@
 <template>
   <n-message-provider>
-    <div class="mt-4 px-4 font-sans antialiased">
-      <div class="pb-4 justify-end"><VendorPaymentsAdd /></div>
+    <div class="mt-4 font-sans antialiased">
+      <div class="flex justify-end items-center translate-y-[68px] pr-10">
+        <VendorPaymentsAdd />
+      </div>
 
-      <div class="py-8 px-8 rounded-lg border-2">
+      <div class="rounded-lg border-2 py-8 px-8 bg-white">
         <div><p class="text-2xl font-bold pb-8">Payments</p></div>
         <n-data-table
           class="rounded-lg"
@@ -17,12 +19,7 @@
 
     <n-drawer v-model:show="showOuterRef" :width="500">
       <n-drawer-content title="Payment Details">
-        <n-form
-          :model="formValue"
-          :label-width="90"
-          size="medium"
-          ref="formRef"
-        >
+        <n-form :model="formValue" :label-width="90" size="medium" ref="formRef">
           <n-form-item label="Inv #" class="pr-12">
             <UpdatableButtonWrapper
               v-model="formValue.invoice_number"
@@ -33,11 +30,7 @@
             >
               <n-input
                 style="width: 400px"
-                class="
-                  border-2
-                  rounded-md
-                  hover:border-sky-500 hover:ring-sky-500 hover:ring-0
-                "
+                class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0"
                 :default-value="formValue.invoice_number"
                 type="text"
                 v-model:value="formValue.invoice_number"
@@ -56,11 +49,7 @@
             >
               <n-input
                 style="width: 400px"
-                class="
-                  border-2
-                  rounded-md
-                  hover:border-sky-500 hover:ring-sky-500 hover:ring-0
-                "
+                class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0"
                 :default-value="formValue.check_number"
                 type="text"
                 v-model:value="formValue.check_number"
@@ -80,11 +69,7 @@
             >
               <n-input
                 style="width: 400px"
-                class="
-                  border-2
-                  rounded-md
-                  hover:border-sky-500 hover:ring-sky-500 hover:ring-0
-                "
+                class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0"
                 :default-value="formValue.amount"
                 type="text"
                 v-model:value="formValue.amount"
@@ -105,11 +90,7 @@
             >
               <n-input
                 style="width: 400px"
-                class="
-                  border-2
-                  rounded-md
-                  hover:border-sky-500 hover:ring-sky-500 hover:ring-0
-                "
+                class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0"
                 :default-value="formValue.payment_status_id"
                 type="text"
                 placeholder="Enter Type"
