@@ -21,6 +21,7 @@ const themeOverrides = {
   Input: {
     color: "rgba(0,0,0,0)",
     colorDisabled: "rgba(0,0,0,0)",
+    textColorDisabled: "#333",
     border: "none",
     borderHover: "none",
     borderDisabled: "none",
@@ -38,6 +39,7 @@ const themeOverrides = {
       InternalSelection: {
         color: "rgba(0,0,0,0)",
         colorDisabled: "rgba(0,0,0,0)",
+        textColorDisabled: "#333",
         border: "none",
         borderHover: "none",
         borderDisabled: "none",
@@ -176,7 +178,7 @@ function handleButtonHover(name) {}
         "
       >
         <div
-          class="flex items-center duration-200 w-full rounded-lg border-2"
+          class="flex items-center duration-200 w-full rounded-lg border-[1px]"
           :class="`
             ${saved && 'ping'}
             ${
@@ -241,7 +243,7 @@ function handleButtonHover(name) {}
             <input
               ref="input"
               v-if="type === 'header'"
-              class="text-ellipsis bg-transparent outline-none w-full pl-1 py-1 text-3xl font-bold placeholder:text-gray-300"
+              class="text-ellipsis bg-transparent outline-none w-full pl-1 py-1 text-2xl font-bold placeholder:text-gray-300"
               :value="value"
               :placeholder="placeholder || 'Header'"
               :disabled="!editing"
@@ -282,7 +284,7 @@ function handleButtonHover(name) {}
                 }
               "
               @mouseleave="hoverEdit = false"
-              class="__edit h-4 w-4 rounded-full -translate-x-1"
+              class="__edit h-3 w-3 rounded-full -translate-x-1"
               :class="`
                     ${
                       editing

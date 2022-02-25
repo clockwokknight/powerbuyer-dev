@@ -248,7 +248,7 @@ onMounted(() => {
         <div class="col-span-4">
           <CustomInput
             label="Phone"
-            placeholder="(###) ### ####"
+            placeholder=""
             :value="vendor?.phone"
             v-model="form.phone"
             @save="submitValue('phone')"
@@ -293,7 +293,7 @@ onMounted(() => {
         <div class="col-span-4">
           <CustomInput
             type="select"
-            label="Vendor Category"
+            label="Category"
             :options="vendorCategoryOptions"
             :value="vendor?.vendor_category_id"
             v-model="form.vendor_category_id"
@@ -308,39 +308,22 @@ onMounted(() => {
 
     <!-- right side -->
 
-    <div class="col-span-4 flex flex-col justify-between">
+    <div class="col-span-4 flex flex-col justify-between items-end">
       <div class="__invoice-info">
         <div class="flex justify-end">
           <p class="text-sm font-bold">Open Invoices</p>
         </div>
         <div class="flex justify-end pb-20">
-          <p class="font-bold text-[2.5rem]">$10,193</p>
+          <p class="font-bold text-2xl">$10,193</p>
         </div>
       </div>
-      <div class="__invoice-buttons flex flex-col justify-center items-end w-full">
-        <button class="__invoice-button bg-lightergray hover:bg-lightgray text-primary">
-          <svg class="fill-primary" viewBox="0 0 24 24">
-            <path
-              d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2zm0 5a.75.75 0 0 0-.743.648l-.007.102v3.5h-3.5a.75.75 0 0 0-.102 1.493l.102.007h3.5v3.5a.75.75 0 0 0 1.493.102l.007-.102v-3.5h3.5a.75.75 0 0 0 .102-1.493l-.102-.007h-3.5v-3.5A.75.75 0 0 0 12 7z"
-            ></path>
-          </svg>
-          <span>Add expense items</span>
+
+      <div class="__invoice-buttons flex flex-col justify-center items-end min-w-max">
+        <button class="__invoice-button">
+          <span><b>+</b> Add payment</span>
         </button>
-        <button class="__invoice-button bg-lightergray hover:bg-lightgray text-primary">
-          <svg class="fill-primary" viewBox="0 0 24 24">
-            <path
-              d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2zm0 5a.75.75 0 0 0-.743.648l-.007.102v3.5h-3.5a.75.75 0 0 0-.102 1.493l.102.007h3.5v3.5a.75.75 0 0 0 1.493.102l.007-.102v-3.5h3.5a.75.75 0 0 0 .102-1.493l-.102-.007h-3.5v-3.5A.75.75 0 0 0 12 7z"
-            ></path>
-          </svg>
-          <span>Add payment</span>
-        </button>
-        <button class="__invoice-button bg-primary hover:bg-primarydark text-white">
-          <svg class="fill-white" viewBox="0 0 24 24">
-            <path
-              d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2zm0 5a.75.75 0 0 0-.743.648l-.007.102v3.5h-3.5a.75.75 0 0 0-.102 1.493l.102.007h3.5v3.5a.75.75 0 0 0 1.493.102l.007-.102v-3.5h3.5a.75.75 0 0 0 .102-1.493l-.102-.007h-3.5v-3.5A.75.75 0 0 0 12 7z"
-            ></path>
-          </svg>
-          <span>Create expense</span>
+        <button class="__invoice-button">
+          <span><b>+</b> Create expense</span>
         </button>
       </div>
     </div>
@@ -364,11 +347,9 @@ onMounted(() => {
 <style lang="scss">
 .__invoice-button {
   transition-timing-function: ease;
-  @apply h-10 mt-[14px] flex justify-between items-center duration-[300ms] pl-3 pr-6 py-[11px] rounded-full font-bold;
+  @apply h-10 w-full mt-[14px] flex justify-center items-center text-center duration-[200ms] px-3 rounded-md border-[1px] border-lightgray;
   &:hover {
-    svg {
-      @apply scale-[1.3] rotate-90;
-    }
+    @apply text-secondary border-secondary;
   }
   svg {
     transition-timing-function: $overshoot;
