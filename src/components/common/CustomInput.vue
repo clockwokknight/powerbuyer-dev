@@ -2,9 +2,7 @@
 import { ref, reactive, defineEmits, defineProps, computed, onMounted } from "vue";
 import { NInput, NSelect } from "naive-ui";
 import { NConfigProvider } from "naive-ui";
-
 const emit = defineEmits(["update:value", "focus", "scroll", "edit", "save", "cancel"]);
-
 const props = defineProps([
   "value",
   "type",
@@ -16,7 +14,6 @@ const props = defineProps([
   "mask",
   "scroll",
 ]);
-
 const themeOverrides = {
   Input: {
     color: "rgba(0,0,0,0)",
@@ -56,7 +53,6 @@ const themeOverrides = {
     },
   },
 };
-
 const sampleOptions = ref([
   {
     label: "Option 1",
@@ -79,29 +75,24 @@ const sampleOptions = ref([
     value: 5,
   },
 ]);
-
 const hoverEdit = ref(false);
 const hoverInput = ref(false);
 const focusing = ref(false);
 const editing = ref(false);
 const saved = ref(false);
 const done = ref(false);
-
 const input = ref();
 const saveButton = ref();
 const editButton = ref();
 const cancelButton = ref();
-
 const caretX = ref("12px");
 const caretFill = ref(hoverInput.value ? "#bdbdbd00" : "#bdbdbd");
-
 function edit() {
   emit("edit");
   editing.value = true;
   caretX.value = "6px";
   caretFill.value = "#888888";
 }
-
 function save() {
   emit("save");
   saved.value = true;
@@ -116,7 +107,6 @@ function save() {
   caretX.value = "12px";
   caretFill.value = !hoverInput.value ? "#bdbdbd00" : "#bdbdbd";
 }
-
 function cancel() {
   emit("cancel");
   editing.value = false;
@@ -127,7 +117,6 @@ function cancel() {
   caretX.value = "12px";
   caretFill.value = !hoverInput.value ? "#bdbdbd00" : "#bdbdbd";
 }
-
 function blur() {
   emit("cancel");
   editing.value = false;
@@ -138,17 +127,14 @@ function blur() {
   caretX.value = "12px";
   caretFill.value = "#bdbdbd";
 }
-
 function wait(duration, callback) {
   setTimeout(() => {
     callback();
   }, duration);
 }
-
 function log(msg) {
   console.log(msg);
 }
-
 function handleButtonHover(name) {}
 </script>
 
@@ -223,7 +209,6 @@ function handleButtonHover(name) {}
               "
               @scroll="(e) => $emit('scroll', e)"
             />
-
             <n-select
               ref="input"
               v-if="type === 'select'"
@@ -244,7 +229,6 @@ function handleButtonHover(name) {}
               "
               @focus="(e) => $emit('focus', e)"
             />
-
             <input
               ref="input"
               v-if="type === 'header'"
@@ -263,7 +247,6 @@ function handleButtonHover(name) {}
               @focus="(e) => $emit('focus', e)"
             />
           </div>
-
           <div
             class="__buttons flex justify-center items-center duration-200"
             :class="`
@@ -361,7 +344,6 @@ function handleButtonHover(name) {}
     </div>
   </n-config-provider>
 </template>
-
 <style>
 .n-base-suffix__arrow {
   transition: 400ms cubic-bezier(0.22, 1, 0.36, 1) !important;

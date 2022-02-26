@@ -3,9 +3,9 @@ import { computed, onMounted, defineAsyncComponent, reactive, ref, watch } from 
 import { useRouter, useRoute } from "vue-router";
 import { useMutation, useQueryClient } from "vue-query";
 import { getVendorById, useVendorCategories } from "@/hooks/vendor";
+import { getPaymentTerms, getStates } from "@/hooks/common_query";
 import { pick } from "@/lib/helper";
 import { useMessage } from "naive-ui";
-import { getPaymentTerms, getStates } from "@/hooks/common_query";
 import compare from "just-compare";
 import axios from "axios";
 
@@ -82,6 +82,9 @@ const { isLoading, mutateAsync } = useMutation(
       message.success("Saved");
       queryClient.invalidateQueries(["vendor", routeParamId.value]);
     },
+    onError() {
+      message.error("An error ocurred");
+    },
   }
 );
 
@@ -146,6 +149,10 @@ function handleScroll(e) {
   console.log(e);
 }
 
+function log(msg) {
+  console.log(msg);
+}
+
 onMounted(() => {
   console.log("mounted vendors");
 });
@@ -165,11 +172,16 @@ onMounted(() => {
         <CustomInput
           type="header"
           :value="vendor?.name"
-          v-model="form.name"
+          v-model:value="form.name"
           placeholder="Company Name"
           @save="submitValue('name')"
           @cancel="resetValue('name')"
           @focus="currentActiveField = 'name'"
+          @input="
+            (e) => {
+              log(form);
+            }
+          "
         />
       </div>
 
@@ -179,7 +191,7 @@ onMounted(() => {
           <CustomInput
             label="Address"
             :value="vendor?.address_one"
-            v-model="form.address_one"
+            v-model:value="form.address_one"
             placeholder=""
             @save="submitValue('address_one')"
             @cancel="resetValue('address_one')"
@@ -190,7 +202,7 @@ onMounted(() => {
           <CustomInput
             label="Address 2"
             :value="vendor?.address_two"
-            v-model="form.address_two"
+            v-model:value="form.address_two"
             placeholder=""
             @save="submitValue('address_two')"
             @cancel="resetValue('address_two')"
@@ -202,7 +214,7 @@ onMounted(() => {
           <CustomInput
             label="City"
             :value="vendor?.city"
-            v-model="form.city"
+            v-model:value="form.city"
             placeholder=""
             @save="submitValue('city')"
             @cancel="resetValue('city')"
@@ -215,7 +227,7 @@ onMounted(() => {
             label="State"
             :options="statesList"
             :value="vendor?.state"
-            v-model="form.state"
+            v-model:value="form.state"
             placeholder=""
             @save="submitValue('state')"
             @cancel="resetValue('state')"
@@ -226,7 +238,7 @@ onMounted(() => {
           <CustomInput
             label="Zip Code"
             :value="vendor?.zip"
-            v-model="form.zip"
+            v-model:value="form.zip"
             placeholder=""
             @save="submitValue('zip')"
             @cancel="resetValue('zip')"
@@ -238,7 +250,7 @@ onMounted(() => {
           <CustomInput
             label="Email"
             :value="vendor?.email"
-            v-model="form.email"
+            v-model:value="form.email"
             placeholder=""
             @save="submitValue('email')"
             @cancel="resetValue('email')"
@@ -250,7 +262,7 @@ onMounted(() => {
             label="Phone"
             placeholder=""
             :value="vendor?.phone"
-            v-model="form.phone"
+            v-model:value="form.phone"
             @save="submitValue('phone')"
             @cancel="resetValue('phone')"
             @focus="currentActiveField = 'phone'"
@@ -260,7 +272,7 @@ onMounted(() => {
           <CustomInput
             label="Fax"
             :value="vendor?.fax"
-            v-model="form.fax"
+            v-model:value="form.fax"
             placeholder=""
             @save="submitValue('fax')"
             @cancel="resetValue('fax')"
@@ -272,7 +284,7 @@ onMounted(() => {
           <CustomInput
             label="DIN"
             :value="vendor?.din"
-            v-model="form.din"
+            v-model:value="form.din"
             placeholder=""
             @save="submitValue('din')"
             @cancel="resetValue('din')"
@@ -283,7 +295,7 @@ onMounted(() => {
           <CustomInput
             label="Tax ID"
             :value="vendor?.tax_id_number"
-            v-model="form.text_id_number"
+            v-model:value="form.text_id_number"
             placeholder=""
             @save="submitValue('tax_id_number')"
             @cancel="resetValue('tax_id_number')"
@@ -296,7 +308,7 @@ onMounted(() => {
             label="Category"
             :options="vendorCategoryOptions"
             :value="vendor?.vendor_category_id"
-            v-model="form.vendor_category_id"
+            v-model:value="form.vendor_category_id"
             placeholder=""
             @save="submitValue('vendor_category_id')"
             @cancel="resetValue('vendor_category_id')"
@@ -324,7 +336,7 @@ onMounted(() => {
           label="Payment Terms"
           :options="paymentTermOptions"
           :value="vendor?.payment_terms"
-          v-model="form.payment_terms"
+          v-model:value="form.payment_terms"
           placeholder=""
           @save="submitValue('payment_terms')"
           @cancel="resetValue('payment_terms')"
