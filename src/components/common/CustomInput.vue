@@ -95,10 +95,6 @@ const cancelButton = ref();
 const caretX = ref("12px");
 const caretFill = ref(hoverInput.value ? "#bdbdbd00" : "#bdbdbd");
 
-function log(msg) {
-  console.log(msg);
-}
-
 function edit() {
   emit("edit");
   editing.value = true;
@@ -147,6 +143,10 @@ function wait(duration, callback) {
   setTimeout(() => {
     callback();
   }, duration);
+}
+
+function log(msg) {
+  console.log(msg);
 }
 
 function handleButtonHover(name) {}
@@ -199,12 +199,17 @@ function handleButtonHover(name) {}
             <n-input
               ref="input"
               v-if="!type || type === 'text'"
-              v-model:value="value"
               class="bg-transparent outline-none w-full pl-6"
-              :on-input="$emit('update:value', value)"
+              :class="!editing && 'pointer-events-none'"
+              v-model:value="value"
               :placeholder="placeholder || ''"
               :disabled="!editing"
-              :class="!editing && 'pointer-events-none'"
+              :on-input="
+                (e) => {
+                  $emit('update:value', e);
+                  log(e);
+                }
+              "
               @blur="
                 (e) =>
                   e.relatedTarget?.classList[0] !== '__save' &&
@@ -222,14 +227,14 @@ function handleButtonHover(name) {}
             <n-select
               ref="input"
               v-if="type === 'select'"
-              v-model:value="value"
               class="bg-transparent !outline-none w-full pl-3"
               :class="!editing && 'pointer-events-none'"
+              v-model:value="value"
               :options="options || sampleOptions"
               :filterable="filterable || true"
               :placeholder="placeholder || 'Select'"
               :disabled="!editing"
-              :on-input="$emit('update:value', value)"
+              :on-input="(e) => $emit('update:value', e)"
               :on-scroll="(e) => $emit('scroll', e)"
               @blur="
                 (e) =>
@@ -244,11 +249,11 @@ function handleButtonHover(name) {}
               ref="input"
               v-if="type === 'header'"
               class="text-ellipsis bg-transparent outline-none w-full pl-1 py-1 text-2xl font-bold placeholder:text-gray-300"
-              :value="value"
               :placeholder="placeholder || 'Header'"
               :disabled="!editing"
               :on-scroll="(e) => $emit('scroll', e)"
-              @input="$emit('update:value', $event.target.value)"
+              v-model="value"
+              @input="(e) => $emit('update:value', e.target.value)"
               @blur="
                 (e) =>
                   e.relatedTarget?.classList[0] !== '__save' &&

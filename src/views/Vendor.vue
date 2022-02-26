@@ -23,7 +23,6 @@ const VendorContacts = defineAsyncComponent({
 
 const route = useRoute();
 const router = useRouter();
-
 const message = useMessage();
 const queryClient = useQueryClient();
 
@@ -80,7 +79,7 @@ const { isLoading, mutateAsync } = useMutation(
   (data) => axios.put(`/vendors/${vendor.value.id}`, data),
   {
     onSuccess() {
-      console.log("successfully mutated data");
+      message.success("Saved");
       queryClient.invalidateQueries(["vendor", routeParamId.value]);
     },
   }
