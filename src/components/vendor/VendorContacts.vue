@@ -97,7 +97,7 @@ function updateVendor() {
   showOuterRef.value = false;
 }
 
-const deleteContact = () => {
+function deleteContact() {
   deleteVendorContact(formValue.value.id);
   showOuterRef.value = false;
 };

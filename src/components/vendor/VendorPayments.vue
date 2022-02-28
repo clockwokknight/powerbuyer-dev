@@ -1,75 +1,13 @@
 <script setup>
 import { h, defineComponent, ref, watch, onUpdated } from "vue";
-import { useRoute } from "vue-router";
 import { NTag, NButton, useMessage } from "naive-ui";
+import { useRoute } from "vue-router";
 import vendors from "@/api/vendors";
 import payments from "@/api/payments";
+
 import MaskedInput from "@/components/common/MaskedInput.vue";
 import UpdatableButtonWrapper from "@/components/common/UpdatableButtonWrapper.vue";
 import VendorPaymentsAdd from "@/components/vendor/VendorPaymentsAdd.vue";
-
-const tableData = ref([]);
-const showOuterRef = ref(false);
-const route = useRoute();
-
-const isLoading = ref(false);
-
-const formValue = ref({
-  vendor_id: 0,
-  invoice_number: "",
-  check_number: "",
-  type: "",
-  amount: "",
-});
-
-const show = ref({
-  invoice_number: false,
-  check_number: false,
-  type: false,
-  amount: false,
-});
-
-const routeParamId = ref(route.params?.id);
-
-const handleKeyUp = (val) => {
-  show.value[val] = true;
-};
-
-const handleKeyDown = (val) => {
-  show.value[val] = false;
-};
-
-watch(
-  () => route.params?.id,
-
-  () => {
-    routeParamId.value = route.params?.id;
-    payments.all().then((res) => {
-      tableData.value = res.data;
-    });
-  }
-);
-
-payments.all().then((res) => {
-  // console.log(res.data)
-  tableData.value = res.data;
-});
-
-const doShowOuter = (row) => {
-  console.log(row);
-  console.log(formValue.value.invoice_number);
-  console.log(row.invoice_number);
-  formValue.value.vendor_id = row.vendor_id;
-  formValue.value.invoice_number = row.invoice_number;
-  formValue.value.check_number = row.check_number;
-  formValue.value.amount = row.amount;
-  formValue.value.payment_status_id = row.payment_status_id;
-
-  console.log(formValue.value);
-  showOuterRef.value = true;
-};
-
-function updateVendor(key, val) {}
 
 const columns = [
   {
@@ -97,7 +35,6 @@ const columns = [
     key: "payment_date",
     //fixed: 'left'
   },
-
   {
     title: "",
     key: "edit",
@@ -115,7 +52,68 @@ const columns = [
     },
   },
 ];
+
 const pagination = { pageSize: 10 };
+
+const tableData = ref([]);
+const showOuterRef = ref(false);
+const isLoading = ref(false);
+
+const formValue = ref({
+  vendor_id: 0,
+  invoice_number: "",
+  check_number: "",
+  type: "",
+  amount: "",
+});
+
+const show = ref({
+  invoice_number: false,
+  check_number: false,
+  type: false,
+  amount: false,
+});
+
+const route = useRoute();
+const routeParamId = ref(route.params?.id);
+
+watch(
+  () => route.params?.id,
+  () => {
+    routeParamId.value = route.params?.id;
+    payments.all().then((res) => {
+      tableData.value = res.data;
+    });
+  }
+);
+
+payments.all().then((res) => {
+  // console.log(res.data)
+  tableData.value = res.data;
+});
+
+function updateVendor(key, val) {}
+
+function handleKeyUp(val) {
+  show.value[val] = true;
+}
+
+function handleKeyDown(val) {
+  show.value[val] = false;
+}
+
+function doShowOuter(row) {
+  console.log(row);
+  console.log(formValue.value.invoice_number);
+  console.log(row.invoice_number);
+  formValue.value.vendor_id = row.vendor_id;
+  formValue.value.invoice_number = row.invoice_number;
+  formValue.value.check_number = row.check_number;
+  formValue.value.amount = row.amount;
+  formValue.value.payment_status_id = row.payment_status_id;
+  console.log(formValue.value);
+  showOuterRef.value = true;
+}
 </script>
 
 <template>

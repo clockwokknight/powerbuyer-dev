@@ -1,18 +1,12 @@
 <script setup>
-import {
-  computed,
-  onMounted,
-  onUnmounted,
-  defineAsyncComponent,
-  reactive,
-  ref,
-  watch,
-} from "vue";
+import { computed, onMounted, onUnmounted, defineAsyncComponent, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useMutation, useQueryClient } from "vue-query";
 import { getVendorById, useVendorCategories } from "@/hooks/vendor";
 import { getPaymentTerms, getStates } from "@/hooks/common_query";
+import { useGlobalState } from "@/store/global";
 import { pick } from "@/lib/helper";
+import { utils } from "@/lib/utils";
 import { useMessage } from "naive-ui";
 import compare from "just-compare";
 import axios from "axios";
@@ -29,17 +23,23 @@ const VendorContacts = defineAsyncComponent({
   loader: () => import("@/components/vendor/VendorContacts.vue"),
 });
 
+const global = useGlobalState();
 const route = useRoute();
 const router = useRouter();
 const message = useMessage();
 const queryClient = useQueryClient();
 
+const stuck = ref(false);
 const currentActiveField = ref(null);
 const routeParamId = ref(route.params?.id);
 
 let form = ref({});
 
 const vendorTabs = ref([
+  {
+    title: "DETAILS",
+    value: "#details",
+  },
   {
     title: "EXPENSES",
     value: "#expenses",
@@ -149,34 +149,25 @@ function submitValue(key) {
   currentActiveField.value = null;
 }
 
-function log(msg) {
-  console.log(msg);
-}
-
 function handleTabClick(e) {
   window.location.hash = e;
 }
 
 function handleScroll(e) {
-  console.log("scrolling...", e);
+  console.log("stuck");
+  stuck.value = true;
 }
 
 onMounted(() => {
-  console.log("mounted vendors");
-  window.addEventListener("scroll", handleScroll);
+  const subtabs = document.getElementById("__subtabs");
+  new IntersectionObserver(([e]) => handleScroll(e), { threshold: [1] }).observe(subtabs);
 });
 
-onUnmounted(() => {
-  window.EventListener("scroll", handleScroll);
-});
 // LOAD TABLE DATA
 </script>
 
 <template>
-  <div
-    @scroll="handleScroll(e)"
-    class="__vendor-card grid grid-cols-12 rounded-xl border-2 bg-white p-6"
-  >
+  <div class="__section __vendor-card grid grid-cols-12 rounded-xl border-2 bg-white p-6">
     <!-- left side -->
 
     <div class="__form flex flex-col justify-between col-span-8">
@@ -358,7 +349,7 @@ onUnmounted(() => {
         <div
           class="__invoice-buttons flex flex-col justify-center items-end min-w-max max-w-full mt-[60px]"
         >
-          <button class="__invoice-button">
+          <button class="__invoice-button" @click="global.openDrawer('payments')">
             <span><b>+</b> Add payment</span>
           </button>
           <button class="__invoice-button">
@@ -370,21 +361,25 @@ onUnmounted(() => {
   </div>
 
   <Tabs
+    id="__subtabs"
     class="bg-white rounded-xl border-2 border-gray-200 mt-4 sticky -top-1 z-50"
     :items="vendorTabs"
     @click="handleTabClick"
   />
 
-  <VendorExpenses />
-  <VendorPayments />
-  <VendorExpensesItems />
+  <VendorExpenses class="__section" />
+  <VendorPayments class="__section" />
+  <VendorExpensesItems class="__section" />
   <Suspense>
-    <template #default><VendorContacts /></template>
+    <template #default><VendorContacts class="__section" /></template>
     <template #fallback> Loading... </template>
   </Suspense>
 </template>
 
 <style lang="scss">
+.__section {
+  @apply scroll-mt-[40px];
+}
 .__invoice-button {
   transition-timing-function: ease;
   @apply h-10 w-full mt-[14px] flex justify-center items-center text-center duration-[200ms] px-3 rounded-md border-[1px] border-lightgray;

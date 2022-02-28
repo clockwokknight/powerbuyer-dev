@@ -1,19 +1,19 @@
 <script setup>
-import { ref, reactive, defineEmits, defineProps, computed, onMounted } from "vue";
-import { NInput, NSelect } from "naive-ui";
-import { NConfigProvider } from "naive-ui";
+import { ref, reactive, computed, onMounted } from "vue";
+import { NInput, NSelect, NConfigProvider } from "naive-ui";
+
 const emit = defineEmits(["update:value", "focus", "scroll", "edit", "save", "cancel"]);
+
 const props = defineProps([
   "value",
   "type",
   "label",
   "placeholder",
-  "color",
   "filterable",
   "options",
   "mask",
-  "scroll",
 ]);
+
 const themeOverrides = {
   Input: {
     color: "rgba(0,0,0,0)",
@@ -53,6 +53,7 @@ const themeOverrides = {
     },
   },
 };
+
 const sampleOptions = ref([
   {
     label: "Option 1",
@@ -75,6 +76,7 @@ const sampleOptions = ref([
     value: 5,
   },
 ]);
+
 const hoverEdit = ref(false);
 const hoverInput = ref(false);
 const focusing = ref(false);
@@ -87,12 +89,14 @@ const editButton = ref();
 const cancelButton = ref();
 const caretX = ref("12px");
 const caretFill = ref(hoverInput.value ? "#bdbdbd00" : "#bdbdbd");
+
 function edit() {
   emit("edit");
   editing.value = true;
   caretX.value = "6px";
   caretFill.value = "#888888";
 }
+
 function save() {
   emit("save");
   saved.value = true;
@@ -107,6 +111,7 @@ function save() {
   caretX.value = "12px";
   caretFill.value = !hoverInput.value ? "#bdbdbd00" : "#bdbdbd";
 }
+
 function cancel() {
   emit("cancel");
   editing.value = false;
@@ -117,6 +122,7 @@ function cancel() {
   caretX.value = "12px";
   caretFill.value = !hoverInput.value ? "#bdbdbd00" : "#bdbdbd";
 }
+
 function blur() {
   emit("cancel");
   editing.value = false;
@@ -127,15 +133,18 @@ function blur() {
   caretX.value = "12px";
   caretFill.value = "#bdbdbd";
 }
+
 function wait(duration, callback) {
   setTimeout(() => {
     callback();
   }, duration);
 }
+
+function handleButtonHover(name) {}
+
 function log(msg) {
   console.log(msg);
 }
-function handleButtonHover(name) {}
 </script>
 
 <template>
@@ -260,9 +269,7 @@ function handleButtonHover(name) {}
               @click="
                 () => {
                   edit();
-                  wait(200, () => {
-                    input.focus();
-                  });
+                  wait(200, input.focus);
                 }
               "
               @mouseover="
@@ -344,6 +351,7 @@ function handleButtonHover(name) {}
     </div>
   </n-config-provider>
 </template>
+
 <style>
 .n-base-suffix__arrow {
   transition: 400ms cubic-bezier(0.22, 1, 0.36, 1) !important;
