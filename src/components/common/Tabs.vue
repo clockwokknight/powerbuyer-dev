@@ -3,7 +3,7 @@ import { ref, reactive, defineEmits, defineProps, computed, onMounted } from "vu
 
 const emits = defineEmits(["click"]);
 
-const props = defineProps(["items"]);
+const props = defineProps(["items", "type"]);
 
 const exampleItems = ref([
   {

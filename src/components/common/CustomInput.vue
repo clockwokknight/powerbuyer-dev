@@ -185,7 +185,7 @@ function handleButtonHover(name) {}
             <n-input
               ref="input"
               v-if="!type || type === 'text'"
-              class="bg-transparent outline-none w-full pl-6"
+              class="bg-transparent outline-none w-full pl-3"
               :class="!editing && 'pointer-events-none'"
               v-model:value="value"
               :placeholder="placeholder || ''"
@@ -212,7 +212,7 @@ function handleButtonHover(name) {}
             <n-select
               ref="input"
               v-if="type === 'select'"
-              class="bg-transparent !outline-none w-full pl-3"
+              class="bg-transparent !outline-none w-full pl-0"
               :class="!editing && 'pointer-events-none'"
               v-model:value="value"
               :options="options || sampleOptions"

@@ -260,51 +260,51 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
 
     <!-- Main Tabs App Content -->
 
-    <section class="h-screen w-[calc(100vw-335px)]">
+    <section class="h-screen w-[calc(100vw-335px)] bg-white !border-transparent">
       <TabGroup :selected-index="selectedIndex" @change="tabChanged">
         <header class="relative flex items-end" ref="tabListButtonWrapper">
           <div
-            class="flex h-[62px] items-end overflow-x-hidden bg-[#F8F8FA]"
+            class="flex h-[60px] items-end overflow-x-hidden bg-white !border-transparent"
             ref="scrollWrapper"
           >
             <TabList>
-              <nav ref="tabListButton" class="flex min-w-max flex-nowrap gap-x-2">
-                <template
-                  v-if="tablist.length >= 1"
-                  v-for="tab in tablist"
-                  :key="tab?.id"
-                >
+              <nav
+                v-if="tablist.length >= 1"
+                ref="tabListButton"
+                class="flex items-center h-[60px] min-w-max flex-nowrap gap-x-3 pl-[24px]"
+              >
+                <div v-for="tab in tablist" :key="tab?.id" class="!border-transparent">
                   <router-link
                     :to="{ name: 'SingleVendor', params: { id: tab?.id } }"
                     custom
                     v-slot="{ href, route, navigate, isActive }"
                   >
-                    <div
-                      class="relative grid place-content-center overflow-hidden rounded border-x border-t"
-                    >
+                    <div class="relative grid place-content-center overflow-hidden">
                       <tab
-                        class="max-w-xs scroll-mt-2 focus:outline-none"
+                        class="max-w-xs scroll-mt-2 bg-white !border-transparent rounded-lg focus:outline-none"
                         :class="[
-                          isActive ? 'bg-primary text-white' : 'bg-white text-gray-700',
+                          isActive
+                            ? 'bg-primary text-white'
+                            : 'bg-lightergray text-gray-700',
                         ]"
                       >
                         <a
                           :href="href"
                           @click="navigate"
-                          class="block max-w-[250px] overflow-hidden truncate whitespace-nowrap px-4 py-2 pr-6 focus:outline-none"
+                          class="__tab-link block max-w-[250px] overflow-hidden !border-transparent truncate whitespace-nowrap px-4 py-2 pr-6 focus:outline-none"
                         >
-                          {{ tab?.name }}
+                          <b class="pr-10">{{ tab?.name }}</b>
                         </a>
                       </tab>
                       <span
-                        class="absolute inset-y-0 right-0 top-[1px] z-10 flex cursor-pointer items-center rounded-r pr-1"
+                        class="absolute inset-y-0 right-0 top-[1px] z-10 flex cursor-pointer items-center rounded-r pr-2 ml-2"
                         @click.stop="closeTab(tab.id)"
                         :class="[isActive ? 'bg-primary text-white' : 'bg-slate-white']"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           xmlns:xlink="http://www.w3.org/1999/xlink"
-                          class="h-5 w-5"
+                          class="h-6 w-6"
                           :class="[
                             isActive
                               ? 'bg-primary text-white hover:text-gray-300'
@@ -337,9 +337,10 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
                             d="M192 320l128-128"
                           ></path>
                         </svg>
-                      </span></div
-                  ></router-link>
-                </template>
+                      </span>
+                    </div>
+                  </router-link>
+                </div>
               </nav>
             </TabList>
           </div>
@@ -383,7 +384,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
       </TabGroup>
       <!-- Main Body Content-->
       <div class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden border-t-2">
-        <main class="min-h-full bg-lightergray p-6">
+        <main class="min-h-full bg-lightergray p-6 pt-6">
           <router-view />
         </main>
       </div>

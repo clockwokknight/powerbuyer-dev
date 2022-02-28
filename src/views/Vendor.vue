@@ -1,5 +1,13 @@
 <script setup>
-import { computed, onMounted, defineAsyncComponent, reactive, ref, watch } from "vue";
+import {
+  computed,
+  onMounted,
+  onUnmounted,
+  defineAsyncComponent,
+  reactive,
+  ref,
+  watch,
+} from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useMutation, useQueryClient } from "vue-query";
 import { getVendorById, useVendorCategories } from "@/hooks/vendor";
@@ -141,20 +149,25 @@ function submitValue(key) {
   currentActiveField.value = null;
 }
 
+function log(msg) {
+  console.log(msg);
+}
+
 function handleTabClick(e) {
   window.location.hash = e;
 }
 
 function handleScroll(e) {
-  console.log(e);
-}
-
-function log(msg) {
-  console.log(msg);
+  console.log("scrolling...", e);
 }
 
 onMounted(() => {
   console.log("mounted vendors");
+  window.addEventListener("scroll", handleScroll);
+});
+
+onUnmounted(() => {
+  window.EventListener("scroll", handleScroll);
 });
 // LOAD TABLE DATA
 </script>
@@ -168,7 +181,7 @@ onMounted(() => {
 
     <div class="__form flex flex-col justify-between col-span-8">
       <div class="__title">
-        <h3 class="font-bold translate-x-4 mb-4">VENDOR</h3>
+        <h3 class="font-bold translate-x-4 mb-2">VENDOR</h3>
         <CustomInput
           type="header"
           :value="vendor?.name"
@@ -185,7 +198,7 @@ onMounted(() => {
         />
       </div>
 
-      <div class="__form grid grid-cols-12 gap-4 mt-12">
+      <div class="__form grid grid-cols-12 gap-4 mt-8">
         <!-- row 1 -->
         <div class="col-span-6">
           <CustomInput
@@ -357,7 +370,7 @@ onMounted(() => {
   </div>
 
   <Tabs
-    class="bg-white rounded-xl border-2 border-gray-200 mt-4 sticky top-0 z-50"
+    class="bg-white rounded-xl border-2 border-gray-200 mt-4 sticky -top-1 z-50"
     :items="vendorTabs"
     @click="handleTabClick"
   />
