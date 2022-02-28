@@ -58,6 +58,20 @@ const vendorTabs = ref([
   },
 ]);
 
+watch(
+  () => route.params?.id,
+  () => {
+    if (route.params?.id) {
+      routeParamId.value = route.params?.id;
+    }
+  },
+  {
+    immediate: true,
+  }
+);
+
+// let vendor = ref({});
+
 const { data: vendorCategory } = useVendorCategories();
 const vendorCategoryOptions = computed(() =>
   vendorCategory.value?.pages.reduce(
@@ -81,7 +95,7 @@ const paymentTermOptions = computed(() =>
 );
 
 const { data: statesList } = getStates();
-const { data: vendor } = getVendorById(routeParamId);
+const { data: vendor, isLoading: isVendorLoading } = getVendorById(routeParamId);
 
 const { isLoading, mutateAsync } = useMutation(
   (data) => axios.put(`/vendors/${vendor.value.id}`, data),
@@ -97,12 +111,33 @@ const { isLoading, mutateAsync } = useMutation(
 );
 
 watch(
-  () => route.params?.id,
-  () => {
-    if (route.params?.id) {
-      routeParamId.value = route.params?.id;
+  vendor,
+  (newValue) => {
+    if (newValue) {
+      const obj = pick(newValue, [
+        "name",
+        "payment_terms",
+        "din",
+        "vendor_category_id",
+        "vendor_type",
+        "tax_id_number",
+        "address_one",
+        "address_two",
+        "city",
+        "state",
+        "country",
+        "zip",
+        "phone",
+        "email",
+        "comments",
+        "accounting_code",
+      ]);
+      Object.keys(obj).forEach((key) => {
+        form[key] = obj[key];
+      });
     }
-  }
+  },
+  { immediate: true }
 );
 
 watch(vendor, (newValue) => {
@@ -325,7 +360,7 @@ onMounted(() => {
     <!-- right side -->
 
     <div class="col-span-4 flex flex-col justify-between items-end">
-      <div class="__invoice-info max-w-[232px]">
+      <div class="__invoice-info">
         <div class="flex justify-end">
           <p class="text-sm font-bold">Open Invoices</p>
         </div>
@@ -334,7 +369,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="flex-col justify-between align-end max-w-[232px]">
+      <div class="flex-col justify-between align-end max-w-[220px]">
         <CustomInput
           type="select"
           label="Payment Terms"

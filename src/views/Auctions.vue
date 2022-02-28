@@ -6,14 +6,12 @@ import { TabGroup, TabList, Tab } from "@headlessui/vue";
 import { useRoute, useRouter } from "vue-router";
 import { useDebounceFn, useDebounce } from "@vueuse/core";
 
-import { useLoadingBar } from "naive-ui";
-
 import { getAuctions } from "@/hooks/auctions";
 import AuctionsList from "@/components/auction/AuctionList.vue";
+import AddAuction from "@/components/auction/AddAuction.vue";
 const pageName = "auctions";
 const router = useRouter();
 const route = useRoute();
-const loadingBar = useLoadingBar();
 
 const searchText = ref("");
 const debouncedSearchText = useDebounce(searchText, 500);
@@ -57,6 +55,7 @@ const {
   data: auctions,
   hasNextPage: hasAuctionNextPage,
   fetchNextPage: fetchAuctionNextPage,
+  isFetching: isAuctionFetching,
 } = getAuctions();
 
 const tablist = ref([]);
@@ -97,7 +96,6 @@ const closeTab = (id) => {
   const index = findTabIndex(id);
   if (tablist.value.length === 1) {
     tablist.value.splice(index, 1);
-    syncTabs();
     router.push("/" + pageName);
   } else {
     if (parseInt(route.params?.id) === tablist.value[index].id) {
@@ -110,13 +108,11 @@ const closeTab = (id) => {
       router.push(`/${pageName}/${tablist.value[activeIndex].id}`);
     }
     tablist.value.splice(index, 1);
-
-    syncTabs();
     ifScrollArrowNeeded();
   }
+  syncTabs();
 };
 const addTab = (vendor) => {
-  loadingBar.start();
   const index = findTabIndex(vendor.id);
   if (index === -1) {
     tablist.value = tablist.value
@@ -148,7 +144,6 @@ const tabChanged = (index) => {
 };
 
 watch(selectedIndex, (newValue) => {
-  loadingBar.start();
   if (
     tablist.value.length >= 1 &&
     parseInt(route.params?.id) !== tablist.value[newValue].id
@@ -170,7 +165,6 @@ const scrollTabToView = useDebounceFn(() => {
       break;
     }
   }
-  loadingBar.finish();
 }, 100);
 
 // Vendor Search Result
@@ -196,9 +190,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
       <div class="sticky top-0 border-b bg-white p-3">
         <div class="mb-3 flex justify-between">
           <h1 class="text-xl font-bold uppercase">Auctions</h1>
-          <!--          <div>-->
-          <!--            <AddVendor />-->
-          <!--          </div>-->
+          <AddAuction />
         </div>
         <!--        <div class="flex">-->
         <!--          <div class="mr-3">-->
@@ -284,6 +276,15 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
             </button>
           </template>
         </ul>
+        <div
+          v-if="isVendorSearchFetching || isAuctionFetching"
+          v-for="index in Array.from({ length: 10 })"
+          :key="index"
+          class="border-b px-4 py-4 even:bg-[#f8f8fa]"
+        >
+          <n-skeleton text class="w-full" />
+          <n-skeleton text class="w-[45%]" />
+        </div>
       </div>
     </aside>
     <!-- Main Tabs App Content -->
@@ -419,7 +420,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
       <div
         class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden border-t-2"
       >
-        <main class="min-h-full bg-white pt-10">
+        <main class="h-full bg-white">
           <router-view />
         </main>
       </div>

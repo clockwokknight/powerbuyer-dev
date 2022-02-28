@@ -14,7 +14,7 @@ watch(
     if (route.params?.id) routeParamId.value = route.params?.id;
   }
 );
-const { data: auction, isLoading } = useQuery(
+const { data: auction, isLoading: isAuctionLoading } = useQuery(
   ["auction", routeParamId],
   ({ queryKey }) => {
     return axios
@@ -26,6 +26,10 @@ const { data: auction, isLoading } = useQuery(
 
 <template>
   <div>
-    <h1>Auction</h1>
+    <pre>
+
+      {{ auction }}
+
+    </pre>
   </div>
 </template>
