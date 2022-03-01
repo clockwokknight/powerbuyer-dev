@@ -4,7 +4,7 @@ import { NInput, NSelect, NConfigProvider } from "naive-ui";
 import { utils } from "@/lib/utils";
 
 const emit = defineEmits([
-  "update:modelValue",
+  "update:value",
   "focus",
   "scroll",
   "edit",
@@ -12,8 +12,7 @@ const emit = defineEmits([
   "cancel",
 ]);
 const props = defineProps([
-  "modelValue",
-  "defaultValue",
+  "value",
   "type",
   "label",
   "placeholder",
@@ -197,57 +196,46 @@ function handleButtonHover(name) {}
           <div class="__inputs w-full">
             <n-input
               ref="input"
-              v-if="!type || type === 'text'"
-              class="bg-transparent outline-none w-full pl-3"
-              v-model:value="defaultValue"
-              :class="!editing && 'pointer-events-none'"
-              :placeholder="placeholder || ''"
+              v-if="!type || type === 'text' || type === 'header'"
+              :class="`
+                ${!editing && 'pointer-events-none'}
+                ${(type === 'text' || !type) && 'bg-transparent outline-none w-full pl-3'}
+                ${
+                  type === 'header' &&
+                  '__header text-ellipsis bg-transparent outline-none w-full pl-1 py-1 text-2xl !font-bold placeholder:text-gray-300'
+                }
+              `"
+              v-model:value="value"
+              :placeholder="placeholder || (type === 'header' ? 'Company Name' : '')"
               :disabled="!editing"
-              :on-input="(e) => $emit('update:modelValue', e)"
+              :on-input="$emit('update:value', value)"
+              @focus="(e) => $emit('focus', e)"
               @blur="
                 (e) =>
                   e.relatedTarget?.classList[0] !== '__save' &&
                   e.relatedTarget?.classList[0] !== '__cancel' &&
                   blur()
               "
-              @focus="(e) => $emit('focus', e)"
             />
             <n-select
               ref="input"
               v-if="type === 'select'"
               class="bg-transparent !outline-none w-full pl-0"
-              v-model:value="defaultValue"
+              v-model:value="value"
               :class="!editing && 'pointer-events-none'"
               :options="options || sampleOptions"
               :filterable="filterable || true"
               :placeholder="placeholder || 'Select'"
               :disabled="!editing"
-              :on-input="(e) => $emit('update:modelValue', e)"
+              :on-input="$emit('update:value', value)"
               :on-scroll="(e) => $emit('scroll', e)"
+              @focus="(e) => $emit('focus', e)"
               @blur="
                 (e) =>
                   e.relatedTarget?.classList[0] !== '__save' &&
                   e.relatedTarget?.classList[0] !== '__cancel' &&
                   blur()
               "
-              @focus="(e) => $emit('focus', e)"
-            />
-            <n-input
-              ref="input"
-              v-if="type === 'header'"
-              class="text-ellipsis bg-transparent outline-none w-full pl-1 py-1 text-2xl font-bold placeholder:text-gray-300"
-              v-model:value="defaultValue"
-              :placeholder="placeholder || 'Header'"
-              :disabled="!editing"
-              :on-scroll="(e) => $emit('scroll', e)"
-              :on-input="(e) => $emit('update:modelValue', e)"
-              @blur="
-                (e) =>
-                  e.relatedTarget?.classList[0] !== '__save' &&
-                  e.relatedTarget?.classList[0] !== '__cancel' &&
-                  blur()
-              "
-              @focus="(e) => $emit('focus', e)"
             />
           </div>
           <div
@@ -347,6 +335,9 @@ function handleButtonHover(name) {}
 </template>
 
 <style>
+.__header input {
+  font-weight: bold !important;
+}
 .n-base-suffix__arrow {
   transition: 400ms cubic-bezier(0.22, 1, 0.36, 1) !important;
   transform: scale(1.2) translateX(v-bind(caretX)) !important;

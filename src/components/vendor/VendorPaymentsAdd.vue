@@ -42,7 +42,7 @@ const status = ref("");
 let drawer = computed(() => global.drawer);
 
 watch(drawer, (val) => {
-  showOuterRef.value = val;
+  showOuterRef.value = val.active;
 });
 
 function validateEmail(v) {
