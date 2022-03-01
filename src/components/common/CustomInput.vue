@@ -1,11 +1,19 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from "vue";
 import { NInput, NSelect, NConfigProvider } from "naive-ui";
+import { utils } from "@/lib/utils";
 
-const emit = defineEmits(["update:value", "focus", "scroll", "edit", "save", "cancel"]);
-
+const emit = defineEmits([
+  "update:modelValue",
+  "focus",
+  "scroll",
+  "edit",
+  "save",
+  "cancel",
+]);
 const props = defineProps([
-  "value",
+  "modelValue",
+  "defaultValue",
   "type",
   "label",
   "placeholder",
@@ -141,10 +149,6 @@ function wait(duration, callback) {
 }
 
 function handleButtonHover(name) {}
-
-function log(msg) {
-  console.log(msg);
-}
 </script>
 
 <template>
@@ -195,40 +199,30 @@ function log(msg) {
               ref="input"
               v-if="!type || type === 'text'"
               class="bg-transparent outline-none w-full pl-3"
+              v-model:value="defaultValue"
               :class="!editing && 'pointer-events-none'"
-              v-model:value="value"
               :placeholder="placeholder || ''"
               :disabled="!editing"
-              :on-input="
-                (e) => {
-                  $emit('update:value', e);
-                  log(e);
-                }
-              "
+              :on-input="(e) => $emit('update:modelValue', e)"
               @blur="
                 (e) =>
                   e.relatedTarget?.classList[0] !== '__save' &&
                   e.relatedTarget?.classList[0] !== '__cancel' &&
                   blur()
               "
-              @focus="
-                (e) => {
-                  $emit('focus', e);
-                }
-              "
-              @scroll="(e) => $emit('scroll', e)"
+              @focus="(e) => $emit('focus', e)"
             />
             <n-select
               ref="input"
               v-if="type === 'select'"
               class="bg-transparent !outline-none w-full pl-0"
+              v-model:value="defaultValue"
               :class="!editing && 'pointer-events-none'"
-              v-model:value="value"
               :options="options || sampleOptions"
               :filterable="filterable || true"
               :placeholder="placeholder || 'Select'"
               :disabled="!editing"
-              :on-input="(e) => $emit('update:value', e)"
+              :on-input="(e) => $emit('update:modelValue', e)"
               :on-scroll="(e) => $emit('scroll', e)"
               @blur="
                 (e) =>
@@ -238,15 +232,15 @@ function log(msg) {
               "
               @focus="(e) => $emit('focus', e)"
             />
-            <input
+            <n-input
               ref="input"
               v-if="type === 'header'"
               class="text-ellipsis bg-transparent outline-none w-full pl-1 py-1 text-2xl font-bold placeholder:text-gray-300"
+              v-model:value="defaultValue"
               :placeholder="placeholder || 'Header'"
               :disabled="!editing"
               :on-scroll="(e) => $emit('scroll', e)"
-              v-model="value"
-              @input="(e) => $emit('update:value', e.target.value)"
+              :on-input="(e) => $emit('update:modelValue', e)"
               @blur="
                 (e) =>
                   e.relatedTarget?.classList[0] !== '__save' &&

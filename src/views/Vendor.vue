@@ -33,7 +33,7 @@ const stuck = ref(false);
 const currentActiveField = ref(null);
 const routeParamId = ref(route.params?.id);
 
-let form = ref({});
+const form = ref({});
 
 const vendorTabs = ref([
   {
@@ -69,8 +69,6 @@ watch(
     immediate: true,
   }
 );
-
-// let vendor = ref({});
 
 const { data: vendorCategory } = useVendorCategories();
 const vendorCategoryOptions = computed(() =>
@@ -113,6 +111,7 @@ const { isLoading, mutateAsync } = useMutation(
 watch(
   vendor,
   (newValue) => {
+    console.log("vendor changed", newValue);
     if (newValue) {
       const obj = pick(newValue, [
         "name",
@@ -135,47 +134,21 @@ watch(
       Object.keys(obj).forEach((key) => {
         form[key] = obj[key];
       });
+      console.log("form: ", form["state"]);
     }
   },
   { immediate: true }
 );
 
-watch(vendor, (newValue) => {
-  if (newValue) {
-    const obj = pick(newValue, [
-      "name",
-      "payment_terms",
-      "din",
-      "vendor_category_id",
-      "vendor_type",
-      "tax_id_number",
-      "address_one",
-      "address_two",
-      "city",
-      "state",
-      "country",
-      "zip",
-      "phone",
-      "email",
-      "comments",
-      "accounting_code",
-    ]);
-    Object.keys(obj).forEach((key) => {
-      form[key] = obj[key];
-    });
-  }
-});
-
 function resetValue(key) {
-  console.log("resetting value...");
-  console.log("old value", vendor.value[key]);
+  console.log("resetting...");
   form[key] = vendor.value[key];
   currentActiveField.value = null;
 }
 
 function submitValue(key) {
-  console.log("submitting value");
-  console.log("new value: ", form[key]);
+  console.log("Vendor: ", vendor.value);
+  console.log("FORM: ", form.value);
   if (!compare(vendor.value[key], form[key])) {
     mutateAsync({ [key]: form[key] }).then(() => {
       currentActiveField.value = null;
@@ -189,7 +162,6 @@ function handleTabClick(e) {
 }
 
 function handleScroll(e) {
-  console.log("stuck");
   stuck.value = true;
 }
 
@@ -210,15 +182,15 @@ onMounted(() => {
         <h3 class="font-bold translate-x-4 mb-2">VENDOR</h3>
         <CustomInput
           type="header"
-          :value="vendor?.name"
-          v-model:value="form.name"
+          :defaultValue="vendor?.name"
+          v-model="form.name"
           placeholder="Company Name"
           @save="submitValue('name')"
           @cancel="resetValue('name')"
           @focus="currentActiveField = 'name'"
           @input="
             (e) => {
-              log(form);
+              utils.log(e.target.value);
             }
           "
         />
@@ -229,8 +201,8 @@ onMounted(() => {
         <div class="col-span-6">
           <CustomInput
             label="Address"
-            :value="vendor?.address_one"
-            v-model:value="form.address_one"
+            :defaultValue="vendor?.address_one"
+            v-model="form.address_one"
             placeholder=""
             @save="submitValue('address_one')"
             @cancel="resetValue('address_one')"
@@ -240,8 +212,8 @@ onMounted(() => {
         <div class="col-span-6">
           <CustomInput
             label="Address 2"
-            :value="vendor?.address_two"
-            v-model:value="form.address_two"
+            :defaultValue="vendor?.address_two"
+            v-model="form.address_two"
             placeholder=""
             @save="submitValue('address_two')"
             @cancel="resetValue('address_two')"
@@ -252,8 +224,8 @@ onMounted(() => {
         <div class="col-span-4">
           <CustomInput
             label="City"
-            :value="vendor?.city"
-            v-model:value="form.city"
+            :defaultValue="vendor?.city"
+            v-model="form.city"
             placeholder=""
             @save="submitValue('city')"
             @cancel="resetValue('city')"
@@ -265,8 +237,8 @@ onMounted(() => {
             type="select"
             label="State"
             :options="statesList"
-            :value="vendor?.state"
-            v-model:value="form.state"
+            :defaultValue="vendor?.state"
+            v-model="form.state"
             placeholder=""
             @save="submitValue('state')"
             @cancel="resetValue('state')"
@@ -276,8 +248,8 @@ onMounted(() => {
         <div class="col-span-4">
           <CustomInput
             label="Zip Code"
-            :value="vendor?.zip"
-            v-model:value="form.zip"
+            :defaultValue="vendor?.zip"
+            v-model="form.zip"
             placeholder=""
             @save="submitValue('zip')"
             @cancel="resetValue('zip')"
@@ -288,8 +260,8 @@ onMounted(() => {
         <div class="col-span-4">
           <CustomInput
             label="Email"
-            :value="vendor?.email"
-            v-model:value="form.email"
+            :defaultValue="vendor?.email"
+            v-model="form.email"
             placeholder=""
             @save="submitValue('email')"
             @cancel="resetValue('email')"
@@ -300,8 +272,8 @@ onMounted(() => {
           <CustomInput
             label="Phone"
             placeholder=""
-            :value="vendor?.phone"
-            v-model:value="form.phone"
+            :defaultValue="vendor?.phone"
+            v-model="form.phone"
             @save="submitValue('phone')"
             @cancel="resetValue('phone')"
             @focus="currentActiveField = 'phone'"
@@ -310,8 +282,8 @@ onMounted(() => {
         <div class="col-span-4">
           <CustomInput
             label="Fax"
-            :value="vendor?.fax"
-            v-model:value="form.fax"
+            :defaultValue="vendor?.fax"
+            v-model="form.fax"
             placeholder=""
             @save="submitValue('fax')"
             @cancel="resetValue('fax')"
@@ -322,8 +294,8 @@ onMounted(() => {
         <div class="col-span-4">
           <CustomInput
             label="DIN"
-            :value="vendor?.din"
-            v-model:value="form.din"
+            :defaultValue="vendor?.din"
+            v-model="form.din"
             placeholder=""
             @save="submitValue('din')"
             @cancel="resetValue('din')"
@@ -333,8 +305,8 @@ onMounted(() => {
         <div class="col-span-4">
           <CustomInput
             label="Tax ID"
-            :value="vendor?.tax_id_number"
-            v-model:value="form.text_id_number"
+            :defaultValue="vendor?.tax_id_number"
+            v-model="form.text_id_number"
             placeholder=""
             @save="submitValue('tax_id_number')"
             @cancel="resetValue('tax_id_number')"
@@ -346,8 +318,8 @@ onMounted(() => {
             type="select"
             label="Category"
             :options="vendorCategoryOptions"
-            :value="vendor?.vendor_category_id"
-            v-model:value="form.vendor_category_id"
+            :defaultValue="vendor?.vendor_category_id"
+            v-model="form.vendor_category_id"
             placeholder=""
             @save="submitValue('vendor_category_id')"
             @cancel="resetValue('vendor_category_id')"
@@ -374,8 +346,8 @@ onMounted(() => {
           type="select"
           label="Payment Terms"
           :options="paymentTermOptions"
-          :value="vendor?.payment_terms"
-          v-model:value="form.payment_terms"
+          :defaultValue="vendor?.payment_terms"
+          v-model="form.payment_terms"
           placeholder=""
           @save="submitValue('payment_terms')"
           @cancel="resetValue('payment_terms')"
