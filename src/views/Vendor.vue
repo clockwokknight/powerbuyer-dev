@@ -400,7 +400,7 @@ let tabs = computed(() => global.tabs);
   width: calc(100vw - 370px);
 }
 .__section {
-  @apply scroll-mt-[126px];
+  @apply scroll-mt-[112px];
 }
 .__invoice-button {
   transition-timing-function: ease;
