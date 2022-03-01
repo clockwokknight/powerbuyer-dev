@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, onUnmounted, defineAsyncComponent, ref, watch } from "vue";
+import { computed, onMounted, defineAsyncComponent, ref, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useMutation, useQueryClient } from "vue-query";
 import { getVendorById, useVendorCategories } from "@/hooks/vendor";
@@ -111,7 +111,6 @@ const { isLoading, mutateAsync } = useMutation(
 watch(
   vendor,
   (newValue) => {
-    console.log("vendor changed", newValue);
     if (newValue) {
       const obj = pick(newValue, [
         "name",
@@ -134,11 +133,16 @@ watch(
       Object.keys(obj).forEach((key) => {
         form[key] = obj[key];
       });
-      console.log("form: ", form);
     }
   },
   { immediate: true }
 );
+
+watch(form, (val) => {
+  console.clear();
+  console.log("updated form");
+  console.log(val);
+});
 
 function resetValue(key) {
   console.log("resetting...");
@@ -147,8 +151,7 @@ function resetValue(key) {
 }
 
 function submitValue(key) {
-  console.log("Vendor: ", vendor.value);
-  console.log("FORM: ", form.value);
+  console.log("FORM: ", form);
   if (!compare(vendor.value[key], form[key])) {
     mutateAsync({ [key]: form[key] }).then(() => {
       currentActiveField.value = null;
