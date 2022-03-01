@@ -33,12 +33,14 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
   useQuery([`${pageName}_search`, debouncedSearchText], ({ queryKey }) => {
     if (queryKey[1] === "") return null;
     else
-      return axios.get(`/${pageName}/search/${queryKey[1]}`).then((res) => {
-        if (res.data?.debug) {
-          return [];
-        }
-        return res.data;
-      });
+      return axios
+        .get(`/${pageName}/search/auction_company/${queryKey[1]}`)
+        .then((res) => {
+          if (res.data?.debug) {
+            return [];
+          }
+          return res.data;
+        });
   });
 const addTab = (auction) => {
   tabStore.addTab({ id: auction.id, name: auction.auction_company });
@@ -56,40 +58,33 @@ const addTab = (auction) => {
           <h1 class="text-xl font-bold uppercase">Auctions</h1>
           <AddAuction />
         </div>
-        <!--        <div class="flex">-->
-        <!--          <div class="mr-3">-->
-        <!--                        <n-input-->
-        <!--                          v-model:value.trim="searchText"-->
-        <!--                          round-->
-        <!--                          clearable-->
-        <!--                          placeholder="Search..."-->
-        <!--                        />-->
-        <!--          </div>-->
-        <!--          <div content="Filter" v-tippy="{ placement: 'right', duration: 50 }">-->
-        <!--            <svg-->
-        <!--              class="-->
-        <!--                mt-1-->
-        <!--                h-6-->
-        <!--                w-6-->
-        <!--                cursor-pointer-->
-        <!--                text-gray-400-->
-        <!--                hover:text-[#027bff]-->
-        <!--              "-->
-        <!--              xmlns="http://www.w3.org/2000/svg"-->
-        <!--              xmlns:xlink="http://www.w3.org/1999/xlink"-->
-        <!--              viewBox="0 0 24 24"-->
-        <!--            >-->
-        <!--              <path-->
-        <!--                d="M5.5 5h13a1 1 0 0 1 .5 1.5L14 12v7l-4-3v-4L5 6.5A1 1 0 0 1 5.5 5"-->
-        <!--                fill="none"-->
-        <!--                stroke="currentColor"-->
-        <!--                stroke-width="2"-->
-        <!--                stroke-linecap="round"-->
-        <!--                stroke-linejoin="round"-->
-        <!--              ></path>-->
-        <!--            </svg>-->
-        <!--          </div>-->
-        <!--        </div>-->
+        <div class="flex">
+          <div class="mr-3">
+            <n-input
+              v-model:value.trim="searchText"
+              round
+              clearable
+              placeholder="Search..."
+            />
+          </div>
+          <div content="Filter" v-tippy="{ placement: 'right', duration: 50 }">
+            <svg
+              class="mt-1 h-6 w-6 cursor-pointer text-gray-400 hover:text-[#027bff]"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M5.5 5h13a1 1 0 0 1 .5 1.5L14 12v7l-4-3v-4L5 6.5A1 1 0 0 1 5.5 5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              ></path>
+            </svg>
+          </div>
+        </div>
         <!-- Filter Component -->
       </div>
       <!-- Main Loop List -->

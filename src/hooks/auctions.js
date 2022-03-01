@@ -13,3 +13,8 @@ export const getAuctions = () =>
           : null,
     }
   );
+
+export const getAuctionById = (id) =>
+  useQuery(["auction", id], ({ queryKey }) => {
+    return axios.get(`/auctions/${queryKey[1]}`).then((res) => res.data);
+  });
