@@ -1,5 +1,12 @@
 <script setup>
-import { computed, onMounted, defineAsyncComponent, ref, watch } from "vue";
+import {
+  computed,
+  onMounted,
+  defineAsyncComponent,
+  getCurrentInstance,
+  ref,
+  watch,
+} from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useMutation, useQueryClient } from "vue-query";
 import { getVendorById, useVendorCategories } from "@/hooks/vendor";
@@ -23,13 +30,17 @@ const VendorContacts = defineAsyncComponent({
   loader: () => import("@/components/vendor/VendorContacts.vue"),
 });
 
+const instance = getCurrentInstance();
+
 const global = useGlobalState();
 const route = useRoute();
 const router = useRouter();
 const message = useMessage();
 const queryClient = useQueryClient();
 
-const stuck = ref(false);
+let tabsStuck = ref(false);
+let subtabsStuck = ref(false);
+
 const currentActiveField = ref(null);
 const routeParamId = ref(route.params?.id);
 
@@ -60,7 +71,7 @@ const vendorTabs = ref([
 
 watch(
   () => route.params?.id,
-  () => {
+  (val) => {
     if (route.params?.id) {
       routeParamId.value = route.params?.id;
     }
@@ -71,6 +82,7 @@ watch(
 );
 
 const { data: vendorCategory } = useVendorCategories();
+
 const vendorCategoryOptions = computed(() =>
   vendorCategory.value?.pages.reduce(
     (prev, current) =>
@@ -99,33 +111,37 @@ const { isLoading, mutateAsync } = useMutation(
   (data) => axios.put(`/vendors/${vendor.value.id}`, data),
   {
     onSuccess() {
-      message.success("Saved");
       queryClient.invalidateQueries(["vendor", routeParamId.value]);
-    },
-    onError() {
-      message.error("An error ocurred");
     },
   }
 );
 
+watch(vendor, (vendor) => {
+  console.log(vendor);
+  vendor && global.addTab({ title: vendor.name, value: vendor.id });
+});
+
 watch(currentActiveField, (val) => {
-  console.clear();
   console.log("active field: ", val);
 });
 
 function resetValue(key) {
+  console.log(`resetting value: ${payload.value} ==> ${vendor?.value[key]}`);
   payload.value = vendor?.value[key];
   currentActiveField.value = null;
+  instance?.proxy?.$forceUpdate();
 }
 
 function submitValue(key) {
   console.log("submitting");
   mutateAsync({ [key]: payload.value })
     .then((data) => {
+      message.success("Saved");
       console.log("submission promise: ", data);
       currentActiveField.value = null;
     })
     .catch((err) => {
+      message.error("An error ocurred");
       console.log("uh oh...", err);
     });
   currentActiveField.value = null;
@@ -140,19 +156,44 @@ function handleScroll(e) {
 }
 
 onMounted(() => {
+  const tabs = document.getElementById("__tabs");
   const subtabs = document.getElementById("__subtabs");
-  new IntersectionObserver(([e]) => handleScroll(e), { threshold: [1] })?.observe(
-    subtabs
-  );
+  new IntersectionObserver(
+    ([e]) => {
+      tabsStuck.value = e.intersectionRatio < 1;
+    },
+    { threshold: [1] }
+  )?.observe(tabs);
+  new IntersectionObserver(
+    ([e]) => {
+      subtabsStuck.value = e.intersectionRatio < 1;
+    },
+    { threshold: [1] }
+  )?.observe(subtabs);
 });
+
+let tabs = computed(() => global.tabs);
 
 // LOAD TABLE DATA
 </script>
 
 <template>
-  <div class="__section __vendor-card grid grid-cols-12 rounded-xl border-2 bg-white p-6">
-    <!-- left side -->
+  <div
+    class="__veil top-0 left-[390px] h-[60px] bg-lightergray fixed z-50 -translate-x-10"
+  ></div>
 
+  <Tabs
+    id="__tabs"
+    class="duration-300 bg-white rounded-xl border-2 border-gray-200 sticky top-[24px] z-50"
+    :class="tabsStuck && 'shadow-xl shadow-[#00000011] rounded-none'"
+    :items="tabs"
+    @click="(e) => router.push(`/vendors/${e}`)"
+  />
+
+  <div
+    class="__section __vendor-card grid grid-cols-12 rounded-xl border-2 bg-white p-6 mt-4"
+  >
+    <!-- left side -->
     <div class="__form flex flex-col justify-between col-span-8">
       <div class="__title">
         <h3 class="font-bold translate-x-2 mb-2">VENDOR</h3>
@@ -166,7 +207,6 @@ onMounted(() => {
           @focus="currentActiveField = 'name'"
         />
       </div>
-
       <div class="__form grid grid-cols-12 gap-4 mt-8">
         <!-- row 1 -->
         <div class="col-span-6">
@@ -311,7 +351,6 @@ onMounted(() => {
           <p class="font-bold text-2xl">$10,193</p>
         </div>
       </div>
-
       <div class="flex-col justify-between align-end max-w-[220px]">
         <CustomInput
           type="select"
@@ -325,7 +364,7 @@ onMounted(() => {
           @focus="currentActiveField = 'payment_terms'"
         />
         <div
-          class="__invoice-buttons flex flex-col justify-center items-end min-w-max max-w-full mt-[60px]"
+          class="__invoice-buttons flex flex-col justify-center items-end min-w-max max-w-full mt-[58px]"
         >
           <button class="__invoice-button" @click="global.openDrawer('payments')">
             <span><b>+</b> Add payment</span>
@@ -340,7 +379,9 @@ onMounted(() => {
 
   <Tabs
     id="__subtabs"
-    class="bg-white rounded-xl border-2 border-gray-200 mt-4 sticky -top-1 z-50"
+    type="basic"
+    class="duration-300 bg-white rounded-xl border-2 border-gray-200 mt-4 sticky top-[83px] left-0 z-50 w-full"
+    :class="subtabsStuck && '!bg-green-600'"
     :items="vendorTabs"
     @click="handleTabClick"
   />
@@ -355,8 +396,11 @@ onMounted(() => {
 </template>
 
 <style lang="scss">
+.__veil {
+  width: calc(100vw - 370px);
+}
 .__section {
-  @apply scroll-mt-[40px];
+  @apply scroll-mt-[126px];
 }
 .__invoice-button {
   transition-timing-function: ease;

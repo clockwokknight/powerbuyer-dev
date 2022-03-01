@@ -7,10 +7,13 @@ import { TabGroup, TabList, Tab } from "@headlessui/vue";
 import { useDebounceFn, useDebounce } from "@vueuse/core";
 import { getVendorById, getVendors } from "@/hooks/vendor";
 import axios from "axios";
+import { useGlobalState } from "@/store/global";
 
 import VendorList from "@/components/vendor/VendorList.vue";
 import AddVendor from "@/components/vendor/AddVendor.vue";
+import Tabs from "@/components/common/Tabs.vue";
 
+const global = useGlobalState();
 const router = useRouter();
 const route = useRoute();
 
@@ -22,34 +25,7 @@ const tabListButton = ref(null);
 const tabListButtonWrapper = ref(null);
 const showScrollArrow = ref(false);
 const scrollWrapper = ref(null);
-// Left and right Click Arrow Scroll
-const ifScrollArrowNeeded = useDebounceFn(() => {
-  const wrapperWidth = tabListButtonWrapper.value?.getBoundingClientRect().width;
-  const tabWidth = tabListButton.value?.getBoundingClientRect().width;
 
-  showScrollArrow.value = wrapperWidth < tabWidth;
-}, 500);
-
-onUpdated(() => {
-  ifScrollArrowNeeded();
-});
-
-const scrollTo = (type) => {
-  const scrollLeft = scrollWrapper.value.scrollLeft;
-
-  if (type === "left") {
-    scrollWrapper.value.scrollTo({
-      left: scrollLeft - 150,
-      behavior: "smooth",
-    });
-  } else {
-    scrollWrapper.value.scrollTo({
-      left: scrollLeft + 150,
-      behavior: "smooth",
-    });
-  }
-};
-// Showing All Vendors
 const {
   data: vendors,
   isLoading: isVendorsLoading,
@@ -62,8 +38,6 @@ const tablist = ref([]);
 onMounted(() => {
   axios.get("/user_ui_tabs/1/vendors").then((res) => {
     tablist.value = JSON.parse(res.data.tabs);
-    scrollTabToView();
-    ifScrollArrowNeeded();
     if (tablist.value.length >= 1 && route.path === "/vendors") {
       tablist.value.forEach((tab) => {
         if (tab.active) {
@@ -74,66 +48,6 @@ onMounted(() => {
   });
 });
 
-const syncTabs = useDebounceFn(() => {
-  axios.post("/user_ui_tabs/update", {
-    user_id: 1,
-    page: "vendors",
-    tabs: JSON.stringify(tablist.value),
-  });
-}, 1000);
-const findTabIndex = (id) => tablist.value.findIndex((tab) => tab.id === id);
-
-const closeTab = (id) => {
-  const index = findTabIndex(id);
-  if (tablist.value.length === 1) {
-    tablist.value.splice(index, 1);
-    syncTabs();
-    router.push("/vendors");
-  } else {
-    if (parseInt(route.params?.id) === tablist.value[index].id) {
-      const activeIndex = index === 0 ? index + 1 : index - 1;
-      tablist.value = tablist.value.map(({ active, ...rest }, i) => {
-        if (i === activeIndex) {
-          return { ...rest, active: true };
-        } else return rest;
-      });
-      router.push(`/vendors/${tablist.value[activeIndex].id}`);
-    }
-    tablist.value.splice(index, 1);
-
-    syncTabs();
-    ifScrollArrowNeeded();
-  }
-};
-const addTab = (vendor) => {
-  const index = findTabIndex(vendor.id);
-  if (index === -1) {
-    tablist.value = tablist.value
-      .map(({ active, ...rest }) => rest)
-      .concat([{ id: vendor?.id, name: vendor?.name, active: true }]);
-    selectedIndex.value = tablist.value.length - 1;
-  } else {
-    tablist.value = tablist.value.map(({ active, ...rest }, i) => {
-      if (i === index) {
-        return { ...rest, active: true };
-      } else return rest;
-    });
-    selectedIndex.value = index;
-  }
-  scrollTabToView();
-  syncTabs();
-};
-
-const tabChanged = (index) => {
-  selectedIndex.value = index;
-  tablist.value = tablist.value.map(({ active, ...rest }, i) => {
-    if (i === index) {
-      return { ...rest, active: true };
-    } else return rest;
-  });
-  scrollTabToView();
-};
-
 watch(selectedIndex, (newValue) => {
   if (
     tablist.value.length >= 1 &&
@@ -142,19 +56,6 @@ watch(selectedIndex, (newValue) => {
     router.push(`/vendors/${tablist.value[newValue].id}`);
   }
 });
-
-const scrollTabToView = useDebounceFn(() => {
-  const tabListChildren = tabListButton.value.children;
-  for (let i = 0; i < tabListChildren.length; i++) {
-    const tabIndex = parseInt(
-      tabListChildren[i].getElementsByTagName("button")[0].getAttribute("tabindex")
-    );
-    if (tabIndex === 0) {
-      tabListChildren[i].scrollIntoView({ behavior: "smooth" });
-      break;
-    }
-  }
-}, 100);
 
 // Vendor Search Result
 const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
@@ -225,11 +126,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
         </div>
         <ul class="">
           <template v-if="debouncedSearchText">
-            <VendorList
-              v-if="vendorSearchResults"
-              :vendors="vendorSearchResults"
-              @click:tab="addTab"
-            />
+            <VendorList v-if="vendorSearchResults" :vendors="vendorSearchResults" />
           </template>
 
           <template v-else>
@@ -237,7 +134,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
               v-for="(vendorPage, vendorPageIdx) in vendors?.pages"
               :key="vendorPageIdx"
             >
-              <VendorList :vendors="vendorPage.data" @click:tab="addTab" />
+              <VendorList :vendors="vendorPage.data" />
             </template>
             <button
               v-observe-visibility="
@@ -256,129 +153,8 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
     <!-- Main Tabs App Content -->
 
     <section class="h-screen w-[calc(100vw-335px)] bg-white !border-transparent">
-      <TabGroup :selected-index="selectedIndex" @change="tabChanged">
-        <header class="relative flex items-end" ref="tabListButtonWrapper">
-          <div
-            class="flex h-[60px] items-end overflow-x-hidden bg-white !border-transparent"
-            ref="scrollWrapper"
-          >
-            <TabList>
-              <nav
-                v-if="tablist.length >= 1"
-                ref="tabListButton"
-                class="flex items-center h-[60px] min-w-max flex-nowrap gap-x-3 pl-[24px]"
-              >
-                <div v-for="tab in tablist" :key="tab?.id" class="!border-transparent">
-                  <router-link
-                    :to="{ name: 'SingleVendor', params: { id: tab?.id } }"
-                    custom
-                    v-slot="{ href, route, navigate, isActive }"
-                  >
-                    <div class="relative grid place-content-center overflow-hidden">
-                      <tab
-                        class="max-w-xs scroll-mt-2 bg-white !border-transparent rounded-lg focus:outline-none"
-                        :class="[
-                          isActive
-                            ? 'bg-primary text-white'
-                            : 'bg-lightergray text-gray-700',
-                        ]"
-                      >
-                        <a
-                          :href="href"
-                          @click="navigate"
-                          class="__tab-link block max-w-[250px] overflow-hidden !border-transparent truncate whitespace-nowrap px-4 py-2 pr-6 focus:outline-none"
-                        >
-                          <b class="pr-10">{{ tab?.name }}</b>
-                        </a>
-                      </tab>
-                      <span
-                        class="absolute inset-y-0 right-0 top-[1px] z-10 flex cursor-pointer items-center rounded-r pr-2 ml-2"
-                        @click.stop="closeTab(tab.id)"
-                        :class="[isActive ? 'bg-primary text-white' : 'bg-slate-white']"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          xmlns:xlink="http://www.w3.org/1999/xlink"
-                          class="h-6 w-6"
-                          :class="[
-                            isActive
-                              ? 'bg-primary text-white hover:text-gray-300'
-                              : 'bg-slate-white text-gray-200 hover:text-gray-400',
-                          ]"
-                          fill="currentColor"
-                          viewBox="0 0 512 512"
-                        >
-                          <path
-                            d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192s192-86 192-192z"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-miterlimit="10"
-                            stroke-width="32"
-                          ></path>
-                          <path
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="32"
-                            d="M320 320L192 192"
-                          ></path>
-                          <path
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="32"
-                            d="M192 320l128-128"
-                          ></path>
-                        </svg>
-                      </span>
-                    </div>
-                  </router-link>
-                </div>
-              </nav>
-            </TabList>
-          </div>
-          <div class="flex h-[48px] bg-[#f8f8fa]">
-            <button
-              class="grid w-8 place-content-center px-2 hover:text-[#027bff]"
-              v-if="showScrollArrow"
-              @click="scrollTo('left')"
-            >
-              <svg
-                class="h-4 w-4"
-                xmlns="http://www.w3.org/2000/svg"
-                xmlns:xlink="http://www.w3.org/1999/xlink"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M16.62 2.99a1.25 1.25 0 0 0-1.77 0L6.54 11.3a.996.996 0 0 0 0 1.41l8.31 8.31c.49.49 1.28.49 1.77 0s.49-1.28 0-1.77L9.38 12l7.25-7.25c.48-.48.48-1.28-.01-1.76z"
-                  fill="currentColor"
-                ></path>
-              </svg>
-            </button>
-            <button
-              class="grid w-8 place-content-center px-2 hover:text-[#027bff]"
-              v-if="showScrollArrow"
-              @click="scrollTo('right')"
-            >
-              <svg
-                class="h-4 w-4"
-                xmlns="http://www.w3.org/2000/svg"
-                xmlns:xlink="http://www.w3.org/1999/xlink"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M7.38 21.01c.49.49 1.28.49 1.77 0l8.31-8.31a.996.996 0 0 0 0-1.41L9.15 2.98c-.49-.49-1.28-.49-1.77 0s-.49 1.28 0 1.77L14.62 12l-7.25 7.25c-.48.48-.48 1.28.01 1.76z"
-                  fill="currentColor"
-                ></path>
-              </svg>
-            </button>
-          </div>
-        </header>
-      </TabGroup>
       <!-- Main Body Content-->
-      <div class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden border-t-2">
+      <div class="h-full overflow-y-auto overflow-x-hidden border-t-2">
         <main class="min-h-full bg-lightergray p-6 pt-6">
           <router-view />
         </main>

@@ -19,27 +19,25 @@ const userMenu = [
 </script>
 
 <template>
-  <n-message-provider>
-    <n-loading-bar-provider>
-      <n-message-provider>
-        <n-notification-provider>
-          <n-dialog-provider>
-            <div class="h-screen w-full overflow-hidden bg-[#fff] antialiased">
-              <div class="flex h-full w-full">
-                <aside class="sticky top-0 left-0 z-10 w-[60px] bg-[#202124]">
-                  <MainMenu />
-                </aside>
-                <section class="relative flex h-full w-full bg-[#F8F8FA]">
-                  <router-view />
-                </section>
-              </div>
+  <n-loading-bar-provider>
+    <n-message-provider placement="bottom">
+      <n-notification-provider>
+        <n-dialog-provider>
+          <div class="h-screen w-full overflow-hidden bg-[#fff] antialiased">
+            <div class="flex h-full w-full">
+              <aside class="sticky top-0 left-0 z-10 w-[60px] bg-[#202124]">
+                <MainMenu />
+              </aside>
+              <section class="relative flex h-full w-full bg-[#F8F8FA]">
+                <router-view />
+              </section>
             </div>
-            <VueQueryDevTools />
-          </n-dialog-provider>
-        </n-notification-provider>
-      </n-message-provider>
-    </n-loading-bar-provider>
-  </n-message-provider>
+          </div>
+          <VueQueryDevTools />
+        </n-dialog-provider>
+      </n-notification-provider>
+    </n-message-provider>
+  </n-loading-bar-provider>
 </template>
 
 <style>
