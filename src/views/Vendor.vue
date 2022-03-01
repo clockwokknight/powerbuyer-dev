@@ -565,12 +565,8 @@ const submitValue = (key) => {
       </div>
     </div>
   </n-spin>
-  <Suspense>
-    <template #default>
-      <VendorContacts />
-    </template>
-    <template #fallback> Loading... </template>
-  </Suspense>
+
+  <VendorContacts />
   <VendorExpensesItems />
   <VendorExpenses />
   <VendorPayments />

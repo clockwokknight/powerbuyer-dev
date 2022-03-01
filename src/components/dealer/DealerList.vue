@@ -1,28 +1,26 @@
 <script setup>
-defineProps(["vendors"]);
+defineProps(["dealers"]);
 defineEmits(["click:tab"]);
 </script>
 
 <template>
   <li
-    v-for="vendor in vendors"
-    :key="vendor?.id"
+    v-for="dealer in dealers"
+    :key="dealer?.id"
     class="border-b px-4 py-4 even:bg-[#f8f8fa] hover:bg-gray-100"
-    @click="$emit('click:tab', vendor)"
+    @click="$emit('click:tab', dealer)"
   >
-    <!-- Company Name -->
     <router-link
-      :to="{ name: 'SingleVendor', params: { id: vendor?.id } }"
+      :to="{ name: 'SingleDealer', params: { id: dealer?.id } }"
       active-class="text-primary"
       class="block"
     >
       <div>
         <h2 class="max-w-[250px] truncate whitespace-nowrap font-semibold">
-          {{ vendor?.name }}
+          {{ dealer?.name }}
         </h2>
       </div>
-      <div class="text-xs">{{ vendor.city }}, {{ vendor.state }}</div>
-      <div>{{ vendor.phone }}</div>
+      <!--      <div>{{ dealer?.phone }}</div>-->
     </router-link>
   </li>
 </template>

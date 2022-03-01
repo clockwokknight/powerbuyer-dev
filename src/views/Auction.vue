@@ -10,8 +10,10 @@ const routeParamId = ref(route.params?.id);
 watch(
   () => route.params,
   (toParams, previousParams) => {
-    console.log({ toParams, previousParams });
     if (route.params?.id) routeParamId.value = route.params?.id;
+  },
+  {
+    immediate: true,
   }
 );
 const { data: auction, isLoading: isAuctionLoading } = useQuery(

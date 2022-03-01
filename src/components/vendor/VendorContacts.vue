@@ -47,7 +47,8 @@ const { data: vendorContacts, isLoading: isVendorContactLoading } = useQuery(
   ({ queryKey }) =>
     axios
       .get(`/vendor_contacts/by_vendor/${queryKey[1]}`)
-      .then((res) => (Array.isArray(res.data) ? res.data : []))
+      .then((res) => (Array.isArray(res.data) ? res.data : [])),
+  { suspense: true }
 );
 
 watch(
