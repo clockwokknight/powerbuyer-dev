@@ -33,7 +33,7 @@ const stuck = ref(false);
 const currentActiveField = ref(null);
 const routeParamId = ref(route.params?.id);
 
-const form = ref({});
+let payload = ref({});
 
 const vendorTabs = ref([
   {
@@ -108,55 +108,26 @@ const { isLoading, mutateAsync } = useMutation(
   }
 );
 
-watch(
-  vendor,
-  (newValue) => {
-    if (newValue) {
-      const obj = pick(newValue, [
-        "name",
-        "payment_terms",
-        "din",
-        "vendor_category_id",
-        "vendor_type",
-        "tax_id_number",
-        "address_one",
-        "address_two",
-        "city",
-        "state",
-        "country",
-        "zip",
-        "phone",
-        "email",
-        "comments",
-        "accounting_code",
-      ]);
-      Object.keys(obj).forEach((key) => {
-        form[key] = obj[key];
-      });
-    }
-  },
-  { immediate: true }
-);
-
-watch(form, (val) => {
+watch(currentActiveField, (val) => {
   console.clear();
-  console.log("updated form");
-  console.log(val);
+  console.log("active field: ", val);
 });
 
 function resetValue(key) {
-  console.log("resetting...");
-  form[key] = vendor.value[key];
+  payload.value = vendor?.value[key];
   currentActiveField.value = null;
 }
 
 function submitValue(key) {
-  console.log("FORM: ", form);
-  if (!compare(vendor.value[key], form[key])) {
-    mutateAsync({ [key]: form[key] }).then(() => {
+  console.log("submitting");
+  mutateAsync({ [key]: payload.value })
+    .then((data) => {
+      console.log("submission promise: ", data);
       currentActiveField.value = null;
+    })
+    .catch((err) => {
+      console.log("uh oh...", err);
     });
-  }
   currentActiveField.value = null;
 }
 
@@ -188,7 +159,7 @@ onMounted(() => {
         <CustomInput
           type="header"
           :value="vendor?.name"
-          v-model="form.name"
+          v-model:value="payload"
           placeholder="Company Name"
           @save="submitValue('name')"
           @cancel="resetValue('name')"
@@ -202,7 +173,7 @@ onMounted(() => {
           <CustomInput
             label="Address"
             :value="vendor?.address_one"
-            v-model="form.address_one"
+            v-model:value="payload"
             placeholder=""
             @save="submitValue('address_one')"
             @cancel="resetValue('address_one')"
@@ -213,7 +184,7 @@ onMounted(() => {
           <CustomInput
             label="Address 2"
             :value="vendor?.address_two"
-            v-model="form.address_two"
+            v-model:value="payload"
             placeholder=""
             @save="submitValue('address_two')"
             @cancel="resetValue('address_two')"
@@ -225,7 +196,7 @@ onMounted(() => {
           <CustomInput
             label="City"
             :value="vendor?.city"
-            v-model="form.city"
+            v-model:value="payload"
             placeholder=""
             @save="submitValue('city')"
             @cancel="resetValue('city')"
@@ -238,7 +209,7 @@ onMounted(() => {
             label="State"
             :options="statesList"
             :value="vendor?.state"
-            v-model="form.state"
+            v-model:value="payload"
             placeholder=""
             @save="submitValue('state')"
             @cancel="resetValue('state')"
@@ -249,7 +220,7 @@ onMounted(() => {
           <CustomInput
             label="Zip Code"
             :value="vendor?.zip"
-            v-model="form.zip"
+            v-model:value="payload"
             placeholder=""
             @save="submitValue('zip')"
             @cancel="resetValue('zip')"
@@ -261,7 +232,7 @@ onMounted(() => {
           <CustomInput
             label="Email"
             :value="vendor?.email"
-            v-model="form.email"
+            v-model:value="payload"
             placeholder=""
             @save="submitValue('email')"
             @cancel="resetValue('email')"
@@ -273,7 +244,7 @@ onMounted(() => {
             label="Phone"
             placeholder=""
             :value="vendor?.phone"
-            v-model="form.phone"
+            v-model:value="payload"
             @save="submitValue('phone')"
             @cancel="resetValue('phone')"
             @focus="currentActiveField = 'phone'"
@@ -283,7 +254,7 @@ onMounted(() => {
           <CustomInput
             label="Fax"
             :value="vendor?.fax"
-            v-model="form.fax"
+            v-model:value="payload"
             placeholder=""
             @save="submitValue('fax')"
             @cancel="resetValue('fax')"
@@ -295,7 +266,7 @@ onMounted(() => {
           <CustomInput
             label="DIN"
             :value="vendor?.din"
-            v-model="form.din"
+            v-model:value="payload"
             placeholder=""
             @save="submitValue('din')"
             @cancel="resetValue('din')"
@@ -306,7 +277,7 @@ onMounted(() => {
           <CustomInput
             label="Tax ID"
             :value="vendor?.tax_id_number"
-            v-model="form.text_id_number"
+            v-model:value="payload"
             placeholder=""
             @save="submitValue('tax_id_number')"
             @cancel="resetValue('tax_id_number')"
@@ -319,7 +290,7 @@ onMounted(() => {
             label="Category"
             :options="vendorCategoryOptions"
             :value="vendor?.vendor_category_id"
-            v-model="form.vendor_category_id"
+            v-model:value="payload"
             placeholder=""
             @save="submitValue('vendor_category_id')"
             @cancel="resetValue('vendor_category_id')"
@@ -347,7 +318,7 @@ onMounted(() => {
           label="Payment Terms"
           :options="paymentTermOptions"
           :value="vendor?.payment_terms"
-          v-model="form.payment_terms"
+          v-model:value="payload"
           placeholder=""
           @save="submitValue('payment_terms')"
           @cancel="resetValue('payment_terms')"
