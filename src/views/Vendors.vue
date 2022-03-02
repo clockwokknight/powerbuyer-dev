@@ -75,7 +75,14 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
 function handleScroll(e) {
   let scroll = e.target.scrollTop;
   global.stick([scroll >= 100, scroll >= 400]);
-  tabActivators = [scroll < 400, scroll < 800, scroll < 1600];
+  global.setActiveTab(
+    [
+      scroll < 400,
+      scroll >= 400 && scroll < 800,
+      scroll >= 800 && scroll < 1600,
+      scroll >= 1600,
+    ].indexOf(true)
+  );
 }
 </script>
 

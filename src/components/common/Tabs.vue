@@ -1,10 +1,12 @@
 <script setup>
-import { ref, defineEmits, defineProps, computed, onMounted } from "vue";
+import { ref, defineEmits, defineProps, computed, onMounted, watch } from "vue";
 import { useGlobalState } from "@/store/global";
 
 const global = useGlobalState();
 const emits = defineEmits(["click"]);
 const props = defineProps(["items", "type"]);
+
+const active = ref(0);
 
 const exampleItems = ref([
   {
@@ -25,8 +27,16 @@ const exampleItems = ref([
   },
 ]);
 
-const active = ref(0);
 const tabItems = computed(() => props.items || exampleItems.value);
+
+watch(
+  () => global.activateTab,
+  (val) => {
+    console.clear();
+    console.log(val, active.value);
+    active.value = val;
+  }
+);
 </script>
 
 <template>

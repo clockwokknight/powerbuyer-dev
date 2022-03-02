@@ -5,6 +5,7 @@ export const useGlobalState = defineStore('global', {
         return {
             drawer: { active: false, context: null },
             tabs: [],
+            activateTab: 0,
             stuck: [false, false],
         };
     },
@@ -27,6 +28,9 @@ export const useGlobalState = defineStore('global', {
         },
         closeTab(index) {
             this.tabs.splice(index, 1);
+        },
+        setActiveTab(index) {
+            this.activateTab = index;
         },
         stick(val) {
             this.stuck = val;
