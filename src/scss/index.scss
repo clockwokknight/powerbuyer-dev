@@ -11,6 +11,10 @@ body {
   @apply bg-[#F5F6F6]
 }
 
+.center-content {
+  @apply flex justify-center items-center;
+}
+
 // ---- menu ----
 
 .menu-items li, .menu-footer {

@@ -6,6 +6,7 @@ import {
   getCurrentInstance,
   ref,
   watch,
+  watchEffect,
 } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useMutation, useQueryClient } from "vue-query";
@@ -38,9 +39,6 @@ const router = useRouter();
 const message = useMessage();
 const queryClient = useQueryClient();
 
-let tabsStuck = ref(false);
-let subtabsStuck = ref(false);
-
 const currentActiveField = ref(null);
 const routeParamId = ref(route.params?.id);
 
@@ -68,18 +66,6 @@ const vendorTabs = ref([
     value: "#contacts",
   },
 ]);
-
-watch(
-  () => route.params?.id,
-  (val) => {
-    if (route.params?.id) {
-      routeParamId.value = route.params?.id;
-    }
-  },
-  {
-    immediate: true,
-  }
-);
 
 const { data: vendorCategory } = useVendorCategories();
 
@@ -116,23 +102,41 @@ const { isLoading, mutateAsync } = useMutation(
   }
 );
 
+watch(
+  () => route.params?.id,
+  (val) => {
+    if (route.params?.id) {
+      routeParamId.value = route.params?.id;
+    }
+  },
+  {
+    immediate: true,
+  }
+);
+
+watchEffect(() => {
+  console.log(payload.value);
+});
+
 watch(vendor, (vendor) => {
-  console.log(vendor);
   vendor && global.addTab({ title: vendor.name, value: vendor.id });
 });
 
-watch(currentActiveField, (val) => {
-  console.log("active field: ", val);
+watch(payload.value, (val) => {
+  console.log("\npayload updated: ", payload.value);
 });
 
 function resetValue(key) {
+  console.log("\n");
   console.log(`resetting value: ${payload.value} ==> ${vendor?.value[key]}`);
   payload.value = vendor?.value[key];
+  console.log("payload: ", payload.value);
   currentActiveField.value = null;
   instance?.proxy?.$forceUpdate();
 }
 
 function submitValue(key) {
+  console.clear();
   console.log("submitting");
   mutateAsync({ [key]: payload.value })
     .then((data) => {
@@ -151,27 +155,6 @@ function handleTabClick(e) {
   window.location.hash = e;
 }
 
-function handleScroll(e) {
-  stuck.value = true;
-}
-
-onMounted(() => {
-  const tabs = document.getElementById("__tabs");
-  const subtabs = document.getElementById("__subtabs");
-  new IntersectionObserver(
-    ([e]) => {
-      tabsStuck.value = e.intersectionRatio < 1;
-    },
-    { threshold: [1] }
-  )?.observe(tabs);
-  new IntersectionObserver(
-    ([e]) => {
-      subtabsStuck.value = e.intersectionRatio < 1;
-    },
-    { threshold: [1] }
-  )?.observe(subtabs);
-});
-
 let tabs = computed(() => global.tabs);
 
 // LOAD TABLE DATA
@@ -185,12 +168,16 @@ let tabs = computed(() => global.tabs);
   <Tabs
     id="__tabs"
     class="duration-300 bg-white rounded-xl border-2 border-gray-200 sticky top-[24px] z-50"
-    :class="tabsStuck && 'shadow-xl shadow-[#00000011] rounded-none'"
+    :class="
+      global.stuck[0] &&
+      'shadow-xl shadow-[#00000011] !rounded-t-xl rounded-r-xl rounded-b-none rounded-l-none'
+    "
     :items="tabs"
     @click="(e) => router.push(`/vendors/${e}`)"
   />
 
   <div
+    id="details"
     class="__section __vendor-card grid grid-cols-12 rounded-xl border-2 bg-white p-6 mt-4"
   >
     <!-- left side -->
@@ -199,9 +186,9 @@ let tabs = computed(() => global.tabs);
         <h3 class="font-bold translate-x-2 mb-2">VENDOR</h3>
         <CustomInput
           type="header"
+          placeholder="Company Name"
           :value="vendor?.name"
           v-model:value="payload"
-          placeholder="Company Name"
           @save="submitValue('name')"
           @cancel="resetValue('name')"
           @focus="currentActiveField = 'name'"
@@ -212,9 +199,9 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-6">
           <CustomInput
             label="Address"
+            placeholder=""
             :value="vendor?.address_one"
             v-model:value="payload"
-            placeholder=""
             @save="submitValue('address_one')"
             @cancel="resetValue('address_one')"
             @focus="currentActiveField = 'address_one'"
@@ -223,9 +210,9 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-6">
           <CustomInput
             label="Address 2"
+            placeholder=""
             :value="vendor?.address_two"
             v-model:value="payload"
-            placeholder=""
             @save="submitValue('address_two')"
             @cancel="resetValue('address_two')"
             @focus="currentActiveField = 'address_two'"
@@ -235,9 +222,9 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="City"
+            placeholder=""
             :value="vendor?.city"
             v-model:value="payload"
-            placeholder=""
             @save="submitValue('city')"
             @cancel="resetValue('city')"
             @focus="currentActiveField = 'city'"
@@ -247,10 +234,10 @@ let tabs = computed(() => global.tabs);
           <CustomInput
             type="select"
             label="State"
+            placeholder=""
             :options="statesList"
             :value="vendor?.state"
             v-model:value="payload"
-            placeholder=""
             @save="submitValue('state')"
             @cancel="resetValue('state')"
             @focus="currentActiveField = 'state'"
@@ -259,9 +246,11 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="Zip Code"
+            type="mask"
+            mask="#####-####"
+            placeholder="#####-####"
             :value="vendor?.zip"
             v-model:value="payload"
-            placeholder=""
             @save="submitValue('zip')"
             @cancel="resetValue('zip')"
             @focus="currentActiveField = 'zip'"
@@ -271,9 +260,9 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="Email"
+            placeholder=""
             :value="vendor?.email"
             v-model:value="payload"
-            placeholder=""
             @save="submitValue('email')"
             @cancel="resetValue('email')"
             @focus="currentActiveField = 'email'"
@@ -282,7 +271,9 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="Phone"
-            placeholder=""
+            type="mask"
+            mask="+1 (###) ### ####"
+            placeholder="(###) ### ####"
             :value="vendor?.phone"
             v-model:value="payload"
             @save="submitValue('phone')"
@@ -293,9 +284,11 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="Fax"
+            type="mask"
+            mask="+1 (###) ### ####"
+            placeholder="(###) ### ####"
             :value="vendor?.fax"
             v-model:value="payload"
-            placeholder=""
             @save="submitValue('fax')"
             @cancel="resetValue('fax')"
             @focus="currentActiveField = 'fax'"
@@ -316,9 +309,11 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="Tax ID"
+            type="mask"
+            mask="### ## ####"
+            placeholder="### ## ####"
             :value="vendor?.tax_id_number"
             v-model:value="payload"
-            placeholder=""
             @save="submitValue('tax_id_number')"
             @cancel="resetValue('tax_id_number')"
             @focus="currentActiveField = 'tax_id_number'"
@@ -380,8 +375,8 @@ let tabs = computed(() => global.tabs);
   <Tabs
     id="__subtabs"
     type="basic"
-    class="duration-300 bg-white rounded-xl border-2 border-gray-200 mt-4 sticky top-[83px] left-0 z-50 w-full"
-    :class="subtabsStuck && '!bg-green-600'"
+    class="duration-300 bg-white rounded-xl border-2 border-gray-200 mt-4 sticky top-[82px] left-0 z-50 w-full"
+    :class="global.stuck[1] && '!bg-gray-50 !rounded-none shadow-lg shadow-[#00000011]'"
     :items="vendorTabs"
     @click="handleTabClick"
   />
@@ -400,7 +395,7 @@ let tabs = computed(() => global.tabs);
   width: calc(100vw - 370px);
 }
 .__section {
-  @apply scroll-mt-[112px];
+  @apply scroll-mt-[100px];
 }
 .__invoice-button {
   transition-timing-function: ease;

@@ -1,16 +1,11 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from "vue";
 import { NInput, NSelect, NConfigProvider } from "naive-ui";
+import MaskedInput from "@/components/common/generic/MaskedInput.vue";
 import { utils } from "@/lib/utils";
 
-const emit = defineEmits([
-  "update:value",
-  "focus",
-  "scroll",
-  "edit",
-  "save",
-  "cancel",
-]);
+const emit = defineEmits(["update:value", "focus", "scroll", "edit", "save", "cancel"]);
+
 const props = defineProps([
   "value",
   "type",
@@ -84,18 +79,22 @@ const sampleOptions = ref([
   },
 ]);
 
+const input = ref(null);
+const masked = ref(null);
+
 const hoverEdit = ref(false);
 const hoverInput = ref(false);
 const focusing = ref(false);
 const editing = ref(false);
 const saved = ref(false);
 const done = ref(false);
-const input = ref();
 const saveButton = ref();
 const editButton = ref();
 const cancelButton = ref();
 const caretX = ref("12px");
 const caretFill = ref(hoverInput.value ? "#bdbdbd00" : "#bdbdbd");
+
+function handleButtonHover(name) {}
 
 function edit() {
   emit("edit");
@@ -140,14 +139,6 @@ function blur() {
   caretX.value = "12px";
   caretFill.value = "#bdbdbd";
 }
-
-function wait(duration, callback) {
-  setTimeout(() => {
-    callback();
-  }, duration);
-}
-
-function handleButtonHover(name) {}
 </script>
 
 <template>
@@ -180,8 +171,9 @@ function handleButtonHover(name) {}
           :class="`
             ${saved && 'ping'}
             ${
-              (!type || type === 'text' || type === 'select') &&
-              `${editing && 'border-[#18A058] shadow-lg shadow-green-50'}`
+              (!type || type !== 'header') &&
+              editing &&
+              'border-[#18A058] shadow-lg shadow-green-50'
             } 
             ${
               type === 'header' &&
@@ -194,6 +186,8 @@ function handleButtonHover(name) {}
           <!-- input types -->
 
           <div class="__inputs w-full">
+            <!-- text input -->
+
             <n-input
               ref="input"
               v-if="!type || type === 'text' || type === 'header'"
@@ -217,11 +211,36 @@ function handleButtonHover(name) {}
                   blur()
               "
             />
+
+            <!-- masked text input -->
+
+            <masked-input
+              ref="masked"
+              v-if="type === 'mask'"
+              v-model:value="value"
+              styles="bg-transparent outline-none w-full pl-3"
+              :class="!editing && 'pointer-events-none'"
+              :masked="true"
+              :mask="mask || 'No mask provided'"
+              :placeholder="placeholder"
+              :disabled="!editing"
+              :on-input="
+                (e) => {
+                  utils.log('CustomInput.vue: ' + e);
+                  $emit('update:value', e);
+                }
+              "
+              @focus="(e) => $emit('focus', e)"
+              @blur="blur"
+            />
+
+            <!-- selector input -->
+
             <n-select
               ref="input"
               v-if="type === 'select'"
-              class="bg-transparent !outline-none w-full pl-0"
               v-model:value="value"
+              class="bg-transparent !outline-none w-full pl-0"
               :class="!editing && 'pointer-events-none'"
               :options="options || sampleOptions"
               :filterable="filterable || true"
@@ -246,12 +265,18 @@ function handleButtonHover(name) {}
             `"
           >
             <!-- edit -->
+
             <button
               ref="editButton"
               @click="
                 () => {
                   edit();
-                  wait(200, input.focus);
+                  utils.wait(() => {
+                    utils.log('\n---------');
+                    utils.log(['input ref: ', input]);
+                    utils.log(['masked ref: ', masked]);
+                    //input.focus();
+                  }, 500);
                 }
               "
               @mouseover="
@@ -277,7 +302,9 @@ function handleButtonHover(name) {}
                 ></path>
               </svg>
             </button>
+
             <!-- save -->
+
             <button
               ref="saveButton"
               @click="save"
@@ -302,7 +329,9 @@ function handleButtonHover(name) {}
                 ></path>
               </svg>
             </button>
+
             <!-- cancel -->
+
             <button
               ref="cancelButton"
               @click="cancel"

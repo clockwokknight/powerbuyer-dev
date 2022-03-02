@@ -27,17 +27,6 @@ const exampleItems = ref([
 
 const active = ref(0);
 const tabItems = computed(() => props.items || exampleItems.value);
-
-onMounted(() => {
-  let scrollContainer = document.getElementById("__scrollable");
-  setTimeout(() => {
-    console.log(scrollContainer);
-    scrollContainer.addEventListener("wheel", (e) => {
-      e.preventDefault();
-      scrollContainer.scrollLeft += e.deltaY;
-    });
-  }, 1000);
-});
 </script>
 
 <template>
@@ -62,7 +51,7 @@ onMounted(() => {
           :class="
             type !== 'basic' && active === index
               ? 'bg-primarylight text-primary py-2 pl-6 pr-0 rounded-lg mr-6 duration-300 hover:scale-[0.96]'
-              : 'bg-white text-black py-2 px-3 rounded-lg mr-6 duration-300'
+              : 'bg-transparent text-black py-2 px-3 rounded-lg mr-0 duration-300'
           "
         >
           {{ item.title }}
@@ -76,7 +65,7 @@ onMounted(() => {
       </span>
       <div
         v-if="type === 'basic'"
-        class="__indicator duration-200 h-1 bg-transparent translate-y-[10px] -translate-x-3"
+        class="__indicator duration-200 h-1 bg-transparent translate-y-[10px]"
         :class="`${active === index ? '!w-12 !bg-primary' : 'w-0 bg-gray-300'}`"
       ></div>
     </div>

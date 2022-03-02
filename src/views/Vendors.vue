@@ -6,8 +6,8 @@ import { useLoadingBar } from "naive-ui";
 import { TabGroup, TabList, Tab } from "@headlessui/vue";
 import { useDebounceFn, useDebounce } from "@vueuse/core";
 import { getVendorById, getVendors } from "@/hooks/vendor";
-import axios from "axios";
 import { useGlobalState } from "@/store/global";
+import axios from "axios";
 
 import VendorList from "@/components/vendor/VendorList.vue";
 import AddVendor from "@/components/vendor/AddVendor.vue";
@@ -71,6 +71,12 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
       });
   }
 );
+
+function handleScroll(e) {
+  let scroll = e.target.scrollTop;
+  global.stick([scroll >= 100, scroll >= 400]);
+  tabActivators = [scroll < 400, scroll < 800, scroll < 1600];
+}
 </script>
 
 <template>
@@ -154,7 +160,10 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
 
     <section class="h-screen w-[calc(100vw-335px)] bg-white !border-transparent">
       <!-- Main Body Content-->
-      <div class="h-full overflow-y-auto overflow-x-hidden border-t-2">
+      <div
+        @scroll="handleScroll"
+        class="h-full overflow-y-auto overflow-x-hidden border-t-2"
+      >
         <main class="min-h-full bg-lightergray p-6 pt-6">
           <router-view />
         </main>
