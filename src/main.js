@@ -13,7 +13,7 @@ import VueTippy from "vue-tippy";
 import App from "./App.vue";
 
 //Tailwind CSS
-import "./index.scss";
+import "./scss/index.scss";
 
 //Pinia
 import { createPinia } from "pinia";

@@ -2,30 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: 'Montserrat', 'sans-serif';
-@apply bg-[#F5F6F6]
+  @apply bg-[#F5F6F6]
 }
+
+.center-content {
+  @apply flex justify-center items-center;
+}
+
+// ---- menu ----
+
 .menu-items li, .menu-footer {
-@apply w-[45px] h-[45px] flex justify-center hover:bg-[#565656] rounded-lg cursor-pointer my-[3px];
+  @apply w-[45px] h-[45px] flex justify-center hover:bg-[#565656] rounded-lg cursor-pointer my-[3px];
 }
 .menu-items li img, .menu-footer img {
-@apply max-w-[20px];
+  @apply max-w-[20px];
 }
 .menu-items li:hover img, .menu-footer:hover img {
-filter: invert(0) sepia(0) saturate(1) hue-rotate(0deg) brightness(1.2)
+  filter: invert(0) sepia(0) saturate(1) hue-rotate(0deg) brightness(1.2)
 }
 .menu-items li:hover, .menu-footer:hover {
-box-shadow: 0px 3px 8px -1px rgba(0, 0, 0, 0.46);
--webkit-animation: animation 1000ms linear both;
-animation: animation 1000ms linear both;
+  box-shadow: 0px 3px 8px -1px rgba(0, 0, 0, 0.46);
+  -webkit-animation: animation 1000ms linear both;
+  animation: animation 1000ms linear both;
 }
-
 .menu-items .router-link-active > li {
-@apply bg-[#565656];
+  @apply bg-[#565656];
+}
+.pageItemsList {
+  box-shadow: 6px 0px 26px -15px rgba(0, 0, 0, 0.25);
 }
 
-/* width */
+// ---- scrollbar ----
+
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
@@ -41,16 +55,18 @@ animation: animation 1000ms linear both;
   border-radius: 10px;
 }
 
+// ---- tippy ----
+
 .tippy-content{
-    background: #000000;
-    color: #ffffff;
-    padding: 4px 10px;
-    border-radius: 6px;
-    @apply text-[12px]
-  }
-.pageItemsList {
-  box-shadow: 6px 0px 26px -15px rgba(0, 0, 0, 0.25);
+  background: #000000;
+  color: #ffffff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  @apply text-[12px]
 }
+
+// ---- animation ----
+
   /* Style 1 - Inner pulsing with icon */
 .pulse {
   border-radius: 8px;

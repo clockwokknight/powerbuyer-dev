@@ -97,7 +97,7 @@ function updateVendor() {
   showOuterRef.value = false;
 }
 
-const deleteContact = () => {
+function deleteContact() {
   deleteVendorContact(formValue.value.id);
   showOuterRef.value = false;
 };
@@ -134,117 +134,121 @@ const columns = [
     },
   },
 ];
-
 const pagination = { pageSize: 10 };
 </script>
+
 <template>
-  <div class="mt-4 px-4 font-sans">
-    <div class="justify-end pb-4"><VendorAdd /></div>
+  <div id="contacts" class="_vendor-contacts scroll-smooth">
+    <div class="-mt-4">
+      <div class="flex justify-end items-center translate-y-[68px] pr-10">
+        <VendorAdd />
+      </div>
 
-    <div class="rounded-lg border-2 py-8 px-8">
-      <div><p class="pb-8 text-2xl font-bold">Contacts</p></div>
-      <n-data-table
-        class="rounded-lg"
-        :columns="columns"
-        :data="vendorContacts"
-        :pagination="pagination"
-        :bordered="false"
-        :key="update"
-        :loading="isVendorContactLoading || isLoading"
-      />
+      <div class="rounded-xl border-2 py-8 px-8 bg-white">
+        <div><p class="pb-8 text-2xl font-bold">Contacts</p></div>
+        <n-data-table
+          class="rounded-lg"
+          :columns="columns"
+          :data="vendorContacts"
+          :pagination="pagination"
+          :bordered="false"
+          :key="update"
+          :loading="isVendorContactLoading || isLoading"
+        />
+      </div>
     </div>
+
+    <n-drawer v-model:show="showOuterRef" :width="500">
+      <n-drawer-content title="Vendor Details">
+        <n-form
+          :model="formValue"
+          :rules="rules"
+          :label-width="90"
+          size="medium"
+          ref="formRef"
+          :disabled="isLoading"
+          @submit.prevent="updateVendor"
+        >
+          <n-form-item label="First Name" class="pr-12" path="first_name">
+            <n-input
+              style="width: 400px"
+              class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+              :default-value="formValue.first_name"
+              type="text"
+              v-model:value="formValue.first_name"
+            />
+          </n-form-item>
+          <n-form-item label="Last Name" class="pr-12" path="last_name">
+            <n-input
+              style="width: 400px"
+              class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+              type="text"
+              v-model:value="formValue.last_name"
+            />
+          </n-form-item>
+
+          <n-form-item label="Email" class="pr-12">
+            <n-input
+              style="width: 400px"
+              class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+              type="text"
+              placeholder="Enter Email"
+              v-model:value="formValue.email"
+            />
+          </n-form-item>
+
+          <n-form-item label="Position" class="pr-12">
+            <n-input
+              style="width: 400px"
+              class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+              :default-value="formValue.job_title"
+              type="text"
+              v-model:value="formValue.job_title"
+              placeholder="Enter Job Title"
+            />
+          </n-form-item>
+
+          <n-form-item label="Cell Phone" class="pr-12">
+            <masked-input
+              style="width: 400px"
+              class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+              :default-value="formValue.cell_phone"
+              mask="(###) ###-####"
+              v-model:value="formValue.cell_phone"
+            />
+          </n-form-item>
+
+          <n-form-item label="Office Phone" class="pr-12">
+            <masked-input
+              style="width: 400px"
+              class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+              :default-value="formValue.office_phone"
+              mask="(###) ###-####"
+              v-model:value="formValue.office_phone"
+            />
+          </n-form-item>
+        </n-form>
+        <template #footer>
+          <div class="flex gap-x-4">
+            <n-button size="large" type="error" @click="showModal = true"
+              >Delete</n-button
+            >
+            <n-button size="large" @click="updateVendor">Update</n-button>
+          </div>
+        </template>
+        <n-modal
+          v-model:show="showModal"
+          @positive-click="deleteContact"
+          content="Are you sure you want to delete?"
+          positive-text="Yes"
+          preset="dialog"
+          type="error"
+          @mask-click="showModal = false"
+          @negative-click="showModal = false"
+          negative-text="Cancel"
+          title="Delete"
+        />
+      </n-drawer-content>
+    </n-drawer>
   </div>
-
-  <n-drawer v-model:show="showOuterRef" :width="500">
-    <n-drawer-content title="Vendor Details">
-      <n-form
-        :model="formValue"
-        :rules="rules"
-        :label-width="90"
-        size="medium"
-        ref="formRef"
-        :disabled="isLoading"
-        @submit.prevent="updateVendor"
-      >
-        <n-form-item label="First Name" class="pr-12" path="first_name">
-          <n-input
-            style="width: 400px"
-            class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
-            :default-value="formValue.first_name"
-            type="text"
-            v-model:value="formValue.first_name"
-          />
-        </n-form-item>
-        <n-form-item label="Last Name" class="pr-12" path="last_name">
-          <n-input
-            style="width: 400px"
-            class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
-            type="text"
-            v-model:value="formValue.last_name"
-          />
-        </n-form-item>
-
-        <n-form-item label="Email" class="pr-12">
-          <n-input
-            style="width: 400px"
-            class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
-            type="text"
-            placeholder="Enter Email"
-            v-model:value="formValue.email"
-          />
-        </n-form-item>
-
-        <n-form-item label="Position" class="pr-12">
-          <n-input
-            style="width: 400px"
-            class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
-            :default-value="formValue.job_title"
-            type="text"
-            v-model:value="formValue.job_title"
-            placeholder="Enter Job Title"
-          />
-        </n-form-item>
-
-        <n-form-item label="Cell Phone" class="pr-12">
-          <masked-input
-            style="width: 400px"
-            class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
-            :default-value="formValue.cell_phone"
-            mask="(###) ###-####"
-            v-model:value="formValue.cell_phone"
-          />
-        </n-form-item>
-
-        <n-form-item label="Office Phone" class="pr-12">
-          <masked-input
-            style="width: 400px"
-            class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
-            :default-value="formValue.office_phone"
-            mask="(###) ###-####"
-            v-model:value="formValue.office_phone"
-          />
-        </n-form-item>
-      </n-form>
-      <template #footer>
-        <div class="flex gap-x-4">
-          <n-button size="large" type="error" @click="showModal = true"
-            >Delete</n-button
-          >
-          <n-button size="large" @click="updateVendor">Update</n-button>
-        </div>
-      </template>
-      <n-modal
-        v-model:show="showModal"
-        @positive-click="deleteContact"
-        content="Are you sure you want to delete?"
-        positive-text="Yes"
-        preset="dialog"
-        type="error"
-        @mask-click="showModal = false"
-        @negative-click="showModal = false"
-        negative-text="Cancel"
-        title="Delete"
-      />
-    </n-drawer-content>
-  </n-drawer>
 </template>
