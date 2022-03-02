@@ -4,7 +4,7 @@ import { useRoute } from "vue-router";
 import { NButton } from "naive-ui";
 import { useMutation, useQuery, useQueryClient } from "vue-query";
 import axios from "axios";
-import { objectFilter, pick } from "@/lib/helper";
+import { objectFilter, omit, pick } from "@/lib/helper";
 import { getVendorExpenseItems } from "@/hooks/expense";
 import ActionButtons from "@/components/vendor/ActionButtons.vue";
 import DealerContactForm from "@/components/dealer/DealerContactForm.vue";
@@ -33,15 +33,9 @@ const { data: vendorContacts, isFetching: isVendorContactLoading } = useQuery(
 );
 
 const showUpdateForm = (row) => {
-  const obj = pick(row, [
-    "vendor_id",
-    "id",
-    "name",
-    "description",
-    "amount",
-    "expense_type_id",
-  ]);
-  obj.amount = parseFloat(obj.amount);
+  const obj = omit(row, ["created_at", "updated_at"]);
+  obj.enable_email = Boolean(obj.enable_email);
+  obj.enable_sms = Boolean(obj.enable_sms);
   formRow.value = obj;
   visibleForm.value = true;
 };
@@ -79,28 +73,53 @@ const { mutate: deleteExpenseItem } = useMutation(
 
 const columns = [
   {
-    title: "Name",
-    key: "name",
+    title: "First Name",
+    key: "first_name",
+    fixed: "left",
+  },
+  {
+    title: "Last Name",
+    key: "last_name",
+  },
+  {
+    title: "Job Title",
+    key: "job_title",
+  },
+  {
+    title: "Email",
+    key: "email",
+  },
+  {
+    title: "Office Phone",
+    key: "office_phone",
+  },
+  {
+    title: "Cell",
+    key: "cell",
+  },
+  {
+    title: "Register Number",
+    key: "reg_num",
     //fixed: 'left'
   },
   {
-    title: "Description",
-    key: "description",
-    //fixed: 'left'
+    title: "Enabled Email",
+    key: "enable_email",
+    render(row) {
+      return h("span", { innerHTML: Boolean(row.enable_email) });
+    },
   },
   {
-    title: "Expense Type",
-    key: "expense_type.name",
-    //fixed: 'left'
-  },
-  {
-    title: "Amount",
-    key: "amount",
-    //fixed: 'left'
+    title: "Enabled SMS",
+    key: "enable_sms",
+    render(row) {
+      return h("span", { innerHTML: Boolean(row.enable_sms) });
+    },
   },
   {
     title: "",
     key: "edit",
+    fixed: "right",
     render(row) {
       return h(ActionButtons, {
         row,
@@ -170,6 +189,9 @@ const onDeleteExpenseItem = (id) => {
         :pagination="pagination"
         :bordered="false"
         :loading="isVendorContactLoading"
+        :max-height="500"
+        :scroll-x="1500"
+        virtual-scroll
       />
     </div>
   </div>

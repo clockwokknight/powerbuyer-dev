@@ -21,7 +21,7 @@ const initialForm = {
   job_title: "",
   first_name: "",
   last_name: "",
-  reg_number: "",
+  reg_num: "",
   type: null,
   office_phone: "",
   cell: "",
@@ -58,7 +58,7 @@ const rules = {
     message: "Please enter Last Name",
     trigger: ["input", "blur"],
   },
-  reg_number: {
+  reg_num: {
     required: true,
     message: "Please enter Register Number",
     trigger: ["input", "blur"],
@@ -142,7 +142,7 @@ const updateShow = (show) => {
           <n-input
             placeholder="Registered Number"
             clearable
-            v-model:value="form.reg_number"
+            v-model:value="form.reg_num"
             :loading="isLoading"
           />
         </n-form-item>

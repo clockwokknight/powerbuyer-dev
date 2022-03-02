@@ -12,20 +12,16 @@ import { objectFilter } from "@/lib/helper";
 const showDrawer = ref(false);
 const initialForm = {
   name: "",
-  tax_id_number: "",
   din: "",
   address_one: "",
   address_two: "",
-  payment_terms: null,
-  vendor_category_id: null,
   phone: "",
   email: "",
   state: null,
   city: "",
   zip: "",
   fax: "",
-  comments: "",
-  accounting_code: "",
+  notes: "",
 };
 
 const formRef = ref(null);
@@ -35,39 +31,12 @@ const form = ref({ ...initialForm });
 // Queries
 const { data: statesList } = getStates();
 
-const { data: paymentTerms } = getPaymentTerms();
-const paymentTermOptions = computed(() =>
-  paymentTerms.value?.map((payment) => ({
-    label: payment.name,
-    value: payment.name,
-  }))
-);
-
-const {
-  data: vendorCategory,
-  hasNextPage: hasMoreVendorCategory,
-  fetchNextPage: fetchNextVendorCategory,
-} = useVendorCategories();
-
-const vendorCategoryOptions = computed(() =>
-  vendorCategory.value?.pages.reduce(
-    (prev, current) =>
-      prev.concat(
-        current.data.map((category) => ({
-          value: category.id,
-          label: category.name,
-        }))
-      ),
-    []
-  )
-);
-
 // Mutations
-const { mutateAsync: createVendor, isLoading } = useMutation(
-  (data) => axios.post("/vendors/store", data),
+const { mutateAsync: createDealer, isLoading } = useMutation(
+  (data) => axios.post("/dealers/store", data),
   {
     onSuccess() {
-      message.success("Vendor created Successfully");
+      message.success("Dealer created Successfully");
       form.value = { ...initialForm };
       showDrawer.value = false;
     },
@@ -83,7 +52,7 @@ const { mutateAsync: createVendor, isLoading } = useMutation(
 async function addVendor() {
   try {
     await formRef.value.validate();
-    await createVendor(objectFilter(form.value, (key, value) => value));
+    await createDealer(objectFilter(form.value, (key, value) => value));
   } catch {}
 }
 
@@ -107,24 +76,13 @@ const handleVendorCategorySelectScroll = (e) => {
 const rules = {
   name: {
     required: true,
-    message: "Please enter a Company Name",
+    message: "Name is required",
     trigger: ["input"],
   },
   din: {
     required: true,
     message: "Please enter a valid DIN",
     trigger: ["input"],
-  },
-  payment_terms: {
-    required: true,
-    trigger: ["blur", "change"],
-    message: "Please select a Payment Term",
-  },
-  vendor_category_id: {
-    required: true,
-    type: "number",
-    message: "Please select a vendor category",
-    trigger: ["blur", "change"],
   },
   tax_id_number: {
     required: true,
@@ -158,8 +116,20 @@ const rules = {
   },
   phone: {
     required: true,
-    message: "Please enter a phone number",
-    trigger: ["input"],
+    trigger: ["input", "blur"],
+    validator(rules, value) {
+      if (!/^[(]\d{3}[)][\s]?\d{3}[-\s]?\d{4}$/.test(value))
+        return new Error("Please enter a valid phone number");
+    },
+  },
+  fax: {
+    required: true,
+    trigger: ["input", "blur"],
+    validator(rules, value) {
+      if (value === "") return true;
+      if (!/^[(]\d{3}[)][\s]?\d{3}[-\s]?\d{4}$/.test(value))
+        return new Error("Please enter a valid phone number");
+    },
   },
   zip: {
     required: true,
@@ -246,7 +216,7 @@ const rules = {
             v-model:value.trim="form.city"
           />
         </n-form-item>
-        <n-space>
+        <div class="flex gap-x-3">
           <n-form-item label="State" path="state">
             <n-select
               style="width: 220px"
@@ -258,7 +228,9 @@ const rules = {
             />
           </n-form-item>
           <n-form-item label="ZIP Code" path="zip">
-            <n-input
+            <MaskedInput
+              masked
+              mask="#####-####"
               type="text"
               min-length="2"
               maxlength="5"
@@ -268,7 +240,15 @@ const rules = {
               v-model:value="form.zip"
             />
           </n-form-item>
-        </n-space>
+        </div>
+        <n-form-item label="Email" path="email">
+          <n-input
+            type="email"
+            placeholder="Enter Email"
+            clearable
+            v-model:value="form.email"
+          />
+        </n-form-item>
         <n-form-item label="Phone Number" path="phone">
           <masked-input
             mask="(###) ###-####"
@@ -276,14 +256,6 @@ const rules = {
             clearable
             v-model:value="form.phone"
             :loading="isLoading"
-          />
-        </n-form-item>
-        <n-form-item label="Email" path="email">
-          <n-input
-            type="email"
-            placeholder="Enter Email"
-            clearable
-            v-model:value="form.email"
           />
         </n-form-item>
         <n-form-item label="Fax">
