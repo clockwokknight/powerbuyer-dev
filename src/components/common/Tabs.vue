@@ -34,7 +34,7 @@ watch(
   (val) => {
     console.clear();
     console.log(val, active.value);
-    active.value = val;
+    if (props.type === "basic") active.value = val;
   }
 );
 </script>

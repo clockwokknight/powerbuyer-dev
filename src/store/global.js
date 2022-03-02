@@ -34,7 +34,7 @@ export const useGlobalState = defineStore('global', {
         },
         stick(val) {
             this.stuck = val;
-        }
+        },
     },
 });
 
