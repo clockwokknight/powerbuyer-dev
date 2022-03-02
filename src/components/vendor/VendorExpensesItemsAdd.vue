@@ -1,10 +1,7 @@
 <script setup>
-import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { getExpenseTypes } from "@/hooks/expense";
 import CurrencyInput from "@/components/common/CurrencyInput.vue";
-import { useRoute } from "vue-router";
-
-const route = useRoute();
 
 const props = defineProps({
   showDrawer: Boolean,

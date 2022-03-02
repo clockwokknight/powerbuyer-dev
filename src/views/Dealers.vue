@@ -6,6 +6,7 @@ import PageTabs from "@/components/PageTabs.vue";
 import { getDealers } from "@/hooks/dealers";
 import DealerList from "@/components/dealer/DealerList.vue";
 import { useTabsViewStore } from "@/store/tabs";
+import AddDealer from "@/components/dealer/AddDealer.vue";
 
 const pageName = "auctions";
 const tabStore = useTabsViewStore();
@@ -46,7 +47,7 @@ const addTab = (dealer) => {
       <div class="sticky top-0 border-b bg-white p-3">
         <div class="mb-3 flex justify-between">
           <h1 class="text-xl font-bold uppercase">Dealers</h1>
-          <!--          <AddAuction />-->
+          <AddDealer />
         </div>
         <!--        <div class="flex">-->
         <!--          <div class="mr-3">-->

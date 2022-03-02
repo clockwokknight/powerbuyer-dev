@@ -118,7 +118,6 @@ tabStore.$onAction(({ name, store, after, args }) => {
 });
 
 const closeTab = (id) => {
-  console.log("closing");
   tabStore.closeTab(id);
   if (tabStore.tabs.length === 0) {
     router.push("/" + props.pageName);

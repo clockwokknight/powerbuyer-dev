@@ -3,13 +3,14 @@ import { useQuery } from "vue-query";
 import { useRoute } from "vue-router";
 import axios from "axios";
 import { computed, ref, watch } from "vue";
+import DealerContacts from "@/components/dealer/DealerContacts.vue";
 
 const route = useRoute();
 
 const routeParamId = ref(route.params?.id);
 watch(
   () => route.params,
-  (toParams, previousParams) => {
+  (toParams) => {
     if (toParams?.id) routeParamId.value = toParams?.id;
   },
   {
@@ -27,5 +28,6 @@ const { data: dealer, isLoading } = useQuery(
     <pre>
       {{ dealer }}
     </pre>
+    <DealerContacts />
   </div>
 </template>
