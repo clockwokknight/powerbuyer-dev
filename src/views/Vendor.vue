@@ -84,6 +84,7 @@ const vendorCategoryOptions = computed(() =>
 );
 
 const { data: paymentTerms } = getPaymentTerms();
+
 const paymentTermOptions = computed(() =>
   paymentTerms.value?.map((payment) => ({
     label: payment.name,
@@ -92,9 +93,25 @@ const paymentTermOptions = computed(() =>
 );
 
 const { data: statesList } = getStates();
-const { data: vendor, isLoading: isVendorLoading } =
-  getVendorById(routeParamId);
-const form = ref({ name: "", address_one: "" });
+
+const { data: vendor, isLoading: isVendorLoading } = getVendorById(routeParamId);
+
+const form = ref({
+  name: "",
+  address_one: "",
+  address_two: "",
+  city: "",
+  state: "",
+  zip: "",
+  email: "",
+  phone: "",
+  fax: "",
+  din: "",
+  tax_id_number: "",
+  vendor_category_id: "",
+  payment_terms: "",
+});
+
 watch(
   () => vendor.value,
   (newValue) => {
@@ -198,7 +215,8 @@ let tabs = computed(() => global.tabs);
         <CustomInput
           type="header"
           placeholder="Company Name"
-          v-model:value="form.name"
+          :value="form.name"
+          @update:value="(val) => (form.name = val)"
           @save="submitValue('name')"
           @cancel="resetValue('name')"
           @focus="currentActiveField = 'name'"
@@ -209,8 +227,8 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-6">
           <CustomInput
             label="Address"
+            :validate="['required']"
             placeholder=""
-            type="input"
             :value="form.address_one"
             @update:value="(val) => (form.address_one = val)"
             @save="submitValue('address_one')"
@@ -221,9 +239,10 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-6">
           <CustomInput
             label="Address 2"
+            :validate="['required']"
             placeholder=""
-            :value="vendor?.address_two"
-            v-model:value="payload"
+            :value="form.address_two"
+            @update:value="(val) => (form.address_two = val)"
             @save="submitValue('address_two')"
             @cancel="resetValue('address_two')"
             @focus="currentActiveField = 'address_two'"
@@ -233,9 +252,10 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="City"
+            :validate="['required']"
             placeholder=""
-            :value="vendor?.city"
-            v-model:value="payload"
+            :value="form.city"
+            @update:value="(val) => (form.city = val)"
             @save="submitValue('city')"
             @cancel="resetValue('city')"
             @focus="currentActiveField = 'city'"
@@ -245,10 +265,11 @@ let tabs = computed(() => global.tabs);
           <CustomInput
             type="select"
             label="State"
+            :validate="['required']"
             placeholder=""
             :options="statesList"
-            :value="vendor?.state"
-            v-model:value="payload"
+            :value="form.state"
+            @update:value="(val) => (form.state = val)"
             @save="submitValue('state')"
             @cancel="resetValue('state')"
             @focus="currentActiveField = 'state'"
@@ -257,11 +278,12 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="Zip Code"
+            :validate="['required']"
             type="mask"
             mask="#####-####"
             placeholder="#####-####"
-            :value="vendor?.zip"
-            v-model:value="payload"
+            :value="form.zip"
+            @update:value="(val) => (form.zip = val)"
             @save="submitValue('zip')"
             @cancel="resetValue('zip')"
             @focus="currentActiveField = 'zip'"
@@ -271,9 +293,10 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="Email"
+            :validate="['required', 'email']"
             placeholder=""
-            :value="vendor?.email"
-            v-model:value="payload"
+            :value="form.email"
+            @update:value="(val) => (form.email = val)"
             @save="submitValue('email')"
             @cancel="resetValue('email')"
             @focus="currentActiveField = 'email'"
@@ -282,11 +305,12 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="Phone"
+            :validate="['required', 'phone']"
             type="mask"
-            mask="+1 (###) ### ####"
-            placeholder="(###) ### ####"
-            :value="vendor?.phone"
-            v-model:value="payload"
+            mask="+1 (###) ###-####"
+            placeholder="+1 (###) ###-####"
+            :value="form.phone"
+            @update:value="(val) => (form.phone = val)"
             @save="submitValue('phone')"
             @cancel="resetValue('phone')"
             @focus="currentActiveField = 'phone'"
@@ -295,11 +319,12 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="Fax"
+            :validate="['phone']"
             type="mask"
-            mask="+1 (###) ### ####"
-            placeholder="(###) ### ####"
-            :value="vendor?.fax"
-            v-model:value="payload"
+            mask="+1 (###) ###-####"
+            placeholder="+1 (###) ###-####"
+            :value="form.fax"
+            @update:value="(val) => (form.fax = val)"
             @save="submitValue('fax')"
             @cancel="resetValue('fax')"
             @focus="currentActiveField = 'fax'"
@@ -309,9 +334,10 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="DIN"
-            :value="vendor?.din"
-            v-model:value="payload"
+            :validate="['required']"
+            :value="form.din"
             placeholder=""
+            @update:value="(val) => (form.din = val)"
             @save="submitValue('din')"
             @cancel="resetValue('din')"
             @focus="currentActiveField = 'din'"
@@ -320,11 +346,12 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="Tax ID"
+            :validate="['required']"
             type="mask"
             mask="### ## ####"
             placeholder="### ## ####"
-            :value="vendor?.tax_id_number"
-            v-model:value="payload"
+            :value="form.tax_id_number"
+            @update:value="(val) => (form.tax_id_number = val)"
             @save="submitValue('tax_id_number')"
             @cancel="resetValue('tax_id_number')"
             @focus="currentActiveField = 'tax_id_number'"
@@ -334,10 +361,11 @@ let tabs = computed(() => global.tabs);
           <CustomInput
             type="select"
             label="Category"
+            :validate="['required']"
             :options="vendorCategoryOptions"
-            :value="vendor?.vendor_category_id"
-            v-model:value="payload"
+            :value="form.vendor_category_id"
             placeholder=""
+            @update:value="(val) => (form.vendor_category_id = val)"
             @save="submitValue('vendor_category_id')"
             @cancel="resetValue('vendor_category_id')"
             @focus="currentActiveField = 'vendor_category_id'"
@@ -361,10 +389,11 @@ let tabs = computed(() => global.tabs);
         <CustomInput
           type="select"
           label="Payment Terms"
+          :validate="['required']"
           :options="paymentTermOptions"
-          :value="vendor?.payment_terms"
-          v-model:value="payload"
+          :value="form.payment_terms"
           placeholder=""
+          @update:value="(val) => (form.payment_terms = val)"
           @save="submitValue('payment_terms')"
           @cancel="resetValue('payment_terms')"
           @focus="currentActiveField = 'payment_terms'"
@@ -372,10 +401,7 @@ let tabs = computed(() => global.tabs);
         <div
           class="__invoice-buttons mt-[58px] flex min-w-max max-w-full flex-col items-end justify-center"
         >
-          <button
-            class="__invoice-button"
-            @click="global.openDrawer('payments')"
-          >
+          <button class="__invoice-button" @click="global.openDrawer('payments')">
             <span><b>+</b> Add payment</span>
           </button>
           <button class="__invoice-button">
@@ -390,10 +416,7 @@ let tabs = computed(() => global.tabs);
     id="__subtabs"
     type="basic"
     class="sticky top-[82px] left-0 z-50 mt-4 w-full rounded-xl border-2 border-gray-200 bg-white duration-300"
-    :class="
-      global.stuck[1] &&
-      '!rounded-none !bg-gray-50 shadow-lg shadow-[#00000011]'
-    "
+    :class="global.stuck[1] && '!rounded-none !bg-gray-50 shadow-lg shadow-[#00000011]'"
     :items="vendorTabs"
     @click="handleTabClick"
   />
