@@ -36,8 +36,6 @@ const message = useMessage();
 const showOuterRef = ref(false);
 const formValue = ref({});
 const formRef = ref(null);
-const feedback = ref("");
-const status = ref("");
 
 let drawer = computed(() => global.drawer);
 
@@ -49,9 +47,6 @@ function validateEmail(v) {
   if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(v)) {
     console.log("success");
   } else {
-    console.log("nope");
-    feedback = "Please enter a valid email address.";
-    status = "error";
   }
 }
 
@@ -102,7 +97,11 @@ function addExpense() {
     </n-icon>
     Add Payment
   </n-button>
-  <n-drawer v-model:show="showOuterRef" :on-update:show="global.closeDrawer" :width="500">
+  <n-drawer
+    v-model:show="showOuterRef"
+    :on-update:show="global.closeDrawer"
+    :width="500"
+  >
     <n-drawer-content title="Add Payment">
       <n-form
         :model="formValue"

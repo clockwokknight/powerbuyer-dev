@@ -24,16 +24,15 @@ const scrollWrapper = ref(null);
 
 // Left and right Click Arrow Scroll
 const ifScrollArrowNeeded = useDebounceFn(() => {
-  const wrapperWidth =
-    tabListButtonWrapper.value?.getBoundingClientRect().width;
+  const wrapperWidth = tabListButtonWrapper.value?.getBoundingClientRect().width;
   const tabWidth = tabListButton.value?.getBoundingClientRect().width;
 
   showScrollArrow.value = wrapperWidth < tabWidth;
 }, 500);
 
-onUpdated(() => {
+/*onUpdated(() => {
   ifScrollArrowNeeded();
-});
+});*/
 
 const scrollTo = (type) => {
   const scrollLeft = scrollWrapper.value.scrollLeft;
@@ -117,9 +116,7 @@ const addTab = (vendor) => {
   if (index === -1) {
     tablist.value = tablist.value
       .map(({ active, ...rest }) => rest)
-      .concat([
-        { id: vendor?.id, name: vendor?.auction_company, active: true },
-      ]);
+      .concat([{ id: vendor?.id, name: vendor?.auction_company, active: true }]);
     selectedIndex.value = tablist.value.length - 1;
   } else {
     tablist.value = tablist.value.map(({ active, ...rest }, i) => {
@@ -156,9 +153,7 @@ const scrollTabToView = useDebounceFn(() => {
   const tabListChildren = tabListButton.value.children;
   for (let i = 0; i < tabListChildren.length; i++) {
     const tabIndex = parseInt(
-      tabListChildren[i]
-        .getElementsByTagName("button")[0]
-        .getAttribute("tabindex")
+      tabListChildren[i].getElementsByTagName("button")[0].getAttribute("tabindex")
     );
     if (tabIndex === 0) {
       tabListChildren[i].scrollIntoView({ behavior: "smooth" });
@@ -168,8 +163,9 @@ const scrollTabToView = useDebounceFn(() => {
 }, 100);
 
 // Vendor Search Result
-const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
-  useQuery([`${pageName}_search`, debouncedSearchText], ({ queryKey }) => {
+const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
+  [`${pageName}_search`, debouncedSearchText],
+  ({ queryKey }) => {
     if (queryKey[1] === "") return null;
     else
       return axios.get(`/${pageName}/search/${queryKey[1]}`).then((res) => {
@@ -178,7 +174,8 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
         }
         return res.data;
       });
-  });
+  }
+);
 </script>
 
 <template>
@@ -296,10 +293,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
             ref="scrollWrapper"
           >
             <TabList>
-              <nav
-                ref="tabListButton"
-                class="flex min-w-max flex-nowrap gap-x-2"
-              >
+              <nav ref="tabListButton" class="flex min-w-max flex-nowrap gap-x-2">
                 <template
                   v-for="tab in tablist"
                   v-if="tablist.length >= 1"
@@ -316,9 +310,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
                       <tab
                         class="max-w-xs scroll-mt-2 focus:outline-none"
                         :class="[
-                          isActive
-                            ? 'bg-primary text-white'
-                            : 'bg-white text-gray-700',
+                          isActive ? 'bg-primary text-white' : 'bg-white text-gray-700',
                         ]"
                       >
                         <a
@@ -332,9 +324,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
                       <span
                         class="absolute inset-y-0 right-0 top-[1px] z-10 flex cursor-pointer items-center rounded-r pr-1"
                         @click.stop="closeTab(tab.id)"
-                        :class="[
-                          isActive ? 'bg-primary text-white' : 'bg-slate-white',
-                        ]"
+                        :class="[isActive ? 'bg-primary text-white' : 'bg-slate-white']"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -417,9 +407,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
         </header>
       </TabGroup>
       <!-- Main Body Content-->
-      <div
-        class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden border-t-2"
-      >
+      <div class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden border-t-2">
         <main class="h-full bg-white">
           <router-view />
         </main>
