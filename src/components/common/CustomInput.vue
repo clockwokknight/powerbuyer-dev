@@ -4,7 +4,14 @@ import { NInput, NSelect, NConfigProvider } from "naive-ui";
 import MaskedInput from "@/components/common/generic/MaskedInput.vue";
 import { utils } from "@/lib/utils";
 
-const emit = defineEmits(["update:value", "focus", "scroll", "edit", "save", "cancel"]);
+const emit = defineEmits([
+  "update:value",
+  "focus",
+  "scroll",
+  "edit",
+  "save",
+  "cancel",
+]);
 
 const props = defineProps([
   "value",
@@ -123,12 +130,12 @@ function blur() {
     <div class="__custom-input relative">
       <label
         v-if="type !== 'header'"
-        class="absolute text-gray-600 bg-white text-[10px] translate-x-4 translate-y-[-6px] px-2 tracking-widest uppercase font-bold z-40"
+        class="absolute z-40 translate-x-4 translate-y-[-6px] bg-white px-2 text-[10px] font-bold uppercase tracking-widest text-gray-600"
         >{{ label || "label" }}
       </label>
 
       <div
-        class="flex mt-1 w-full"
+        class="mt-1 flex w-full"
         @mouseover="
           () => {
             hoverInput = true;
@@ -144,7 +151,7 @@ function blur() {
         "
       >
         <div
-          class="flex items-center duration-200 w-full rounded-md border-[1px]"
+          class="flex w-full items-center rounded-md border-[1px] duration-200"
           :class="`
             ${saved && 'ping'}
             ${
@@ -154,16 +161,18 @@ function blur() {
             } 
             ${
               type === 'header' &&
-              `${editing ? `border-transparent !shadow-lg` : `!border-transparent`} ${
-                saved && 'ping'
-              } ${hoverEdit && '!border-gray-200'}`
+              `${
+                editing
+                  ? `border-transparent !shadow-lg`
+                  : `!border-transparent`
+              } ${saved && 'ping'} ${hoverEdit && '!border-gray-200'}`
             }
         `"
         >
           <div class="__inputs w-full">
             <masked-input
               ref="input"
-              v-model:value="value"
+              :value="value"
               :type="type"
               :editing="editing"
               :masked="type !== 'select'"
@@ -182,9 +191,11 @@ function blur() {
           </div>
 
           <div
-            class="__buttons flex justify-center items-center duration-200"
+            class="__buttons flex items-center justify-center duration-200"
             :class="`
-                ${(hoverInput || editing || type === 'header') && '!opacity-100'}
+                ${
+                  (hoverInput || editing || type === 'header') && '!opacity-100'
+                }
                 ${type === 'header' ? 'opacity-100' : 'opacity-0'}
             `"
           >
@@ -209,11 +220,11 @@ function blur() {
                 }
               "
               @mouseleave="hoverEdit = false"
-              class="__edit h-3 w-3 rounded-full -translate-x-1"
+              class="__edit h-3 w-3 -translate-x-1 rounded-full"
               :class="`
                     ${
                       editing
-                        ? 'opacity-0 scale-50 pointer-events-none duration-200'
+                        ? 'pointer-events-none scale-50 opacity-0 duration-200'
                         : 'opacity-100 duration-100'
                     }
                     ${done && 'delay-[250ms]'}
@@ -242,7 +253,7 @@ function blur() {
               class="__save h-5 w-5 -translate-x-2 duration-200"
               :class="
                 !editing
-                  ? 'opacity-0 !scale-50 pointer-events-none'
+                  ? 'pointer-events-none !scale-50 opacity-0'
                   : 'opacity-100 delay-100'
               "
             >
@@ -266,14 +277,17 @@ function blur() {
               "
               @mouseleave="hoverEdit = false"
               :style="!editing && 'width: 0px !important'"
-              class="__cancel h-5 w-5 -translate-x-2 duration-200 ml-1"
+              class="__cancel ml-1 h-5 w-5 -translate-x-2 duration-200"
               :class="
                 !editing
-                  ? 'opacity-0 !scale-50 pointer-events-none delay-100'
+                  ? 'pointer-events-none !scale-50 opacity-0 delay-100'
                   : 'opacity-100'
               "
             >
-              <svg class="fill-gray-400 rotate-45 hover:opacity-60" viewBox="0 0 24 24">
+              <svg
+                class="rotate-45 fill-gray-400 hover:opacity-60"
+                viewBox="0 0 24 24"
+              >
                 <path
                   d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2zm0 5a.75.75 0 0 0-.743.648l-.007.102v3.5h-3.5a.75.75 0 0 0-.102 1.493l.102.007h3.5v3.5a.75.75 0 0 0 1.493.102l.007-.102v-3.5h3.5a.75.75 0 0 0 .102-1.493l-.102-.007h-3.5v-3.5A.75.75 0 0 0 12 7z"
                 ></path>

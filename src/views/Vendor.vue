@@ -7,6 +7,7 @@ import {
   ref,
   watch,
   watchEffect,
+  nextTick,
 } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useMutation, useQueryClient } from "vue-query";
@@ -91,8 +92,15 @@ const paymentTermOptions = computed(() =>
 );
 
 const { data: statesList } = getStates();
-const { data: vendor, isLoading: isVendorLoading } = getVendorById(routeParamId);
-
+const { data: vendor, isLoading: isVendorLoading } =
+  getVendorById(routeParamId);
+const form = ref({ name: "", address_one: "" });
+watch(
+  () => vendor.value,
+  (newValue) => {
+    if (newValue) form.value = { ...newValue };
+  }
+);
 const { isLoading, mutateAsync } = useMutation(
   (data) => axios.put(`/vendors/${vendor.value.id}`, data),
   {
@@ -130,15 +138,18 @@ function resetValue(key) {
   console.log("\n");
   console.log(`resetting value: ${payload.value} ==> ${vendor?.value[key]}`);
   payload.value = vendor?.value[key];
+  form.value = {
+    ...form.value,
+    [key]: vendor.value[key],
+  };
   console.log("payload: ", payload.value);
   currentActiveField.value = null;
-  instance?.proxy?.$forceUpdate();
 }
 
 function submitValue(key) {
   console.clear();
   console.log("submitting");
-  mutateAsync({ [key]: payload.value })
+  mutateAsync({ [key]: form.value[key] })
     .then((data) => {
       message.success("Saved");
       console.log("submission promise: ", data);
@@ -162,15 +173,15 @@ let tabs = computed(() => global.tabs);
 
 <template>
   <div
-    class="__veil top-0 left-[390px] h-[60px] bg-lightergray fixed z-50 -translate-x-10"
+    class="__veil fixed top-0 left-[390px] z-50 h-[60px] -translate-x-10 bg-lightergray"
   ></div>
 
   <Tabs
     id="__tabs"
-    class="duration-300 bg-white rounded-xl border-2 border-gray-200 sticky top-[24px] z-50"
+    class="sticky top-[24px] z-50 rounded-xl border-2 border-gray-200 bg-white duration-300"
     :class="
       global.stuck[0] &&
-      'shadow-xl shadow-[#00000011] !rounded-t-xl rounded-r-xl rounded-b-none rounded-l-none'
+      '!rounded-t-xl rounded-r-xl rounded-b-none rounded-l-none shadow-xl shadow-[#00000011]'
     "
     :items="tabs"
     @click="(e) => router.push(`/vendors/${e}`)"
@@ -178,30 +189,30 @@ let tabs = computed(() => global.tabs);
 
   <div
     id="details"
-    class="__section __vendor-card grid grid-cols-12 rounded-xl border-2 bg-white p-6 mt-4"
+    class="__section __vendor-card mt-4 grid grid-cols-12 rounded-xl border-2 bg-white p-6"
   >
     <!-- left side -->
-    <div class="__form flex flex-col justify-between col-span-8">
+    <div class="__form col-span-8 flex flex-col justify-between">
       <div class="__title">
-        <h3 class="font-bold translate-x-2 mb-2">VENDOR</h3>
+        <h3 class="mb-2 translate-x-2 font-bold">VENDOR</h3>
         <CustomInput
           type="header"
           placeholder="Company Name"
-          :value="vendor?.name"
-          v-model:value="payload"
+          v-model:value="form.name"
           @save="submitValue('name')"
           @cancel="resetValue('name')"
           @focus="currentActiveField = 'name'"
         />
       </div>
-      <div class="__form grid grid-cols-12 gap-4 mt-8">
+      <div class="__form mt-8 grid grid-cols-12 gap-4">
         <!-- row 1 -->
         <div class="col-span-6">
           <CustomInput
             label="Address"
             placeholder=""
-            :value="vendor?.address_one"
-            v-model:value="payload"
+            type="input"
+            :value="form.address_one"
+            @update:value="(val) => (form.address_one = val)"
             @save="submitValue('address_one')"
             @cancel="resetValue('address_one')"
             @focus="currentActiveField = 'address_one'"
@@ -337,16 +348,16 @@ let tabs = computed(() => global.tabs);
 
     <!-- right side -->
 
-    <div class="col-span-4 flex flex-col justify-between items-end">
+    <div class="col-span-4 flex flex-col items-end justify-between">
       <div class="__invoice-info">
         <div class="flex justify-end">
           <p class="text-sm font-bold">Open Invoices</p>
         </div>
         <div class="flex justify-end">
-          <p class="font-bold text-2xl">$10,193</p>
+          <p class="text-2xl font-bold">$10,193</p>
         </div>
       </div>
-      <div class="flex-col justify-between align-end max-w-[220px]">
+      <div class="align-end max-w-[220px] flex-col justify-between">
         <CustomInput
           type="select"
           label="Payment Terms"
@@ -359,9 +370,12 @@ let tabs = computed(() => global.tabs);
           @focus="currentActiveField = 'payment_terms'"
         />
         <div
-          class="__invoice-buttons flex flex-col justify-center items-end min-w-max max-w-full mt-[58px]"
+          class="__invoice-buttons mt-[58px] flex min-w-max max-w-full flex-col items-end justify-center"
         >
-          <button class="__invoice-button" @click="global.openDrawer('payments')">
+          <button
+            class="__invoice-button"
+            @click="global.openDrawer('payments')"
+          >
             <span><b>+</b> Add payment</span>
           </button>
           <button class="__invoice-button">
@@ -375,8 +389,11 @@ let tabs = computed(() => global.tabs);
   <Tabs
     id="__subtabs"
     type="basic"
-    class="duration-300 bg-white rounded-xl border-2 border-gray-200 mt-4 sticky top-[82px] left-0 z-50 w-full"
-    :class="global.stuck[1] && '!bg-gray-50 !rounded-none shadow-lg shadow-[#00000011]'"
+    class="sticky top-[82px] left-0 z-50 mt-4 w-full rounded-xl border-2 border-gray-200 bg-white duration-300"
+    :class="
+      global.stuck[1] &&
+      '!rounded-none !bg-gray-50 shadow-lg shadow-[#00000011]'
+    "
     :items="vendorTabs"
     @click="handleTabClick"
   />
@@ -399,9 +416,9 @@ let tabs = computed(() => global.tabs);
 }
 .__invoice-button {
   transition-timing-function: ease;
-  @apply h-10 w-full mt-[14px] flex justify-center items-center text-center duration-[200ms] px-3 rounded-md border-[1px] border-lightgray;
+  @apply mt-[14px] flex h-10 w-full items-center justify-center rounded-md border-[1px] border-lightgray px-3 text-center duration-[200ms];
   &:hover {
-    @apply text-secondary border-secondary;
+    @apply border-secondary text-secondary;
   }
   svg {
     transition-timing-function: $overshoot;
