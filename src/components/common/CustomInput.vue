@@ -135,6 +135,7 @@ function save() {
 
 function cancel() {
   emit("cancel");
+  isValid.value = null;
   editing.value = false;
   done.value = true;
   setTimeout(() => {
