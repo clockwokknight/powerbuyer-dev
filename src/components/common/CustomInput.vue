@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed, onMounted } from "vue";
+import { ref, toRefs, reactive, computed, onMounted } from "vue";
 import { NInput, NSelect, NConfigProvider } from "naive-ui";
 import MaskedInput from "@/components/common/generic/MaskedInput.vue";
 import { utils } from "@/lib/utils";
@@ -55,29 +55,6 @@ const themeOverrides = {
     },
   },
 };
-
-const sampleOptions = ref([
-  {
-    label: "Option 1",
-    value: 1,
-  },
-  {
-    label: "Option 2",
-    value: 2,
-  },
-  {
-    label: "Option 3",
-    value: 3,
-  },
-  {
-    label: "Option 4",
-    value: 4,
-  },
-  {
-    label: "Option 5",
-    value: 5,
-  },
-]);
 
 const input = ref(null);
 const masked = ref(null);
@@ -183,48 +160,17 @@ function blur() {
             }
         `"
         >
-          <!-- input types -->
-
           <div class="__inputs w-full">
-            <!-- text input -->
-
-            <n-input
-              ref="input"
-              v-if="!type || type === 'text' || type === 'header'"
-              :class="`
-                ${!editing && 'pointer-events-none'}
-                ${(type === 'text' || !type) && 'bg-transparent outline-none w-full pl-3'}
-                ${
-                  type === 'header' &&
-                  '__header text-ellipsis bg-transparent outline-none w-full pl-1 py-1 text-2xl !font-bold placeholder:text-gray-300'
-                }
-              `"
-              v-model:value="value"
-              :placeholder="placeholder || (type === 'header' ? 'Company Name' : '')"
-              :disabled="!editing"
-              :on-input="$emit('update:value', value)"
-              @focus="(e) => $emit('focus', e)"
-              @blur="
-                (e) =>
-                  e.relatedTarget?.classList[0] !== '__save' &&
-                  e.relatedTarget?.classList[0] !== '__cancel' &&
-                  blur()
-              "
-            />
-
-            <!-- masked text input -->
-
             <masked-input
-              ref="masked"
-              v-if="type === 'mask'"
+              ref="input"
               v-model:value="value"
-              styles="bg-transparent outline-none w-full pl-3"
-              :class="!editing && 'pointer-events-none'"
-              :masked="true"
-              :mask="mask || 'No mask provided'"
+              :type="type"
+              :editing="editing"
+              :masked="type !== 'select'"
+              :mask="mask"
+              :options="options"
               :placeholder="placeholder"
-              :disabled="!editing"
-              :on-input="
+              @input="
                 (e) => {
                   utils.log('CustomInput.vue: ' + e);
                   $emit('update:value', e);
@@ -233,30 +179,8 @@ function blur() {
               @focus="(e) => $emit('focus', e)"
               @blur="blur"
             />
-
-            <!-- selector input -->
-
-            <n-select
-              ref="input"
-              v-if="type === 'select'"
-              v-model:value="value"
-              class="bg-transparent !outline-none w-full pl-0"
-              :class="!editing && 'pointer-events-none'"
-              :options="options || sampleOptions"
-              :filterable="filterable || true"
-              :placeholder="placeholder || 'Select'"
-              :disabled="!editing"
-              :on-input="$emit('update:value', value)"
-              :on-scroll="(e) => $emit('scroll', e)"
-              @focus="(e) => $emit('focus', e)"
-              @blur="
-                (e) =>
-                  e.relatedTarget?.classList[0] !== '__save' &&
-                  e.relatedTarget?.classList[0] !== '__cancel' &&
-                  blur()
-              "
-            />
           </div>
+
           <div
             class="__buttons flex justify-center items-center duration-200"
             :class="`
@@ -265,7 +189,6 @@ function blur() {
             `"
           >
             <!-- edit -->
-
             <button
               ref="editButton"
               @click="
