@@ -194,7 +194,7 @@ const { stop } = useIntersectionObserver(
 <template>
   <div
     id="details"
-    class="__section __vendor-card mt-4 grid grid-cols-12 rounded-xl border-2 bg-white p-6"
+    class="__section __vendor-card mt-4 grid grid-cols-12 rounded border-2 bg-white p-6"
   >
     <!-- left side -->
     <div class="__form col-span-8 flex flex-col justify-between">
@@ -407,7 +407,7 @@ const { stop } = useIntersectionObserver(
     id="__subtabs"
     type="basic"
     ref="vendorTab"
-    class="sticky top-[-2px] left-0 z-50 mt-4 w-full rounded-xl border-2 border-gray-200 bg-white duration-300"
+    class="sticky top-[-2px] left-0 z-50 mt-4 w-full rounded border-2 border-gray-200 bg-white duration-300"
     :items="vendorTabs"
     @click="handleTabClick"
   />
@@ -423,7 +423,8 @@ const { stop } = useIntersectionObserver(
 
 <style lang="scss">
 #__subtabs[stuck] {
-  @apply rounded-none border-none bg-lightergray;
+  background: #f9fafb;
+  @apply rounded-none border-none shadow-lg shadow-[#00000011];
 }
 .__veil {
   width: calc(100vw - 370px);

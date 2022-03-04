@@ -35,9 +35,8 @@ const addTab = (vendor) => {
 };
 
 // Vendor Search Result
-const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
-  ["vendorSearch", debouncedSearchText],
-  ({ queryKey }) => {
+const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
+  useQuery(["vendorSearch", debouncedSearchText], ({ queryKey }) => {
     if (queryKey[1] === "") return null;
     else
       return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => {
@@ -46,8 +45,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
         }
         return res.data;
       });
-  }
-);
+  });
 
 function handleScroll(e) {
   let scroll = e.target.scrollTop;
@@ -87,7 +85,7 @@ function handleScroll(e) {
           </div>
           <div content="Filter" v-tippy="{ placement: 'right', duration: 50 }">
             <svg
-              class="hover:text-primary mt-1 h-6 w-6 cursor-pointer text-gray-400"
+              class="mt-1 h-6 w-6 cursor-pointer text-gray-400 hover:text-primary"
               viewBox="0 0 24 24"
             >
               <path
@@ -146,11 +144,11 @@ function handleScroll(e) {
 
     <!-- Main Tabs App Content -->
 
-    <section class="h-screen w-[calc(100vw-335px)] bg-white">
+    <section class="h-screen w-[calc(100vw-335px)] bg-lightergray">
       <page-tabs page-name="vendors" />
       <!-- Main Body Content-->
-      <div class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden border-t-2">
-        <main id="container" class="bg-lightergray min-h-full p-6 pt-6">
+      <div class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
+        <main id="container" class="min-h-full p-6">
           <router-view />
         </main>
       </div>
