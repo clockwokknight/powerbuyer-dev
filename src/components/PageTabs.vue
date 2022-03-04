@@ -4,7 +4,7 @@ import { useTabsViewStore } from "@/store/tabs";
 import { Tab, TabGroup, TabList } from "@headlessui/vue";
 import { useDebounceFn } from "@vueuse/core";
 import axios from "axios";
-import { ref, watch } from "vue";
+import { nextTick, ref, watch } from "vue";
 import { useMutation, useQueryClient } from "vue-query";
 import { useRoute, useRouter } from "vue-router";
 
@@ -137,7 +137,8 @@ watch(
   }
 );
 
-const scrollTabToView = useDebounceFn(() => {
+const scrollTabToView = useDebounceFn(async () => {
+  await nextTick();
   const tabListChildren = tabListButton.value?.children;
   if (tabListChildren && tabStore.selectedIndex !== -1)
     tabListChildren[tabStore?.selectedIndex]?.scrollIntoView({
@@ -145,6 +146,10 @@ const scrollTabToView = useDebounceFn(() => {
     });
 }, 100);
 
+/**
+ *
+ * getting the tab width before leaving for transition
+ */
 const width = ref("");
 const beforeLeaveTab = (el) => {
   width.value = `${el.getBoundingClientRect().width}px`;
@@ -168,7 +173,7 @@ const beforeLeaveTab = (el) => {
                 v-for="(tab, tabIdx) in tabStore.tabs"
                 v-if="tabStore.tabs.length >= 1"
                 :key="tab?.id"
-                class="group relative grid place-content-center overflow-hidden rounded-lg"
+                class="group relative grid select-none place-content-center overflow-hidden rounded-lg"
               >
                 <router-link
                   :to="`/${props.pageName}/${tab?.id}`"
@@ -176,11 +181,11 @@ const beforeLeaveTab = (el) => {
                   v-slot="{ href, route, navigate, isActive }"
                 >
                   <tab
-                    class="relative max-w-xs scroll-mt-2 focus:outline-none"
+                    class="relative max-w-xs scroll-mt-2 scroll-mr-3 focus:outline-none"
                     :class="[
                       isActive
-                        ? 'bg-primary/10 font-bold text-primary before:absolute before:inset-y-0 before:left-0 before:h-full before:w-1 before:bg-primary focus:outline-none'
-                        : 'bg-white text-gray-700',
+                        ? 'bg-primary/10  font-extrabold text-primary before:absolute before:inset-y-0 before:left-0 before:h-full before:w-1 before:bg-primary focus:outline-none'
+                        : 'font-bold text-black/75',
                     ]"
                   >
                     <a
@@ -225,7 +230,7 @@ const beforeLeaveTab = (el) => {
           </nav>
         </TabList>
       </div>
-      <div class="flex h-[48px] bg-[#f8f8fa]">
+      <div class="flex h-[48px]">
         <button
           class="grid w-8 place-content-center px-2 hover:text-[#027bff]"
           v-if="showScrollArrow"
@@ -244,7 +249,7 @@ const beforeLeaveTab = (el) => {
           </svg>
         </button>
         <button
-          class="grid w-8 place-content-center px-2 hover:text-[#027bff]"
+          class="grid place-content-center px-1 hover:text-[#027bff]"
           v-if="showScrollArrow"
           @click="scrollTo('right')"
         >

@@ -65,12 +65,6 @@ watch(
           "
         >
           {{ item.title }}
-          <b
-            v-if="type !== 'basic'"
-            class="__close-tab ml-2 scale-50 text-red-600 opacity-0 duration-200 hover:text-red-900"
-            @click="global.closeTab(index)"
-            >X</b
-          >
         </span>
       </span>
       <div
@@ -83,12 +77,8 @@ watch(
 </template>
 
 <style scoped>
-.__tab-title:hover .__close-tab {
-  opacity: 1 !important;
-  @apply mr-5 scale-100;
-}
 .__indicator {
-  border-radius: 24px 24px 0px 0px;
+  border-radius: 24px 24px 0 0;
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 .__tab-item:hover .__indicator {

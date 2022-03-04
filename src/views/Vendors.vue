@@ -150,7 +150,7 @@ function handleScroll(e) {
       <div
         class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden border-t-2"
       >
-        <main class="min-h-full bg-lightergray p-6 pt-6">
+        <main id="container" class="min-h-full bg-lightergray p-6 pt-6">
           <router-view />
         </main>
       </div>

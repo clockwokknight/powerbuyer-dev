@@ -27,6 +27,7 @@ import VendorExpenses from "@/components/vendor/VendorExpenses.vue";
 import VendorPayments from "@/components/vendor/VendorPayments.vue";
 import CustomInput from "@/components/common/CustomInput.vue";
 import Tabs from "@/components/common/Tabs.vue";
+import { useIntersectionObserver } from "@vueuse/core";
 
 const VendorContacts = defineAsyncComponent({
   loader: () => import("@/components/vendor/VendorContacts.vue"),
@@ -159,12 +160,21 @@ function handleTabClick(e) {
 }
 
 let tabs = computed(() => global.tabs);
+const vendorTab = ref(null);
+const { stop } = useIntersectionObserver(
+  vendorTab,
+  ([e], observerElement) => {
+    e.target.toggleAttribute("stuck", e.intersectionRatio < 1);
+  },
+  { threshold: [1] }
+);
 
 // LOAD TABLE DATA
 </script>
 
 <template>
   <div
+    id="details"
     class="__section __vendor-card mt-4 grid grid-cols-12 rounded-xl border-2 bg-white p-6"
   >
     <!-- left side -->
@@ -362,17 +372,14 @@ let tabs = computed(() => global.tabs);
     </div>
   </div>
 
-  <!--  <Tabs-->
-  <!--    id="__subtabs"-->
-  <!--    type="basic"-->
-  <!--    class="sticky top-[82px] left-0 z-50 mt-4 w-full rounded-xl border-2 border-gray-200 bg-white duration-300"-->
-  <!--    :class="-->
-  <!--      global.stuck[1] &&-->
-  <!--      '!rounded-none !bg-gray-50 shadow-lg shadow-[#00000011]'-->
-  <!--    "-->
-  <!--    :items="vendorTabs"-->
-  <!--    @click="handleTabClick"-->
-  <!--  />-->
+  <Tabs
+    id="__subtabs"
+    type="basic"
+    ref="vendorTab"
+    class="sticky top-[-2px] left-0 z-50 mt-4 w-full rounded-xl border-2 border-gray-200 bg-white duration-300"
+    :items="vendorTabs"
+    @click="handleTabClick"
+  />
 
   <VendorExpenses class="__section" />
   <VendorPayments class="__section" />
@@ -384,6 +391,9 @@ let tabs = computed(() => global.tabs);
 </template>
 
 <style lang="scss">
+#__subtabs[stuck] {
+  @apply rounded-none border-none bg-lightergray;
+}
 .__veil {
   width: calc(100vw - 370px);
 }
