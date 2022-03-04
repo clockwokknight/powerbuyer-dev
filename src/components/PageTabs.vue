@@ -104,7 +104,7 @@ tabStore.$onAction(({ name, store, after, args }) => {
         tabs: JSON.stringify(store.tabs),
       });
     }
-    if (name !== "findTabIndex") {
+    if (name === "addTab" || name === "initTabs") {
       ifScrollArrowNeeded();
       scrollTabToView();
     }
@@ -145,7 +145,7 @@ const scrollTabToView = useDebounceFn(async () => {
     tabListChildren[tabStore?.selectedIndex]?.scrollIntoView({
       behavior: "smooth",
     });
-}, 200);
+}, 1000);
 
 /**
  *
@@ -159,9 +159,9 @@ const beforeLeaveTab = (el) => {
 
 <template>
   <TabGroup :selected-index="tabStore.selectedIndex" @change="tabChanged">
-    <header class="h-[80px] px-[calc(1.5rem+5px)] pt-6">
+    <header class="relative z-50 h-[80px] pl-6 pr-[calc(1.5rem+5px)] pt-6">
       <div
-        class="relative flex h-[62px] items-center rounded bg-white"
+        class="relative flex h-[62px] items-center rounded bg-white shadow-lg"
         ref="tabListButtonWrapper"
       >
         <div class="flex items-center overflow-x-hidden" ref="scrollWrapper">
