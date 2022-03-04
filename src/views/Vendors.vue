@@ -128,14 +128,15 @@ function handleScroll(e) {
       </div>
       <!-- Main Loop List -->
       <div class="">
-        <div
-          v-if="isVendorSearchFetching || isVendorsLoading"
-          v-for="index in Array.from({ length: 10 })"
-          :key="index"
-          class="border-b px-4 py-4 even:bg-[#f8f8fa]"
-        >
-          <n-skeleton text :repeat="2" class="w-full" />
-          <n-skeleton text class="w-[45%]" />
+        <div v-if="isVendorSearchFetching || isVendorsLoading">
+          <div
+            v-for="index in Array.from({ length: 10 })"
+            :key="index"
+            class="border-b px-4 py-4 even:bg-[#f8f8fa]"
+          >
+            <n-skeleton text :repeat="2" class="w-full" />
+            <n-skeleton text class="w-[45%]" />
+          </div>
         </div>
         <ul class="">
           <template v-if="debouncedSearchText">

@@ -83,6 +83,12 @@ export const useVendors = defineStore( 'vendors', {
         },
         SET_SELECTED_TAB(payload) {
             this.$state.tab.selected = payload
+        },
+        TRIGGER_INPUT_FOCUS(el) {
+            el.focus();
+        },
+        TRIGGER_INPUT_BLUR(el) {
+            el.blur();
         }
     },
 } );

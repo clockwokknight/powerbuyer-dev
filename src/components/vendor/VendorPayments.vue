@@ -124,10 +124,10 @@ function doShowOuter(row) {
           <VendorPaymentsAdd />
         </div>
 
-        <div class="rounded-xl border-2 py-8 px-8 bg-white">
+        <div class="rounded-md border-2 py-8 px-8 bg-white">
           <div><p class="text-2xl font-bold pb-8">Payments</p></div>
           <n-data-table
-            class="rounded-lg"
+            class="rounded-md"
             :columns="columns"
             :data="tableData"
             :pagination="pagination"
