@@ -2,7 +2,7 @@
 import { getPageTabs } from "@/hooks/pageTabs";
 import { useTabsViewStore } from "@/store/tabs";
 import { Tab, TabGroup, TabList } from "@headlessui/vue";
-import { useDebounceFn, useScroll } from "@vueuse/core";
+import { useDebounceFn } from "@vueuse/core";
 import axios from "axios";
 import { nextTick, ref, watch } from "vue";
 import { useMutation, useQueryClient } from "vue-query";
@@ -20,8 +20,7 @@ const showScrollArrow = ref(false);
 const scrollWrapper = ref(null);
 
 // Left and right Click Arrow Scroll
-const ifScrollArrowNeeded = useDebounceFn(async () => {
-  await nextTick();
+const ifScrollArrowNeeded = useDebounceFn(() => {
   const wrapperWidth =
     tabListButtonWrapper.value?.getBoundingClientRect().width;
   const tabWidth = tabListButton.value?.getBoundingClientRect().width;
@@ -84,7 +83,6 @@ watch(
             }
           });
         }
-        ifScrollArrowNeeded();
       }
     }
   },
@@ -103,10 +101,6 @@ tabStore.$onAction(({ name, store, after, args }) => {
         page: props.pageName,
         tabs: JSON.stringify(store.tabs),
       });
-    }
-    if (name === "addTab" || name === "initTabs") {
-      ifScrollArrowNeeded();
-      scrollTabToView();
     }
   });
 });
@@ -145,7 +139,7 @@ const scrollTabToView = useDebounceFn(async () => {
     tabListChildren[tabStore?.selectedIndex]?.scrollIntoView({
       behavior: "smooth",
     });
-}, 1000);
+}, 500);
 
 /**
  *
@@ -154,6 +148,10 @@ const scrollTabToView = useDebounceFn(async () => {
 const width = ref("");
 const beforeLeaveTab = (el) => {
   width.value = `${el.getBoundingClientRect().width}px`;
+};
+const afterAnimated = () => {
+  ifScrollArrowNeeded();
+  scrollTabToView();
 };
 </script>
 
@@ -164,13 +162,21 @@ const beforeLeaveTab = (el) => {
         class="relative flex h-[62px] items-center rounded bg-white shadow-lg"
         ref="tabListButtonWrapper"
       >
-        <div class="flex items-center overflow-x-hidden" ref="scrollWrapper">
+        <div
+          class="flex items-center overflow-x-auto scrollbar:h-0 scrollbar:w-0"
+          ref="scrollWrapper"
+        >
           <TabList v-slot="{ selectedIndex }">
             <nav
               ref="tabListButton"
               class="flex min-w-max flex-nowrap gap-x-2 pl-5"
             >
-              <TransitionGroup name="fade" @before-leave="beforeLeaveTab">
+              <TransitionGroup
+                name="fade"
+                @before-leave="beforeLeaveTab"
+                @after-leave="afterAnimated"
+                @after-enter="afterAnimated"
+              >
                 <div
                   v-for="(tab, tabIdx) in tabStore.tabs"
                   v-if="tabStore.tabs.length >= 1"
@@ -252,7 +258,7 @@ const beforeLeaveTab = (el) => {
             </svg>
           </button>
           <button
-            class="grid place-content-center px-1 hover:text-[#027bff]"
+            class="grid w-8 place-content-center px-1 hover:text-[#027bff]"
             v-if="showScrollArrow"
             @click="scrollTo('right')"
           >

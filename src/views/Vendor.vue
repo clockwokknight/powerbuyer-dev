@@ -424,7 +424,7 @@ const { stop } = useIntersectionObserver(
 <style lang="scss">
 #__subtabs[stuck] {
   background: #f9fafb;
-  @apply rounded-none border-none shadow-lg shadow-[#00000011];
+  @apply rounded-none border-2 border-none border-transparent shadow-lg shadow-[#00000011];
 }
 .__veil {
   width: calc(100vw - 370px);
