@@ -2,6 +2,7 @@
 import { masker, tokens } from "@/directives/mask";
 import { watch, ref, toRefs } from "vue";
 import { utils } from "@/lib/utils";
+import { useVendors } from "@/store/vendors";
 
 const emit = defineEmits(["update:value", "blur", "focus", "input"]);
 
@@ -43,14 +44,20 @@ const sampleOptions = ref([
 const { mask, masked, value } = toRefs(props);
 const display = ref(value.value);
 const lastValue = ref(null);
-const input = ref(null);
+const inputRef = ref(null);
+
+watch(
+  () => props.editing,
+  (editing) => {
+    console.log(editing, inputRef.value);
+    setTimeout(() => (editing ? inputRef.value.focus() : inputRef.value.blur()), 300);
+  }
+);
 
 watch(
   () => value.value,
-  (newValue) => {
-    if (newValue !== lastValue.value) {
-      display.value = newValue;
-    }
+  (val) => {
+    if (val !== lastValue.value) display.value = val;
   }
 );
 
@@ -67,19 +74,13 @@ function refresh(value) {
     emit("update:value", val);
   }
 }
-
-function focus() {
-  console.log("called input.focus() from CustomInput.vue");
-  nput.focus();
-}
 </script>
 
 <template>
   <n-input
     v-if="type !== 'select'"
-    ref="nput"
+    ref="inputRef"
     v-mask="mask"
-    :placeholder="placeholder"
     class="bg-transparent outline-none w-full pl-3"
     :class="`
       ${!editing && 'pointer-events-none'}
@@ -88,6 +89,7 @@ function focus() {
         '__header text-ellipsis bg-transparent outline-none w-full pl-1 py-1 text-2xl !font-bold placeholder:text-gray-300'
       }
     `"
+    :placeholder="placeholder"
     :value="display"
     :disabled="!editing"
     :on-input="
@@ -106,12 +108,12 @@ function focus() {
   />
   <n-select
     v-if="type === 'select'"
-    ref="nput"
+    ref="inputRef"
+    class="bg-transparent outline-none w-full pl-3"
+    :class="!editing && 'pointer-events-none'"
     :options="options || sampleOptions"
     :filterable="true"
     :placeholder="placeholder || 'Select'"
-    class="bg-transparent outline-none w-full pl-3"
-    :class="!editing && 'pointer-events-none'"
     :value="value"
     :disabled="!editing"
     :on-input="

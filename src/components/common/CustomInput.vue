@@ -2,8 +2,9 @@
 import { ref, toRefs, reactive, computed, onMounted } from "vue";
 import { NInput, NSelect, NConfigProvider } from "naive-ui";
 import { useMessage } from "naive-ui";
+import { useVendors } from "@/store/vendors";
 import { utils } from "@/lib/utils";
-import MaskedInput from "@/components/common/generic/MaskedInput.vue";
+import MaskedCustomInput from "@/components/common/MaskedCustomInput.vue";
 
 const emit = defineEmits(["update:value", "focus", "scroll", "edit", "save", "cancel"]);
 
@@ -58,6 +59,7 @@ const themeOverrides = {
   },
 };
 
+const vendors = useVendors();
 const message = useMessage();
 
 const inputEl = ref(null);
@@ -128,8 +130,9 @@ function save() {
     caretX.value = "12px";
     caretFill.value = !hoverInput.value ? "#bdbdbd00" : "#bdbdbd";
   } else {
-    isValid.value = 0;
     message.error("Invalid input");
+    isValid.value = 0;
+    edit();
   }
 }
 
@@ -144,19 +147,6 @@ function cancel() {
   caretX.value = "12px";
   caretFill.value = !hoverInput.value ? "#bdbdbd00" : "#bdbdbd";
 }
-
-function blur() {
-  emit("cancel");
-  editing.value = false;
-  done.value = true;
-  setTimeout(() => {
-    done.value = false;
-  }, 500);
-  caretX.value = "12px";
-  caretFill.value = "#bdbdbd";
-}
-
-function handleButtonHover(name) {}
 </script>
 
 <template>
@@ -220,7 +210,7 @@ function handleButtonHover(name) {}
             }`"
         >
           <div class="__inputs w-full">
-            <masked-input
+            <masked-custom-input
               ref="inputEl"
               :value="value"
               :type="type"
@@ -231,12 +221,12 @@ function handleButtonHover(name) {}
               :placeholder="placeholder"
               @input="
                 (e) => {
-                  utils.log('CustomInput.vue: ' + e);
+                  utils.log('🤷🏾‍♂️ CustomInput.vue: ' + e);
                   $emit('update:value', e);
                 }
               "
               @focus="(e) => $emit('focus', e)"
-              @blur="blur"
+              @blur="cancel"
             />
           </div>
 
@@ -258,12 +248,7 @@ function handleButtonHover(name) {}
                   }, 500);
                 }
               "
-              @mouseover="
-                () => {
-                  hoverEdit = false;
-                  handleButtonHover('Edit');
-                }
-              "
+              @mouseover="hoverEdit = false"
               @mouseleave="hoverEdit = false"
               class="__edit h-3 w-3 -translate-x-1 rounded-full"
               :class="`
@@ -287,12 +272,7 @@ function handleButtonHover(name) {}
             <button
               ref="saveButton"
               @click="save"
-              @mouseover="
-                () => {
-                  hoverEdit = false;
-                  handleButtonHover('Save');
-                }
-              "
+              @mouseover="hoverEdit = false"
               @mouseleave="hoverEdit = false"
               :style="!editing && 'width: 0px !important'"
               class="__save h-5 w-5 -translate-x-2 duration-200"
@@ -314,12 +294,7 @@ function handleButtonHover(name) {}
             <button
               ref="cancelButton"
               @click="cancel"
-              @mouseover="
-                () => {
-                  hoverEdit = false;
-                  handleButtonHover('Cancel');
-                }
-              "
+              @mouseover="hoverEdit = false"
               @mouseleave="hoverEdit = false"
               :style="!editing && 'width: 0px !important'"
               class="__cancel ml-1 h-5 w-5 -translate-x-2 duration-200"

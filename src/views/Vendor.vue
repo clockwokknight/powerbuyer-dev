@@ -347,9 +347,7 @@ let tabs = computed(() => global.tabs);
           <CustomInput
             label="Tax ID"
             :validate="['required']"
-            type="mask"
-            mask="### ## ####"
-            placeholder="### ## ####"
+            placeholder=""
             :value="form.tax_id_number"
             @update:value="(val) => (form.tax_id_number = val)"
             @save="submitValue('tax_id_number')"
