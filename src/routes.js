@@ -2,8 +2,9 @@ import { createRouter, createWebHistory } from "vue-router";
 //App Pages
 const Dashboard = () => import("@/views/Dashboard.vue");
 import Login from "@/views/Login.vue";
-import Auctions from "@/views/Auctions.vue";
-import Auction from "@/views/Auction.vue";
+const Auctions = () => import("@/views/Auctions.vue");
+const Auction = () => import("@/views/Auction.vue");
+const AuctionHome = () => import("@/components/auction/AuctionHome.vue");
 const Buyers = () => import("@/views/Buyers.vue");
 const Buyer = () => import("@/views/Buyer.vue");
 import Lenders from "@/views/Lenders.vue";
@@ -13,8 +14,9 @@ import Vehicle from "@/views/Vehicle.vue";
 const Vendors = () => import("@/views/Vendors.vue");
 const Vendor = () => import("@/views/Vendor.vue");
 const VendorHome = () => import("@/components/vendor/VendorHome.vue");
-import Dealers from "@/views/Dealers.vue";
-import Dealer from "@/views/Dealer.vue";
+const Dealers = () => import("@/views/Dealers.vue");
+const Dealer = () => import("@/views/Dealer.vue");
+const DealerHome = () => import("@/components/dealer/DealerHome.vue");
 import Lanes from "@/views/Lanes.vue";
 import LanesHistory from "@/views/LanesHistory.vue";
 import LanesManage from "@/views/LanesManage.vue";
@@ -22,8 +24,8 @@ import Deals from "@/views/Deals.vue";
 import Deal from "@/views/Deal.vue";
 import OtherSystemMenus from "@/views/OtherSystemMenus.vue";
 import BuyerHome from "@/components/buyer/BuyerHome.vue";
-import AuctionHome from "@/components/auction/AuctionHome.vue";
-import Components from '@/views/Components.vue';
+const NotFound = () => import("@/views/NotFound.vue");
+import Components from "@/views/Components.vue";
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -35,9 +37,9 @@ export const router = createRouter({
       component: Dashboard,
     },
     {
-      path: '/components',
-      name: 'Components',
-      component: Components
+      path: "/components",
+      name: "Components",
+      component: Components,
     },
     {
       path: "/login",
@@ -114,11 +116,18 @@ export const router = createRouter({
       path: "/dealers",
       name: "Dealers",
       component: Dealers,
-    },
-    {
-      path: "/dealer",
-      name: "Dealer",
-      component: Dealer,
+      children: [
+        {
+          path: "",
+          name: "DealerHome",
+          components: DealerHome,
+        },
+        {
+          path: ":id",
+          name: "SingleDealer",
+          component: Dealer,
+        },
+      ],
     },
     {
       path: "/lanes",
@@ -155,6 +164,7 @@ export const router = createRouter({
       name: "System",
       component: OtherSystemMenus,
     },
+    { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },
   ],
 });
 

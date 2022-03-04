@@ -12,6 +12,7 @@ import axios from "axios";
 import { useVendorCategories } from "@/hooks/vendor";
 import { getBuyerManagers, getBuyerTypes } from "@/hooks/buyer";
 import { getGmtvLocations } from "@/hooks/location";
+import { objectFilter } from "@/lib/helper";
 
 const openDrawer = ref(false);
 const formRef = ref(null);
@@ -61,12 +62,13 @@ const rules = {
     message: "Please select a location",
   },
   email: {
+    trigger: "input",
+    required: true,
     validator(rule, value) {
-      if (value === "") return true;
-      else if (!/(^[a-zA-Z0-9_.]+[@]{1}[a-z0-9]+[\.][a-z]+$)/.test(value)) {
+      if (value === "") return new Error("Email is required");
+      else if (!/(^[a-zA-Z0-9_.]+[@][a-z0-9]+[.][a-z]+$)/.test(value)) {
         return new Error("Not a valid email address");
       }
-      return true;
     },
   },
 };
@@ -126,32 +128,13 @@ const { mutate, isLoading } = useMutation(
   }
 );
 
-// const vendorCategoryOptions = computed(() =>
-//   vendorCategory.value?.pages.reduce(
-//     (prev, current) =>
-//       prev.concat(
-//         current.data.map((category) => ({
-//           value: category.id,
-//           label: category.name,
-//         }))
-//       ),
-//     []
-//   )
-// );
-
 const handleSubmit = async () => {
   try {
     await formRef.value.validate();
-    const obj = {};
-    Object.keys(form.value).map((key) => {
-      if (form.value[key]) {
-        obj[key] = form.value[key];
-      }
-    });
-    mutate(obj);
+
+    mutate(objectFilter(form.value, (key, value) => value));
   } catch (e) {
-    console.log(e);
-    e.forEach(([err]) => message.error(err.message));
+    // e.forEach(([err]) => message.error(err.message));
   }
 };
 
@@ -159,7 +142,7 @@ const errors = ref({});
 </script>
 
 <template>
-  <n-button @click="showDrawer = !showDrawer">
+  <n-button @click="openDrawer = true">
     <n-icon>
       <svg
         xmlns="http://www.w3.org/2000/svg"

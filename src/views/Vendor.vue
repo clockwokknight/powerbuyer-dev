@@ -27,6 +27,7 @@ import VendorExpenses from "@/components/vendor/VendorExpenses.vue";
 import VendorPayments from "@/components/vendor/VendorPayments.vue";
 import CustomInput from "@/components/common/CustomInput.vue";
 import Tabs from "@/components/common/Tabs.vue";
+import { useIntersectionObserver } from "@vueuse/core";
 
 const VendorContacts = defineAsyncComponent({
   loader: () => import("@/components/vendor/VendorContacts.vue"),
@@ -116,7 +117,8 @@ watch(
   () => vendor.value,
   (newValue) => {
     if (newValue) form.value = { ...newValue };
-  }
+  },
+  { immediate: true }
 );
 const { isLoading, mutateAsync } = useMutation(
   (data) => axios.put(`/vendors/${vendor.value.id}`, data),
@@ -138,14 +140,6 @@ watch(
     immediate: true,
   }
 );
-
-watchEffect(() => {
-  console.log(payload.value);
-});
-
-watch(vendor, (vendor) => {
-  vendor && global.addTab({ title: vendor.name, value: vendor.id });
-});
 
 watch(payload.value, (val) => {
   console.log("\npayload updated: ", payload.value);
@@ -183,29 +177,22 @@ function handleTabClick(e) {
 }
 
 let tabs = computed(() => global.tabs);
+const vendorTab = ref(null);
+const { stop } = useIntersectionObserver(
+  vendorTab,
+  ([e], observerElement) => {
+    e.target.toggleAttribute("stuck", e.intersectionRatio < 1);
+  },
+  { threshold: [1] }
+);
 
 // LOAD TABLE DATA
 </script>
 
 <template>
   <div
-    class="__veil fixed top-0 left-[390px] z-50 h-[60px] -translate-x-10 bg-lightergray"
-  ></div>
-
-  <Tabs
-    id="__tabs"
-    class="sticky top-[24px] z-50 rounded-md border-2 border-gray-200 bg-white duration-300"
-    :class="
-      global.stuck[0] &&
-      '!rounded-t-md rounded-r-md rounded-b-none rounded-l-none shadow-xl shadow-[#00000011]'
-    "
-    :items="tabs"
-    @click="(e) => router.push(`/vendors/${e}`)"
-  />
-
-  <div
     id="details"
-    class="__section __vendor-card mt-4 grid grid-cols-12 border-2 bg-white p-6"
+    class="__section __vendor-card mt-4 grid grid-cols-12 rounded border-2 bg-white p-6"
   >
     <!-- left side -->
     <div class="__form col-span-8 flex flex-col justify-between">
@@ -412,8 +399,8 @@ let tabs = computed(() => global.tabs);
   <Tabs
     id="__subtabs"
     type="basic"
-    class="sticky top-[82px] left-0 z-50 mt-4 w-full rounded-md border-2 border-gray-200 bg-white duration-300"
-    :class="global.stuck[1] && '!rounded-none !bg-gray-50 shadow-lg shadow-[#00000011]'"
+    ref="vendorTab"
+    class="sticky top-[-2px] left-0 z-50 mt-4 w-full rounded border-2 border-gray-200 bg-white duration-300"
     :items="vendorTabs"
     @click="handleTabClick"
   />
@@ -428,15 +415,19 @@ let tabs = computed(() => global.tabs);
 </template>
 
 <style lang="scss">
+#__subtabs[stuck] {
+  background: #f9fafb;
+  @apply rounded-none border-2 border-none border-transparent shadow-lg shadow-[#00000011];
+}
 .__veil {
   width: calc(100vw - 370px);
 }
 .__section {
-  @apply rounded-md scroll-mt-[100px];
+  @apply scroll-mt-[100px] rounded-md;
 }
 .__invoice-button {
   transition-timing-function: ease;
-  @apply mt-[14px] flex h-10 w-full items-center justify-center rounded-sm border-[1px] border-lightgray px-3 text-center duration-[200ms];
+  @apply border-lightgray mt-[14px] flex h-10 w-full items-center justify-center rounded-sm border-[1px] px-3 text-center duration-[200ms];
   &:hover {
     @apply border-secondary text-secondary;
   }

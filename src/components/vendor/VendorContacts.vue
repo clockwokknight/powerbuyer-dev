@@ -47,7 +47,8 @@ const { data: vendorContacts, isLoading: isVendorContactLoading } = useQuery(
   ({ queryKey }) =>
     axios
       .get(`/vendor_contacts/by_vendor/${queryKey[1]}`)
-      .then((res) => (Array.isArray(res.data) ? res.data : []))
+      .then((res) => (Array.isArray(res.data) ? res.data : [])),
+  { suspense: true }
 );
 
 watch(
@@ -100,7 +101,7 @@ function updateVendor() {
 function deleteContact() {
   deleteVendorContact(formValue.value.id);
   showOuterRef.value = false;
-};
+}
 
 const columns = [
   {
@@ -140,11 +141,11 @@ const pagination = { pageSize: 10 };
 <template>
   <div id="contacts" class="_vendor-contacts scroll-smooth">
     <div class="-mt-4">
-      <div class="flex justify-end items-center translate-y-[68px] pr-10">
+      <div class="flex translate-y-[68px] items-center justify-end pr-10">
         <VendorAdd />
       </div>
 
-      <div class="rounded-xl border-2 py-8 px-8 bg-white">
+      <div class="rounded border-2 bg-white py-8 px-8">
         <div><p class="pb-8 text-2xl font-bold">Contacts</p></div>
         <n-data-table
           class="rounded-lg"

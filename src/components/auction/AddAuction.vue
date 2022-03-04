@@ -1,9 +1,15 @@
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import MaskedInput from "@/components/common/MaskedInput.vue";
 import { getStates } from "@/hooks/common_query";
+import { useMutation, useQueryClient } from "vue-query";
+import axios from "axios";
+import { objectFilter } from "@/lib/helper";
+import { useMessage } from "naive-ui";
 
 const showDrawer = ref(false);
+const message = useMessage();
+const queryClient = useQueryClient();
 
 const initialForm = {
   code: "",
@@ -19,9 +25,32 @@ const initialForm = {
 };
 
 const form = ref({ ...initialForm });
+const formRef = ref(null);
+
+watch(showDrawer, (newValue) => {
+  if (newValue) {
+    form.value = { ...initialForm };
+  }
+});
 
 const { data: stateList } = getStates();
 
+const { mutateAsync: createAuction, isLoading } = useMutation(
+  (data) => axios.post("/auctions", data),
+  {
+    onSuccess() {
+      message.success("Auction Created Successfully");
+      showDrawer.value = false;
+      queryClient.invalidateQueries("auctions");
+    },
+  }
+);
+const submitForm = async () => {
+  try {
+    await formRef.value.validate();
+    await createAuction(objectFilter(form.value, (key, value) => value));
+  } catch (e) {}
+};
 const rules = {
   code: {
     required: true,
@@ -50,8 +79,15 @@ const rules = {
   },
   zip: {
     required: true,
-    message: "Zip is required",
     trigger: "input",
+    validator(rules, value) {
+      if (value === "") {
+        return new Error("Zip code is required");
+      }
+      if (!/^(\d{5}-\d{4})|(\d{5})$/.test(value)) {
+        return new Error("Please enter a valid zip code");
+      }
+    },
   },
   email: {
     required: true,
@@ -73,27 +109,34 @@ const rules = {
 </script>
 
 <template>
-  <n-button
-    @click="showDrawer = true"
-    content="Create Auction"
-    v-tippy="{ placement: 'right', duration: 50 }"
-  >
-    <n-icon>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        xmlns:xlink="http://www.w3.org/1999/xlink"
-        viewBox="0 0 24 24"
-      >
-        <path
-          d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"
-          fill="currentColor"
-        ></path>
-      </svg>
-    </n-icon>
-  </n-button>
+  <n-tooltip trigger="hover">
+    <template #trigger>
+      <n-button @click="showDrawer = true">
+        <n-icon>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            viewBox="0 0 24 24"
+          >
+            <path
+              d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"
+              fill="currentColor"
+            ></path>
+          </svg>
+        </n-icon>
+      </n-button>
+    </template>
+    Create an auction
+  </n-tooltip>
   <n-drawer v-model:show="showDrawer" :width="500">
     <n-drawer-content title="Add Auction">
-      <n-form :model="form" :rules="rules" size="medium" ref="formRef">
+      <n-form
+        :model="form"
+        :rules="rules"
+        :disabled="isLoading"
+        size="medium"
+        ref="formRef"
+      >
         <n-form-item label="Auction Company" path="auction_company">
           <n-input v-model:value="form.auction_company" />
         </n-form-item>
@@ -136,7 +179,13 @@ const rules = {
         </n-form-item>
       </n-form>
       <template #footer>
-        <n-button size="large">Add</n-button>
+        <n-button
+          size="large"
+          :loading="isLoading"
+          :disabled="isLoading"
+          @click="submitForm"
+          >Add</n-button
+        >
       </template>
     </n-drawer-content>
   </n-drawer>
