@@ -49,7 +49,7 @@ const inputRef = ref(null);
 watch(
   () => props.editing,
   (editing) => {
-    console.log(editing, inputRef.value);
+    console.log("<MasedCustomInput.vue> props.editing: ", editing, inputRef.value);
     setTimeout(() => (editing ? inputRef.value.focus() : inputRef.value.blur()), 300);
   }
 );

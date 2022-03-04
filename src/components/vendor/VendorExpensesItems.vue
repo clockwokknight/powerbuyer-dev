@@ -157,10 +157,10 @@ const onDeleteExpenseItem = (id) => {
       @delete="onDeleteExpenseItem"
     />
 
-    <div class="rounded-xl border-2 py-8 px-8 bg-white">
+    <div class="rounded-md border-2 py-8 px-8 bg-white">
       <div><p class="pb-8 text-2xl font-bold">Expense Items</p></div>
       <n-data-table
-        class="rounded-lg"
+        class="rounded-md"
         :columns="columns"
         :data="expenseItems"
         :pagination="pagination"
