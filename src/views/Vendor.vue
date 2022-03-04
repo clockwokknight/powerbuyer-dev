@@ -85,6 +85,7 @@ const vendorCategoryOptions = computed(() =>
 );
 
 const { data: paymentTerms } = getPaymentTerms();
+
 const paymentTermOptions = computed(() =>
   paymentTerms.value?.map((payment) => ({
     label: payment.name,
@@ -93,9 +94,25 @@ const paymentTermOptions = computed(() =>
 );
 
 const { data: statesList } = getStates();
-const { data: vendor, isLoading: isVendorLoading } =
-  getVendorById(routeParamId);
-const form = ref({ name: "", address_one: "" });
+
+const { data: vendor, isLoading: isVendorLoading } = getVendorById(routeParamId);
+
+const form = ref({
+  name: "",
+  address_one: "",
+  address_two: "",
+  city: "",
+  state: "",
+  zip: "",
+  email: "",
+  phone: "",
+  fax: "",
+  din: "",
+  tax_id_number: "",
+  vendor_category_id: "",
+  payment_terms: "",
+});
+
 watch(
   () => vendor.value,
   (newValue) => {
@@ -184,7 +201,8 @@ const { stop } = useIntersectionObserver(
         <CustomInput
           type="header"
           placeholder="Company Name"
-          v-model:value="form.name"
+          :value="form.name"
+          @update:value="(val) => (form.name = val)"
           @save="submitValue('name')"
           @cancel="resetValue('name')"
           @focus="currentActiveField = 'name'"
@@ -195,8 +213,8 @@ const { stop } = useIntersectionObserver(
         <div class="col-span-6">
           <CustomInput
             label="Address"
+            :validate="['required']"
             placeholder=""
-            type="input"
             :value="form.address_one"
             @update:value="(val) => (form.address_one = val)"
             @save="submitValue('address_one')"
@@ -207,9 +225,10 @@ const { stop } = useIntersectionObserver(
         <div class="col-span-6">
           <CustomInput
             label="Address 2"
+            :validate="['required']"
             placeholder=""
-            :value="vendor?.address_two"
-            v-model:value="payload"
+            :value="form.address_two"
+            @update:value="(val) => (form.address_two = val)"
             @save="submitValue('address_two')"
             @cancel="resetValue('address_two')"
             @focus="currentActiveField = 'address_two'"
@@ -219,9 +238,10 @@ const { stop } = useIntersectionObserver(
         <div class="col-span-4">
           <CustomInput
             label="City"
+            :validate="['required']"
             placeholder=""
-            :value="vendor?.city"
-            v-model:value="payload"
+            :value="form.city"
+            @update:value="(val) => (form.city = val)"
             @save="submitValue('city')"
             @cancel="resetValue('city')"
             @focus="currentActiveField = 'city'"
@@ -231,10 +251,11 @@ const { stop } = useIntersectionObserver(
           <CustomInput
             type="select"
             label="State"
+            :validate="['required']"
             placeholder=""
             :options="statesList"
-            :value="vendor?.state"
-            v-model:value="payload"
+            :value="form.state"
+            @update:value="(val) => (form.state = val)"
             @save="submitValue('state')"
             @cancel="resetValue('state')"
             @focus="currentActiveField = 'state'"
@@ -243,11 +264,12 @@ const { stop } = useIntersectionObserver(
         <div class="col-span-4">
           <CustomInput
             label="Zip Code"
+            :validate="['required']"
             type="mask"
             mask="#####-####"
             placeholder="#####-####"
-            :value="vendor?.zip"
-            v-model:value="payload"
+            :value="form.zip"
+            @update:value="(val) => (form.zip = val)"
             @save="submitValue('zip')"
             @cancel="resetValue('zip')"
             @focus="currentActiveField = 'zip'"
@@ -257,9 +279,10 @@ const { stop } = useIntersectionObserver(
         <div class="col-span-4">
           <CustomInput
             label="Email"
+            :validate="['required', 'email']"
             placeholder=""
-            :value="vendor?.email"
-            v-model:value="payload"
+            :value="form.email"
+            @update:value="(val) => (form.email = val)"
             @save="submitValue('email')"
             @cancel="resetValue('email')"
             @focus="currentActiveField = 'email'"
@@ -268,11 +291,12 @@ const { stop } = useIntersectionObserver(
         <div class="col-span-4">
           <CustomInput
             label="Phone"
+            :validate="['required', 'phone']"
             type="mask"
-            mask="+1 (###) ### ####"
-            placeholder="(###) ### ####"
-            :value="vendor?.phone"
-            v-model:value="payload"
+            mask="+1 (###) ###-####"
+            placeholder="+1 (###) ###-####"
+            :value="form.phone"
+            @update:value="(val) => (form.phone = val)"
             @save="submitValue('phone')"
             @cancel="resetValue('phone')"
             @focus="currentActiveField = 'phone'"
@@ -281,11 +305,12 @@ const { stop } = useIntersectionObserver(
         <div class="col-span-4">
           <CustomInput
             label="Fax"
+            :validate="['phone']"
             type="mask"
-            mask="+1 (###) ### ####"
-            placeholder="(###) ### ####"
-            :value="vendor?.fax"
-            v-model:value="payload"
+            mask="+1 (###) ###-####"
+            placeholder="+1 (###) ###-####"
+            :value="form.fax"
+            @update:value="(val) => (form.fax = val)"
             @save="submitValue('fax')"
             @cancel="resetValue('fax')"
             @focus="currentActiveField = 'fax'"
@@ -295,9 +320,10 @@ const { stop } = useIntersectionObserver(
         <div class="col-span-4">
           <CustomInput
             label="DIN"
-            :value="vendor?.din"
-            v-model:value="payload"
+            :validate="['required']"
+            :value="form.din"
             placeholder=""
+            @update:value="(val) => (form.din = val)"
             @save="submitValue('din')"
             @cancel="resetValue('din')"
             @focus="currentActiveField = 'din'"
@@ -306,11 +332,12 @@ const { stop } = useIntersectionObserver(
         <div class="col-span-4">
           <CustomInput
             label="Tax ID"
+            :validate="['required']"
             type="mask"
             mask="### ## ####"
             placeholder="### ## ####"
-            :value="vendor?.tax_id_number"
-            v-model:value="payload"
+            :value="form.tax_id_number"
+            @update:value="(val) => (form.tax_id_number = val)"
             @save="submitValue('tax_id_number')"
             @cancel="resetValue('tax_id_number')"
             @focus="currentActiveField = 'tax_id_number'"
@@ -320,10 +347,11 @@ const { stop } = useIntersectionObserver(
           <CustomInput
             type="select"
             label="Category"
+            :validate="['required']"
             :options="vendorCategoryOptions"
-            :value="vendor?.vendor_category_id"
-            v-model:value="payload"
+            :value="form.vendor_category_id"
             placeholder=""
+            @update:value="(val) => (form.vendor_category_id = val)"
             @save="submitValue('vendor_category_id')"
             @cancel="resetValue('vendor_category_id')"
             @focus="currentActiveField = 'vendor_category_id'"
@@ -347,10 +375,11 @@ const { stop } = useIntersectionObserver(
         <CustomInput
           type="select"
           label="Payment Terms"
+          :validate="['required']"
           :options="paymentTermOptions"
-          :value="vendor?.payment_terms"
-          v-model:value="payload"
+          :value="form.payment_terms"
           placeholder=""
+          @update:value="(val) => (form.payment_terms = val)"
           @save="submitValue('payment_terms')"
           @cancel="resetValue('payment_terms')"
           @focus="currentActiveField = 'payment_terms'"
@@ -358,10 +387,7 @@ const { stop } = useIntersectionObserver(
         <div
           class="__invoice-buttons mt-[58px] flex min-w-max max-w-full flex-col items-end justify-center"
         >
-          <button
-            class="__invoice-button"
-            @click="global.openDrawer('payments')"
-          >
+          <button class="__invoice-button" @click="global.openDrawer('payments')">
             <span><b>+</b> Add payment</span>
           </button>
           <button class="__invoice-button">
@@ -392,7 +418,7 @@ const { stop } = useIntersectionObserver(
 
 <style lang="scss">
 #__subtabs[stuck] {
-  @apply rounded-none border-none bg-lightergray;
+  @apply bg-lightergray rounded-none border-none;
 }
 .__veil {
   width: calc(100vw - 370px);
@@ -402,7 +428,7 @@ const { stop } = useIntersectionObserver(
 }
 .__invoice-button {
   transition-timing-function: ease;
-  @apply mt-[14px] flex h-10 w-full items-center justify-center rounded-md border-[1px] border-lightgray px-3 text-center duration-[200ms];
+  @apply border-lightgray mt-[14px] flex h-10 w-full items-center justify-center rounded-md border-[1px] px-3 text-center duration-[200ms];
   &:hover {
     @apply border-secondary text-secondary;
   }

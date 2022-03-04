@@ -81,7 +81,13 @@ function focus() {
     v-mask="mask"
     :placeholder="placeholder"
     class="bg-transparent outline-none w-full pl-3"
-    :class="!editing && 'pointer-events-none'"
+    :class="`
+      ${!editing && 'pointer-events-none'}
+      ${
+        type === 'header' &&
+        '__header text-ellipsis bg-transparent outline-none w-full pl-1 py-1 text-2xl !font-bold placeholder:text-gray-300'
+      }
+    `"
     :value="display"
     :disabled="!editing"
     :on-input="
