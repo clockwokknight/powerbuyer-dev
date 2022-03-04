@@ -95,7 +95,8 @@ const paymentTermOptions = computed(() =>
 
 const { data: statesList } = getStates();
 
-const { data: vendor, isLoading: isVendorLoading } = getVendorById(routeParamId);
+const { data: vendor, isLoading: isVendorLoading } =
+  getVendorById(routeParamId);
 
 const form = ref({
   name: "",
@@ -117,7 +118,8 @@ watch(
   () => vendor.value,
   (newValue) => {
     if (newValue) form.value = { ...newValue };
-  }
+  },
+  { immediate: true }
 );
 const { isLoading, mutateAsync } = useMutation(
   (data) => axios.put(`/vendors/${vendor.value.id}`, data),
@@ -387,7 +389,10 @@ const { stop } = useIntersectionObserver(
         <div
           class="__invoice-buttons mt-[58px] flex min-w-max max-w-full flex-col items-end justify-center"
         >
-          <button class="__invoice-button" @click="global.openDrawer('payments')">
+          <button
+            class="__invoice-button"
+            @click="global.openDrawer('payments')"
+          >
             <span><b>+</b> Add payment</span>
           </button>
           <button class="__invoice-button">
@@ -418,7 +423,7 @@ const { stop } = useIntersectionObserver(
 
 <style lang="scss">
 #__subtabs[stuck] {
-  @apply bg-lightergray rounded-none border-none;
+  @apply rounded-none border-none bg-lightergray;
 }
 .__veil {
   width: calc(100vw - 370px);
@@ -428,7 +433,7 @@ const { stop } = useIntersectionObserver(
 }
 .__invoice-button {
   transition-timing-function: ease;
-  @apply border-lightgray mt-[14px] flex h-10 w-full items-center justify-center rounded-md border-[1px] px-3 text-center duration-[200ms];
+  @apply mt-[14px] flex h-10 w-full items-center justify-center rounded-md border-[1px] border-lightgray px-3 text-center duration-[200ms];
   &:hover {
     @apply border-secondary text-secondary;
   }

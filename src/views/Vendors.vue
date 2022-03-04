@@ -14,8 +14,8 @@ import AddVendor from "@/components/vendor/AddVendor.vue";
 import { useTabsViewStore } from "@/store/tabs";
 import PageTabs from "@/components/PageTabs.vue";
 
-const tabStore = useTabsViewStore();
 import Tabs from "@/components/common/Tabs.vue";
+const tabStore = useTabsViewStore();
 
 const global = useGlobalState();
 
@@ -35,8 +35,9 @@ const addTab = (vendor) => {
 };
 
 // Vendor Search Result
-const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
-  useQuery(["vendorSearch", debouncedSearchText], ({ queryKey }) => {
+const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
+  ["vendorSearch", debouncedSearchText],
+  ({ queryKey }) => {
     if (queryKey[1] === "") return null;
     else
       return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => {
@@ -45,7 +46,8 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
         }
         return res.data;
       });
-  });
+  }
+);
 
 function handleScroll(e) {
   let scroll = e.target.scrollTop;
@@ -85,7 +87,7 @@ function handleScroll(e) {
           </div>
           <div content="Filter" v-tippy="{ placement: 'right', duration: 50 }">
             <svg
-              class="mt-1 h-6 w-6 cursor-pointer text-gray-400 hover:text-primary"
+              class="hover:text-primary mt-1 h-6 w-6 cursor-pointer text-gray-400"
               viewBox="0 0 24 24"
             >
               <path
@@ -147,10 +149,8 @@ function handleScroll(e) {
     <section class="h-screen w-[calc(100vw-335px)] bg-white">
       <page-tabs page-name="vendors" />
       <!-- Main Body Content-->
-      <div
-        class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden border-t-2"
-      >
-        <main id="container" class="min-h-full bg-lightergray p-6 pt-6">
+      <div class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden border-t-2">
+        <main id="container" class="bg-lightergray min-h-full p-6 pt-6">
           <router-view />
         </main>
       </div>
