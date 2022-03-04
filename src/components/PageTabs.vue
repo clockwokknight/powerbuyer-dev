@@ -123,6 +123,7 @@ const tabChanged = (index) => {
 watch(
   () => tabStore.selectedIndex,
   (newValue) => {
+    scrollTabToView();
     if (
       newValue !== -1 &&
       parseInt(route.params?.id) !== tabStore.tabs[newValue].id
