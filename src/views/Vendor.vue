@@ -95,8 +95,7 @@ const paymentTermOptions = computed(() =>
 
 const { data: statesList } = getStates();
 
-const { data: vendor, isLoading: isVendorLoading } =
-  getVendorById(routeParamId);
+const { data: vendor, isLoading: isVendorLoading } = getVendorById(routeParamId);
 
 const form = ref({
   name: "",
@@ -159,12 +158,11 @@ function resetValue(key) {
 }
 
 function submitValue(key) {
-  console.clear();
-  console.log("submitting");
   mutateAsync({ [key]: form.value[key] })
     .then((data) => {
       message.success("Saved");
-      console.log("submission promise: ", data);
+      console.clear();
+      console.log(data);
       currentActiveField.value = null;
     })
     .catch((err) => {
@@ -335,9 +333,7 @@ const { stop } = useIntersectionObserver(
           <CustomInput
             label="Tax ID"
             :validate="['required']"
-            type="mask"
-            mask="### ## ####"
-            placeholder="### ## ####"
+            placeholder=""
             :value="form.tax_id_number"
             @update:value="(val) => (form.tax_id_number = val)"
             @save="submitValue('tax_id_number')"
@@ -389,10 +385,7 @@ const { stop } = useIntersectionObserver(
         <div
           class="__invoice-buttons mt-[58px] flex min-w-max max-w-full flex-col items-end justify-center"
         >
-          <button
-            class="__invoice-button"
-            @click="global.openDrawer('payments')"
-          >
+          <button class="__invoice-button" @click="global.openDrawer('payments')">
             <span><b>+</b> Add payment</span>
           </button>
           <button class="__invoice-button">
@@ -430,11 +423,11 @@ const { stop } = useIntersectionObserver(
   width: calc(100vw - 370px);
 }
 .__section {
-  @apply scroll-mt-[100px];
+  @apply scroll-mt-[100px] rounded-md;
 }
 .__invoice-button {
   transition-timing-function: ease;
-  @apply mt-[14px] flex h-10 w-full items-center justify-center rounded-md border-[1px] border-lightgray px-3 text-center duration-[200ms];
+  @apply border-lightgray mt-[14px] flex h-10 w-full items-center justify-center rounded-sm border-[1px] px-3 text-center duration-[200ms];
   &:hover {
     @apply border-secondary text-secondary;
   }

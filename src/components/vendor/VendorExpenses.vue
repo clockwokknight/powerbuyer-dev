@@ -114,7 +114,7 @@ function showEditExpenseForm(row) {
       <div class="rounded border-2 bg-white py-8 px-8">
         <div><p class="pb-8 text-2xl font-bold">Expenses</p></div>
         <n-data-table
-          class="rounded-lg"
+          class="rounded-md"
           striped
           :columns="columns"
           :data="expensesData?.pages[0]"

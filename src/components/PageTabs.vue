@@ -21,7 +21,8 @@ const scrollWrapper = ref(null);
 
 // Left and right Click Arrow Scroll
 const ifScrollArrowNeeded = useDebounceFn(() => {
-  const wrapperWidth = tabListButtonWrapper.value?.getBoundingClientRect().width;
+  const wrapperWidth =
+    tabListButtonWrapper.value?.getBoundingClientRect().width;
   const tabWidth = tabListButton.value?.getBoundingClientRect().width;
 
   showScrollArrow.value = wrapperWidth < tabWidth;
@@ -82,6 +83,7 @@ watch(
             }
           });
         }
+        ifScrollArrowNeeded();
       }
     }
   },
@@ -123,7 +125,10 @@ watch(
   () => tabStore.selectedIndex,
   (newValue) => {
     scrollTabToView();
-    if (newValue !== -1 && parseInt(route.params?.id) !== tabStore.tabs[newValue].id) {
+    if (
+      newValue !== -1 &&
+      parseInt(route.params?.id) !== tabStore.tabs[newValue].id
+    ) {
       router.push(`/${props.pageName}/${tabStore.tabs[newValue].id}`);
     }
   }
@@ -164,7 +169,10 @@ const afterAnimated = () => {
           ref="scrollWrapper"
         >
           <TabList v-slot="{ selectedIndex }">
-            <nav ref="tabListButton" class="flex min-w-max flex-nowrap gap-x-2 pl-5">
+            <nav
+              ref="tabListButton"
+              class="flex min-w-max flex-nowrap gap-x-2 pl-5"
+            >
               <TransitionGroup
                 name="fade"
                 @before-leave="beforeLeaveTab"
@@ -207,7 +215,9 @@ const afterAnimated = () => {
                   >
                     <svg
                       class="cubic-timing-tab h-3 w-3 text-red-500 transition-transform duration-300 group-hover:scale-100"
-                      :class="[tabIdx === selectedIndex ? 'scale-100' : 'scale-0']"
+                      :class="[
+                        tabIdx === selectedIndex ? 'scale-100' : 'scale-0',
+                      ]"
                       viewBox="0 0 11 11"
                       fill="none"
                       stroke="currentColor"
