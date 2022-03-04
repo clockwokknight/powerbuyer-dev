@@ -1,15 +1,18 @@
 <script setup>
 import { ref, computed, onMounted, watch, toRef } from "vue";
-import { useMessage } from "naive-ui";
-import { getAllDeals, searchDealByVin } from "@/hooks/deals";
-import { useDebounce } from "@vueuse/core";
 import { useRoute } from "vue-router";
-import CurrencyInput from "@/components/common/CurrencyInput.vue";
-import { getExpenseTypes, getVendorExpenseItems } from "@/hooks/expense";
-import { objectFilter, omit, pick } from "@/lib/helper";
-import dayjs from "dayjs";
+import { useDebounce } from "@vueuse/core";
 import { useMutation, useQueryClient } from "vue-query";
+import { objectFilter, omit, pick } from "@/lib/helper";
+import { getExpenseTypes, getVendorExpenseItems } from "@/hooks/expense";
+import { getAllDeals, searchDealByVin } from "@/hooks/deals";
+import { useMessage } from "naive-ui";
+import { utils } from "@/lib/utils";
+import { useGlobalState } from "@/store/global";
+import dayjs from "dayjs";
 import axios from "axios";
+
+import CurrencyInput from "@/components/common/CurrencyInput.vue";
 
 const message = useMessage();
 const queryClient = useQueryClient();
@@ -55,6 +58,7 @@ watch(
 const { data: expenseItems } = getVendorExpenseItems(vendor_id, {
   enabled: showDrawer,
 });
+
 const expenseItemsOptions = computed(() =>
   [{ label: "+ Add new", value: "add" }].concat(
     expenseItems.value?.map((item) => ({
@@ -89,10 +93,7 @@ watch(
   () => form.value?.expense_items,
   (newFormValue) => {
     if (newFormValue.length > 0) {
-      form.value.cost = newFormValue?.reduce(
-        (prev, curr) => prev + curr.amount,
-        0
-      );
+      form.value.cost = newFormValue?.reduce((prev, curr) => prev + curr.amount, 0);
     } else {
       form.value.cost = 0;
     }
@@ -169,8 +170,9 @@ const dealOptions = computed(() =>
 const searchVinSelect = ref("");
 const debouncedSearchVin = useDebounce(searchVinSelect, 500);
 
-const { data: searchDealResult, isLoading: isVendorSearchLoading } =
-  searchDealByVin(debouncedSearchVin);
+const { data: searchDealResult, isLoading: isVendorSearchLoading } = searchDealByVin(
+  debouncedSearchVin
+);
 const searchVinResultOptions = computed(() =>
   searchDealResult.value?.map((deal) => ({
     value: deal.id,
@@ -225,9 +227,7 @@ async function submitExpense() {
     // const modifiedForm = omit(form.value, ['cost'])
     const modifiedForm = { ...form.value };
     if (modifiedForm.expense_date)
-      modifiedForm.expense_date = dayjs(modifiedForm.expense_date).format(
-        "YYYY-MM-DD"
-      );
+      modifiedForm.expense_date = dayjs(modifiedForm.expense_date).format("YYYY-MM-DD");
     else delete modifiedForm.expense_date;
 
     modifiedForm.expense_items = modifiedForm.expense_items.map((item) => ({
@@ -276,10 +276,10 @@ const onCreateExpenseItems = () => {
         ></path>
       </svg>
     </n-icon>
-    Add Expense
+    Create Expense
   </n-button>
   <n-drawer v-model:show="showDrawer" :width="500">
-    <n-drawer-content title="Add Expense">
+    <n-drawer-content title="Create Expense">
       <n-form
         :model="form"
         :rules="rules"
@@ -370,25 +370,13 @@ const onCreateExpenseItems = () => {
         </n-dynamic-input>
 
         <n-form-item label="Cost" path="cost">
-          <currency-input
-            clearable
-            v-model="form.cost"
-            :loading="isLoading"
-            disabled
-          />
+          <currency-input clearable v-model="form.cost" :loading="isLoading" disabled />
         </n-form-item>
         <n-form-item label="Invoice Number" path="invoice_number">
-          <n-input
-            clearable
-            v-model:value="form.invoice_number"
-            :loading="isLoading"
-          />
+          <n-input clearable v-model:value="form.invoice_number" :loading="isLoading" />
         </n-form-item>
         <n-form-item label="Expense Date" path="expense_date">
-          <n-date-picker
-            v-model:value="form.expense_date"
-            format="yyyy-MM-dd"
-          />
+          <n-date-picker v-model:value="form.expense_date" format="yyyy-MM-dd" />
         </n-form-item>
       </n-form>
       <template #footer>

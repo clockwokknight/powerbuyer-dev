@@ -15,89 +15,15 @@ import ActionButtons from "@/components/vendor/ActionButtons.vue";
 import VendorExpenseEdit from "@/components/vendor/VendorExpenseEdit.vue";
 import VendorExpensesAdd from "@/components/vendor/VendorExpensesAdd.vue";
 
+defineProps(["columns", "", ""]);
+
 const global = useGlobalState();
 const route = useRoute();
 const message = useMessage();
 
-const isLoading = ref(false);
-
-const routeParamId = ref(route.params?.id);
-
-watch(
-  () => route.params?.id,
-  () => {
-    if (route.params?.id) routeParamId.value = route.params?.id;
-  }
-);
-
-const { data: expensesData, isLoading: expensesDataLoading } = getExpensesByVendor(
-  routeParamId
-);
-
-// const expenseDataComputed = computed(() => expensesData.value ? )
-const rowKey = (row) => row?.deal_id;
-const columns = [
-  {
-    title: "VIN",
-    key: "vin",
-    //fixed: 'left'
-  },
-  {
-    title: "Name",
-    key: "name",
-    //fixed: 'left'
-  },
-  {
-    title: "Amount",
-    key: "amount",
-    //fixed: 'left'
-  },
-  {
-    title: "DOS",
-    key: "expense_date",
-    //fixed: 'left'
-  },
-  {
-    title: "Inv #",
-    key: "invoice_number",
-    //fixed: 'left'
-  },
-  {
-    title: "",
-    key: "edit",
-    render(row) {
-      return row?.children
-        ? h("div")
-        : h(ActionButtons, {
-            onEdit: () => showEditExpenseForm(row),
-          });
-    },
-  },
-];
-
 const pagination = { pageSize: 10 };
 const visibleEditForm = ref(false);
 const formRow = ref(null);
-
-function showEditExpenseForm(row) {
-  const obj = pick(row, [
-    "name",
-    "deal_id",
-    "description",
-    "expense_date",
-    "id",
-    "vendor_id",
-    "invoice_number",
-    "cost",
-  ]);
-  obj.type = parseInt(row.type);
-  obj.amount = parseFloat(row.amount);
-  if (obj?.expense_date) {
-    obj.expense_date = dayjs(obj.expense_date).valueOf();
-  }
-  formRow.value = { ...obj };
-  visibleEditForm.value = true;
-}
 </script>
 
 <template>

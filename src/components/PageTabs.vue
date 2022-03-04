@@ -1,19 +1,12 @@
 <script setup>
-import { TabGroup, TabList, Tab } from "@headlessui/vue";
-import {
-  onMounted,
-  ref,
-  watch,
-  nextTick,
-  onUpdated,
-  onBeforeUnmount,
-} from "vue";
-import axios from "axios";
-import { useDebounceFn } from "@vueuse/core";
-import { useTabsViewStore } from "@/store/tabs";
-import { useRoute, useRouter } from "vue-router";
-import { useMutation, useQueryClient } from "vue-query";
 import { getPageTabs } from "@/hooks/pageTabs";
+import { useTabsViewStore } from "@/store/tabs";
+import { Tab, TabGroup, TabList } from "@headlessui/vue";
+import { useDebounceFn } from "@vueuse/core";
+import axios from "axios";
+import { ref, watch } from "vue";
+import { useMutation, useQueryClient } from "vue-query";
+import { useRoute, useRouter } from "vue-router";
 
 const tabStore = useTabsViewStore();
 const props = defineProps(["pageName"]);
@@ -151,92 +144,84 @@ const scrollTabToView = useDebounceFn(() => {
       behavior: "smooth",
     });
 }, 100);
+
+const width = ref("");
+const beforeLeaveTab = (el) => {
+  width.value = `${el.getBoundingClientRect().width}px`;
+};
 </script>
 
 <template>
   <TabGroup :selected-index="tabStore.selectedIndex" @change="tabChanged">
-    <header class="relative flex items-end" ref="tabListButtonWrapper">
+    <header class="relative flex items-center" ref="tabListButtonWrapper">
       <div
-        class="flex h-[62px] items-end overflow-x-hidden bg-[#F8F8FA]"
+        class="flex h-[62px] items-center overflow-x-hidden"
         ref="scrollWrapper"
       >
-        <TabList>
-          <nav ref="tabListButton" class="flex min-w-max flex-nowrap gap-x-2">
-            <template
-              v-for="tab in tabStore.tabs"
-              v-if="tabStore.tabs.length >= 1"
-              :key="tab?.id"
-            >
-              <router-link
-                :to="`/${props.pageName}/${tab?.id}`"
-                custom
-                v-slot="{ href, route, navigate, isActive }"
+        <TabList v-slot="{ selectedIndex }">
+          <nav
+            ref="tabListButton"
+            class="flex min-w-max flex-nowrap gap-x-2 pl-5"
+          >
+            <TransitionGroup name="fade" @before-leave="beforeLeaveTab">
+              <div
+                v-for="(tab, tabIdx) in tabStore.tabs"
+                v-if="tabStore.tabs.length >= 1"
+                :key="tab?.id"
+                class="group relative grid place-content-center overflow-hidden rounded-lg"
               >
-                <div
-                  class="relative grid place-content-center overflow-hidden rounded border-x border-t"
+                <router-link
+                  :to="`/${props.pageName}/${tab?.id}`"
+                  custom
+                  v-slot="{ href, route, navigate, isActive }"
                 >
                   <tab
-                    class="max-w-xs scroll-mt-2 focus:outline-none"
+                    class="relative max-w-xs scroll-mt-2 focus:outline-none"
                     :class="[
                       isActive
-                        ? 'bg-primary text-white'
+                        ? 'bg-primary/10 font-bold text-primary before:absolute before:inset-y-0 before:left-0 before:h-full before:w-1 before:bg-primary focus:outline-none'
                         : 'bg-white text-gray-700',
                     ]"
                   >
                     <a
                       :href="href"
                       @click="navigate"
-                      class="block max-w-[250px] overflow-hidden truncate whitespace-nowrap px-4 py-2 pr-6 focus:outline-none"
+                      class="block max-w-[250px] overflow-hidden truncate whitespace-nowrap py-2 pl-6 pr-6 transition-all focus:outline-none group-hover:pr-9"
+                      :class="[isActive ? 'pr-9' : '']"
                     >
                       {{ tab?.name }}
                     </a>
                   </tab>
-                  <span
-                    class="absolute inset-y-0 right-0 top-[1px] z-10 flex cursor-pointer items-center rounded-r pr-1"
-                    @click.stop="closeTab(tab.id)"
+                </router-link>
+                <span
+                  class="absolute inset-y-0 right-0 top-[1px] z-10 flex cursor-pointer items-center transition-all group-hover:pr-3.5"
+                  :class="[tabIdx === selectedIndex ? 'pr-3.5' : '']"
+                  @click.stop="closeTab(tab.id)"
+                >
+                  <svg
+                    class="cubic-timing-tab h-3 w-3 text-red-500 transition-transform duration-300 group-hover:scale-100"
                     :class="[
-                      isActive ? 'bg-primary text-white' : 'bg-slate-white',
+                      tabIdx === selectedIndex ? 'scale-100' : 'scale-0',
                     ]"
+                    viewBox="0 0 11 11"
+                    fill="none"
+                    stroke="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      xmlns:xlink="http://www.w3.org/1999/xlink"
-                      class="h-5 w-5"
-                      :class="[
-                        isActive
-                          ? 'bg-primary text-white hover:text-gray-300'
-                          : 'bg-slate-white text-gray-200 hover:text-gray-400',
-                      ]"
-                      fill="currentColor"
-                      viewBox="0 0 512 512"
-                    >
-                      <path
-                        d="M448 256c0-106-86-192-192-192S64 150 64 256s86 192 192 192s192-86 192-192z"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-miterlimit="10"
-                        stroke-width="32"
-                      ></path>
-                      <path
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="32"
-                        d="M320 320L192 192"
-                      ></path>
-                      <path
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="32"
-                        d="M192 320l128-128"
-                      ></path>
-                    </svg>
-                  </span></div
-              ></router-link>
-            </template>
+                    <path
+                      d="M1.00007 9.72795L9.72803 1"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    />
+                    <path
+                      d="M9.72844 9.72795L1.00049 1"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    />
+                  </svg>
+                </span>
+              </div>
+            </TransitionGroup>
           </nav>
         </TabList>
       </div>
@@ -279,3 +264,34 @@ const scrollTabToView = useDebounceFn(() => {
     </header>
   </TabGroup>
 </template>
+
+<style>
+/* 1. declare transition */
+.fade-move,
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.fade-enter-to {
+  opacity: 1;
+  transform: scaleX(1) translateX(0);
+}
+/* 2. declare enter from and leave to state */
+.fade-enter-from {
+  opacity: 0;
+  transform: scaleX(0.01) translateX(-30px);
+}
+.fade-leave-from {
+  opacity: 1;
+  width: v-bind(width);
+}
+.fade-leave-to {
+  opacity: 0;
+  width: 0;
+}
+/* 3. ensure leaving items are taken out of layout flow so that moving
+      animations can be calculated correctly. */
+/*.fade-leave-active {*/
+/*  position: absolute;*/
+/*}*/
+</style>

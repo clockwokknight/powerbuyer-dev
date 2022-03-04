@@ -1,16 +1,23 @@
 <script setup>
-import { ref } from "vue";
 import { useQuery } from "vue-query";
 import axios from "axios";
 import { useDebounce } from "@vueuse/core";
 import VendorList from "@/components/vendor/VendorList.vue";
+import { onUpdated, ref, watch, onMounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useLoadingBar } from "naive-ui";
+import { TabGroup, TabList, Tab } from "@headlessui/vue";
+import { getVendorById, getVendors } from "@/hooks/vendor";
+import { useGlobalState } from "@/store/global";
 
 import AddVendor from "@/components/vendor/AddVendor.vue";
-import { getVendors } from "@/hooks/vendor";
 import { useTabsViewStore } from "@/store/tabs";
 import PageTabs from "@/components/PageTabs.vue";
 
 const tabStore = useTabsViewStore();
+import Tabs from "@/components/common/Tabs.vue";
+
+const global = useGlobalState();
 
 const searchText = ref("");
 const debouncedSearchText = useDebounce(searchText, 500);
@@ -39,6 +46,19 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
         return res.data;
       });
   });
+
+function handleScroll(e) {
+  let scroll = e.target.scrollTop;
+  global.stick([scroll >= 100, scroll >= 400]);
+  global.setActiveTab(
+    [
+      scroll < 400,
+      scroll >= 400 && scroll < 800,
+      scroll >= 800 && scroll < 1600,
+      scroll >= 1600,
+    ].indexOf(true)
+  );
+}
 </script>
 
 <template>
@@ -65,9 +85,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
           </div>
           <div content="Filter" v-tippy="{ placement: 'right', duration: 50 }">
             <svg
-              class="mt-1 h-6 w-6 cursor-pointer text-gray-400 hover:text-[#027bff]"
-              xmlns="http://www.w3.org/2000/svg"
-              xmlns:xlink="http://www.w3.org/1999/xlink"
+              class="mt-1 h-6 w-6 cursor-pointer text-gray-400 hover:text-primary"
               viewBox="0 0 24 24"
             >
               <path
@@ -123,14 +141,16 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
         </ul>
       </div>
     </aside>
+
     <!-- Main Tabs App Content -->
-    <section class="h-screen w-[calc(100vw-335px)]">
+
+    <section class="h-screen w-[calc(100vw-335px)] bg-white">
       <page-tabs page-name="vendors" />
       <!-- Main Body Content-->
       <div
         class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden border-t-2"
       >
-        <main class="min-h-full bg-white pt-10">
+        <main class="min-h-full bg-lightergray p-6 pt-6">
           <router-view />
         </main>
       </div>
