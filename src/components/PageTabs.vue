@@ -2,7 +2,7 @@
 import { getPageTabs } from "@/hooks/pageTabs";
 import { useTabsViewStore } from "@/store/tabs";
 import { Tab, TabGroup, TabList } from "@headlessui/vue";
-import { useDebounceFn } from "@vueuse/core";
+import { useDebounceFn, useScroll } from "@vueuse/core";
 import axios from "axios";
 import { nextTick, ref, watch } from "vue";
 import { useMutation, useQueryClient } from "vue-query";
@@ -154,6 +154,18 @@ const width = ref("");
 const beforeLeaveTab = (el) => {
   width.value = `${el.getBoundingClientRect().width}px`;
 };
+
+/**
+ *
+ * @param {WheelEvent} e
+ */
+function handleWheel(e) {
+  const preventYWheel =
+    e.currentTarget.offsetWidth < e.currentTarget.scrollWidth;
+  if (!preventYWheel || e.deltaY === 0) return;
+  e.currentTarget.scrollLeft += e.deltaY + e.deltaX;
+  e.preventDefault();
+}
 </script>
 
 <template>
@@ -162,6 +174,7 @@ const beforeLeaveTab = (el) => {
       <div
         class="flex h-[62px] items-center overflow-x-hidden"
         ref="scrollWrapper"
+        @wheel="handleWheel"
       >
         <TabList v-slot="{ selectedIndex }">
           <nav
@@ -230,6 +243,7 @@ const beforeLeaveTab = (el) => {
           </nav>
         </TabList>
       </div>
+
       <div class="flex h-[48px]">
         <button
           class="grid w-8 place-content-center px-2 hover:text-[#027bff]"
@@ -270,7 +284,7 @@ const beforeLeaveTab = (el) => {
   </TabGroup>
 </template>
 
-<style>
+<style scoped>
 /* 1. declare transition */
 .fade-move,
 .fade-enter-active,
@@ -294,9 +308,4 @@ const beforeLeaveTab = (el) => {
   opacity: 0;
   width: 0;
 }
-/* 3. ensure leaving items are taken out of layout flow so that moving
-      animations can be calculated correctly. */
-/*.fade-leave-active {*/
-/*  position: absolute;*/
-/*}*/
 </style>

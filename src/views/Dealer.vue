@@ -28,6 +28,7 @@ const { data: dealer, isLoading } = useQuery(
     <pre>
       {{ dealer }}
     </pre>
+    <div id="__subtabs" stuck></div>
     <DealerContacts />
   </div>
 </template>
