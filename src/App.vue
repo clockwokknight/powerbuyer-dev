@@ -34,7 +34,7 @@ const userMenu = [
               <div class="flex h-full w-full">
                 <aside class="flex flex-col sticky top-0 left-0 z-10 w-[60px] bg-[#202124]">
                   <MainMenu />
-                  <n-switch class="mt-auto mb-4" v-model:value="isDark"  @update:value="toggleDark()"/>
+                  <n-switch class="mt-auto mb-4" v-model:value="isDark"  @update:value="toggleDark"/>
                 </aside>
                 <section class="relative flex h-full w-full bg-[#F8F8FA]">
                   <router-view />
