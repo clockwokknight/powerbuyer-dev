@@ -1,5 +1,5 @@
 <script setup>
-import { ref, toRefs, reactive, computed, onMounted } from "vue";
+import { ref, watch, toRefs, reactive, computed, onMounted } from "vue";
 import { NInput, NSelect, NConfigProvider } from "naive-ui";
 import { useMessage } from "naive-ui";
 import { useVendors } from "@/store/vendors";
@@ -80,11 +80,11 @@ const cancelButton = ref();
 const caretX = ref("12px");
 const caretFill = ref(hoverInput.value ? "#bdbdbd00" : "#bdbdbd");
 
-const isValid = ref(true);
+const isValid = ref(false);
 
 const validators = {
   required: (input) => {
-    return input && input.length > 0;
+    return input && input !== "";
   },
   phone: (input) => {
     return /^(\+\d{1,2}\s?)?1?\-?\.?\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/.test(input);
@@ -95,6 +95,13 @@ const validators = {
     );
   },
 };
+
+watch(
+  () => props.value,
+  (newVal) => {
+    isValid.value = validation(newVal);
+  }
+);
 
 function validation(input) {
   if (props.validate) {
@@ -112,19 +119,17 @@ function edit() {
   editing.value = true;
   caretX.value = "6px";
   caretFill.value = "#888888";
-  isValid.value = validation(props.value) ? 1 : 0;
 }
 
 function cancel() {
   emit("cancel");
-  isValid.value = null;
   editing.value = false;
   done.value = true;
   setTimeout(() => {
     done.value = false;
   }, 500);
   caretX.value = "12px";
-  caretFill.value = !hoverInput.value ? "#bdbdbd00" : "#bdbdbd";
+  caretFill.value = hoverInput.value ? "#bdbdbd00" : "#bdbdbd";
 }
 
 function save() {
@@ -140,7 +145,7 @@ function save() {
       done.value = false;
     }, 500);
     caretX.value = "12px";
-    caretFill.value = !hoverInput.value ? "#bdbdbd00" : "#bdbdbd";
+    caretFill.value = hoverInput.value ? "#bdbdbd00" : "#bdbdbd";
   } else {
     message.error("Invalid input");
     setTimeout(edit(), 300);
@@ -149,7 +154,7 @@ function save() {
 
 function handleInput(e) {
   emit("update:value", e);
-  isValid.value = validation(e) ? 1 : 0;
+  isValid.value = validation(e);
 }
 </script>
 
@@ -159,13 +164,14 @@ function handleInput(e) {
       <div class="flex">
         <label
           v-if="type !== 'header'"
-          class="absolute z-40 translate-x-4 translate-y-[-6px] bg-white px-2 text-[10px] font-bold uppercase tracking-widest text-gray-600"
+          class="absolute z-40 translate-x-4 translate-y-[-2px] bg-white px-2 text-[10px] font-bold uppercase tracking-widest text-gray-600"
         >
           <b
-            v-if="
-              validate && validate.includes('required') && (!value || !(value.length > 0))
+            class="text-red-600 duration-[300ms]"
+            :class="
+              !(validate && validate.includes('required') && (!value || value === '')) &&
+              'mr-[-10px] scale-50 opacity-0'
             "
-            class="text-red-600"
           >
             *
           </b>
@@ -195,13 +201,13 @@ function handleInput(e) {
             ${saved && 'ping'}
             ${
               (!type || type !== 'header') &&
-              isValid !== 0 &&
+              !isValid &&
               editing &&
               'border-[#18A058] shadow-lg shadow-green-50'
             }
             ${
               (!type || type !== 'header') &&
-              isValid === 0 &&
+              !isValid &&
               editing &&
               'border-red-600 shadow-lg shadow-red-50'
             } 
@@ -287,7 +293,7 @@ function handleInput(e) {
             >
               <svg
                 class="duration-200"
-                :class="!isValid ? 'fill-gray-300' : 'fill-secondary hover:opacity-60'"
+                :class="!isValid ? 'fill-gray-200' : 'fill-secondary hover:opacity-60'"
                 viewBox="0 0 24 24"
               >
                 <path
