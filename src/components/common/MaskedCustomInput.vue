@@ -48,10 +48,8 @@ const inputRef = ref(null);
 
 watch(
   () => props.editing,
-  (editing) => {
-    console.log("<MasedCustomInput.vue> props.editing: ", editing, inputRef.value);
-    setTimeout(() => (editing ? inputRef.value.focus() : inputRef.value.blur()), 300);
-  }
+  (editing) =>
+    setTimeout(() => (editing ? inputRef.value.focus() : inputRef.value.blur()), 300)
 );
 
 watch(
@@ -72,6 +70,15 @@ function refresh(value) {
   if (val !== lastValue.value) {
     lastValue.value = val;
     emit("update:value", val);
+  }
+}
+
+function handleBlur(e) {
+  console.log("target: ", e.relatedTarget?.classList[0]);
+  let target = e.relatedTarget?.classList[0];
+  if (target !== "__save" && target !== "__cancel") {
+    console.log("cancelling...");
+    emit("blur", e);
   }
 }
 </script>
@@ -99,35 +106,20 @@ function refresh(value) {
       }
     "
     @focus="(e) => $emit('focus', e)"
-    @blur="
-      (e) =>
-        e.relatedTarget?.classList[0] !== '__save' &&
-        e.relatedTarget?.classList[0] !== '__cancel' &&
-        $emit('blur', e)
-    "
+    @blur="handleBlur"
   />
   <n-select
     v-if="type === 'select'"
     ref="inputRef"
-    class="bg-transparent outline-none w-full pl-3"
+    class="bg-transparent outline-none w-full"
     :class="!editing && 'pointer-events-none'"
     :options="options || sampleOptions"
     :filterable="true"
     :placeholder="placeholder || 'Select'"
     :value="value"
     :disabled="!editing"
-    :on-input="
-      (e) => {
-        refresh();
-        $emit('input', e);
-      }
-    "
+    :on-update:value="(e) => $emit('input', e)"
     @focus="(e) => $emit('focus', e)"
-    @blur="
-      (e) =>
-        e.relatedTarget?.classList[0] !== '__save' &&
-        e.relatedTarget?.classList[0] !== '__cancel' &&
-        $emit('blur', e)
-    "
+    @blur="handleBlur"
   />
 </template>

@@ -44,8 +44,6 @@ const queryClient = useQueryClient();
 const currentActiveField = ref(null);
 const routeParamId = ref(route.params?.id);
 
-let payload = ref({});
-
 const vendorTabs = ref([
   {
     title: "DETAILS",
@@ -120,6 +118,7 @@ watch(
   },
   { immediate: true }
 );
+
 const { isLoading, mutateAsync } = useMutation(
   (data) => axios.put(`/vendors/${vendor.value.id}`, data),
   {
@@ -141,19 +140,11 @@ watch(
   }
 );
 
-watch(payload.value, (val) => {
-  console.log("\npayload updated: ", payload.value);
-});
-
 function resetValue(key) {
-  console.log("\n");
-  console.log(`resetting value: ${payload.value} ==> ${vendor?.value[key]}`);
-  payload.value = vendor?.value[key];
   form.value = {
     ...form.value,
     [key]: vendor.value[key],
   };
-  console.log("payload: ", payload.value);
   currentActiveField.value = null;
 }
 
@@ -213,9 +204,9 @@ const { stop } = useIntersectionObserver(
         <div class="col-span-6">
           <CustomInput
             label="Address"
-            :validate="['required']"
             placeholder=""
             :value="form.address_one"
+            :validate="['required']"
             @update:value="(val) => (form.address_one = val)"
             @save="submitValue('address_one')"
             @cancel="resetValue('address_one')"
@@ -225,7 +216,6 @@ const { stop } = useIntersectionObserver(
         <div class="col-span-6">
           <CustomInput
             label="Address 2"
-            :validate="['required']"
             placeholder=""
             :value="form.address_two"
             @update:value="(val) => (form.address_two = val)"
@@ -238,9 +228,9 @@ const { stop } = useIntersectionObserver(
         <div class="col-span-4">
           <CustomInput
             label="City"
-            :validate="['required']"
             placeholder=""
             :value="form.city"
+            :validate="['required']"
             @update:value="(val) => (form.city = val)"
             @save="submitValue('city')"
             @cancel="resetValue('city')"
@@ -251,10 +241,10 @@ const { stop } = useIntersectionObserver(
           <CustomInput
             type="select"
             label="State"
-            :validate="['required']"
             placeholder=""
             :options="statesList"
             :value="form.state"
+            :validate="['required']"
             @update:value="(val) => (form.state = val)"
             @save="submitValue('state')"
             @cancel="resetValue('state')"
@@ -264,10 +254,9 @@ const { stop } = useIntersectionObserver(
         <div class="col-span-4">
           <CustomInput
             label="Zip Code"
-            :validate="['required']"
-            type="mask"
-            mask="#####-####"
             placeholder="#####-####"
+            mask="#####-####"
+            :validate="['required']"
             :value="form.zip"
             @update:value="(val) => (form.zip = val)"
             @save="submitValue('zip')"
@@ -279,8 +268,8 @@ const { stop } = useIntersectionObserver(
         <div class="col-span-4">
           <CustomInput
             label="Email"
-            :validate="['required', 'email']"
             placeholder=""
+            :validate="['required', 'email']"
             :value="form.email"
             @update:value="(val) => (form.email = val)"
             @save="submitValue('email')"
@@ -291,11 +280,10 @@ const { stop } = useIntersectionObserver(
         <div class="col-span-4">
           <CustomInput
             label="Phone"
-            :validate="['required', 'phone']"
-            type="mask"
-            mask="+1 (###) ###-####"
             placeholder="+1 (###) ###-####"
+            mask="+1 (###) ###-####"
             :value="form.phone"
+            :validate="['required', 'phone']"
             @update:value="(val) => (form.phone = val)"
             @save="submitValue('phone')"
             @cancel="resetValue('phone')"
@@ -305,11 +293,10 @@ const { stop } = useIntersectionObserver(
         <div class="col-span-4">
           <CustomInput
             label="Fax"
-            :validate="['phone']"
-            type="mask"
-            mask="+1 (###) ###-####"
             placeholder="+1 (###) ###-####"
+            mask="+1 (###) ###-####"
             :value="form.fax"
+            :validate="['phone']"
             @update:value="(val) => (form.fax = val)"
             @save="submitValue('fax')"
             @cancel="resetValue('fax')"
@@ -320,9 +307,9 @@ const { stop } = useIntersectionObserver(
         <div class="col-span-4">
           <CustomInput
             label="DIN"
+            placeholder=""
             :validate="['required']"
             :value="form.din"
-            placeholder=""
             @update:value="(val) => (form.din = val)"
             @save="submitValue('din')"
             @cancel="resetValue('din')"
@@ -332,8 +319,8 @@ const { stop } = useIntersectionObserver(
         <div class="col-span-4">
           <CustomInput
             label="Tax ID"
-            :validate="['required']"
             placeholder=""
+            :validate="['required']"
             :value="form.tax_id_number"
             @update:value="(val) => (form.tax_id_number = val)"
             @save="submitValue('tax_id_number')"
@@ -345,10 +332,10 @@ const { stop } = useIntersectionObserver(
           <CustomInput
             type="select"
             label="Category"
+            placeholder=""
             :validate="['required']"
             :options="vendorCategoryOptions"
             :value="form.vendor_category_id"
-            placeholder=""
             @update:value="(val) => (form.vendor_category_id = val)"
             @save="submitValue('vendor_category_id')"
             @cancel="resetValue('vendor_category_id')"
