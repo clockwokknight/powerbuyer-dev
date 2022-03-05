@@ -161,7 +161,14 @@ function handleButtonHover(name) {}
 
 <template>
   <n-config-provider :theme-overrides="themeOverrides">
-    <div class="__custom-input relative">
+    <div
+     :class="`__custom-input relative dark:bg-black dark:rounded-lg
+      ${
+        (!type || type !== 'header') &&
+        isValid !== 0 &&
+        editing &&
+        'border-[#18A058] shadow-lg shadow-green-50 dark:shadow-none dark:border-[1px]'
+      }`">
       <div class="flex">
         <label
           v-if="type !== 'header'"
@@ -196,15 +203,9 @@ function handleButtonHover(name) {}
         "
       >
         <div
-          class="flex w-full items-center rounded-md border-[1px] duration-200"
+          class="flex w-full items-center rounded-md border-[1px] dark:border-0 duration-200"
           :class="`
             ${saved && 'ping'}
-            ${
-              (!type || type !== 'header') &&
-              isValid !== 0 &&
-              editing &&
-              'border-[#18A058] shadow-lg shadow-green-50'
-            }
             ${
               (!type || type !== 'header') &&
               isValid === 0 &&
