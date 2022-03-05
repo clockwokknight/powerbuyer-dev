@@ -190,12 +190,12 @@ let tabs = computed(() => global.tabs);
 
 <template>
   <div
-    class="__veil fixed top-0 left-[390px] z-50 h-[60px] -translate-x-10 bg-lightergray"
+    class="__veil fixed top-0 left-[390px] z-50 h-[60px] -translate-x-10 bg-lightergray  dark:bg-[#1E1F21]"
   ></div>
 
   <Tabs
     id="__tabs"
-    class="sticky top-[24px] z-50 rounded-xl border-2 border-gray-200 bg-white duration-300"
+    class="sticky top-[24px] z-50 rounded-xl border-2 border-gray-200 dark:border-0 bg-white dark:bg-[#25272A] duration-300"
     :class="
       global.stuck[0] &&
       '!rounded-t-xl rounded-r-xl rounded-b-none rounded-l-none shadow-xl shadow-[#00000011]'
@@ -206,7 +206,7 @@ let tabs = computed(() => global.tabs);
 
   <div
     id="details"
-    class="__section __vendor-card mt-4 grid grid-cols-12 rounded-xl border-2 bg-white p-6"
+    class="__section __vendor-card mt-4 grid grid-cols-12 rounded-xl border-2 dark:border-0 bg-white dark:bg-[#25272A] p-6"
   >
     <!-- left side -->
     <div class="__form col-span-8 flex flex-col justify-between">
@@ -415,8 +415,8 @@ let tabs = computed(() => global.tabs);
   <Tabs
     id="__subtabs"
     type="basic"
-    class="sticky top-[82px] left-0 z-50 mt-4 w-full rounded-xl border-2 border-gray-200 bg-white duration-300"
-    :class="global.stuck[1] && '!rounded-none !bg-gray-50 shadow-lg shadow-[#00000011]'"
+    class="sticky top-[82px] left-0 z-50 mt-4 w-full rounded-xl border-2 dark:border-0 border-gray-200 bg-white dark:bg-[#25272A] duration-300"
+    :class="global.stuck[1] && '!rounded-none !bg-gray-50 dark:!bg-[#25272A] shadow-lg shadow-[#00000011]'"
     :items="vendorTabs"
     @click="handleTabClick"
   />

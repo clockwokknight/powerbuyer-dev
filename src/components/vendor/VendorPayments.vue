@@ -124,7 +124,7 @@ function doShowOuter(row) {
           <VendorPaymentsAdd />
         </div>
 
-        <div class="rounded-xl border-2 py-8 px-8 bg-white">
+        <div class="rounded-xl border-2 dark:border-0 py-8 px-8 bg-white dark:bg-[#25272A]">
           <div><p class="text-2xl font-bold pb-8">Payments</p></div>
           <n-data-table
             class="rounded-lg"

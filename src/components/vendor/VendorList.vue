@@ -7,7 +7,7 @@ defineEmits(["click:tab"]);
   <li
     v-for="vendor in vendors"
     :key="vendor?.id"
-    class="px-4 py-4 border-b even:bg-[#f8f8fa] hover:bg-gray-100"
+    class="px-4 py-4 border-b dark:border-0 even:bg-[#f8f8fa] dark:even:bg-[#25272A] hover:bg-gray-100 dark:hover:bg-gray-900"
     @click="$emit('click:tab', vendor)"
   >
     <!-- Company Name -->

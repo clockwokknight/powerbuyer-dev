@@ -112,7 +112,7 @@ function showEditExpenseForm(row) {
         <VendorExpensesAdd />
       </div>
 
-      <div class="rounded-xl border-2 py-8 px-8 bg-white">
+      <div class="rounded-xl border-2 dark:border-0 py-8 px-8 bg-white dark:bg-[#25272A]">
         <div><p class="pb-8 text-2xl font-bold">Expenses</p></div>
         <n-data-table
           class="rounded-lg"

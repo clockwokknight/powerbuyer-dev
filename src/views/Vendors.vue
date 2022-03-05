@@ -90,9 +90,9 @@ function handleScroll(e) {
   <div class="vendors flex w-full">
     <!-- Don't show PageItemsList on dashboard  | Current Page List -->
     <aside
-      class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-y-auto overflow-x-hidden bg-white"
+      class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-y-auto overflow-x-hidden bg-white dark:bg-[#1E1F21]"
     >
-      <div class="sticky top-0 border-b bg-white p-3">
+      <div class="sticky top-0 border-b dark:border-0 bg-white dark:bg-[#25272A] p-3">
         <div class="mb-3 flex justify-between">
           <h1 class="text-xl font-bold uppercase">Vendors</h1>
           <div>
@@ -110,7 +110,7 @@ function handleScroll(e) {
           </div>
           <div content="Filter" v-tippy="{ placement: 'right', duration: 50 }">
             <svg
-              class="mt-1 h-6 w-6 cursor-pointer text-gray-400 hover:text-primary"
+              class="mt-1 h-6 w-6 cursor-pointer text-gray-400 dark:text-gray-800 hover:text-primary"
               viewBox="0 0 24 24"
             >
               <path
@@ -132,12 +132,12 @@ function handleScroll(e) {
           v-if="isVendorSearchFetching || isVendorsLoading"
           v-for="index in Array.from({ length: 10 })"
           :key="index"
-          class="border-b px-4 py-4 even:bg-[#f8f8fa]"
+          class="border-b dark:border-0 px-4 py-4 even:bg-[#f8f8fa]"
         >
           <n-skeleton text :repeat="2" class="w-full" />
           <n-skeleton text class="w-[45%]" />
         </div>
-        <ul class="">
+        <ul class="dark:bg-[#1F1F23]">
           <template v-if="debouncedSearchText">
             <VendorList v-if="vendorSearchResults" :vendors="vendorSearchResults" />
           </template>
@@ -165,13 +165,13 @@ function handleScroll(e) {
 
     <!-- Main Tabs App Content -->
 
-    <section class="h-screen w-[calc(100vw-335px)] bg-white !border-transparent">
+    <section class="h-screen w-[calc(100vw-335px)] bg-white dark:bg-[#1E1F21] !border-transparent">
       <!-- Main Body Content-->
       <div
         @scroll="handleScroll"
         class="h-full overflow-y-auto overflow-x-hidden border-t-2"
       >
-        <main class="min-h-full bg-lightergray p-6 pt-6">
+        <main class="min-h-full bg-lightergray dark:bg-[#1E1F21] p-6 pt-6">
           <router-view />
         </main>
       </div>

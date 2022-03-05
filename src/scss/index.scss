@@ -8,7 +8,8 @@
 
 body {
   font-family: 'Montserrat', 'sans-serif';
-  @apply bg-[#F5F6F6]
+  @apply bg-[#F5F6F6];
+  @apply dark:text-white;
 }
 
 .center-content {

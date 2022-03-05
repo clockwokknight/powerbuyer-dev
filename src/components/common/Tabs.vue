@@ -61,7 +61,7 @@ watch(
           :class="
             type !== 'basic' && active === index
               ? 'bg-primarylight text-primary py-2 pl-6 pr-0 rounded-lg mr-6 duration-300 hover:scale-[0.96]'
-              : 'bg-transparent text-black py-2 px-3 rounded-lg mr-0 duration-300'
+              : 'bg-transparent text-black dark:text-white py-2 px-3 rounded-lg mr-0 duration-300'
           "
         >
           {{ item.title }}
