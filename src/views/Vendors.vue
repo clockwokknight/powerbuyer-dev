@@ -113,7 +113,7 @@ function handleScroll(e) {
             <n-skeleton text class="w-[45%]" />
           </div>
         </div>
-        <ul class="dark:bg-[#1F1F23]">
+        <ul class="dark:bg-[#25272A]">
           <template v-if="debouncedSearchText">
             <VendorList
               v-if="vendorSearchResults"
