@@ -1,9 +1,10 @@
 <script setup>
-import { ref, toRefs, reactive, computed, onMounted } from "vue";
+import { ref, watch, toRefs, reactive, computed, onMounted } from "vue";
 import { NInput, NSelect, NConfigProvider } from "naive-ui";
 import { useMessage } from "naive-ui";
+import { useVendors } from "@/store/vendors";
 import { utils } from "@/lib/utils";
-import MaskedInput from "@/components/common/generic/MaskedInput.vue";
+import MaskedCustomInput from "@/components/common/MaskedCustomInput.vue";
 
 const emit = defineEmits(["update:value", "focus", "scroll", "edit", "save", "cancel"]);
 
@@ -58,6 +59,7 @@ const themeOverrides = {
   },
 };
 
+const vendors = useVendors();
 const message = useMessage();
 
 const inputEl = ref(null);
@@ -78,11 +80,11 @@ const cancelButton = ref();
 const caretX = ref("12px");
 const caretFill = ref(hoverInput.value ? "#bdbdbd00" : "#bdbdbd");
 
-const isValid = ref(null);
+const isValid = ref(false);
 
 const validators = {
   required: (input) => {
-    return input && input.length > 0;
+    return input && input !== "";
   },
   phone: (input) => {
     return /^(\+\d{1,2}\s?)?1?\-?\.?\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/.test(input);
@@ -93,6 +95,13 @@ const validators = {
     );
   },
 };
+
+watch(
+  () => props.value,
+  (newVal) => {
+    isValid.value = validation(newVal);
+  }
+);
 
 function validation(input) {
   if (props.validate) {
@@ -112,9 +121,20 @@ function edit() {
   caretFill.value = "#888888";
 }
 
+function cancel() {
+  emit("cancel");
+  editing.value = false;
+  done.value = true;
+  setTimeout(() => {
+    done.value = false;
+  }, 500);
+  caretX.value = "12px";
+  caretFill.value = hoverInput.value ? "#bdbdbd00" : "#bdbdbd";
+}
+
 function save() {
+  editing.value = false;
   if (validation(props.value)) {
-    isValid.value = 1;
     emit("save");
     saved.value = true;
     setTimeout(() => {
@@ -124,39 +144,18 @@ function save() {
     setTimeout(() => {
       done.value = false;
     }, 500);
-    editing.value = false;
     caretX.value = "12px";
-    caretFill.value = !hoverInput.value ? "#bdbdbd00" : "#bdbdbd";
+    caretFill.value = hoverInput.value ? "#bdbdbd00" : "#bdbdbd";
   } else {
-    isValid.value = 0;
     message.error("Invalid input");
+    setTimeout(edit(), 300);
   }
 }
 
-function cancel() {
-  emit("cancel");
-  isValid.value = null;
-  editing.value = false;
-  done.value = true;
-  setTimeout(() => {
-    done.value = false;
-  }, 500);
-  caretX.value = "12px";
-  caretFill.value = !hoverInput.value ? "#bdbdbd00" : "#bdbdbd";
+function handleInput(e) {
+  emit("update:value", e);
+  isValid.value = validation(e);
 }
-
-function blur() {
-  emit("cancel");
-  editing.value = false;
-  done.value = true;
-  setTimeout(() => {
-    done.value = false;
-  }, 500);
-  caretX.value = "12px";
-  caretFill.value = "#bdbdbd";
-}
-
-function handleButtonHover(name) {}
 </script>
 
 <template>
@@ -175,10 +174,11 @@ function handleButtonHover(name) {}
           class="absolute z-40 translate-x-4 translate-y-[-6px] bg-white dark:bg-black px-2 text-[10px] font-bold uppercase tracking-widest text-gray-600 dark:text-gray-300"
         >
           <b
-            v-if="
-              validate && validate.includes('required') && (!value || !(value.length > 0))
+            class="text-red-600 duration-[300ms]"
+            :class="
+              !(validate && validate.includes('required') && (!value || value === '')) &&
+              'mr-[-10px] scale-50 opacity-0'
             "
-            class="text-red-600"
           >
             *
           </b>
@@ -208,7 +208,14 @@ function handleButtonHover(name) {}
             ${saved && 'ping'}
             ${
               (!type || type !== 'header') &&
-              isValid === 0 &&
+              !isValid &&
+              editing &&
+              'border-[#18A058] shadow-lg shadow-green-50'
+            }
+            ${
+              (!type || type !== 'header') &&
+              !isValid &&
+              editing &&
               'border-red-600 shadow-lg shadow-red-50'
             } 
             ${
@@ -221,7 +228,7 @@ function handleButtonHover(name) {}
             }`"
         >
           <div class="__inputs w-full">
-            <masked-input
+            <masked-custom-input
               ref="inputEl"
               :value="value"
               :type="type"
@@ -230,14 +237,9 @@ function handleButtonHover(name) {}
               :mask="mask"
               :options="options"
               :placeholder="placeholder"
-              @input="
-                (e) => {
-                  utils.log('CustomInput.vue: ' + e);
-                  $emit('update:value', e);
-                }
-              "
+              @input="(e) => handleInput(e)"
               @focus="(e) => $emit('focus', e)"
-              @blur="blur"
+              @blur="cancel"
             />
           </div>
 
@@ -259,12 +261,7 @@ function handleButtonHover(name) {}
                   }, 500);
                 }
               "
-              @mouseover="
-                () => {
-                  hoverEdit = false;
-                  handleButtonHover('Edit');
-                }
-              "
+              @mouseover="hoverEdit = false"
               @mouseleave="hoverEdit = false"
               class="__edit h-3 w-3 -translate-x-1 rounded-full"
               :class="`
@@ -276,7 +273,7 @@ function handleButtonHover(name) {}
                     ${done && 'delay-[250ms]'}
                 `"
             >
-              <svg class="fill-black dark:fill-white hover:fill-[#18A058]" viewBox="0 0 24 24">
+              <svg class="fill-black dark:fill-white hover:fill-secondary" viewBox="0 0 24 24">
                 <path
                   d="M13.94 5L19 10.06L9.062 20a2.25 2.25 0 0 1-.999.58l-5.116 1.395a.75.75 0 0 1-.92-.921l1.395-5.116a2.25 2.25 0 0 1 .58-.999L13.938 5zm7.09-2.03a3.578 3.578 0 0 1 0 5.06l-.97.97L15 3.94l.97-.97a3.578 3.578 0 0 1 5.06 0z"
                 ></path>
@@ -288,22 +285,24 @@ function handleButtonHover(name) {}
             <button
               ref="saveButton"
               @click="save"
-              @mouseover="
-                () => {
-                  hoverEdit = false;
-                  handleButtonHover('Save');
-                }
-              "
+              @mouseover="hoverEdit = false"
               @mouseleave="hoverEdit = false"
               :style="!editing && 'width: 0px !important'"
               class="__save h-5 w-5 -translate-x-2 duration-200"
-              :class="
-                !editing
-                  ? 'pointer-events-none !scale-50 opacity-0'
-                  : 'opacity-100 delay-100'
-              "
+              :class="`
+                ${!isValid && 'pointer-events-none'}
+                ${
+                  !editing
+                    ? 'pointer-events-none !scale-50 opacity-0'
+                    : 'opacity-100 delay-100'
+                }
+              `"
             >
-              <svg class="fill-[#18A058] hover:opacity-60" viewBox="0 0 24 24">
+              <svg
+                class="duration-200"
+                :class="!isValid ? 'fill-gray-200' : 'fill-secondary hover:opacity-60'"
+                viewBox="0 0 24 24"
+              >
                 <path
                   d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2zm3.22 6.97l-4.47 4.47l-1.97-1.97a.75.75 0 0 0-1.06 1.06l2.5 2.5a.75.75 0 0 0 1.06 0l5-5a.75.75 0 1 0-1.06-1.06z"
                 ></path>
@@ -315,12 +314,7 @@ function handleButtonHover(name) {}
             <button
               ref="cancelButton"
               @click="cancel"
-              @mouseover="
-                () => {
-                  hoverEdit = false;
-                  handleButtonHover('Cancel');
-                }
-              "
+              @mouseover="hoverEdit = false"
               @mouseleave="hoverEdit = false"
               :style="!editing && 'width: 0px !important'"
               class="__cancel ml-1 h-5 w-5 -translate-x-2 duration-200"
@@ -330,7 +324,10 @@ function handleButtonHover(name) {}
                   : 'opacity-100'
               "
             >
-              <svg class="rotate-45 fill-gray-400 hover:opacity-60" viewBox="0 0 24 24">
+              <svg
+                class="duration-200 rotate-45 fill-gray-400 hover:fill-black"
+                viewBox="0 0 24 24"
+              >
                 <path
                   d="M12 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12S6.477 2 12 2zm0 5a.75.75 0 0 0-.743.648l-.007.102v3.5h-3.5a.75.75 0 0 0-.102 1.493l.102.007h3.5v3.5a.75.75 0 0 0 1.493.102l.007-.102v-3.5h3.5a.75.75 0 0 0 .102-1.493l-.102-.007h-3.5v-3.5A.75.75 0 0 0 12 7z"
                 ></path>

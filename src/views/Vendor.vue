@@ -27,6 +27,7 @@ import VendorExpenses from "@/components/vendor/VendorExpenses.vue";
 import VendorPayments from "@/components/vendor/VendorPayments.vue";
 import CustomInput from "@/components/common/CustomInput.vue";
 import Tabs from "@/components/common/Tabs.vue";
+import { useIntersectionObserver } from "@vueuse/core";
 
 const VendorContacts = defineAsyncComponent({
   loader: () => import("@/components/vendor/VendorContacts.vue"),
@@ -42,8 +43,6 @@ const queryClient = useQueryClient();
 
 const currentActiveField = ref(null);
 const routeParamId = ref(route.params?.id);
-
-let payload = ref({});
 
 const vendorTabs = ref([
   {
@@ -116,8 +115,10 @@ watch(
   () => vendor.value,
   (newValue) => {
     if (newValue) form.value = { ...newValue };
-  }
+  },
+  { immediate: true }
 );
+
 const { isLoading, mutateAsync } = useMutation(
   (data) => axios.put(`/vendors/${vendor.value.id}`, data),
   {
@@ -139,37 +140,20 @@ watch(
   }
 );
 
-watchEffect(() => {
-  console.log(payload.value);
-});
-
-watch(vendor, (vendor) => {
-  vendor && global.addTab({ title: vendor.name, value: vendor.id });
-});
-
-watch(payload.value, (val) => {
-  console.log("\npayload updated: ", payload.value);
-});
-
 function resetValue(key) {
-  console.log("\n");
-  console.log(`resetting value: ${payload.value} ==> ${vendor?.value[key]}`);
-  payload.value = vendor?.value[key];
   form.value = {
     ...form.value,
     [key]: vendor.value[key],
   };
-  console.log("payload: ", payload.value);
   currentActiveField.value = null;
 }
 
 function submitValue(key) {
-  console.clear();
-  console.log("submitting");
   mutateAsync({ [key]: form.value[key] })
     .then((data) => {
       message.success("Saved");
-      console.log("submission promise: ", data);
+      console.clear();
+      console.log(data);
       currentActiveField.value = null;
     })
     .catch((err) => {
@@ -184,29 +168,22 @@ function handleTabClick(e) {
 }
 
 let tabs = computed(() => global.tabs);
+const vendorTab = ref(null);
+const { stop } = useIntersectionObserver(
+  vendorTab,
+  ([e], observerElement) => {
+    e.target.toggleAttribute("stuck", e.intersectionRatio < 1);
+  },
+  { threshold: [1] }
+);
 
 // LOAD TABLE DATA
 </script>
 
 <template>
   <div
-    class="__veil fixed top-0 left-[390px] z-50 h-[60px] -translate-x-10 bg-lightergray  dark:bg-[#1E1F21]"
-  ></div>
-
-  <Tabs
-    id="__tabs"
-    class="sticky top-[24px] z-50 rounded-xl border-2 border-gray-200 dark:border-0 bg-white dark:bg-[#25272A] duration-300"
-    :class="
-      global.stuck[0] &&
-      '!rounded-t-xl rounded-r-xl rounded-b-none rounded-l-none shadow-xl shadow-[#00000011]'
-    "
-    :items="tabs"
-    @click="(e) => router.push(`/vendors/${e}`)"
-  />
-
-  <div
     id="details"
-    class="__section __vendor-card mt-4 grid grid-cols-12 rounded-xl border-2 dark:border-0 bg-white dark:bg-[#25272A] p-6"
+    class="__section __vendor-card mt-4 grid grid-cols-12 rounded border-2 dark:border-0 bg-white dark:bg-[#25272A] p-6"
   >
     <!-- left side -->
     <div class="__form col-span-8 flex flex-col justify-between">
@@ -227,9 +204,9 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-6">
           <CustomInput
             label="Address"
-            :validate="['required']"
             placeholder=""
             :value="form.address_one"
+            :validate="['required']"
             @update:value="(val) => (form.address_one = val)"
             @save="submitValue('address_one')"
             @cancel="resetValue('address_one')"
@@ -239,7 +216,6 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-6">
           <CustomInput
             label="Address 2"
-            :validate="['required']"
             placeholder=""
             :value="form.address_two"
             @update:value="(val) => (form.address_two = val)"
@@ -252,9 +228,9 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="City"
-            :validate="['required']"
             placeholder=""
             :value="form.city"
+            :validate="['required']"
             @update:value="(val) => (form.city = val)"
             @save="submitValue('city')"
             @cancel="resetValue('city')"
@@ -265,10 +241,10 @@ let tabs = computed(() => global.tabs);
           <CustomInput
             type="select"
             label="State"
-            :validate="['required']"
             placeholder=""
             :options="statesList"
             :value="form.state"
+            :validate="['required']"
             @update:value="(val) => (form.state = val)"
             @save="submitValue('state')"
             @cancel="resetValue('state')"
@@ -278,10 +254,9 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="Zip Code"
-            :validate="['required']"
-            type="mask"
-            mask="#####-####"
             placeholder="#####-####"
+            mask="#####-####"
+            :validate="['required']"
             :value="form.zip"
             @update:value="(val) => (form.zip = val)"
             @save="submitValue('zip')"
@@ -293,8 +268,8 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="Email"
-            :validate="['required', 'email']"
             placeholder=""
+            :validate="['required', 'email']"
             :value="form.email"
             @update:value="(val) => (form.email = val)"
             @save="submitValue('email')"
@@ -305,11 +280,10 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="Phone"
-            :validate="['required', 'phone']"
-            type="mask"
-            mask="+1 (###) ###-####"
             placeholder="+1 (###) ###-####"
+            mask="+1 (###) ###-####"
             :value="form.phone"
+            :validate="['required', 'phone']"
             @update:value="(val) => (form.phone = val)"
             @save="submitValue('phone')"
             @cancel="resetValue('phone')"
@@ -319,11 +293,10 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="Fax"
-            :validate="['phone']"
-            type="mask"
-            mask="+1 (###) ###-####"
             placeholder="+1 (###) ###-####"
+            mask="+1 (###) ###-####"
             :value="form.fax"
+            :validate="['phone']"
             @update:value="(val) => (form.fax = val)"
             @save="submitValue('fax')"
             @cancel="resetValue('fax')"
@@ -334,9 +307,9 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="DIN"
+            placeholder=""
             :validate="['required']"
             :value="form.din"
-            placeholder=""
             @update:value="(val) => (form.din = val)"
             @save="submitValue('din')"
             @cancel="resetValue('din')"
@@ -346,10 +319,8 @@ let tabs = computed(() => global.tabs);
         <div class="col-span-4">
           <CustomInput
             label="Tax ID"
+            placeholder=""
             :validate="['required']"
-            type="mask"
-            mask="### ## ####"
-            placeholder="### ## ####"
             :value="form.tax_id_number"
             @update:value="(val) => (form.tax_id_number = val)"
             @save="submitValue('tax_id_number')"
@@ -361,10 +332,10 @@ let tabs = computed(() => global.tabs);
           <CustomInput
             type="select"
             label="Category"
+            placeholder=""
             :validate="['required']"
             :options="vendorCategoryOptions"
             :value="form.vendor_category_id"
-            placeholder=""
             @update:value="(val) => (form.vendor_category_id = val)"
             @save="submitValue('vendor_category_id')"
             @cancel="resetValue('vendor_category_id')"
@@ -415,8 +386,8 @@ let tabs = computed(() => global.tabs);
   <Tabs
     id="__subtabs"
     type="basic"
-    class="sticky top-[82px] left-0 z-50 mt-4 w-full rounded-xl border-2 dark:border-0 border-gray-200 bg-white dark:bg-[#25272A] duration-300"
-    :class="global.stuck[1] && '!rounded-none !bg-gray-50 dark:!bg-[#25272A] shadow-lg shadow-[#00000011]'"
+    ref="vendorTab"
+    class="sticky top-[-2px] left-0 z-50 mt-4 w-full rounded border-2 dark:border-0 border-gray-200 bg-white dark:bg-[#25272A] duration-300"
     :items="vendorTabs"
     @click="handleTabClick"
   />
@@ -431,15 +402,19 @@ let tabs = computed(() => global.tabs);
 </template>
 
 <style lang="scss">
+#__subtabs[stuck] {
+  @apply bg-[#f9fafb] dark:bg-[#25272A];
+  @apply rounded-none border-2 border-none border-transparent shadow-lg shadow-[#00000011];
+}
 .__veil {
   width: calc(100vw - 370px);
 }
 .__section {
-  @apply scroll-mt-[100px];
+  @apply scroll-mt-[100px] rounded-md;
 }
 .__invoice-button {
   transition-timing-function: ease;
-  @apply mt-[14px] flex h-10 w-full items-center justify-center rounded-md border-[1px] border-lightgray px-3 text-center duration-[200ms];
+  @apply border-lightgray mt-[14px] flex h-10 w-full items-center justify-center rounded-sm border-[1px] px-3 text-center duration-[200ms];
   &:hover {
     @apply border-secondary text-secondary;
   }

@@ -30,9 +30,8 @@ watch(
   }
 );
 
-const { data: expensesData, isLoading: expensesDataLoading } = getExpensesByVendor(
-  routeParamId
-);
+const { data: expensesData, isLoading: expensesDataLoading } =
+  getExpensesByVendor(routeParamId);
 
 // const expenseDataComputed = computed(() => expensesData.value ? )
 const rowKey = (row) => row?.deal_id;
@@ -108,14 +107,13 @@ function showEditExpenseForm(row) {
       @update:show="visibleEditForm = false"
     />
     <div class="-mt-4 font-sans">
-      <div class="flex justify-end items-center translate-y-[68px] pr-10">
+      <div class="flex translate-y-[68px] items-center justify-end pr-10">
         <VendorExpensesAdd />
       </div>
-
-      <div class="rounded-xl border-2 dark:border-0 py-8 px-8 bg-white dark:bg-[#25272A]">
+      <div class="rounded border-2 dark:border-0 bg-white dark:bg-[#25272A] py-8 px-8">
         <div><p class="pb-8 text-2xl font-bold">Expenses</p></div>
         <n-data-table
-          class="rounded-lg"
+          class="rounded-md"
           striped
           :columns="columns"
           :data="expensesData?.pages[0]"

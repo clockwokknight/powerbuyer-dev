@@ -1,31 +1,28 @@
 <script setup>
+import { useQuery } from "vue-query";
+import axios from "axios";
+import { useDebounce } from "@vueuse/core";
+import VendorList from "@/components/vendor/VendorList.vue";
 import { onUpdated, ref, watch, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useInfiniteQuery, useQuery } from "vue-query";
 import { useLoadingBar } from "naive-ui";
 import { TabGroup, TabList, Tab } from "@headlessui/vue";
-import { useDebounceFn, useDebounce } from "@vueuse/core";
 import { getVendorById, getVendors } from "@/hooks/vendor";
 import { useGlobalState } from "@/store/global";
-import axios from "axios";
 
-import VendorList from "@/components/vendor/VendorList.vue";
 import AddVendor from "@/components/vendor/AddVendor.vue";
+import { useTabsViewStore } from "@/store/tabs";
+import PageTabs from "@/components/PageTabs.vue";
+
 import Tabs from "@/components/common/Tabs.vue";
+const tabStore = useTabsViewStore();
 
 const global = useGlobalState();
-const router = useRouter();
-const route = useRoute();
 
 const searchText = ref("");
 const debouncedSearchText = useDebounce(searchText, 500);
 
-const selectedIndex = ref(1);
-const tabListButton = ref(null);
-const tabListButtonWrapper = ref(null);
-const showScrollArrow = ref(false);
-const scrollWrapper = ref(null);
-
+// Showing All Vendors
 const {
   data: vendors,
   isLoading: isVendorsLoading,
@@ -33,34 +30,13 @@ const {
   fetchNextPage: vendorFetchNextPage,
 } = getVendors();
 
-const tablist = ref([]);
-
-onMounted(() => {
-  axios.get("/user_ui_tabs/1/vendors").then((res) => {
-    tablist.value = JSON.parse(res.data.tabs);
-    if (tablist.value.length >= 1 && route.path === "/vendors") {
-      tablist.value.forEach((tab) => {
-        if (tab.active) {
-          router.push(`/vendors/${tab.id}`);
-        }
-      });
-    }
-  });
-});
-
-watch(selectedIndex, (newValue) => {
-  if (
-    tablist.value.length >= 1 &&
-    parseInt(route.params?.id) !== tablist.value[newValue].id
-  ) {
-    router.push(`/vendors/${tablist.value[newValue].id}`);
-  }
-});
+const addTab = (vendor) => {
+  tabStore.addTab({ id: vendor?.id, name: vendor?.name });
+};
 
 // Vendor Search Result
-const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
-  ["vendorSearch", debouncedSearchText],
-  ({ queryKey }) => {
+const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
+  useQuery(["vendorSearch", debouncedSearchText], ({ queryKey }) => {
     if (queryKey[1] === "") return null;
     else
       return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => {
@@ -69,8 +45,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
         }
         return res.data;
       });
-  }
-);
+  });
 
 function handleScroll(e) {
   let scroll = e.target.scrollTop;
@@ -128,18 +103,23 @@ function handleScroll(e) {
       </div>
       <!-- Main Loop List -->
       <div class="">
-        <div
-          v-if="isVendorSearchFetching || isVendorsLoading"
-          v-for="index in Array.from({ length: 10 })"
-          :key="index"
-          class="border-b dark:border-0 px-4 py-4 even:bg-[#f8f8fa]"
-        >
-          <n-skeleton text :repeat="2" class="w-full" />
-          <n-skeleton text class="w-[45%]" />
+        <div v-if="isVendorSearchFetching || isVendorsLoading">
+          <div
+            v-for="index in Array.from({ length: 10 })"
+            :key="index"
+            class="border-b dark:border-0 px-4 py-4 even:bg-[#f8f8fa]"
+          >
+            <n-skeleton text :repeat="2" class="w-full" />
+            <n-skeleton text class="w-[45%]" />
+          </div>
         </div>
         <ul class="dark:bg-[#1F1F23]">
           <template v-if="debouncedSearchText">
-            <VendorList v-if="vendorSearchResults" :vendors="vendorSearchResults" />
+            <VendorList
+              v-if="vendorSearchResults"
+              :vendors="vendorSearchResults"
+              @click:tab="addTab"
+            />
           </template>
 
           <template v-else>
@@ -147,7 +127,7 @@ function handleScroll(e) {
               v-for="(vendorPage, vendorPageIdx) in vendors?.pages"
               :key="vendorPageIdx"
             >
-              <VendorList :vendors="vendorPage.data" />
+              <VendorList :vendors="vendorPage.data" @click:tab="addTab" />
             </template>
             <button
               v-observe-visibility="
@@ -165,13 +145,11 @@ function handleScroll(e) {
 
     <!-- Main Tabs App Content -->
 
-    <section class="h-screen w-[calc(100vw-335px)] bg-white dark:bg-[#1E1F21] !border-transparent">
+    <section class="h-screen w-[calc(100vw-335px)] bg-lightergray dark:bg-[#1E1F21]">
+      <page-tabs page-name="vendors" />
       <!-- Main Body Content-->
-      <div
-        @scroll="handleScroll"
-        class="h-full overflow-y-auto overflow-x-hidden border-t-2"
-      >
-        <main class="min-h-full bg-lightergray dark:bg-[#1E1F21] p-6 pt-6">
+      <div class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
+        <main id="container" class="min-h-full p-6">
           <router-view />
         </main>
       </div>
