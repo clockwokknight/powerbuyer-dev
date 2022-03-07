@@ -59,12 +59,26 @@ function handleScroll(e) {
     ].indexOf(true)
   );
 }
+
+function handleVendorListSlide() {
+  document.getElementById('vendors-list').classList.add('close-vendor-list');
+  document.getElementById('main-content').classList.remove('w-[calc(335px)]')
+  setTimeout(() => {
+    document.getElementById('main-content').classList.add('w-[calc(100vw-60px)]');
+  }, 500);
+
+  // setTimeout(() => {
+  //   document.getElementById('vendors-list').classList.add('closed');
+  // }, 1000);
+
+}
 </script>
 
 <template>
   <div class="vendors flex w-full">
     <!-- Don't show PageItemsList on dashboard  | Current Page List -->
     <aside
+      id="vendors-list"
       class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-y-auto overflow-x-hidden bg-white dark:bg-[#1E1F21]"
     >
       <div class="sticky top-0 border-b dark:border-0 bg-white dark:bg-[#25272A] p-3">
@@ -141,11 +155,15 @@ function handleScroll(e) {
           </template>
         </ul>
       </div>
+      <div class="sticky w-full h-[36px] flex flex-row justify-between bottom-0 left-0 bg-white items-center shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] px-4">
+        <div class="text-[8px]">3333 Active Vendors</div>
+        <img class="w-[18px] h-[18px] cursor-pointer" src="/icons/LeftSlide.svg" @click="handleVendorListSlide" />
+      </div>
     </aside>
 
     <!-- Main Tabs App Content -->
 
-    <section class="h-screen w-[calc(100vw-335px)] bg-lightergray dark:bg-[#1E1F21]">
+    <section id="main-content" class="h-screen w-[calc(100vw-335px)] bg-lightergray dark:bg-[#1E1F21]">
       <page-tabs page-name="vendors" />
       <!-- Main Body Content-->
       <div class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
@@ -156,3 +174,30 @@ function handleScroll(e) {
     </section>
   </div>
 </template>
+<style scoped>
+.close-vendor-list {
+  animation: left-slide 0.5s forwards;
+}
+
+.open-vendor-list {
+  animation: left-slide 0.5s forwards;
+  animation-direction: reverse;
+}
+
+@keyframes left-slide {
+  0% {
+    margin-left: 0;
+  }
+  100% {
+    margin-left: -275px;
+  }
+}
+
+.closed {
+  display: none;
+}
+
+.open {
+  display: block;
+}
+</style>
