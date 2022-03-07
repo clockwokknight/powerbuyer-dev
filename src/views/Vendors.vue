@@ -29,7 +29,7 @@ const {
   hasNextPage: hasVendorNextPage,
   fetchNextPage: vendorFetchNextPage,
 } = getVendors();
-
+console.log('vendors:', vendors)
 const addTab = (vendor) => {
   tabStore.addTab({ id: vendor?.id, name: vendor?.name });
 };
@@ -61,105 +61,119 @@ function handleScroll(e) {
 }
 
 function handleVendorListSlide() {
-  document.getElementById('vendors-list').classList.add('close-vendor-list');
-  document.getElementById('main-content').classList.remove('w-[calc(335px)]')
-  setTimeout(() => {
-    document.getElementById('main-content').classList.add('w-[calc(100vw-60px)]');
-  }, 500);
+  const vendorsListElement = document.getElementById('vendors-list');
+  const mainContent = document.getElementById('main-content');
+  const mobileSlider = document.getElementById('mobile-slider');
 
-  // setTimeout(() => {
-  //   document.getElementById('vendors-list').classList.add('closed');
-  // }, 1000);
-
+  if (vendorsListElement.classList.contains('close-vendor-list')) {
+    vendorsListElement.classList.remove('close-vendor-list');
+    mobileSlider.classList.remove('close-vendor-list');
+    vendorsListElement.classList.add('open-vendor-list');
+    mobileSlider.classList.add('open-vendor-list');
+    mainContent.classList.remove('w-[calc(100vw-60px)]')
+    setTimeout(() => {
+      mainContent.classList.add('w-[calc(100vw-335px)]');
+    }, 500);
+  } else {
+    vendorsListElement.classList.remove('open-vendor-list');
+    mobileSlider.classList.remove('open-vendor-list');
+    vendorsListElement.classList.add('close-vendor-list');
+    mobileSlider.classList.add('close-vendor-list');
+    mainContent.classList.remove('w-[calc(100vw-335px)]')
+    setTimeout(() => {
+      mainContent.classList.add('w-[calc(100vw-60px)]');
+    }, 500);
+  }
 }
 </script>
 
 <template>
   <div class="vendors flex w-full">
     <!-- Don't show PageItemsList on dashboard  | Current Page List -->
-    <aside
-      id="vendors-list"
-      class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-y-auto overflow-x-hidden bg-white dark:bg-[#1E1F21]"
-    >
-      <div class="sticky top-0 border-b dark:border-0 bg-white dark:bg-[#25272A] p-3">
-        <div class="mb-3 flex justify-between">
-          <h1 class="text-xl font-bold uppercase">Vendors</h1>
-          <div>
-            <AddVendor />
+    <div id="vendors-list" class="w-[275px]">
+      <aside
+        class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-x-hidden bg-white dark:bg-[#1E1F21]"
+      >
+        <div class="sticky top-0 border-b dark:border-0 bg-white dark:bg-[#25272A] p-3">
+          <div class="mb-3 flex justify-between">
+            <h1 class="text-xl font-bold uppercase">Vendors</h1>
+            <div>
+              <AddVendor />
+            </div>
           </div>
+          <div class="flex">
+            <div class="mr-3">
+              <n-input
+                v-model:value.trim="searchText"
+                round
+                clearable
+                placeholder="Search..."
+              />
+            </div>
+            <div content="Filter" v-tippy="{ placement: 'right', duration: 50 }">
+              <svg
+                class="mt-1 h-6 w-6 cursor-pointer text-gray-400 dark:text-gray-800 hover:text-primary"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M5.5 5h13a1 1 0 0 1 .5 1.5L14 12v7l-4-3v-4L5 6.5A1 1 0 0 1 5.5 5"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                ></path>
+              </svg>
+            </div>
+          </div>
+          <!-- Filter Component -->
         </div>
-        <div class="flex">
-          <div class="mr-3">
-            <n-input
-              v-model:value.trim="searchText"
-              round
-              clearable
-              placeholder="Search..."
-            />
-          </div>
-          <div content="Filter" v-tippy="{ placement: 'right', duration: 50 }">
-            <svg
-              class="mt-1 h-6 w-6 cursor-pointer text-gray-400 dark:text-gray-800 hover:text-primary"
-              viewBox="0 0 24 24"
+        <!-- Main Loop List -->
+        <div class="">
+          <div v-if="isVendorSearchFetching || isVendorsLoading">
+            <div
+              v-for="index in Array.from({ length: 10 })"
+              :key="index"
+              class="border-b dark:border-0 px-4 py-4 even:bg-[#f8f8fa]"
             >
-              <path
-                d="M5.5 5h13a1 1 0 0 1 .5 1.5L14 12v7l-4-3v-4L5 6.5A1 1 0 0 1 5.5 5"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              ></path>
-            </svg>
+              <n-skeleton text :repeat="2" class="w-full" />
+              <n-skeleton text class="w-[45%]" />
+            </div>
           </div>
-        </div>
-        <!-- Filter Component -->
-      </div>
-      <!-- Main Loop List -->
-      <div class="">
-        <div v-if="isVendorSearchFetching || isVendorsLoading">
-          <div
-            v-for="index in Array.from({ length: 10 })"
-            :key="index"
-            class="border-b dark:border-0 px-4 py-4 even:bg-[#f8f8fa]"
-          >
-            <n-skeleton text :repeat="2" class="w-full" />
-            <n-skeleton text class="w-[45%]" />
-          </div>
-        </div>
-        <ul class="dark:bg-[#25272A]">
-          <template v-if="debouncedSearchText">
-            <VendorList
-              v-if="vendorSearchResults"
-              :vendors="vendorSearchResults"
-              @click:tab="addTab"
-            />
-          </template>
-
-          <template v-else>
-            <template
-              v-for="(vendorPage, vendorPageIdx) in vendors?.pages"
-              :key="vendorPageIdx"
-            >
-              <VendorList :vendors="vendorPage.data" @click:tab="addTab" />
+          <ul class="dark:bg-[#25272A]">
+            <template v-if="debouncedSearchText">
+              <VendorList
+                v-if="vendorSearchResults"
+                :vendors="vendorSearchResults"
+                @click:tab="addTab"
+              />
             </template>
-            <button
-              v-observe-visibility="
-                (isVisible) => (isVisible ? vendorFetchNextPage() : null)
-              "
-              v-if="hasVendorNextPage"
-              class="grid w-full place-content-center p-4"
-            >
-              <n-spin size="small" />
-            </button>
-          </template>
-        </ul>
+
+            <template v-else>
+              <template
+                v-for="(vendorPage, vendorPageIdx) in vendors?.pages"
+                :key="vendorPageIdx"
+              >
+                <VendorList :vendors="vendorPage.data" @click:tab="addTab" />
+              </template>
+              <button
+                v-observe-visibility="
+                  (isVisible) => (isVisible ? vendorFetchNextPage() : null)
+                "
+                v-if="hasVendorNextPage"
+                class="grid w-full place-content-center p-4"
+              >
+                <n-spin size="small" />
+              </button>
+            </template>
+          </ul>
+        </div>
+      </aside>
+      <div id="mobile-slider" class="absolute w-[325px] h-[36px] flex flex-row justify-between bottom-0 left-0 bg-white items-center shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] px-4">
+        <div class="text-[8px]">{{ vendors?.pages[0].data.length }} Active Vendors</div>
+        <img class="slide-icon w-[18px] h-[18px] cursor-pointer" src="/icons/LeftSlide.svg" @click="handleVendorListSlide" />
       </div>
-      <div class="sticky w-full h-[36px] flex flex-row justify-between bottom-0 left-0 bg-white items-center shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] px-4">
-        <div class="text-[8px]">3333 Active Vendors</div>
-        <img class="w-[18px] h-[18px] cursor-pointer" src="/icons/LeftSlide.svg" @click="handleVendorListSlide" />
-      </div>
-    </aside>
+    </div>
 
     <!-- Main Tabs App Content -->
 
@@ -180,8 +194,15 @@ function handleVendorListSlide() {
 }
 
 .open-vendor-list {
-  animation: left-slide 0.5s forwards;
-  animation-direction: reverse;
+  animation: right-slide 0.5s forwards;
+}
+
+.close-vendor-list .slide-icon {
+  transform: rotate(180deg);
+}
+
+.open-vendor-list .slide-icon {
+  transform: rotate(0deg);
 }
 
 @keyframes left-slide {
@@ -193,11 +214,19 @@ function handleVendorListSlide() {
   }
 }
 
-.closed {
-  display: none;
+@keyframes right-slide {
+  0% {
+    margin-left: -275px;
+  }
+  100% {
+    margin-left: 0;
+  }
 }
 
-.open {
-  display: block;
+
+@media only screen and (min-width: 768px) {
+  #mobile-slider {
+    display: none;
+  }
 }
 </style>
