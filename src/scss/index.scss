@@ -33,7 +33,10 @@ body {
   animation: animation 1000ms linear both;
 }
 .menu-items .router-link-active > li {
-  // @apply bg-[#565656];
+  @apply bg-[#565656];
+  position: relative;
+}
+.dark .menu-items .router-link-active > li {
   @apply bg-[#027BFF] bg-opacity-30 border-2 border-[#027BFF];
   position: relative;
 }
