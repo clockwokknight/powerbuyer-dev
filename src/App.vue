@@ -36,7 +36,7 @@ const userMenu = [
                   <MainMenu />
                   <n-switch class="mt-auto mb-4" v-model:value="isDark"  @update:value="toggleDark"/>
                 </aside>
-                <section class="relative flex h-full w-full bg-[#F8F8FA]">
+                <section class="relative flex h-full w-full bg-[#F8F8FA] dark:bg-[#1E1F21]">
                   <router-view />
                 </section>
               </div>
