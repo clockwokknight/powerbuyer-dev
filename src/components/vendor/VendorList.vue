@@ -10,7 +10,7 @@ const route = useRoute();
   <li
     v-for="vendor in vendors"
     :key="vendor?.id"
-    class="relative border-b dark:border-0 px-4 py-4 even:bg-[#f8f8fa] dark:odd:bg-[#1E1F21] dark:even:bg-[#25272A] hover:bg-gray-100 dark:hover:bg-gray-900"
+    class="relative border-b dark:border-0 px-4 py-4 even:bg-[#f8f8fa] odd:bg-[#ffffff] dark:odd:bg-[#1E1F21] dark:even:bg-[#25272A] hover:bg-gray-100 dark:hover:bg-gray-900"
     @click="$emit('click:tab', vendor)"
   >
     <!-- Company Name -->

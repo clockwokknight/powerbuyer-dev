@@ -134,13 +134,13 @@ function handleVendorListSlide() {
             <div
               v-for="index in Array.from({ length: 10 })"
               :key="index"
-              class="border-b dark:border-0 px-4 py-4 even:bg-[#f8f8fa]"
+              class="border-b dark:border-0 px-4 py-4 even:bg-[#f8f8fa] odd:bg-white"
             >
               <n-skeleton text :repeat="2" class="w-full" />
               <n-skeleton text class="w-[45%]" />
             </div>
           </div>
-          <ul class="dark:bg-[#25272A]">
+          <ul class="bg-white dark:bg-[#25272A]">
             <template v-if="debouncedSearchText">
               <VendorList
                 v-if="vendorSearchResults"
@@ -169,7 +169,7 @@ function handleVendorListSlide() {
           </ul>
         </div>
       </aside>
-      <div id="mobile-slider" class="absolute w-[325px] h-[36px] flex flex-row justify-between bottom-0 left-0 bg-white items-center shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] px-4">
+      <div id="mobile-slider" class="absolute w-[325px] h-[36px] flex flex-row justify-between bottom-0 left-0 bg-white items-center shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] px-4 dark:bg-black">
         <div class="text-[8px]">{{ vendors?.pages[0].data.length }} Active Vendors</div>
         <img class="slide-icon w-[18px] h-[18px] cursor-pointer" src="/icons/LeftSlide.svg" @click="handleVendorListSlide" />
       </div>
