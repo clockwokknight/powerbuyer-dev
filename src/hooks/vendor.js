@@ -39,3 +39,9 @@ export const getInvoiceTotalByVendor = (vendorId) =>
       .get("vendor_invoices/open_total/" + queryKey[1])
       .then((res) => res.data[0] ?? "0.00")
   );
+export const vendorInvoices = (vendorId) =>
+  useQuery(["vendorInvoices", vendorId], ({ queryKey }) =>
+    axios
+      .get("/vendor_invoices/search_by_vendor/" + queryKey[1])
+      .then((res) => res.data)
+  );

@@ -7,6 +7,7 @@ import vendors from "@/api/vendors";
 
 import MaskedInput from "@/components/common/MaskedInput.vue";
 
+const showDrawer = ref(false);
 const rules = {
   name: {
     required: true,
@@ -30,63 +31,23 @@ const rules = {
   },
 };
 
-const global = useGlobalState();
 const message = useMessage();
 
-const showOuterRef = ref(false);
-const formValue = ref({});
+const form = ref({});
 const formRef = ref(null);
 
-let drawer = computed(() => global.drawer);
-
-watch(drawer, (val) => {
-  showOuterRef.value = val.active;
+watch(showDrawer, (newValue) => {
+  if (newValue) {
+  }
 });
 
-function validateEmail(v) {
-  if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(v)) {
-    console.log("success");
-  } else {
-  }
-}
-
-function addExpense() {
-  formRef.value.validate((errors) => {
-    console.log(route.params?.id);
-    validateEmail(this.formValue.email);
-    if (!errors) {
-      const data = {
-        vendor_id: route.params?.id,
-        name: this.formValue.name,
-        description: this.formValue.description,
-        type: this.formValue.type,
-        amount: this.formValue.amount,
-      };
-      vendors
-        .addContacts(data)
-        .then((res) => {
-          message.success("Successfully added contact!");
-          global.hideDrawer;
-        })
-        .finally((res) => {
-          (this.formValue.id = 0),
-            (this.formValue.name = ""),
-            (this.formValue.description = ""),
-            (this.formValue.type = ""),
-            (this.formValue.amount = "");
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    } else {
-      console.log(errors);
-    }
-  });
+async function submitForm() {
+  await formRef.value.validate();
 }
 </script>
 
 <template>
-  <n-button @click="global.openDrawer('payments')">
+  <n-button @click="showDrawer = true">
     <n-icon>
       <svg viewBox="0 0 24 24">
         <path
@@ -97,11 +58,7 @@ function addExpense() {
     </n-icon>
     Add Payment
   </n-button>
-  <n-drawer
-    v-model:show="showOuterRef"
-    :on-update:show="global.closeDrawer"
-    :width="500"
-  >
+  <n-drawer v-model:show="showDrawer" :width="500">
     <n-drawer-content title="Add Payment">
       <n-form
         :model="formValue"
@@ -146,7 +103,7 @@ function addExpense() {
         </n-form-item>
       </n-form>
       <template #footer>
-        <n-button size="large" @click="addExpense()">Add</n-button>
+        <n-button size="large" @click="submitForm">Add</n-button>
       </template>
     </n-drawer-content>
   </n-drawer>

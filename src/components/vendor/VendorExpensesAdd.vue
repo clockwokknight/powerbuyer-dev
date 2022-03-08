@@ -20,7 +20,6 @@ const route = useRoute();
 
 const showDrawer = ref(false);
 const formRef = ref(null);
-const isLoading = ref(false);
 const initialForm = {
   vendor_id: null,
   amount_due: 0,
@@ -192,42 +191,9 @@ const handleSearch = (query) => {
   searchVinSelect.value = query;
 };
 
-const { mutateAsync: createExpense } = useMutation((data) =>
+const { mutateAsync: createExpense, isLoading } = useMutation((data) =>
   axios.post("/vendor_invoices", { ...data, amount_paid: 0 })
 );
-
-const onCreateExpense = (formValue) => {
-  const { expense_items, ...rest } = formValue;
-  if (expense_items.length > 0) {
-    const msg = message.loading("Submitting", { duration: 10000 });
-    isLoading.value = true;
-    Promise.all(
-      expense_items.map(async (item) => {
-        return new Promise(async (resolve) => {
-          setTimeout(async () => {
-            let obj = {
-              ...rest,
-              ...omit(item, ["expense_type_id"]),
-            };
-            obj = objectFilter(obj, (key, value) => value);
-            await createExpense(obj);
-            resolve("working");
-          }, 1000);
-        });
-      })
-    ).then(() => {
-      showDrawer.value = false;
-      queryClient.invalidateQueries(["expensesByVendor", vendor_id.value]);
-      msg.type = "success";
-      msg.content = "Expense Created Successfully";
-      isLoading.value = false;
-      form.value = { ...initialForm };
-      setTimeout(() => {
-        msg.destroy();
-      }, 3000);
-    });
-  }
-};
 
 async function submitExpense() {
   try {

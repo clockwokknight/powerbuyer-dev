@@ -4,7 +4,7 @@ import { useRoute } from "vue-router";
 import { useMutation } from "vue-query";
 import { useGlobalState } from "@/store/global";
 import { utils } from "@/lib/utils";
-import { objectFilter, omit, pick } from "@/lib/helper";
+import { clone, objectFilter, omit, pick } from "@/lib/helper";
 import { getExpensesByVendor } from "@/hooks/expense";
 import { NTag, NButton, useMessage } from "naive-ui";
 import { useQueryClient } from "vue-query";
@@ -14,6 +14,7 @@ import dayjs from "dayjs";
 import ActionButtons from "@/components/vendor/ActionButtons.vue";
 import VendorExpenseEdit from "@/components/vendor/VendorExpenseEdit.vue";
 import VendorExpensesAdd from "@/components/vendor/VendorExpensesAdd.vue";
+import { vendorInvoices } from "@/hooks/vendor";
 
 const global = useGlobalState();
 const route = useRoute();
@@ -30,22 +31,42 @@ watch(
   }
 );
 
-const { data: expensesData, isLoading: expensesDataLoading } =
-  getExpensesByVendor(routeParamId);
+const { data: invoicesData, isLoading: expensesDataLoading } =
+  vendorInvoices(routeParamId);
 
-// const expenseDataComputed = computed(() => expensesData.value ? )
-const rowKey = (row) => row?.deal_id;
+const invoicesTable = computed(() =>
+  invoicesData.value?.map(({ expenses, ...inv }) => ({
+    ...inv,
+    children: expenses.map((exp) => ({
+      ...exp,
+      shouldEdit: inv.payments.length === 0,
+    })),
+  }))
+);
+
+const rowKey = (row) => row?.id;
 const columns = [
   {
-    title: "VIN",
-    key: "vin",
+    title: "Invoice",
+    key: "invoice_number",
+    fixed: "left",
+  },
+  {
+    title: "Amount Due",
+    key: "amount_due",
     //fixed: 'left'
+  },
+  {
+    title: "Balance",
+    key: "balance",
   },
   {
     title: "Name",
     key: "name",
-    //fixed: 'left'
   },
+  // {
+  //   title: ""
+  // },
   {
     title: "Amount",
     key: "amount",
@@ -57,19 +78,15 @@ const columns = [
     //fixed: 'left'
   },
   {
-    title: "Inv #",
-    key: "invoice_number",
-    //fixed: 'left'
-  },
-  {
     title: "",
     key: "edit",
+    fixed: "right",
     render(row) {
-      return row?.children
-        ? h("div")
-        : h(ActionButtons, {
+      return row?.shouldEdit
+        ? h(ActionButtons, {
             onEdit: () => showEditExpenseForm(row),
-          });
+          })
+        : h("div");
     },
   },
 ];
@@ -117,11 +134,13 @@ function showEditExpenseForm(row) {
           class="rounded-md"
           striped
           :columns="columns"
-          :data="expensesData?.pages[0]"
+          :data="invoicesTable"
           :pagination="pagination"
           :bordered="false"
           :loading="expensesDataLoading"
           :row-key="rowKey"
+          max-height="500"
+          :scroll-x="1200"
         />
       </div>
     </div>
