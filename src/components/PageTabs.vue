@@ -76,13 +76,13 @@ watch(
         });
       } else {
         tabStore.initTabs(JSON.parse(pageTabs.value.tabs));
-        if (tabStore.tabs.length >= 1 && route.path === `/${props.pageName}`) {
-          tabStore.tabs.forEach((tab) => {
-            if (tab.active) {
-              router.push(`/${props.pageName}/${tab.id}`);
-            }
-          });
-        }
+        // if (tabStore.tabs.length >= 1 && route.path === `/${props.pageName}`) {
+        //   tabStore.tabs.forEach((tab) => {
+        //     if (tab.active) {
+        //       router.push(`/${props.pageName}/${tab.id}`);
+        //     }
+        //   });
+        // }
         ifScrollArrowNeeded();
       }
     }
@@ -119,6 +119,11 @@ const tabChanged = (index) => {
       return { ...rest, active: true };
     } else return rest;
   });
+  syncTabs({
+    user_id: 1,
+    page: props.pageName,
+    tabs: JSON.stringify(tabStore.tabs),
+  });
 };
 
 watch(
@@ -127,9 +132,13 @@ watch(
     scrollTabToView();
     if (
       newValue !== -1 &&
+      route.path !== props.pageName &&
       parseInt(route.params?.id) !== tabStore.tabs[newValue].id
     ) {
       router.push(`/${props.pageName}/${tabStore.tabs[newValue].id}`);
+
+      // else
+      //   tabStore.addTab()
     }
   }
 );
@@ -167,6 +176,7 @@ const afterAnimated = () => {
         <div
           class="flex items-center overflow-x-auto scrollbar:h-0 scrollbar:w-0"
           ref="scrollWrapper"
+          style="scrollbar-width: none"
         >
           <TabList v-slot="{ selectedIndex }">
             <nav

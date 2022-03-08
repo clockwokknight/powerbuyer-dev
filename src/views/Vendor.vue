@@ -8,10 +8,15 @@ import {
   watch,
   watchEffect,
   nextTick,
+  unref,
 } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useMutation, useQueryClient } from "vue-query";
-import { getVendorById, useVendorCategories } from "@/hooks/vendor";
+import {
+  getInvoiceTotalByVendor,
+  getVendorById,
+  useVendorCategories,
+} from "@/hooks/vendor";
 import { getPaymentTerms, getStates } from "@/hooks/common_query";
 import { useGlobalState } from "@/store/global";
 import { pick } from "@/lib/helper";
@@ -28,6 +33,7 @@ import VendorPayments from "@/components/vendor/VendorPayments.vue";
 import CustomInput from "@/components/common/CustomInput.vue";
 import Tabs from "@/components/common/Tabs.vue";
 import { useIntersectionObserver } from "@vueuse/core";
+import { useTabsViewStore } from "@/store/tabs";
 
 const VendorContacts = defineAsyncComponent({
   loader: () => import("@/components/vendor/VendorContacts.vue"),
@@ -90,10 +96,11 @@ const paymentTermOptions = computed(() =>
     value: payment.name,
   }))
 );
-
+const { data: getInvoicesTotal } = getInvoiceTotalByVendor(routeParamId);
 const { data: statesList } = getStates();
 
-const { data: vendor, isLoading: isVendorLoading } = getVendorById(routeParamId);
+const { data: vendor, isLoading: isVendorLoading } =
+  getVendorById(routeParamId);
 
 const form = ref({
   name: "",
@@ -353,7 +360,7 @@ const { stop } = useIntersectionObserver(
           <p class="text-sm font-bold">Open Invoices</p>
         </div>
         <div class="flex justify-end">
-          <p class="text-2xl font-bold">$10,193</p>
+          <p class="text-2xl font-bold">{{ getInvoicesTotal }}</p>
         </div>
       </div>
       <div class="align-end max-w-[220px] flex-col justify-between">
@@ -372,7 +379,10 @@ const { stop } = useIntersectionObserver(
         <div
           class="__invoice-buttons mt-[58px] flex min-w-max max-w-full flex-col items-end justify-center"
         >
-          <button class="__invoice-button" @click="global.openDrawer('payments')">
+          <button
+            class="__invoice-button"
+            @click="global.openDrawer('payments')"
+          >
             <span><b>+</b> Add payment</span>
           </button>
           <button class="__invoice-button">
@@ -414,7 +424,7 @@ const { stop } = useIntersectionObserver(
 }
 .__invoice-button {
   transition-timing-function: ease;
-  @apply border-lightgray mt-[14px] flex h-10 w-full items-center justify-center rounded-sm border-[1px] px-3 text-center duration-[200ms];
+  @apply mt-[14px] flex h-10 w-full items-center justify-center rounded-sm border-[1px] border-lightgray px-3 text-center duration-[200ms];
   &:hover {
     @apply border-secondary text-secondary;
   }
