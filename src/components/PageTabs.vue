@@ -159,7 +159,7 @@ const afterAnimated = () => {
 
 <template>
   <TabGroup :selected-index="tabStore.selectedIndex" @change="tabChanged">
-    <header class="relative z-50 h-[80px] pl-6 pr-[calc(1.5rem+5px)] pt-6">
+    <header class="relative z-40 h-[80px] pl-6 pr-[calc(1.5rem+5px)] pt-6">
       <div
         class="relative flex h-[62px] items-center rounded bg-white dark:bg-[#25272A] shadow-lg"
         ref="tabListButtonWrapper"

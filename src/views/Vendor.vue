@@ -387,7 +387,7 @@ const { stop } = useIntersectionObserver(
     id="__subtabs"
     type="basic"
     ref="vendorTab"
-    class="sticky top-[-2px] left-0 z-50 mt-4 w-full rounded border-2 dark:border-0 border-gray-200 bg-white dark:bg-[#25272A] duration-300"
+    class="sticky top-[-2px] left-0 z-40 mt-4 w-full rounded border-2 dark:border-0 border-gray-200 bg-white dark:bg-[#25272A] duration-300"
     :items="vendorTabs"
     @click="handleTabClick"
   />

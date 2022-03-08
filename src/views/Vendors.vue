@@ -67,22 +67,21 @@ function handleVendorListSlide() {
 
   if (vendorsListElement.classList.contains('close-vendor-list')) {
     vendorsListElement.classList.remove('close-vendor-list');
-    mobileSlider.classList.remove('close-vendor-list');
+    // mobileSlider.classList.remove('close-vendor-list');
     vendorsListElement.classList.add('open-vendor-list');
-    mobileSlider.classList.add('open-vendor-list');
-    mainContent.classList.remove('w-[calc(100vw-60px)]')
+    // mobileSlider.classList.add('open-vendor-list');
     setTimeout(() => {
-      mainContent.classList.add('w-[calc(100vw-335px)]');
+      // vendorsListElement.classList.add('');
     }, 500);
   } else {
     vendorsListElement.classList.remove('open-vendor-list');
-    mobileSlider.classList.remove('open-vendor-list');
+    // mobileSlider.classList.remove('open-vendor-list');
     vendorsListElement.classList.add('close-vendor-list');
-    mobileSlider.classList.add('close-vendor-list');
-    mainContent.classList.remove('w-[calc(100vw-335px)]')
-    setTimeout(() => {
-      mainContent.classList.add('w-[calc(100vw-60px)]');
-    }, 500);
+    // mobileSlider.classList.add('close-vendor-list');
+    // mainContent.classList.remove('w-[calc(100vw-335px)]')
+    // setTimeout(() => {
+    //   mainContent.classList.add('w-[calc(100vw-60px)]');
+    // }, 500);
   }
 }
 </script>
@@ -90,7 +89,7 @@ function handleVendorListSlide() {
 <template>
   <div class="vendors flex w-full">
     <!-- Don't show PageItemsList on dashboard  | Current Page List -->
-    <div id="vendors-list" class="w-[275px]">
+    <div id="vendors-list" class="w-[275px] absolute md:relative md:m-0 z-[41]">
       <aside
         class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-x-hidden bg-white dark:bg-[#1E1F21]"
       >
@@ -177,7 +176,7 @@ function handleVendorListSlide() {
 
     <!-- Main Tabs App Content -->
 
-    <section id="main-content" class="h-screen w-[calc(100vw-335px)] bg-lightergray dark:bg-[#1E1F21]">
+    <section id="main-content" class="h-screen w-[calc(100vw-60px)] md:w-[calc(100vw-335px)] bg-lightergray dark:bg-[#1E1F21]">
       <page-tabs page-name="vendors" />
       <!-- Main Body Content-->
       <div class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
@@ -191,10 +190,12 @@ function handleVendorListSlide() {
 <style scoped>
 .close-vendor-list {
   animation: left-slide 0.5s forwards;
+  margin-left: -275px;
 }
 
 .open-vendor-list {
   animation: right-slide 0.5s forwards;
+  margin-left: 0px;
 }
 
 .close-vendor-list .slide-icon {
@@ -205,6 +206,13 @@ function handleVendorListSlide() {
   transform: rotate(0deg);
 }
 
+.vendor-list-open {
+  margin-left: 0;
+}
+
+.vendor-list-closed {
+  margin-left: -275px;
+}
 @keyframes left-slide {
   0% {
     margin-left: 0;
@@ -223,10 +231,14 @@ function handleVendorListSlide() {
   }
 }
 
-
 @media only screen and (min-width: 768px) {
   #mobile-slider {
     display: none;
+  }
+
+  .close-vendor-list {
+    animation: right-slide 0.5s forwards;
+    margin-left: 0;
   }
 }
 </style>
