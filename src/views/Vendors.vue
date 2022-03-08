@@ -62,26 +62,13 @@ function handleScroll(e) {
 
 function handleVendorListSlide() {
   const vendorsListElement = document.getElementById('vendors-list');
-  const mainContent = document.getElementById('main-content');
-  const mobileSlider = document.getElementById('mobile-slider');
 
   if (vendorsListElement.classList.contains('close-vendor-list')) {
     vendorsListElement.classList.remove('close-vendor-list');
-    // mobileSlider.classList.remove('close-vendor-list');
     vendorsListElement.classList.add('open-vendor-list');
-    // mobileSlider.classList.add('open-vendor-list');
-    setTimeout(() => {
-      // vendorsListElement.classList.add('');
-    }, 500);
   } else {
     vendorsListElement.classList.remove('open-vendor-list');
-    // mobileSlider.classList.remove('open-vendor-list');
     vendorsListElement.classList.add('close-vendor-list');
-    // mobileSlider.classList.add('close-vendor-list');
-    // mainContent.classList.remove('w-[calc(100vw-335px)]')
-    // setTimeout(() => {
-    //   mainContent.classList.add('w-[calc(100vw-60px)]');
-    // }, 500);
   }
 }
 </script>
