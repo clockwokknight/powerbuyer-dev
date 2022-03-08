@@ -31,8 +31,8 @@ const userMenu = [
         <n-notification-provider>
           <n-dialog-provider>
             <div class="h-screen w-full overflow-hidden bg-[#fff] antialiased">
-              <div class="flex h-full w-full">
-                <aside class="flex flex-col sticky top-0 left-0 z-10 w-[60px] bg-[#202124] z-50">
+              <div class="flex w-full h-full">
+                <aside class="flex flex-col sticky top-0 left-0 w-[60px] bg-[#202124] dark:bg-black z-50">
                   <MainMenu />
                   <n-switch class="mt-auto mb-4" v-model:value="isDark"  @update:value="toggleDark"/>
                 </aside>

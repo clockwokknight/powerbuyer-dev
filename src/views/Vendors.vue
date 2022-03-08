@@ -74,14 +74,14 @@ function handleVendorListSlide() {
 </script>
 
 <template>
-  <div class="vendors flex w-full">
+  <div class="flex w-full vendors">
     <!-- Don't show PageItemsList on dashboard  | Current Page List -->
     <div id="vendors-list" class="w-[275px] absolute md:relative md:m-0 z-[41]">
       <aside
         class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-x-hidden bg-white dark:bg-[#1E1F21]"
       >
-        <div class="sticky top-0 border-b dark:border-0 bg-white dark:bg-[#25272A] p-3">
-          <div class="mb-3 flex justify-between">
+        <div class="sticky top-0 z-50 border-b dark:border-0 bg-white dark:bg-[#25272A] p-3">
+          <div class="flex justify-between mb-3">
             <h1 class="text-xl font-bold uppercase">Vendors</h1>
             <div>
               <AddVendor />
@@ -98,7 +98,7 @@ function handleVendorListSlide() {
             </div>
             <div content="Filter" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
-                class="mt-1 h-6 w-6 cursor-pointer text-gray-400 dark:text-gray-800 hover:text-primary"
+                class="w-6 h-6 mt-1 text-gray-400 cursor-pointer dark:text-gray-800 hover:text-primary"
                 viewBox="0 0 24 24"
               >
                 <path
@@ -147,7 +147,7 @@ function handleVendorListSlide() {
                   (isVisible) => (isVisible ? vendorFetchNextPage() : null)
                 "
                 v-if="hasVendorNextPage"
-                class="grid w-full place-content-center p-4"
+                class="grid w-full p-4 place-content-center"
               >
                 <n-spin size="small" />
               </button>
