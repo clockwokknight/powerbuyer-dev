@@ -180,7 +180,7 @@ function handleVendorListSlide() {
       <page-tabs page-name="vendors" />
       <!-- Main Body Content-->
       <div class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
-        <main id="container" class="min-h-full p-6">
+        <main id="container" class="min-h-full p-2 md:p-6">
           <router-view />
         </main>
       </div>
