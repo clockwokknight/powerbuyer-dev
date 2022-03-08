@@ -134,7 +134,7 @@ function handleVendorListSlide() {
             <div
               v-for="index in Array.from({ length: 10 })"
               :key="index"
-              class="border-b dark:border-0 px-4 py-4 even:bg-[#f8f8fa] odd:bg-white"
+              class="border-b dark:border-0 px-4 py-4 even:bg-[#f8f8fa] dark:even:bg-[#25272A] odd:bg-white dark:odd:bg-[#1E1F21]"
             >
               <n-skeleton text :repeat="2" class="w-full" />
               <n-skeleton text class="w-[45%]" />
