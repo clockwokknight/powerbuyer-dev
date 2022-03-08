@@ -151,8 +151,7 @@ const onDeleteExpenseItem = (id) => {
       @submit="onSubmitForm"
       @delete="onDeleteExpenseItem"
     />
-
-    <div class="rounded border-2 bg-white py-8 px-8">
+    <div class="rounded border-2 dark:border-0 bg-white dark:bg-[#25272A] py-8 px-8">
       <div><p class="pb-8 text-2xl font-bold">Expense Items</p></div>
       <n-data-table
         class="rounded-md"

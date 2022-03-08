@@ -160,11 +160,18 @@ function handleInput(e) {
 
 <template>
   <n-config-provider :theme-overrides="themeOverrides">
-    <div class="__custom-input relative">
+    <div
+     :class="`__custom-input relative dark:bg-black dark:rounded-lg
+      ${
+        (!type || type !== 'header') &&
+        isValid !== 0 &&
+        editing &&
+        'border-[#18A058] shadow-lg shadow-green-50 dark:shadow-none dark:border-[1px]'
+      }`">
       <div class="flex">
         <label
           v-if="type !== 'header'"
-          class="absolute z-40 translate-x-4 translate-y-[-2px] bg-white px-2 text-[10px] font-bold uppercase tracking-widest text-gray-600"
+          class="absolute z-40 translate-x-4 translate-y-[-6px] bg-white dark:bg-black px-2 text-[10px] font-bold uppercase tracking-widest text-gray-600 dark:text-gray-300"
         >
           <b
             class="text-red-600 duration-[300ms]"
@@ -196,7 +203,7 @@ function handleInput(e) {
         "
       >
         <div
-          class="flex w-full items-center rounded-md border-[1px] duration-200"
+          class="flex w-full items-center rounded-md border-[1px] dark:border-0 duration-200"
           :class="`
             ${saved && 'ping'}
             ${
@@ -266,7 +273,7 @@ function handleInput(e) {
                     ${done && 'delay-[250ms]'}
                 `"
             >
-              <svg class="fill-black hover:fill-secondary" viewBox="0 0 24 24">
+              <svg class="fill-black dark:fill-white hover:fill-secondary" viewBox="0 0 24 24">
                 <path
                   d="M13.94 5L19 10.06L9.062 20a2.25 2.25 0 0 1-.999.58l-5.116 1.395a.75.75 0 0 1-.92-.921l1.395-5.116a2.25 2.25 0 0 1 .58-.999L13.938 5zm7.09-2.03a3.578 3.578 0 0 1 0 5.06l-.97.97L15 3.94l.97-.97a3.578 3.578 0 0 1 5.06 0z"
                 ></path>

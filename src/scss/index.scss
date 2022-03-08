@@ -8,7 +8,8 @@
 
 body {
   font-family: 'Montserrat', 'sans-serif';
-  @apply bg-[#F5F6F6]
+  @apply bg-[#F5F6F6];
+  @apply dark:text-white;
 }
 
 .center-content {
@@ -33,6 +34,11 @@ body {
 }
 .menu-items .router-link-active > li {
   @apply bg-[#565656];
+  position: relative;
+}
+.dark .menu-items .router-link-active > li {
+  @apply bg-[#027BFF] bg-opacity-30 border-2 border-[#027BFF];
+  position: relative;
 }
 .pageItemsList {
   box-shadow: 6px 0px 26px -15px rgba(0, 0, 0, 0.25);

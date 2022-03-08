@@ -99,8 +99,7 @@ const paymentTermOptions = computed(() =>
 const { data: getInvoicesTotal } = getInvoiceTotalByVendor(routeParamId);
 const { data: statesList } = getStates();
 
-const { data: vendor, isLoading: isVendorLoading } =
-  getVendorById(routeParamId);
+const { data: vendor, isLoading: isVendorLoading } = getVendorById(routeParamId);
 
 const form = ref({
   name: "",
@@ -190,10 +189,10 @@ const { stop } = useIntersectionObserver(
 <template>
   <div
     id="details"
-    class="__section __vendor-card mt-4 grid grid-cols-12 rounded border-2 bg-white p-6"
+    class="__section __vendor-card mt-4 grid grid-cols-12 rounded border-2 dark:border-0 bg-white dark:bg-[#25272A] p-6"
   >
     <!-- left side -->
-    <div class="__form col-span-8 flex flex-col justify-between">
+    <div class="__form col-span-12 md:col-span-8 flex flex-col justify-between">
       <div class="__title">
         <h3 class="mb-2 translate-x-2 font-bold">VENDOR</h3>
         <CustomInput
@@ -208,7 +207,7 @@ const { stop } = useIntersectionObserver(
       </div>
       <div class="__form mt-8 grid grid-cols-12 gap-4">
         <!-- row 1 -->
-        <div class="col-span-6">
+        <div class="col-span-12 md:col-span-6">
           <CustomInput
             label="Address"
             placeholder=""
@@ -220,7 +219,7 @@ const { stop } = useIntersectionObserver(
             @focus="currentActiveField = 'address_one'"
           />
         </div>
-        <div class="col-span-6">
+        <div class="col-span-12 md:col-span-6">
           <CustomInput
             label="Address 2"
             placeholder=""
@@ -232,7 +231,7 @@ const { stop } = useIntersectionObserver(
           />
         </div>
         <!-- row 2 -->
-        <div class="col-span-4">
+        <div class="col-span-6 md:col-span-4">
           <CustomInput
             label="City"
             placeholder=""
@@ -244,7 +243,7 @@ const { stop } = useIntersectionObserver(
             @focus="currentActiveField = 'city'"
           />
         </div>
-        <div class="col-span-4">
+        <div class="col-span-6 md:col-span-4">
           <CustomInput
             type="select"
             label="State"
@@ -258,7 +257,7 @@ const { stop } = useIntersectionObserver(
             @focus="currentActiveField = 'state'"
           />
         </div>
-        <div class="col-span-4">
+        <div class="col-span-6 md:col-span-4">
           <CustomInput
             label="Zip Code"
             placeholder="#####-####"
@@ -272,7 +271,7 @@ const { stop } = useIntersectionObserver(
           />
         </div>
         <!-- row 3 -->
-        <div class="col-span-4">
+        <div class="col-span-6 md:col-span-4">
           <CustomInput
             label="Email"
             placeholder=""
@@ -284,7 +283,7 @@ const { stop } = useIntersectionObserver(
             @focus="currentActiveField = 'email'"
           />
         </div>
-        <div class="col-span-4">
+        <div class="col-span-6 md:col-span-4">
           <CustomInput
             label="Phone"
             placeholder="+1 (###) ###-####"
@@ -297,7 +296,7 @@ const { stop } = useIntersectionObserver(
             @focus="currentActiveField = 'phone'"
           />
         </div>
-        <div class="col-span-4">
+        <div class="col-span-6 md:col-span-4">
           <CustomInput
             label="Fax"
             placeholder="+1 (###) ###-####"
@@ -311,7 +310,7 @@ const { stop } = useIntersectionObserver(
           />
         </div>
         <!-- row 4 -->
-        <div class="col-span-4">
+        <div class="col-span-6 md:col-span-4">
           <CustomInput
             label="DIN"
             placeholder=""
@@ -323,7 +322,7 @@ const { stop } = useIntersectionObserver(
             @focus="currentActiveField = 'din'"
           />
         </div>
-        <div class="col-span-4">
+        <div class="col-span-6 md:col-span-4">
           <CustomInput
             label="Tax ID"
             placeholder=""
@@ -335,7 +334,7 @@ const { stop } = useIntersectionObserver(
             @focus="currentActiveField = 'tax_id_number'"
           />
         </div>
-        <div class="col-span-4">
+        <div class="col-span-6 md:col-span-4">
           <CustomInput
             type="select"
             label="Category"
@@ -354,9 +353,11 @@ const { stop } = useIntersectionObserver(
 
     <!-- right side -->
 
-    <div class="col-span-4 flex flex-col items-end justify-between">
-      <div class="__invoice-info">
-        <div class="flex justify-end">
+    <div
+      class="mt-[24px] md:mt-0 col-span-12 md:col-span-4 flex flex-col md:items-end justify-between"
+    >
+      <div class="__invoice-info mb-[24px] md:mb-0">
+        <div class="flex md:justify-end">
           <p class="text-sm font-bold">Open Invoices</p>
         </div>
         <div class="flex justify-end">
@@ -379,10 +380,7 @@ const { stop } = useIntersectionObserver(
         <div
           class="__invoice-buttons mt-[58px] flex min-w-max max-w-full flex-col items-end justify-center"
         >
-          <button
-            class="__invoice-button"
-            @click="global.openDrawer('payments')"
-          >
+          <button class="__invoice-button" @click="global.openDrawer('payments')">
             <span><b>+</b> Add payment</span>
           </button>
           <button class="__invoice-button">
@@ -397,7 +395,7 @@ const { stop } = useIntersectionObserver(
     id="__subtabs"
     type="basic"
     ref="vendorTab"
-    class="sticky top-[-2px] left-0 z-50 mt-4 w-full rounded border-2 border-gray-200 bg-white duration-300"
+    class="sticky top-[-2px] left-0 z-40 mt-4 w-full rounded border-2 dark:border-0 border-gray-200 bg-white dark:bg-[#25272A] duration-300"
     :items="vendorTabs"
     @click="handleTabClick"
   />
@@ -413,7 +411,7 @@ const { stop } = useIntersectionObserver(
 
 <style lang="scss">
 #__subtabs[stuck] {
-  background: #f9fafb;
+  @apply bg-[#f9fafb] dark:bg-[#25272A];
   @apply rounded-none border-2 border-none border-transparent shadow-lg shadow-[#00000011];
 }
 .__veil {

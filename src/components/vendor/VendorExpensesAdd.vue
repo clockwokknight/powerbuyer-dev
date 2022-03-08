@@ -289,7 +289,7 @@ const onCreateExpenseItems = () => {
           #="{ index, value }"
           show-sort-button
         >
-          <div class="rounded bg-gray-200/50 p-3">
+          <div class="rounded bg-gray-200/50 p-3 dark:bg-gray-800/50">
             <n-form-item
               label="VIN"
               :path="`expenses[${index}].deal_id`"
