@@ -29,7 +29,7 @@ const {
   hasNextPage: hasVendorNextPage,
   fetchNextPage: vendorFetchNextPage,
 } = getVendors();
-console.log('vendors:', vendors)
+
 const addTab = (vendor) => {
   tabStore.addTab({ id: vendor?.id, name: vendor?.name });
 };
