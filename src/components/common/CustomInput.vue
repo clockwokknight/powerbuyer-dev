@@ -3,7 +3,7 @@ import { ref, watch, toRefs, reactive, computed, onMounted } from "vue";
 import { NInput, NSelect, NConfigProvider } from "naive-ui";
 import { useMessage } from "naive-ui";
 import { useVendors } from "@/store/vendors";
-import { utils } from "@/lib/utils";
+import { useGlobalState } from "@/store/global";
 import MaskedCustomInput from "@/components/common/MaskedCustomInput.vue";
 
 const emit = defineEmits(["update:value", "focus", "scroll", "edit", "save", "cancel"]);
@@ -19,55 +19,59 @@ const props = defineProps([
   "mask",
 ]);
 
-const themeOverrides = {
-  Input: {
-    color: "rgba(0,0,0,0)",
-    colorDisabled: "rgba(0,0,0,0)",
-    textColorDisabled: "#333",
-    border: "none",
-    borderHover: "none",
-    borderDisabled: "none",
-    borderFocus: "none",
-    boxShadowFocus: "none",
-    borderRadius: "64px",
-    paddingSmall: "0px",
-    paddingMedium: "0px",
-    paddingLarge: "0px",
-    placeholderColor: "#bdbdbd",
-    fontSizeMedium: "12px",
-  },
-  Select: {
-    peers: {
-      InternalSelection: {
-        color: "rgba(0,0,0,0)",
-        colorDisabled: "rgba(0,0,0,0)",
-        textColorDisabled: "#333",
-        border: "none",
-        borderHover: "none",
-        borderDisabled: "none",
-        borderFocus: "none",
-        borderRadius: "6px",
-        boxShadowFocus: "none",
-        paddingTiny: "0px",
-        paddingSmall: "0px",
-        paddingMedium: "0px",
-        paddingLarge: "0px",
-        placeholderColor: "#bdbdbd",
-        fontSizeMedium: "14px",
+const global = useGlobalState();
+
+const themeOverrides = computed(() => {
+  return {
+    Input: {
+      color: "rgba(0,0,0,0)",
+      colorFocus: "rgb(0,0,0,0)",
+      colorDisabled: "rgba(0,0,0,0)",
+      textColorDisabled: global.isDark ? "#eee" : "#111",
+      border: "none",
+      borderHover: "none",
+      borderDisabled: "none",
+      borderFocus: "none",
+      boxShadowFocus: "none",
+      borderRadius: "64px",
+      paddingSmall: "0px",
+      paddingMedium: "0px",
+      paddingLarge: "0px",
+      placeholderColor: global.isDark ? "#777" : "#bdbdbd",
+      fontSizeMedium: "12px",
+    },
+    Select: {
+      peers: {
+        InternalSelection: {
+          color: "rgba(0,0,0,0)",
+          colorFocus: "rgba(0,0,0,0)",
+          colorDisabled: "rgba(0,0,0,0)",
+          textColorDisabled: global.isDark ? "#eee" : "#111",
+          border: "none",
+          borderHover: "none",
+          borderDisabled: "none",
+          borderFocus: "none",
+          borderRadius: "6px",
+          boxShadowFocus: "none",
+          paddingTiny: "0px",
+          paddingSmall: "0px",
+          paddingMedium: "0px",
+          paddingLarge: "0px",
+          placeholderColor: global.isDark ? "#777" : "#bdbdbd",
+          fontSizeMedium: "14px",
+        },
       },
     },
-  },
-};
+  };
+});
 
 const vendors = useVendors();
 const message = useMessage();
 
 const inputEl = ref(null);
 const masked = ref(null);
-
 const hoverEdit = ref(false);
 const hoverInput = ref(false);
-
 const focusing = ref(false);
 const editing = ref(false);
 const saved = ref(false);
@@ -100,15 +104,18 @@ watch(
   () => props.value,
   (newVal) => {
     isValid.value = validation(newVal);
+    console.log(isValid.value);
   }
 );
+
+onMounted(() => {
+  if (!props.validate) isValid.value = true;
+});
 
 function validation(input) {
   if (props.validate) {
     let tests = [];
-    props.validate.forEach((test) => {
-      tests.push(validators[test](input));
-    });
+    props.validate.forEach((test) => tests.push(validators[test](input)));
     return props.validate.length === tests.filter((test) => test).length;
   }
   return true;
@@ -125,9 +132,7 @@ function cancel() {
   emit("cancel");
   editing.value = false;
   done.value = true;
-  setTimeout(() => {
-    done.value = false;
-  }, 500);
+  setTimeout(() => (done.value = false), 500);
   caretX.value = "12px";
   caretFill.value = hoverInput.value ? "#bdbdbd00" : "#bdbdbd";
 }
@@ -137,13 +142,9 @@ function save() {
   if (validation(props.value)) {
     emit("save");
     saved.value = true;
-    setTimeout(() => {
-      saved.value = false;
-    }, 1000);
+    setTimeout(() => (saved.value = false), 1000);
     done.value = true;
-    setTimeout(() => {
-      done.value = false;
-    }, 500);
+    setTimeout(() => (done.value = false), 500);
     caretX.value = "12px";
     caretFill.value = hoverInput.value ? "#bdbdbd00" : "#bdbdbd";
   } else {
@@ -154,24 +155,16 @@ function save() {
 
 function handleInput(e) {
   emit("update:value", e);
-  isValid.value = validation(e);
 }
 </script>
 
 <template>
   <n-config-provider :theme-overrides="themeOverrides">
-    <div
-     :class="`__custom-input relative dark:bg-black dark:rounded-lg
-      ${
-        (!type || type !== 'header') &&
-        isValid !== 0 &&
-        editing &&
-        'border-[#18A058] shadow-lg shadow-green-50 dark:shadow-none dark:border-[1px]'
-      }`">
+    <div class="__custom-input relative">
       <div class="flex">
         <label
           v-if="type !== 'header'"
-          class="absolute z-40 translate-x-4 translate-y-[-6px] bg-white dark:bg-black px-2 text-[10px] font-bold uppercase tracking-widest text-gray-600 dark:text-gray-300"
+          class="absolute z-40 translate-x-4 translate-y-[-2px] bg-transparent px-2 text-[9px] font-bold uppercase tracking-widest text-gray-600 dark:text-gray-300"
         >
           <b
             class="text-red-600 duration-[300ms]"
@@ -182,7 +175,12 @@ function handleInput(e) {
           >
             *
           </b>
-          {{ label || "label" }}
+          <span>{{ label || "label" }}</span>
+          <div
+            style="z-index: -1; width: calc(100% + 2px)"
+            class="absolute bg-white dark:bg-transparent h-[3px] translate-x-[-9px] translate-y-[-8px] rounded-full border-none duration-200"
+            :class="editing && (isValid ? 'dark:!bg-[#202D2C]' : 'dark:!bg-[#2D2020]')"
+          ></div>
         </label>
       </div>
 
@@ -203,29 +201,38 @@ function handleInput(e) {
         "
       >
         <div
-          class="flex w-full items-center rounded-md border-[1px] dark:border-0 duration-200"
+          class="flex w-full items-center rounded-md border-[1px] dark:border-transparent duration-200"
           :class="`
             ${saved && 'ping'}
             ${
-              (!type || type !== 'header') &&
-              !isValid &&
+              type === 'header'
+                ? 'dark:bg-transparent dark:!text-white'
+                : 'dark:bg-[#191919]'
+            }
+            ${
+              (!type || type !== 'header' || global.isDark) &&
               editing &&
-              'border-[#18A058] shadow-lg shadow-green-50'
+              isValid &&
+              '!border-secondary shadow-lg shadow-green-100 dark:shadow-[#00ff0008] dark:!bg-[#202D2C]'
             }
             ${
               (!type || type !== 'header') &&
-              !isValid &&
               editing &&
-              'border-red-600 shadow-lg shadow-red-50'
+              !isValid &&
+              '!border-red-600 shadow-lg shadow-red-100 dark:shadow-[#ff000008] dark:!bg-[#2D2020]'
             } 
             ${
               type === 'header' &&
               `
-                ${editing ? `border-transparent !shadow-lg` : `!border-transparent`} 
+                ${
+                  editing
+                    ? `border-transparent !shadow-lg dark:shadow-[#00ff0008] pl-2`
+                    : `!border-transparent`
+                } 
                 ${saved && 'ping'} 
-                ${hoverEdit && '!border-gray-200'}
               `
-            }`"
+            }
+        `"
         >
           <div class="__inputs w-full">
             <masked-custom-input
@@ -253,14 +260,7 @@ function handleInput(e) {
             <!-- edit -->
             <button
               ref="editButton"
-              @click="
-                () => {
-                  edit();
-                  utils.wait(() => {
-                    // auto-focus input
-                  }, 500);
-                }
-              "
+              @click="edit"
               @mouseover="hoverEdit = false"
               @mouseleave="hoverEdit = false"
               class="__edit h-3 w-3 -translate-x-1 rounded-full"
@@ -273,7 +273,10 @@ function handleInput(e) {
                     ${done && 'delay-[250ms]'}
                 `"
             >
-              <svg class="fill-black dark:fill-white hover:fill-secondary" viewBox="0 0 24 24">
+              <svg
+                class="fill-black dark:fill-white hover:fill-secondary"
+                viewBox="0 0 24 24"
+              >
                 <path
                   d="M13.94 5L19 10.06L9.062 20a2.25 2.25 0 0 1-.999.58l-5.116 1.395a.75.75 0 0 1-.92-.921l1.395-5.116a2.25 2.25 0 0 1 .58-.999L13.938 5zm7.09-2.03a3.578 3.578 0 0 1 0 5.06l-.97.97L15 3.94l.97-.97a3.578 3.578 0 0 1 5.06 0z"
                 ></path>
@@ -300,7 +303,11 @@ function handleInput(e) {
             >
               <svg
                 class="duration-200"
-                :class="!isValid ? 'fill-gray-200' : 'fill-secondary hover:opacity-60'"
+                :class="
+                  !isValid
+                    ? 'fill-gray-200 dark:opacity-[0.1]'
+                    : 'fill-secondary hover:opacity-60'
+                "
                 viewBox="0 0 24 24"
               >
                 <path
@@ -325,7 +332,7 @@ function handleInput(e) {
               "
             >
               <svg
-                class="duration-200 rotate-45 fill-gray-400 hover:fill-black"
+                class="duration-200 rotate-45 fill-gray-400 hover:fill-black dark:hover:fill-white"
                 viewBox="0 0 24 24"
               >
                 <path
@@ -357,14 +364,12 @@ function handleInput(e) {
 .n-base-selection-input {
   background: transparent !important;
 }
-.__buttons {
-}
 .ping {
   animation: ping 1s ease forwards;
 }
 @keyframes ping {
   from {
-    @apply bg-green-100;
+    @apply bg-secondarylight;
   }
   to {
     @apply bg-transparent;

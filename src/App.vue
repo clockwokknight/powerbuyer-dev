@@ -1,12 +1,11 @@
 <script setup>
-import { ref } from "vue";
-import MainMenu from "@/components/MainMenu.vue";
+import { ref, watch, computed, onMounted, onUnmounted } from "vue";
 import { VueQueryDevTools } from "vue-query/devtools";
 import { darkTheme } from "naive-ui";
 import { useDark, useToggle } from "@vueuse/core";
-
-const isDark = useDark();
-const toggleDark = useToggle(isDark);
+import { useGlobalState } from "./store/global";
+import { log } from "./lib/utils";
+import MainMenu from "@/components/MainMenu.vue";
 
 const userMenu = [
   {
@@ -22,6 +21,45 @@ const userMenu = [
     key: "logout",
   },
 ];
+
+const global = useGlobalState();
+
+const isDark = useDark();
+const toggleDark = useToggle(isDark);
+
+const windowWidth = computed(() => window.innerWidth);
+
+watch(
+  () => global.value,
+  (val) => {
+    log.label("global", val);
+  }
+);
+
+watch(
+  () => isDark.value,
+  (val) => {
+    global.setDark(val);
+  }
+);
+
+watch(
+  // TODO : figure out why this value won't update
+  () => windowWidth.value,
+  (val) => {
+    log.label("new width: ", val);
+  }
+);
+
+onMounted(() => {
+  log.green("App.vue mounted");
+  global.setMobile(windowWidth.value <= 768);
+  log.label("mobile? ", global.isMobile);
+});
+
+onUnmounted(() => {
+  log.yellow("App.vue unmounted");
+});
 </script>
 
 <template>
@@ -31,9 +69,9 @@ const userMenu = [
         <n-notification-provider>
           <n-dialog-provider>
             <div class="h-screen w-full overflow-hidden bg-[#fff] antialiased">
-              <div class="flex h-full w-full">
+              <div class="flex w-full h-full">
                 <aside
-                  class="sticky top-0 left-0 z-50 flex w-[60px] flex-col bg-[#202124] dark:bg-black"
+                  class="flex flex-col sticky top-0 left-0 w-[60px] bg-[#202124] dark:bg-black z-50"
                 >
                   <MainMenu />
                   <n-switch

@@ -15,11 +15,11 @@ import { getVendorById, useVendorCategories } from "@/hooks/vendor";
 import { getPaymentTerms, getStates } from "@/hooks/common_query";
 import { useGlobalState } from "@/store/global";
 import { pick } from "@/lib/helper";
-import { utils } from "@/lib/utils";
 import { useMessage } from "naive-ui";
 import compare from "just-compare";
 import axios from "axios";
-
+import { log } from "@/lib/utils";
+import { useIntersectionObserver } from "@vueuse/core";
 import UpdatableButtonWrapper from "@/components/common/UpdatableButtonWrapper.vue";
 import MaskedInput from "@/components/common/MaskedInput.vue";
 import VendorExpensesItems from "@/components/vendor/VendorExpensesItems.vue";
@@ -27,7 +27,6 @@ import VendorExpenses from "@/components/vendor/VendorExpenses.vue";
 import VendorPayments from "@/components/vendor/VendorPayments.vue";
 import CustomInput from "@/components/common/CustomInput.vue";
 import Tabs from "@/components/common/Tabs.vue";
-import { useIntersectionObserver } from "@vueuse/core";
 
 const VendorContacts = defineAsyncComponent({
   loader: () => import("@/components/vendor/VendorContacts.vue"),
@@ -67,6 +66,16 @@ const vendorTabs = ref([
   },
 ]);
 
+const vendorTab = ref(null);
+
+const { stop } = useIntersectionObserver(
+  vendorTab,
+  ([e], observerElement) => {
+    e.target.toggleAttribute("stuck", e.intersectionRatio < 1);
+  },
+  { threshold: [1] }
+);
+
 const { data: vendorCategory } = useVendorCategories();
 
 const vendorCategoryOptions = computed(() =>
@@ -95,29 +104,23 @@ const { data: statesList } = getStates();
 
 const { data: vendor, isLoading: isVendorLoading } = getVendorById(routeParamId);
 
-const form = ref({
-  name: "",
-  address_one: "",
-  address_two: "",
-  city: "",
-  state: "",
-  zip: "",
-  email: "",
-  phone: "",
-  fax: "",
-  din: "",
-  tax_id_number: "",
-  vendor_category_id: "",
-  payment_terms: "",
-});
+const vendorData = ref({});
 
-watch(
-  () => vendor.value,
-  (newValue) => {
-    if (newValue) form.value = { ...newValue };
-  },
-  { immediate: true }
-);
+const form = ref({
+  name: null,
+  address_one: null,
+  address_two: null,
+  city: null,
+  state: null,
+  zip: null,
+  email: null,
+  phone: null,
+  fax: null,
+  din: null,
+  tax_id_number: null,
+  vendor_category_id: null,
+  payment_terms: null,
+});
 
 const { isLoading, mutateAsync } = useMutation(
   (data) => axios.put(`/vendors/${vendor.value.id}`, data),
@@ -126,6 +129,22 @@ const { isLoading, mutateAsync } = useMutation(
       queryClient.invalidateQueries(["vendor", routeParamId.value]);
     },
   }
+);
+
+watch(
+  () => vendor.value,
+  (newValue) => {
+    console.log("vendor changed: ", newValue);
+    if (newValue) {
+      form.value = { ...newValue };
+      vendorData.value = { ...newValue };
+      Object.entries(newValue).forEach((kv) => {
+        // sterilizing vendor data to fix non-update on cancel
+        if (kv[1] === "") vendorData.value[kv[0]] = null;
+      });
+    }
+  },
+  { immediate: true }
 );
 
 watch(
@@ -141,9 +160,11 @@ watch(
 );
 
 function resetValue(key) {
+  nextTick();
+  log.yellow(`resetting value to ${vendorData.value[key]}`);
   form.value = {
     ...form.value,
-    [key]: vendor.value[key],
+    [key]: vendorData.value[key],
   };
   currentActiveField.value = null;
 }
@@ -166,16 +187,6 @@ function submitValue(key) {
 function handleTabClick(e) {
   window.location.hash = e;
 }
-
-let tabs = computed(() => global.tabs);
-const vendorTab = ref(null);
-const { stop } = useIntersectionObserver(
-  vendorTab,
-  ([e], observerElement) => {
-    e.target.toggleAttribute("stuck", e.intersectionRatio < 1);
-  },
-  { threshold: [1] }
-);
 
 // LOAD TABLE DATA
 </script>
@@ -347,7 +358,9 @@ const { stop } = useIntersectionObserver(
 
     <!-- right side -->
 
-    <div class="mt-[24px] md:mt-0 col-span-12 md:col-span-4 flex flex-col md:items-end justify-between">
+    <div
+      class="mt-[24px] md:mt-0 col-span-12 md:col-span-4 flex flex-col md:items-end justify-between"
+    >
       <div class="__invoice-info mb-[24px] md:mb-0">
         <div class="flex md:justify-end">
           <p class="text-sm font-bold">Open Invoices</p>

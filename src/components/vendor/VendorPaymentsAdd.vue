@@ -2,7 +2,6 @@
 import { watch, computed, ref } from "vue";
 import { useGlobalState } from "@/store/global";
 import { useMessage } from "naive-ui";
-import { utils } from "@/lib/utils";
 import vendors from "@/api/vendors";
 
 import MaskedInput from "@/components/common/MaskedInput.vue";
@@ -97,11 +96,7 @@ function addExpense() {
     </n-icon>
     Add Payment
   </n-button>
-  <n-drawer
-    v-model:show="showOuterRef"
-    :on-update:show="global.closeDrawer"
-    :width="500"
-  >
+  <n-drawer v-model:show="showOuterRef" :on-update:show="global.closeDrawer" :width="500">
     <n-drawer-content title="Add Payment">
       <n-form
         :model="formValue"

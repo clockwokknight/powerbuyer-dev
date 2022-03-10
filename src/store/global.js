@@ -1,17 +1,34 @@
 import { defineStore } from 'pinia';
+import { useLocalStorage } from '@vueuse/core';
 
 export const useGlobalState = defineStore('global', {
     state: () => {
-        return {
-            drawer: { active: false, context: null },
-            tabs: [],
-            activateTab: 0,
+        return useLocalStorage('state', {
+            isMobile: false,
+            isDark: true,
             stuck: [false, false],
-        };
+            list: {
+                active: false,
+                context: null,
+            },
+            drawer: { 
+                active: false, 
+                context: null,
+            },
+        });
     },
     actions: {
+        // mobile
+        setMobile(val) {
+            this.isMobile = val;
+        },
+        // dark mode
+        setDark(val) {
+            this.isDark = val;
+        },
+        // hidden drawer
         toggleDrawer() {
-            this.drawer = !this.drawer;
+            this.drawer.active = !this.drawer.active;
         },
         openDrawer(context) {
             this.drawer = { active: true, context: context };
@@ -19,22 +36,18 @@ export const useGlobalState = defineStore('global', {
         closeDrawer(context) {
             this.drawer = { active: false, context: context };
         },
-        addTab(item) {
-            let tabs = this.tabs;
-            item && tabs.push(item);
-            this.tabs = Array.from(new Set(tabs));
-            this.tabIDs = Array.from(new Set(tabs));
-            console.log('tabs: ', this.tabs);
+        // list
+        toggleList() {
+            this.list.active = !this.list.active;
         },
-        closeTab(index) {
-            this.tabs.splice(index, 1);
+        setListActive(val) {
+            this.list = { active: val, context: context };
         },
-        setActiveTab(index) {
-            this.activateTab = index;
-        },
+        // sticky nav
         stick(val) {
             this.stuck = val;
         },
+        
     },
 });
 
