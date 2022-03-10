@@ -38,4 +38,7 @@ export const utils = {
       else if (unit === "d") return Math.abs((timestamp1 - timestamp2) / 1000 / 60 / 60 / 24 );
       else return Math.abs(timestamp1 - timestamp2);
     },
+    parsePhoneNumber: (phone) => {
+      return Array.from(phone).filter(digit => /\b\d\b/.test(digit)).join('');
+    }
 };

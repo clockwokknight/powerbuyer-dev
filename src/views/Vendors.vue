@@ -25,6 +25,7 @@ const debouncedSearchText = useDebounce(searchText, 500);
 const vendorListActive = ref(false);
 
 // Showing All Vendors
+
 const {
   data: vendors,
   isLoading: isVendorsLoading,
@@ -37,6 +38,7 @@ const addTab = (vendor) => {
 };
 
 // Vendor Search Result
+
 const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
   ["vendorSearch", debouncedSearchText],
   ({ queryKey }) => {

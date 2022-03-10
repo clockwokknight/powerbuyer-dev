@@ -18,7 +18,7 @@ import { pick } from "@/lib/helper";
 import { useMessage } from "naive-ui";
 import compare from "just-compare";
 import axios from "axios";
-import { log } from "@/lib/utils";
+import { log, utils } from "@/lib/utils";
 import { useIntersectionObserver } from "@vueuse/core";
 import UpdatableButtonWrapper from "@/components/common/UpdatableButtonWrapper.vue";
 import MaskedInput from "@/components/common/MaskedInput.vue";
@@ -170,7 +170,9 @@ function resetValue(key) {
 }
 
 function submitValue(key) {
-  mutateAsync({ [key]: form.value[key] })
+  mutateAsync({
+    [key]: key === "phone" ? utils.parsePhoneNumber(form.value[key]) : form.value[key],
+  })
     .then((data) => {
       message.success("Saved");
       console.clear();
@@ -291,8 +293,8 @@ function handleTabClick(e) {
         <div class="col-span-6 md:col-span-4">
           <CustomInput
             label="Phone"
-            placeholder="+1 (###) ###-####"
-            mask="+1 (###) ###-####"
+            placeholder="(###) ###-####"
+            mask="(###) ###-####"
             :value="form.phone"
             :validate="['required', 'phone']"
             @update:value="(val) => (form.phone = val)"
@@ -304,8 +306,8 @@ function handleTabClick(e) {
         <div class="col-span-6 md:col-span-4">
           <CustomInput
             label="Fax"
-            placeholder="+1 (###) ###-####"
-            mask="+1 (###) ###-####"
+            placeholder="(###) ###-####"
+            mask="(###) ###-####"
             :value="form.fax"
             :validate="['phone']"
             @update:value="(val) => (form.fax = val)"
