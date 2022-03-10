@@ -7,8 +7,6 @@ import { clone, objectFilter, omit, pick } from "@/lib/helper";
 import { getExpenseTypes, getVendorExpenseItems } from "@/hooks/expense";
 import { getAllDeals, searchDealByVin } from "@/hooks/deals";
 import { useMessage } from "naive-ui";
-import { utils } from "@/lib/utils";
-import { useGlobalState } from "@/store/global";
 import dayjs from "dayjs";
 import axios from "axios";
 
@@ -24,7 +22,7 @@ const initialForm = {
   vendor_id: null,
   amount_due: 0,
   invoice_number: "",
-  due_date: null,
+  due_date: dayjs().add(30, "day").format("YYYY-MM-DD"),
   expenses: [
     {
       expense_date: dayjs().format("YYYY-MM-DD"),
@@ -116,11 +114,11 @@ const rules = {
     },
     trigger: "change",
   },
-  invoice_number: {
-    required: true,
-    message: "Invoice Number is required",
-    trigger: "input",
-  },
+  // invoice_number: {
+  //   required: true,
+  //   message: "Invoice Number is required",
+  //   trigger: "input",
+  // },
   due_date: {
     required: true,
     message: "Date is required",
@@ -129,7 +127,7 @@ const rules = {
   expenses: {
     expense_date: {
       required: true,
-      message: "Date is required",
+      message: "Please pick a date",
       trigger: ["blur", "change"],
     },
     deal_id: {
@@ -191,8 +189,13 @@ const handleSearch = (query) => {
   searchVinSelect.value = query;
 };
 
-const { mutateAsync: createExpense, isLoading } = useMutation((data) =>
-  axios.post("/vendor_invoices", { ...data, amount_paid: 0 })
+const { mutateAsync: createExpense, isLoading } = useMutation(
+  (data) => axios.post("/vendor_invoices", { ...data, amount_paid: 0 }),
+  {
+    onSuccess() {
+      queryClient.invalidateQueries(["vendorInvoices", vendor_id.value]);
+    },
+  }
 );
 
 async function submitExpense() {
@@ -213,7 +216,7 @@ async function submitExpense() {
     console.log({ modifiedForm });
     await createExpense(modifiedForm);
     showDrawer.value = false;
-    // queryClient.invalidateQueries(["expensesByVendor", vendor_id.value]);
+
     message.success("Expense Created Successfully");
 
     // onCreateExpense(modifiedForm);
@@ -274,13 +277,6 @@ const onCreateExpenseItems = () => {
         ref="formRef"
         :disabled="isLoading"
       >
-        <n-form-item label="Invoice Number" path="invoice_number">
-          <n-input
-            clearable
-            v-model:value="form.invoice_number"
-            :loading="isLoading"
-          />
-        </n-form-item>
         <div>Expenses</div>
         <n-dynamic-input
           v-model:value="form.expenses"
@@ -288,6 +284,7 @@ const onCreateExpenseItems = () => {
           @create="onCreateExpenseItems"
           #="{ index, value }"
           show-sort-button
+          :min="1"
         >
           <div class="rounded bg-gray-200/50 p-3 dark:bg-gray-800/50">
             <n-form-item
@@ -364,7 +361,12 @@ const onCreateExpenseItems = () => {
                 :disabled="isLoading"
               />
             </n-form-item>
-            <n-form-item label="Expense Date" path="expense_date">
+            <n-form-item
+              label="Expense Date"
+              ignore-path-change
+              :path="`expenses[${index}].expense_date`"
+              :rule="rules.expenses.expense_date"
+            >
               <n-date-picker
                 v-model:formatted-value="form.expenses[index].expense_date"
                 value-format="yyyy-MM-dd"

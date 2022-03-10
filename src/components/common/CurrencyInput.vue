@@ -3,7 +3,7 @@ import { format, unformat } from "v-money3";
 
 defineProps({
   modelValue: {
-    type: Number,
+    type: [Number, String],
   },
 });
 
