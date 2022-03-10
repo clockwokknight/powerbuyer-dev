@@ -1,6 +1,12 @@
 import { useInfiniteQuery, useQuery } from "vue-query";
 import axios from "axios";
 
+export const BUYER_TYPE = {
+  Manager: 1,
+  Buyer: 2,
+  FiedBuyer: 3,
+};
+
 export const getBuyerTypes = () =>
   useQuery(
     "buyer_types",
