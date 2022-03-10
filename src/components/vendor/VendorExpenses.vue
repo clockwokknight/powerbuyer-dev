@@ -3,7 +3,6 @@ import { computed, h, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useMutation } from "vue-query";
 import { useGlobalState } from "@/store/global";
-import { utils } from "@/lib/utils";
 import { objectFilter, omit, pick } from "@/lib/helper";
 import { getExpensesByVendor } from "@/hooks/expense";
 import { NTag, NButton, useMessage } from "naive-ui";
@@ -30,8 +29,9 @@ watch(
   }
 );
 
-const { data: expensesData, isLoading: expensesDataLoading } =
-  getExpensesByVendor(routeParamId);
+const { data: expensesData, isLoading: expensesDataLoading } = getExpensesByVendor(
+  routeParamId
+);
 
 // const expenseDataComputed = computed(() => expensesData.value ? )
 const rowKey = (row) => row?.deal_id;

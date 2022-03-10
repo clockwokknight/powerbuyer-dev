@@ -1,12 +1,11 @@
 <script setup>
-import { ref } from 'vue';
-import MainMenu from "@/components/MainMenu.vue";
+import { ref, watch, computed, onMounted, onUnmounted } from "vue";
 import { VueQueryDevTools } from "vue-query/devtools";
-import { darkTheme } from 'naive-ui';
-import { useDark, useToggle } from '@vueuse/core'
-
-const isDark = useDark()
-const toggleDark = useToggle(isDark)
+import { darkTheme } from "naive-ui";
+import { useDark, useToggle } from "@vueuse/core";
+import { useGlobalState } from "./store/global";
+import { log } from "./lib/utils";
+import MainMenu from "@/components/MainMenu.vue";
 
 const userMenu = [
   {
@@ -22,6 +21,45 @@ const userMenu = [
     key: "logout",
   },
 ];
+
+const global = useGlobalState();
+
+const isDark = useDark();
+const toggleDark = useToggle(isDark);
+
+const windowWidth = computed(() => window.innerWidth);
+
+watch(
+  () => global.value,
+  (val) => {
+    log.label("global", val);
+  }
+);
+
+watch(
+  () => isDark.value,
+  (val) => {
+    global.setDark(val);
+  }
+);
+
+watch(
+  // TODO : figure out why this value won't update
+  () => windowWidth.value,
+  (val) => {
+    log.label("new width: ", val);
+  }
+);
+
+onMounted(() => {
+  log.green("App.vue mounted");
+  global.setMobile(windowWidth.value <= 768);
+  log.label("mobile? ", global.isMobile);
+});
+
+onUnmounted(() => {
+  log.yellow("App.vue unmounted");
+});
 </script>
 
 <template>
@@ -32,11 +70,19 @@ const userMenu = [
           <n-dialog-provider>
             <div class="h-screen w-full overflow-hidden bg-[#fff] antialiased">
               <div class="flex w-full h-full">
-                <aside class="flex flex-col sticky top-0 left-0 w-[60px] bg-[#202124] dark:bg-black z-50">
+                <aside
+                  class="flex flex-col sticky top-0 left-0 w-[60px] bg-[#202124] dark:bg-black z-50"
+                >
                   <MainMenu />
-                  <n-switch class="mt-auto mb-4" v-model:value="isDark"  @update:value="toggleDark"/>
+                  <n-switch
+                    class="mt-auto mb-4"
+                    v-model:value="isDark"
+                    @update:value="toggleDark"
+                  />
                 </aside>
-                <section class="relative flex h-full w-full bg-[#F8F8FA] dark:bg-[#1E1F21]">
+                <section
+                  class="relative flex h-full w-full bg-[#F8F8FA] dark:bg-[#1E1F21]"
+                >
                   <router-view />
                 </section>
               </div>

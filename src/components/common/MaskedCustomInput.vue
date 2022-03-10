@@ -1,8 +1,6 @@
 <script setup>
 import { masker, tokens } from "@/directives/mask";
 import { watch, ref, toRefs } from "vue";
-import { utils } from "@/lib/utils";
-import { useVendors } from "@/store/vendors";
 
 const emit = defineEmits(["update:value", "blur", "focus", "input"]);
 
@@ -74,10 +72,8 @@ function refresh(value) {
 }
 
 function handleBlur(e) {
-  console.log("target: ", e.relatedTarget?.classList[0]);
   let target = e.relatedTarget?.classList[0];
   if (target !== "__save" && target !== "__cancel") {
-    console.log("cancelling...");
     emit("blur", e);
   }
 }
@@ -88,7 +84,7 @@ function handleBlur(e) {
     v-if="type !== 'select'"
     ref="inputRef"
     v-mask="mask"
-    class="bg-transparent outline-none w-full pl-3"
+    class="bg-transparent outline-none w-full pl-3 truncate"
     :class="`
       ${!editing && 'pointer-events-none'}
       ${

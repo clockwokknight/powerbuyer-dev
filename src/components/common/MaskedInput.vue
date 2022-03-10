@@ -1,5 +1,5 @@
 <template>
-  <n-input :value="display" v-mask="mask" @input="refresh" />
+  <n-input class="truncate" :value="display" v-mask="mask" @input="refresh" />
 </template>
 
 <script setup>

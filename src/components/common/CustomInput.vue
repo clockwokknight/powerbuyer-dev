@@ -3,7 +3,7 @@ import { ref, watch, toRefs, reactive, computed, onMounted } from "vue";
 import { NInput, NSelect, NConfigProvider } from "naive-ui";
 import { useMessage } from "naive-ui";
 import { useVendors } from "@/store/vendors";
-import { utils } from "@/lib/utils";
+import { useGlobalState } from "@/store/global";
 import MaskedCustomInput from "@/components/common/MaskedCustomInput.vue";
 
 const emit = defineEmits(["update:value", "focus", "scroll", "edit", "save", "cancel"]);
@@ -19,11 +19,13 @@ const props = defineProps([
   "mask",
 ]);
 
+const global = useGlobalState();
+
 const themeOverrides = {
   Input: {
     color: "rgba(0,0,0,0)",
     colorDisabled: "rgba(0,0,0,0)",
-    textColorDisabled: "#333",
+    textColorDisabled: global.isDark ? "#aaa" : "#333",
     border: "none",
     borderHover: "none",
     borderDisabled: "none",
@@ -33,7 +35,7 @@ const themeOverrides = {
     paddingSmall: "0px",
     paddingMedium: "0px",
     paddingLarge: "0px",
-    placeholderColor: "#bdbdbd",
+    placeholderColor: global.isDark ? "#777" : "#bdbdbd",
     fontSizeMedium: "12px",
   },
   Select: {
@@ -41,7 +43,7 @@ const themeOverrides = {
       InternalSelection: {
         color: "rgba(0,0,0,0)",
         colorDisabled: "rgba(0,0,0,0)",
-        textColorDisabled: "#333",
+        textColorDisabled: global.isDark ? "#aaa" : "#333",
         border: "none",
         borderHover: "none",
         borderDisabled: "none",
@@ -52,7 +54,7 @@ const themeOverrides = {
         paddingSmall: "0px",
         paddingMedium: "0px",
         paddingLarge: "0px",
-        placeholderColor: "#bdbdbd",
+        placeholderColor: global.isDark ? "#777" : "#bdbdbd",
         fontSizeMedium: "14px",
       },
     },
@@ -64,10 +66,8 @@ const message = useMessage();
 
 const inputEl = ref(null);
 const masked = ref(null);
-
 const hoverEdit = ref(false);
 const hoverInput = ref(false);
-
 const focusing = ref(false);
 const editing = ref(false);
 const saved = ref(false);
@@ -100,15 +100,18 @@ watch(
   () => props.value,
   (newVal) => {
     isValid.value = validation(newVal);
+    console.log(isValid.value);
   }
 );
+
+onMounted(() => {
+  if (!props.validate) isValid.value = true;
+});
 
 function validation(input) {
   if (props.validate) {
     let tests = [];
-    props.validate.forEach((test) => {
-      tests.push(validators[test](input));
-    });
+    props.validate.forEach((test) => tests.push(validators[test](input)));
     return props.validate.length === tests.filter((test) => test).length;
   }
   return true;
@@ -125,9 +128,7 @@ function cancel() {
   emit("cancel");
   editing.value = false;
   done.value = true;
-  setTimeout(() => {
-    done.value = false;
-  }, 500);
+  setTimeout(() => (done.value = false), 500);
   caretX.value = "12px";
   caretFill.value = hoverInput.value ? "#bdbdbd00" : "#bdbdbd";
 }
@@ -137,13 +138,9 @@ function save() {
   if (validation(props.value)) {
     emit("save");
     saved.value = true;
-    setTimeout(() => {
-      saved.value = false;
-    }, 1000);
+    setTimeout(() => (saved.value = false), 1000);
     done.value = true;
-    setTimeout(() => {
-      done.value = false;
-    }, 500);
+    setTimeout(() => (done.value = false), 500);
     caretX.value = "12px";
     caretFill.value = hoverInput.value ? "#bdbdbd00" : "#bdbdbd";
   } else {
@@ -154,20 +151,20 @@ function save() {
 
 function handleInput(e) {
   emit("update:value", e);
-  isValid.value = validation(e);
 }
 </script>
 
 <template>
   <n-config-provider :theme-overrides="themeOverrides">
     <div
-     :class="`__custom-input relative dark:bg-black dark:rounded-lg
+      :class="`__custom-input relative dark:bg-black dark:rounded-lg
       ${
         (!type || type !== 'header') &&
-        isValid !== 0 &&
+        isValid &&
         editing &&
         'border-[#18A058] shadow-lg shadow-green-50 dark:shadow-none dark:border-[1px]'
-      }`">
+      }`"
+    >
       <div class="flex">
         <label
           v-if="type !== 'header'"
@@ -208,7 +205,7 @@ function handleInput(e) {
             ${saved && 'ping'}
             ${
               (!type || type !== 'header') &&
-              !isValid &&
+              isValid &&
               editing &&
               'border-[#18A058] shadow-lg shadow-green-50'
             }
@@ -253,14 +250,7 @@ function handleInput(e) {
             <!-- edit -->
             <button
               ref="editButton"
-              @click="
-                () => {
-                  edit();
-                  utils.wait(() => {
-                    // auto-focus input
-                  }, 500);
-                }
-              "
+              @click="edit"
               @mouseover="hoverEdit = false"
               @mouseleave="hoverEdit = false"
               class="__edit h-3 w-3 -translate-x-1 rounded-full"
@@ -273,7 +263,10 @@ function handleInput(e) {
                     ${done && 'delay-[250ms]'}
                 `"
             >
-              <svg class="fill-black dark:fill-white hover:fill-secondary" viewBox="0 0 24 24">
+              <svg
+                class="fill-black dark:fill-white hover:fill-secondary"
+                viewBox="0 0 24 24"
+              >
                 <path
                   d="M13.94 5L19 10.06L9.062 20a2.25 2.25 0 0 1-.999.58l-5.116 1.395a.75.75 0 0 1-.92-.921l1.395-5.116a2.25 2.25 0 0 1 .58-.999L13.938 5zm7.09-2.03a3.578 3.578 0 0 1 0 5.06l-.97.97L15 3.94l.97-.97a3.578 3.578 0 0 1 5.06 0z"
                 ></path>
@@ -356,8 +349,6 @@ function handleInput(e) {
 }
 .n-base-selection-input {
   background: transparent !important;
-}
-.__buttons {
 }
 .ping {
   animation: ping 1s ease forwards;

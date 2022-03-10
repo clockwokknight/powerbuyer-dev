@@ -32,8 +32,6 @@ const tabItems = computed(() => props.items || exampleItems.value);
 watch(
   () => global.activateTab,
   (val) => {
-    console.clear();
-    console.log(val, active.value);
     if (props.type === "basic") active.value = val;
   }
 );

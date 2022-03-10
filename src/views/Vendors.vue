@@ -22,6 +22,8 @@ const global = useGlobalState();
 const searchText = ref("");
 const debouncedSearchText = useDebounce(searchText, 500);
 
+const vendorListActive = ref(false);
+
 // Showing All Vendors
 const {
   data: vendors,
@@ -35,8 +37,9 @@ const addTab = (vendor) => {
 };
 
 // Vendor Search Result
-const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
-  useQuery(["vendorSearch", debouncedSearchText], ({ queryKey }) => {
+const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
+  ["vendorSearch", debouncedSearchText],
+  ({ queryKey }) => {
     if (queryKey[1] === "") return null;
     else
       return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => {
@@ -45,7 +48,8 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
         }
         return res.data;
       });
-  });
+  }
+);
 
 function handleScroll(e) {
   let scroll = e.target.scrollTop;
@@ -60,27 +64,32 @@ function handleScroll(e) {
   );
 }
 
-function handleVendorListSlide() {
-  const vendorsListElement = document.getElementById('vendors-list');
-
-  if (vendorsListElement.classList.contains('close-vendor-list')) {
-    vendorsListElement.classList.remove('close-vendor-list');
-    vendorsListElement.classList.add('open-vendor-list');
-  } else {
-    vendorsListElement.classList.remove('open-vendor-list');
-    vendorsListElement.classList.add('close-vendor-list');
-  }
+function toggleListSlide() {
+  vendorListActive.value = !vendorListActive.value;
 }
+
+watch(
+  () => vendorListActive.value,
+  (val) => {
+    global.setListActive(val);
+  }
+);
 </script>
 
 <template>
   <div class="flex w-full vendors">
     <!-- Don't show PageItemsList on dashboard  | Current Page List -->
-    <div id="vendors-list" class="w-[275px] absolute md:relative md:m-0 z-[41]">
+    <div
+      id="vendors-list"
+      class="w-[275px] absolute md:relative md:m-0 z-[41]"
+      :class="vendorListActive ? 'open-vendor-list' : 'close-vendor-list'"
+    >
       <aside
         class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-x-hidden bg-white dark:bg-[#1E1F21]"
       >
-        <div class="sticky top-0 z-50 border-b dark:border-0 bg-white dark:bg-[#25272A] p-3">
+        <div
+          class="sticky top-0 z-50 border-b dark:border-0 bg-white dark:bg-[#25272A] p-3"
+        >
           <div class="flex justify-between mb-3">
             <h1 class="text-xl font-bold uppercase">Vendors</h1>
             <div>
@@ -155,15 +164,25 @@ function handleVendorListSlide() {
           </ul>
         </div>
       </aside>
-      <div id="mobile-slider" class="absolute w-[325px] h-[36px] flex flex-row justify-between bottom-0 left-0 bg-white items-center shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] px-4 dark:bg-black">
+      <div
+        id="mobile-slider"
+        class="absolute w-[325px] h-[36px] flex flex-row justify-between bottom-0 left-0 bg-white items-center shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] px-4 dark:bg-black"
+      >
         <div class="text-[8px]">{{ vendors?.pages[0].data.length }} Active Vendors</div>
-        <img class="slide-icon w-[18px] h-[18px] cursor-pointer" src="/icons/LeftSlide.svg" @click="handleVendorListSlide" />
+        <img
+          class="slide-icon w-[18px] h-[18px] cursor-pointer"
+          src="/icons/LeftSlide.svg"
+          @click="toggleListSlide"
+        />
       </div>
     </div>
 
     <!-- Main Tabs App Content -->
 
-    <section id="main-content" class="h-screen w-[calc(100vw-60px)] md:w-[calc(100vw-335px)] bg-lightergray dark:bg-[#1E1F21]">
+    <section
+      id="main-content"
+      class="h-screen w-[calc(100vw-60px)] md:w-[calc(100vw-335px)] bg-lightergray dark:bg-[#1E1F21]"
+    >
       <page-tabs page-name="vendors" />
       <!-- Main Body Content-->
       <div class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
