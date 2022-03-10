@@ -1,12 +1,13 @@
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, ref, unref, watch } from "vue";
 import { useMessage } from "naive-ui";
 import dayjs from "dayjs";
-import { clone } from "@/lib/helper";
+import { clone, pick } from "@/lib/helper";
 import { useQuery } from "vue-query";
 import axios from "axios";
 import CurrencyInput from "@/components/common/CurrencyInput.vue";
 import { useRoute } from "vue-router";
+import { vendorInvoices } from "@/hooks/vendor.js";
 
 const route = useRoute();
 
@@ -28,9 +29,9 @@ const form = ref({ ...initialForm });
 const routeParamId = ref(route.params?.id);
 
 watch(
-  () => route.params?.id,
+  () => route.params,
   (toParam) => {
-    if (route.params?.id) routeParamId.value = route.params?.id;
+    if (toParam?.id) routeParamId.value = toParam?.id;
   }
 );
 
@@ -44,23 +45,17 @@ const paymentStatusOptions = computed(() =>
   }))
 );
 
-const { data: paymentRecipientTypes } = useQuery("payment_receipt_types", () =>
-  axios.get("/payment_receipt_types").then((r) => r.data)
-);
+// const { data: paymentRecipientTypes } = useQuery("payment_receipt_types", () =>
+//   axios.get("/payment_receipt_types").then((r) => r.data)
+// );
 
-const paymentRecipientTypesOptions = computed(() =>
-  paymentRecipientTypes.value?.map((type) => ({
-    label: type.name,
-    value: type.id,
-  }))
-);
+// const paymentRecipientTypesOptions = computed(() =>
+//   paymentRecipientTypes.value?.map((type) => ({
+//     label: type.name,
+//     value: type.id,
+//   }))
+// );
 const rules = {
-  recipient_id: {
-    required: true,
-    type: "number",
-    message: "Please choose a recipient",
-    trigger: ["input"],
-  },
   payment_status_id: {
     required: true,
     type: "number",
@@ -110,6 +105,16 @@ watch(showDrawer, (newValue) => {
   }
 });
 
+const { data: invoicesData, isLoading: expensesDataLoading } =
+  vendorInvoices(routeParamId);
+
+const invoiceDataOptions = computed(() =>
+  invoicesData.value?.map((inv) => ({
+    label: inv.invoice_number,
+    value: inv.id,
+  }))
+);
+
 async function submitForm() {
   await formRef.value.validate();
 }
@@ -118,6 +123,14 @@ const onCreatePaymentInvoice = () => {
     vendor_invoice_id: null,
     payment_amount: 0,
   };
+};
+const onInvoiceSelect = (val, index) => {
+  const vendor_invoiceIdx = invoicesData.value.findIndex(
+    (inv) => inv.id === val
+  );
+  console.log({ vendor_invoiceIdx });
+  const vendor_invoice = invoicesData.value[vendor_invoiceIdx];
+  // form.value.payment_invoices[index].payment_amount =  vendor_invoice.balance
 };
 </script>
 
@@ -142,13 +155,6 @@ const onCreatePaymentInvoice = () => {
         size="medium"
         ref="formRef"
       >
-        <n-form-item label="Recipient" path="recipient_id">
-          <n-select
-            :options="paymentRecipientTypesOptions"
-            v-model:value="form.recipient_id"
-            filterable
-          />
-        </n-form-item>
         <n-form-item label="Payment Status" path="payment_status_id">
           <n-select
             :options="paymentStatusOptions"
@@ -178,8 +184,11 @@ const onCreatePaymentInvoice = () => {
               :path="`payment_invoices[${index}].vendor_invoice_id`"
               :rule="rules.payment_invoices.vendor_invoice_id"
             >
-              <n-input
-                v-model:value="form.payment_invoices[index].vendor_invoice_id"
+              <n-select
+                :options="invoiceDataOptions"
+                clearable
+                @update-value="onInvoiceSelect"
+                :value="form.payment_invoices[index].vendor_invoice_id"
               />
             </n-form-item>
             <n-form-item
