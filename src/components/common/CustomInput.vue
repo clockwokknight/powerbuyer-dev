@@ -178,7 +178,7 @@ function handleInput(e) {
           <span>{{ label || "label" }}</span>
           <div
             style="z-index: -1; width: calc(100% + 2px)"
-            class="absolute bg-white dark:bg-[#191919] h-[2px] translate-x-[-9px] translate-y-[-7.5px] rounded-full border-none duration-200"
+            class="absolute bg-white dark:bg-transparent h-[3px] translate-x-[-9px] translate-y-[-8px] rounded-full border-none duration-200"
             :class="editing && (isValid ? 'dark:!bg-[#202D2C]' : 'dark:!bg-[#2D2020]')"
           ></div>
         </label>
@@ -369,7 +369,7 @@ function handleInput(e) {
 }
 @keyframes ping {
   from {
-    @apply bg-green-100;
+    @apply bg-secondarylight;
   }
   to {
     @apply bg-transparent;
