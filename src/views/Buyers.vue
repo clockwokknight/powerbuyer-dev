@@ -138,12 +138,10 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
     <div class="h-screen w-[calc(100vw-335px)]">
       <page-tabs page-name="buyers" />
       <!-- Main Body Content-->
-      <div
-        class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden border-t-2"
-      >
-        <div class="min-h-full bg-white pt-10">
+      <div class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden">
+        <main class="min-h-full p-2 md:p-6">
           <router-view />
-        </div>
+        </main>
       </div>
     </div>
   </div>

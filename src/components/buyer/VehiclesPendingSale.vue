@@ -59,12 +59,12 @@ const columns = [
 </script>
 
 <template>
-  <div id="vehicles-at-auction" class="scroll-smooth">
+  <div id="vehicles-pending-sale" class="scroll-smooth">
     <div class="-mt-4 font-sans">
       <div
         class="rounded border-2 bg-white py-8 px-8 dark:border-0 dark:bg-[#25272A]"
       >
-        <div><p class="pb-8 text-2xl font-bold">Vehicles at Auction</p></div>
+        <div><p class="pb-8 text-2xl font-bold">Vehicles Pending Sale</p></div>
         <n-data-table
           class="rounded-md"
           striped
