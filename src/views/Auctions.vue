@@ -29,9 +29,8 @@ const {
 } = getAuctions();
 
 // Vendor Search Result
-const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
-  [`${pageName}_search`, debouncedSearchText],
-  ({ queryKey }) => {
+const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
+  useQuery([`${pageName}_search`, debouncedSearchText], ({ queryKey }) => {
     if (queryKey[1] === "") return null;
     else
       return axios
@@ -42,8 +41,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
           }
           return res.data;
         });
-  }
-);
+  });
 const addTab = (auction) => {
   tabStore.addTab({ id: auction.id, name: auction.auction_company });
 };
@@ -152,8 +150,8 @@ const addTab = (auction) => {
     <section class="h-screen w-[calc(100vw-335px)]">
       <page-tabs page-name="auctions" />
       <!-- Main Body Content-->
-      <div class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden border-t-2">
-        <main class="h-full bg-white">
+      <div class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden">
+        <main class="min-h-full p-2 md:p-6">
           <router-view />
         </main>
       </div>
