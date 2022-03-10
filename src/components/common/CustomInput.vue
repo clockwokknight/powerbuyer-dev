@@ -21,45 +21,49 @@ const props = defineProps([
 
 const global = useGlobalState();
 
-const themeOverrides = {
-  Input: {
-    color: "rgba(0,0,0,0)",
-    colorDisabled: "rgba(0,0,0,0)",
-    textColorDisabled: global.isDark ? "#aaa" : "#333",
-    border: "none",
-    borderHover: "none",
-    borderDisabled: "none",
-    borderFocus: "none",
-    boxShadowFocus: "none",
-    borderRadius: "64px",
-    paddingSmall: "0px",
-    paddingMedium: "0px",
-    paddingLarge: "0px",
-    placeholderColor: global.isDark ? "#777" : "#bdbdbd",
-    fontSizeMedium: "12px",
-  },
-  Select: {
-    peers: {
-      InternalSelection: {
-        color: "rgba(0,0,0,0)",
-        colorDisabled: "rgba(0,0,0,0)",
-        textColorDisabled: global.isDark ? "#aaa" : "#333",
-        border: "none",
-        borderHover: "none",
-        borderDisabled: "none",
-        borderFocus: "none",
-        borderRadius: "6px",
-        boxShadowFocus: "none",
-        paddingTiny: "0px",
-        paddingSmall: "0px",
-        paddingMedium: "0px",
-        paddingLarge: "0px",
-        placeholderColor: global.isDark ? "#777" : "#bdbdbd",
-        fontSizeMedium: "14px",
+var themeOverrides = computed(() => {
+  return {
+    Input: {
+      color: "rgba(0,0,0,0)",
+      colorFocus: "rgb(0,0,0,0)",
+      colorDisabled: "rgba(0,0,0,0)",
+      textColorDisabled: global.isDark ? "#eee" : "#111",
+      border: "none",
+      borderHover: "none",
+      borderDisabled: "none",
+      borderFocus: "none",
+      boxShadowFocus: "none",
+      borderRadius: "64px",
+      paddingSmall: "0px",
+      paddingMedium: "0px",
+      paddingLarge: "0px",
+      placeholderColor: global.isDark ? "#777" : "#bdbdbd",
+      fontSizeMedium: "12px",
+    },
+    Select: {
+      peers: {
+        InternalSelection: {
+          color: "rgba(0,0,0,0)",
+          colorFocus: "rgba(0,0,0,0)",
+          colorDisabled: "rgba(0,0,0,0)",
+          textColorDisabled: global.isDark ? "#eee" : "#111",
+          border: "none",
+          borderHover: "none",
+          borderDisabled: "none",
+          borderFocus: "none",
+          borderRadius: "6px",
+          boxShadowFocus: "none",
+          paddingTiny: "0px",
+          paddingSmall: "0px",
+          paddingMedium: "0px",
+          paddingLarge: "0px",
+          placeholderColor: global.isDark ? "#777" : "#bdbdbd",
+          fontSizeMedium: "14px",
+        },
       },
     },
-  },
-};
+  };
+});
 
 const vendors = useVendors();
 const message = useMessage();
@@ -191,25 +195,34 @@ function handleInput(e) {
       "
     >
       <div
-        class="flex w-full items-center rounded-md border-[1px] duration-200"
+        class="flex w-full items-center rounded-md border-[1px] dark:border-transparent duration-200"
         :class="`
             ${saved && 'ping'}
             ${
-              (!type || type !== 'header') &&
+              type === 'header'
+                ? 'dark:bg-transparent dark:!text-white'
+                : 'dark:bg-[#191919]'
+            }
+            ${
+              (!type || type !== 'header' || global.isDark) &&
               editing &&
               isValid &&
-              'border-secondary shadow-lg shadow-green-100 dark:shadow-[#00ff0008]'
+              '!border-secondary shadow-lg shadow-green-100 dark:shadow-[#00ff0008] dark:!bg-[#202D2C]'
             }
             ${
               (!type || type !== 'header') &&
               editing &&
               !isValid &&
-              'border-red-600 shadow-lg shadow-red-100 dark:shadow-[#ff000008]'
+              '!border-red-600 shadow-lg shadow-red-100 dark:shadow-[#ff000008] dark:!bg-[#2D2020]'
             } 
             ${
               type === 'header' &&
               `
-                ${editing ? `border-transparent !shadow-lg` : `!border-transparent`} 
+                ${
+                  editing
+                    ? `border-transparent !shadow-lg dark:shadow-[#00ff0008] pl-2`
+                    : `!border-transparent`
+                } 
                 ${saved && 'ping'} 
               `
             }
@@ -286,7 +299,7 @@ function handleInput(e) {
               class="duration-200"
               :class="
                 !isValid
-                  ? 'fill-gray-200 dark:fill-gray-700'
+                  ? 'fill-gray-200 dark:opacity-[0.1]'
                   : 'fill-secondary hover:opacity-60'
               "
               viewBox="0 0 24 24"
