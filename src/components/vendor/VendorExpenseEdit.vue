@@ -70,19 +70,27 @@ watch(
       // if the removed object has id, then store it in deleteExpense state for later use
       const removedObj = toRaw(prevValue[currentRemovedIndex.value]);
       if (objectHas(removedObj, ["id"]))
-        deletedExpenses.value.push({ ...removedObj, delete_record: true });
+        deletedExpenses.value.push({
+          ...omit(removedObj, ["expense_types", "showSelect"]),
+          delete_record: 1,
+        });
     }
   },
   { deep: true, flush: "post" }
 );
 // Mutations
 const { mutate: updateExpense, isLoading: updateExpenseLoading } = useMutation(
-  ({ id, ...data }) => axios.put(`/expenses/${id}`, data),
+  ({ id, ...data }) =>
+    axios.put(`/vendor_invoices/${id}`, {
+      ...data,
+      amount_paid: 0,
+      balance: data.amount_due,
+    }),
   {
     onSuccess() {
       queryClient.invalidateQueries([
-        "expensesByVendor",
-        String(form.value.vendor_id),
+        "vendorInvoices",
+        String(vendor_id.value),
       ]);
       emits("update:show", false);
       message.success("Expense updated successfully.");
@@ -91,12 +99,12 @@ const { mutate: updateExpense, isLoading: updateExpenseLoading } = useMutation(
 );
 
 const { mutateAsync: deleteExpense, isLoading: deleteExpenseLoading } =
-  useMutation((id) => axios.delete("/expenses/" + id), {
+  useMutation((id) => axios.delete("/vendor_invoices/" + id), {
     onSuccess() {
       emits("update:show", false);
       queryClient.invalidateQueries([
-        "expensesByVendor",
-        String(form.value.vendor_id),
+        "vendorInvoices",
+        String(vendor_id.value),
       ]);
       message.success("Expense deleted successfully.");
     },
@@ -229,14 +237,17 @@ const submitForm = async () => {
   try {
     await formRef.value.validate();
     let obj = unref(form);
-    obj.expenses = toRaw(
-      form.value.expenses.map((expense) =>
-        omit(toRaw(expense), ["expense_types", "showSelect"])
-      )
-    );
+    // remove Proxy from expenses array
+    obj.expenses = toRaw(form.value.expenses);
+    // remove Proxy each object from array and remove 'showSelect' and 'expense_types'
+    obj.expenses = obj.expenses
+      .map((expense) => omit(toRaw(expense), ["expense_types", "showSelect"]))
+      // Also add deleted Expense array so that it removes from the database as well.
+      .concat(unref(deletedExpenses));
+
     obj = omit(obj, ["invoice_number"]);
-    console.log(obj);
-    // updateExpense(obj);
+
+    updateExpense(obj);
   } catch (e) {}
 };
 
@@ -354,6 +365,7 @@ const onRemoveExpenseItem = (index) => {
               @update-value="(val) => onExpenseSelect(val, index)"
               :disabled="isLoading"
               :loading="isLoading"
+              @scroll="handleExpenseTypeSelectScroll"
               v-if="form.expenses[index].showSelect"
             />
             <n-input
