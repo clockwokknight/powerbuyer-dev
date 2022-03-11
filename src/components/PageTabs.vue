@@ -1,6 +1,7 @@
 <script setup>
 import { getPageTabs } from "@/hooks/pageTabs";
 import { useTabsViewStore } from "@/store/tabs";
+import { useGlobalState } from "@/store/global";
 import { Tab, TabGroup, TabList } from "@headlessui/vue";
 import { useDebounceFn } from "@vueuse/core";
 import axios from "axios";
@@ -8,6 +9,7 @@ import { nextTick, ref, watch } from "vue";
 import { useMutation, useQueryClient } from "vue-query";
 import { useRoute, useRouter } from "vue-router";
 
+const global = useGlobalState();
 const tabStore = useTabsViewStore();
 const props = defineProps(["pageName"]);
 const router = useRouter();
@@ -21,8 +23,7 @@ const scrollWrapper = ref(null);
 
 // Left and right Click Arrow Scroll
 const ifScrollArrowNeeded = useDebounceFn(() => {
-  const wrapperWidth =
-    tabListButtonWrapper.value?.getBoundingClientRect().width;
+  const wrapperWidth = tabListButtonWrapper.value?.getBoundingClientRect().width;
   const tabWidth = tabListButton.value?.getBoundingClientRect().width;
 
   showScrollArrow.value = wrapperWidth < tabWidth;
@@ -30,7 +31,6 @@ const ifScrollArrowNeeded = useDebounceFn(() => {
 
 const scrollTo = (type) => {
   const scrollLeft = scrollWrapper.value.scrollLeft;
-
   if (type === "left") {
     scrollWrapper.value.scrollTo({
       left: scrollLeft - 150,
@@ -125,10 +125,7 @@ watch(
   () => tabStore.selectedIndex,
   (newValue) => {
     scrollTabToView();
-    if (
-      newValue !== -1 &&
-      parseInt(route.params?.id) !== tabStore.tabs[newValue].id
-    ) {
+    if (newValue !== -1 && parseInt(route.params?.id) !== tabStore.tabs[newValue].id) {
       router.push(`/${props.pageName}/${tabStore.tabs[newValue].id}`);
     }
   }
@@ -159,9 +156,12 @@ const afterAnimated = () => {
 
 <template>
   <TabGroup :selected-index="tabStore.selectedIndex" @change="tabChanged">
-    <header class="relative z-40 h-[80px] pl-2 md:pl-6 pr-[calc(0.5rem+5px)] md:pr-[calc(1.5rem+5px)] pt-2 md:pt-6">
+    <header
+      class="relative z-40 h-[80px] pl-2 md:pl-6 pr-[calc(0.5rem+5px)] md:pr-[calc(1.5rem+5px)] pt-2 md:pt-6"
+    >
       <div
-        class="relative flex h-[62px] items-center rounded bg-white dark:bg-[#25272A] shadow-lg"
+        class="relative flex h-[64px] items-center rounded bg-foreground_light dark:bg-foreground_dark"
+        :class="global.stuck[0] && 'shadow-lg'"
         ref="tabListButtonWrapper"
       >
         <div
@@ -169,10 +169,7 @@ const afterAnimated = () => {
           ref="scrollWrapper"
         >
           <TabList v-slot="{ selectedIndex }">
-            <nav
-              ref="tabListButton"
-              class="flex min-w-max flex-nowrap gap-x-2 pl-5"
-            >
+            <nav ref="tabListButton" class="flex min-w-max flex-nowrap gap-x-2 pl-5">
               <TransitionGroup
                 name="fade"
                 @before-leave="beforeLeaveTab"
@@ -183,7 +180,7 @@ const afterAnimated = () => {
                   v-for="(tab, tabIdx) in tabStore.tabs"
                   v-if="tabStore.tabs.length >= 1"
                   :key="tab?.id"
-                  class="group relative grid select-none place-content-center overflow-hidden rounded-lg"
+                  class="group relative grid select-none place-content-center overflow-hidden rounded-round"
                 >
                   <router-link
                     :to="`/${props.pageName}/${tab?.id}`"
@@ -215,9 +212,7 @@ const afterAnimated = () => {
                   >
                     <svg
                       class="cubic-timing-tab h-3 w-3 text-red-500 transition-transform duration-300 group-hover:scale-100"
-                      :class="[
-                        tabIdx === selectedIndex ? 'scale-100' : 'scale-0',
-                      ]"
+                      :class="[tabIdx === selectedIndex ? 'scale-100' : 'scale-0']"
                       viewBox="0 0 11 11"
                       fill="none"
                       stroke="currentColor"

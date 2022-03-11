@@ -37,10 +37,10 @@ const formRow = ref(null);
         <VendorExpensesAdd />
       </div>
 
-      <div class="rounded-xl border-2 py-8 px-8 bg-white">
+      <div class="rounded-round border-2 py-8 px-8 bg-white">
         <div><p class="pb-8 text-2xl font-bold">Expenses</p></div>
         <n-data-table
-          class="rounded-lg"
+          class="rounded-round"
           striped
           :columns="columns"
           :data="expensesData?.pages[0]"

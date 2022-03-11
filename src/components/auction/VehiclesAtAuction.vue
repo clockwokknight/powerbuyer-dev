@@ -66,7 +66,7 @@ const columns = [
       >
         <div><p class="pb-8 text-2xl font-bold">Vehicles at Auction</p></div>
         <n-data-table
-          class="rounded-md"
+          class="rounded-round"
           striped
           :columns="columns"
           :data="vehicleData?.pages[0]"

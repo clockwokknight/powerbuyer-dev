@@ -82,7 +82,7 @@ const columns = [
       >
         <div><p class="pb-8 text-2xl font-bold">Commissions Payed</p></div>
         <n-data-table
-          class="rounded-md"
+          class="rounded-round"
           striped
           :columns="columns"
           :data="commissionData ? Object.values(commissionData) : []"

@@ -104,7 +104,6 @@ watch(
   () => props.value,
   (newVal) => {
     isValid.value = validation(newVal);
-    console.log(isValid.value);
   }
 );
 
@@ -164,7 +163,7 @@ function handleInput(e) {
       <div class="flex">
         <label
           v-if="type !== 'header'"
-          class="absolute z-40 translate-x-4 translate-y-[-2px] bg-transparent px-2 text-[9px] font-bold uppercase tracking-widest text-gray-600 dark:text-gray-300"
+          class="absolute z-40 translate-x-4 translate-y-[-2px] bg-transparent px-2 text-[9px] font-bold uppercase tracking-widest text-gray-600 dark:text-background_light"
         >
           <b
             class="text-red-600 duration-[300ms]"
@@ -201,25 +200,25 @@ function handleInput(e) {
         "
       >
         <div
-          class="flex w-full items-center rounded-md border-[1px] dark:border-transparent duration-200"
+          class="flex w-full items-center rounded-round border-[1px] dark:border-transparent duration-200"
           :class="`
             ${saved && 'ping'}
             ${
               type === 'header'
                 ? 'dark:bg-transparent dark:!text-white'
-                : 'dark:bg-[#191919]'
+                : 'dark:bg-background_dark'
             }
             ${
               (!type || type !== 'header' || global.isDark) &&
               editing &&
               isValid &&
-              '!border-secondary shadow-lg shadow-green-100 dark:shadow-[#00ff0008] dark:!bg-[#202D2C]'
+              '!border-success shadow-lg shadow-success/10 dark:!bg-[#202D2C]'
             }
             ${
               (!type || type !== 'header') &&
               editing &&
               !isValid &&
-              '!border-red-600 shadow-lg shadow-red-100 dark:shadow-[#ff000008] dark:!bg-[#2D2020]'
+              '!border-error shadow-lg shadow-error/10 dark:!bg-[#2D2020]'
             } 
             ${
               type === 'header' &&
@@ -274,7 +273,7 @@ function handleInput(e) {
                 `"
             >
               <svg
-                class="fill-black dark:fill-white hover:fill-secondary"
+                class="fill-black dark:fill-white hover:fill-success"
                 viewBox="0 0 24 24"
               >
                 <path
@@ -306,7 +305,7 @@ function handleInput(e) {
                 :class="
                   !isValid
                     ? 'fill-gray-200 dark:opacity-[0.1]'
-                    : 'fill-secondary hover:opacity-60'
+                    : 'fill-success hover:opacity-60'
                 "
                 viewBox="0 0 24 24"
               >
@@ -369,7 +368,7 @@ function handleInput(e) {
 }
 @keyframes ping {
   from {
-    @apply bg-secondarylight;
+    @apply bg-[#00ff0020];
   }
   to {
     @apply bg-transparent;

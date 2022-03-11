@@ -58,8 +58,8 @@ watch(
         <span
           :class="
             type !== 'basic' && active === index
-              ? 'mr-6 rounded-lg bg-primarylight py-2 pl-6 pr-0 text-primary duration-300 hover:scale-[0.96]'
-              : 'mr-0 rounded-lg bg-transparent py-2 px-3 text-black dark:text-white duration-300'
+              ? 'mr-6 rounded-round bg-accent py-2 pl-6 pr-0 text-primary duration-300 hover:scale-[0.96]'
+              : 'mr-0 rounded-round bg-transparent py-2 px-3 text-black dark:text-white duration-300'
           "
         >
           {{ item.title }}
@@ -67,7 +67,7 @@ watch(
       </span>
       <div
         v-if="type === 'basic'"
-        class="__indicator h-1 translate-y-[10px] bg-transparent duration-200"
+        class="__indicator h-1 translate-y-[12px] bg-transparent duration-200"
         :class="`${active === index ? '!w-12 !bg-primary' : 'w-0 bg-gray-300'}`"
       ></div>
     </div>

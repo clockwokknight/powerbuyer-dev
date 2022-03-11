@@ -36,7 +36,7 @@ const reset = () => {
 <template>
   <div class="relative">
     
-    <n-input  class="border-2 rounded-md hover:border-sky-500 hover:ring-sky-500 hover:ring-0" 
+    <n-input  class="border-2 rounded-round hover:border-sky-500 hover:ring-sky-500 hover:ring-0" 
 											v-model:value="modelValue"
 											:loading="loadingValue"
                       @keyup="handleKeyUp"

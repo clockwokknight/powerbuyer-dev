@@ -134,7 +134,6 @@ const { isLoading, mutateAsync } = useMutation(
 watch(
   () => vendor.value,
   (newValue) => {
-    console.log("vendor changed: ", newValue);
     if (newValue) {
       form.value = { ...newValue };
       vendorData.value = { ...newValue };
@@ -196,7 +195,7 @@ function handleTabClick(e) {
 <template>
   <div
     id="details"
-    class="__section __vendor-card mt-4 grid grid-cols-12 rounded border-2 dark:border-0 bg-white dark:bg-[#25272A] p-6"
+    class="__section __vendor-card mt-4 grid grid-cols-12 rounded bg-foreground_light dark:bg-foreground_dark p-6"
   >
     <!-- left side -->
     <div class="__form col-span-12 md:col-span-8 flex flex-col justify-between">
@@ -402,7 +401,7 @@ function handleTabClick(e) {
     id="__subtabs"
     type="basic"
     ref="vendorTab"
-    class="sticky top-[-2px] left-0 z-40 mt-4 w-full rounded border-2 dark:border-0 border-gray-200 bg-white dark:bg-[#25272A] duration-300"
+    class="sticky top-[-2px] left-0 z-40 mt-4 w-full rounded bg-foreground_light dark:bg-foreground_dark duration-300"
     :items="vendorTabs"
     @click="handleTabClick"
   />
@@ -418,20 +417,17 @@ function handleTabClick(e) {
 
 <style lang="scss">
 #__subtabs[stuck] {
-  @apply bg-[#f9fafb] dark:bg-[#25272A];
+  @apply bg-[#F4F6F8] dark:bg-[#34363A];
   @apply rounded-none border-2 border-none border-transparent shadow-lg shadow-[#00000011];
 }
 .__veil {
   width: calc(100vw - 370px);
 }
-.__section {
-  @apply scroll-mt-[100px] rounded-md;
-}
 .__invoice-button {
   transition-timing-function: ease;
-  @apply border-lightgray mt-[14px] flex h-10 w-full items-center justify-center rounded-sm border-[1px] px-3 text-center duration-[200ms];
+  @apply border-background_light mt-[14px] flex h-10 w-full items-center justify-center rounded-round border-[1px] px-3 text-center duration-[200ms];
   &:hover {
-    @apply border-secondary text-secondary;
+    @apply border-success text-success;
   }
   svg {
     transition-timing-function: $overshoot;

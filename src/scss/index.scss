@@ -8,18 +8,22 @@
 
 body {
   font-family: 'Montserrat', 'sans-serif';
-  @apply bg-[#F5F6F6];
-  @apply dark:text-white;
+  @apply bg-background_light;
+  @apply dark:text-background_light;
 }
 
 .center-content {
   @apply flex justify-center items-center;
 }
 
+.__section {
+  @apply scroll-mt-[100px] rounded-round;
+}
+
 // ---- menu ----
 
 .menu-items li, .menu-footer {
-  @apply w-[45px] h-[45px] flex justify-center hover:bg-[#565656] rounded-lg cursor-pointer my-[3px];
+  @apply w-[45px] h-[45px] flex justify-center hover:bg-[#565656] rounded-round cursor-pointer my-[3px];
 }
 .menu-items li img, .menu-footer img {
   @apply max-w-[20px];

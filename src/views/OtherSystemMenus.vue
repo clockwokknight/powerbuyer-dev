@@ -8,7 +8,7 @@
 			</div>
 			<div class="grid grid-cols-3">
 				<div
-					class="bg-gray-100 mx-4 rounded-md shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
+					class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
 				>
 					<div class="pt-6 pb-8 px-6">
 						<div class="font-bold text-lg mb-2">Block title</div>
@@ -19,7 +19,7 @@
 					</div>
 				</div>
 				<div
-					class="bg-gray-100 mx-4 rounded-md shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
+					class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
 				>
 					<div class="py-6 px-6">
 						<div class="font-bold text-lg mb-2">Block title</div>
@@ -30,7 +30,7 @@
 					</div>
 				</div>
 				<div
-					class="bg-gray-100 mx-4 rounded-md shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
+					class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
 				>
 					<div class="py-6 px-6">
 						<div class="font-bold text-lg mb-2"></div>
@@ -38,7 +38,7 @@
 					</div>
 				</div>
 				<div
-					class="bg-gray-100 mx-4 rounded-md shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
+					class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
 				>
 					<div class="py-6 px-6">
 						<div class="font-bold text-lg mb-2 h-11"></div>
@@ -46,7 +46,7 @@
 					</div>
 				</div>
 				<div
-					class="bg-gray-100 mx-4 rounded-md shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
+					class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
 				>
 					<div class="py-6 px-6">
 						<div class="font-bold text-lg mb-2 h-11"></div>
@@ -54,7 +54,7 @@
 					</div>
 				</div>
 				<div
-					class="bg-gray-100 mx-4 rounded-md shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
+					class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
 				>
 					<div class="py-6 px-6">
 						<div class="font-bold text-lg mb-2 h-11"></div>
@@ -70,7 +70,7 @@
 			</div>
 			<div class="grid grid-cols-3">
 				<div
-					class="bg-gray-100 mx-4 rounded-md shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
+					class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
 				>
 					<div class="pt-6 pb-8 px-6">
 						<div class="font-bold text-lg mb-2">Block title</div>
@@ -81,7 +81,7 @@
 					</div>
 				</div>
 				<div
-					class="bg-gray-100 mx-4 rounded-md shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
+					class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
 				>
 					<div class="py-6 px-6">
 						<div class="font-bold text-lg mb-2">Block title</div>
@@ -92,7 +92,7 @@
 					</div>
 				</div>
 				<div
-					class="bg-gray-100 mx-4 rounded-md shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
+					class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
 				>
 					<div class="py-6 px-6">
 						<div class="font-bold text-lg mb-2"></div>
@@ -100,7 +100,7 @@
 					</div>
 				</div>
 				<div
-					class="bg-gray-100 mx-4 rounded-md shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
+					class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
 				>
 					<div class="py-6 px-6">
 						<div class="font-bold text-lg mb-2 h-11"></div>
@@ -108,7 +108,7 @@
 					</div>
 				</div>
 				<div
-					class="bg-gray-100 mx-4 rounded-md shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
+					class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
 				>
 					<div class="py-6 px-6">
 						<div class="font-bold text-lg mb-2 h-11"></div>
@@ -116,7 +116,7 @@
 					</div>
 				</div>
 				<div
-					class="bg-gray-100 mx-4 rounded-md shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
+					class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
 				>
 					<div class="py-6 px-6">
 						<div class="font-bold text-lg mb-2 h-11"></div>

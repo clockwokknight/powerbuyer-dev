@@ -9,14 +9,12 @@ import { useLoadingBar } from "naive-ui";
 import { TabGroup, TabList, Tab } from "@headlessui/vue";
 import { getVendorById, getVendors } from "@/hooks/vendor";
 import { useGlobalState } from "@/store/global";
-
 import AddVendor from "@/components/vendor/AddVendor.vue";
 import { useTabsViewStore } from "@/store/tabs";
 import PageTabs from "@/components/PageTabs.vue";
-
 import Tabs from "@/components/common/Tabs.vue";
-const tabStore = useTabsViewStore();
 
+const tabStore = useTabsViewStore();
 const global = useGlobalState();
 
 const searchText = ref("");
@@ -87,11 +85,9 @@ watch(
       :class="vendorListActive ? 'open-vendor-list' : 'close-vendor-list'"
     >
       <aside
-        class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-x-hidden bg-white dark:bg-[#1E1F21]"
+        class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-x-hidden bg-background_light dark:bg-background_dark"
       >
-        <div
-          class="sticky top-0 z-50 border-b dark:border-0 bg-white dark:bg-[#25272A] p-3"
-        >
+        <div class="sticky top-0 z-50 bg-foreground_light dark:bg-foreground_dark p-3">
           <div class="flex justify-between mb-3">
             <h1 class="text-xl font-bold uppercase">Vendors</h1>
             <div>
@@ -126,18 +122,18 @@ watch(
           <!-- Filter Component -->
         </div>
         <!-- Main Loop List -->
-        <div class="">
+        <div>
           <div v-if="isVendorSearchFetching || isVendorsLoading">
             <div
               v-for="index in Array.from({ length: 10 })"
               :key="index"
-              class="border-b dark:border-0 px-4 py-4 even:bg-[#f8f8fa] dark:even:bg-[#25272A] odd:bg-white dark:odd:bg-[#1E1F21]"
+              class="border-b dark:border-0 px-4 py-4 even:bg-foreground_light dark:even:bg-foreground_dark odd:background_light dark:odd:bg-background_dark"
             >
               <n-skeleton text :repeat="2" class="w-full" />
               <n-skeleton text class="w-[45%]" />
             </div>
           </div>
-          <ul class="bg-white dark:bg-[#25272A]">
+          <ul class="bg-foreground_dark dark:bg-foreground_dark">
             <template v-if="debouncedSearchText">
               <VendorList
                 v-if="vendorSearchResults"
@@ -183,9 +179,9 @@ watch(
 
     <section
       id="main-content"
-      class="h-screen w-[calc(100vw-60px)] md:w-[calc(100vw-335px)] bg-lightergray dark:bg-[#1E1F21]"
+      class="h-screen w-[calc(100vw-60px)] md:w-[calc(100vw-335px)] bg-background_light dark:bg-background_dark"
     >
-      <page-tabs page-name="vendors" />
+      <PageTabs page-name="vendors" />
       <!-- Main Body Content-->
       <div class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
         <main id="container" class="min-h-full p-2 md:p-6">
@@ -195,6 +191,7 @@ watch(
     </section>
   </div>
 </template>
+
 <style scoped>
 .close-vendor-list {
   animation: left-slide 0.5s forwards;
