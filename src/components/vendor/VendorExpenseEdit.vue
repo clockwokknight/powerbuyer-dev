@@ -311,7 +311,7 @@ const onRemoveExpenseItem = (index) => {
     @update:show="$emit('update:show', false)"
     size="huge"
     preset="card"
-    class="max-w-screen-md"
+    class="custom-modal relative max-w-screen-md"
   >
     <n-form
       :model="form"
@@ -337,7 +337,7 @@ const onRemoveExpenseItem = (index) => {
         show-sort-button
         :min="1"
       >
-        <div class="rounded bg-gray-200/50 p-3 dark:bg-gray-800/50">
+        <div class="grid rounded bg-gray-200/50 p-3 dark:bg-gray-800/50">
           <n-form-item
             label="VIN"
             :path="`expenses[${index}].deal_id`"
@@ -474,3 +474,10 @@ const onRemoveExpenseItem = (index) => {
     title="Delete"
   />
 </template>
+
+<style lang="scss">
+.custom-modal .n-card__footer {
+  background: var(--n-color-modal);
+  @apply sticky bottom-0 pt-3;
+}
+</style>

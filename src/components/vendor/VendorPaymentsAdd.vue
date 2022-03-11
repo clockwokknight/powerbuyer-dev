@@ -1,9 +1,9 @@
 <script setup>
-import { computed, ref, unref, watch } from "vue";
+import { computed, ref, toRaw, unref, watch } from "vue";
 import { useMessage } from "naive-ui";
 import dayjs from "dayjs";
 import { clone, pick } from "@/lib/helper";
-import { useQuery } from "vue-query";
+import { useMutation, useQuery } from "vue-query";
 import axios from "axios";
 import CurrencyInput from "@/components/common/CurrencyInput.vue";
 import { useRoute } from "vue-router";
@@ -13,8 +13,8 @@ const route = useRoute();
 
 const showDrawer = ref(false);
 const initialForm = {
-  recipient_id: null,
-  recipient_type: null,
+  // recipient_id: null,
+  // recipient_type: null,
   payment_status_id: null,
   check_number: "",
   amount: 0,
@@ -71,14 +71,15 @@ const rules = {
     message: "Please enter a valid Description",
     trigger: ["input"],
   },
-  type: {
+  account_number: {
     required: true,
-    message: "Please enter a valid type",
+    message: "Please enter the Account Number",
     trigger: ["input"],
   },
   amount: {
     required: true,
     message: "Please select a valid amount",
+    type: "number",
     trigger: ["input"],
   },
   payment_invoices: {
@@ -88,10 +89,14 @@ const rules = {
       message: "Please select an invoice",
     },
     payment_amount: {
-      type: "number",
+      // type: "number",
       required: true,
       message: "Payment Amount is required",
     },
+  },
+  payment_date: {
+    required: true,
+    message: "Please enter a valid Date",
   },
 };
 
@@ -105,8 +110,24 @@ watch(showDrawer, (newValue) => {
   }
 });
 
-const { data: invoicesData, isLoading: expensesDataLoading } =
-  vendorInvoices(routeParamId);
+watch(
+  () => form.value?.payment_invoices,
+  (newFormValue) => {
+    if (newFormValue.length > 0) {
+      form.value.amount = newFormValue?.reduce(
+        (prev, curr) => prev + parseFloat(curr.payment_amount),
+        0
+      );
+    } else {
+      form.value.amount = 0;
+    }
+  },
+  { deep: true }
+);
+
+const { data: invoicesData, isLoading: expensesDataLoading } = vendorInvoices(
+  routeParamId
+);
 
 const invoiceDataOptions = computed(() =>
   invoicesData.value?.map((inv) => ({
@@ -115,8 +136,22 @@ const invoiceDataOptions = computed(() =>
   }))
 );
 
+const { mutate: createPayment } = useMutation((data) => axios.post("/payments", data), {
+  onSuccess() {
+    message.success("Payment has been created");
+    showDrawer.value = false;
+  },
+});
+
 async function submitForm() {
-  await formRef.value.validate();
+  try {
+    await formRef.value.validate();
+    const obj = clone(form.value);
+    // obj.recipient_type = 1;
+    obj.recipient_id = routeParamId.value;
+    console.log(form.value);
+    createPayment(obj);
+  } catch (e) {}
 }
 const onCreatePaymentInvoice = () => {
   return {
@@ -125,12 +160,13 @@ const onCreatePaymentInvoice = () => {
   };
 };
 const onInvoiceSelect = (val, index) => {
-  const vendor_invoiceIdx = invoicesData.value.findIndex(
-    (inv) => inv.id === val
-  );
-  console.log({ vendor_invoiceIdx });
+  const vendor_invoiceIdx = invoicesData.value.findIndex((inv) => inv.id === val);
   const vendor_invoice = invoicesData.value[vendor_invoiceIdx];
-  // form.value.payment_invoices[index].payment_amount =  vendor_invoice.balance
+
+  form.value.payment_invoices[index] = {
+    vendor_invoice_id: vendor_invoice.id,
+    payment_amount: vendor_invoice.balance,
+  };
 };
 </script>
 
@@ -148,13 +184,7 @@ const onInvoiceSelect = (val, index) => {
   </n-button>
   <n-drawer v-model:show="showDrawer" :width="500">
     <n-drawer-content title="Add Payment">
-      <n-form
-        :model="form"
-        :label-width="90"
-        :rules="rules"
-        size="medium"
-        ref="formRef"
-      >
+      <n-form :model="form" :label-width="90" :rules="rules" size="medium" ref="formRef">
         <n-form-item label="Payment Status" path="payment_status_id">
           <n-select
             :options="paymentStatusOptions"
@@ -163,15 +193,11 @@ const onInvoiceSelect = (val, index) => {
           />
         </n-form-item>
         <n-form-item label="Check Number" path="check_number">
-          <n-input
-            type="text"
-            clearable
-            v-model:value.trim="form.check_number"
-          />
+          <n-input type="text" clearable v-model:value.trim="form.check_number" />
         </n-form-item>
         <div>Payment Invoice</div>
         <n-dynamic-input
-          v-model:value="form.expenses"
+          v-model:value="form.payment_invoices"
           class="custom-dynamic-input my-5"
           @create="onCreatePaymentInvoice"
           #="{ index, value }"
@@ -187,7 +213,7 @@ const onInvoiceSelect = (val, index) => {
               <n-select
                 :options="invoiceDataOptions"
                 clearable
-                @update-value="onInvoiceSelect"
+                @update:value="(val) => onInvoiceSelect(val, index)"
                 :value="form.payment_invoices[index].vendor_invoice_id"
               />
             </n-form-item>
@@ -196,9 +222,7 @@ const onInvoiceSelect = (val, index) => {
               :rule="rules.payment_invoices.payment_amount"
               label="Payment Amount"
             >
-              <CurrencyInput
-                v-model="form.payment_invoices[index].payment_amount"
-              />
+              <CurrencyInput v-model="form.payment_invoices[index].payment_amount" />
             </n-form-item>
           </div>
         </n-dynamic-input>
@@ -218,6 +242,7 @@ const onInvoiceSelect = (val, index) => {
           <CurrencyInput
             placeholder="Enter Amount"
             clearable
+            disabled
             v-model="form.amount"
           />
         </n-form-item>
