@@ -99,15 +99,17 @@ watch(
         </ul>
       </nav>
     </div>
-    <div class="mt-auto mb-4 w-full flex justify-center">
-      <div
-        class="theme-toggle theme-toggle-js h-[24px] w-[24px] cursor-pointer"
+    <div class="mt-auto mb-4 w-[60px] flex justify-center">
+      <button
+        :content="global.isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+        v-tippy="{ placement: 'right', duration: 50 }"
+        class="theme-toggle theme-toggle-js h-[55px] w-[55px] p-[8px] cursor-pointer"
         @click="toggleDark"
       >
         <svg
-          v-if="global.isDark"
+          v-show="global.isDark"
           viewBox="0 0 24 24"
-          class="scale-[0.7] hover:scale-[0.8] duration-500"
+          class="scale-[0.6] hover:scale-[0.4] duration-500"
         >
           <g>
             <path
@@ -117,9 +119,9 @@ watch(
           </g>
         </svg>
         <svg
-          v-if="!global.isDark"
+          v-show="!global.isDark"
           viewBox="0 0 24 24"
-          class="hover:scale-[1.05] hover:rotate-45 duration-500"
+          class="scale-[0.8] hover:scale-[0.6] hover:rotate-45 duration-500"
         >
           <g>
             <path
@@ -128,7 +130,7 @@ watch(
             ></path>
           </g>
         </svg>
-      </div>
+      </button>
     </div>
   </aside>
 </template>
