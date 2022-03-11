@@ -19,9 +19,8 @@ watch(
   }
 );
 
-const { data: invoicesData, isLoading: expensesDataLoading } = vendorInvoices(
-  routeParamId
-);
+const { data: invoicesData, isLoading: expensesDataLoading } =
+  vendorInvoices(routeParamId);
 
 const rowKey = (row) => row?.id;
 const columns = [
@@ -46,11 +45,9 @@ const columns = [
     title: "",
     key: "edit",
     render(row) {
-      return row?.payments.length > 0
-        ? h("div")
-        : h(ActionButtons, {
-            onEdit: () => showEditExpenseForm(row),
-          });
+      return h(ActionButtons, {
+        onEdit: () => showEditExpenseForm(row),
+      });
     },
   },
 ];
@@ -58,6 +55,7 @@ const columns = [
 const pagination = { pageSize: 10 };
 const visibleEditForm = ref(false);
 const formRow = ref(null);
+const formDisabled = ref(false);
 
 function showEditExpenseForm(row) {
   let obj = clone(row);
@@ -73,7 +71,15 @@ function showEditExpenseForm(row) {
       "expense_types",
     ])
   );
-  obj = omit(obj, ["payments", "balance", "amount_paid", "children", "vendor_name"]);
+  obj = omit(obj, [
+    "payments",
+    "balance",
+    "amount_paid",
+    "children",
+    "vendor_name",
+  ]);
+
+  formDisabled.value = Boolean(row?.payments.length);
   formRow.value = obj;
   visibleEditForm.value = true;
 }
@@ -85,12 +91,15 @@ function showEditExpenseForm(row) {
       :show-drawer="visibleEditForm"
       :initial-data="formRow"
       @update:show="visibleEditForm = false"
+      :is-disabled="formDisabled"
     />
     <div class="-mt-4 font-sans">
       <div class="flex translate-y-[68px] items-center justify-end pr-10">
         <VendorExpensesAdd />
       </div>
-      <div class="rounded border-2 bg-white py-8 px-8 dark:border-0 dark:bg-[#25272A]">
+      <div
+        class="rounded border-2 bg-white py-8 px-8 dark:border-0 dark:bg-[#25272A]"
+      >
         <div>
           <p class="pb-8 text-2xl font-bold">Invoices & Expenses</p>
         </div>

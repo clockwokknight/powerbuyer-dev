@@ -13,8 +13,6 @@ import PageTabs from "@/components/PageTabs.vue";
 
 const tabStore = useTabsViewStore();
 
-const global = useGlobalState();
-
 const searchText = ref("");
 const debouncedSearchText = useDebounce(searchText, 500);
 
@@ -42,6 +40,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
         return res.data;
       });
   });
+
 // TODO: we are gonna have to figure this out
 function handleScroll(e) {
   let scroll = e.target.scrollTop;

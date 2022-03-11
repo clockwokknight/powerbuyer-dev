@@ -1,10 +1,13 @@
 <script setup>
 import VendorPaymentsAdd from "@/components/vendor/VendorPaymentsAdd.vue";
+import ActionButtons from "@/components/vendor/ActionButtons.vue";
 import axios from "axios";
 import { NButton } from "naive-ui";
-import { h, ref, watch } from "vue";
+import { h, ref, toRaw, watch } from "vue";
 import { useQuery } from "vue-query";
 import { useRoute } from "vue-router";
+import { omit, pick } from "@/lib/helper.js";
+import VendorPaymentEdit from "@/components/vendor/VendorPaymentEdit.vue";
 
 const columns = [
   {
@@ -31,28 +34,43 @@ const columns = [
     title: "",
     key: "edit",
     render(row) {
-      return h(
-        NButton,
-        {
-          strong: true,
-
-          size: "medium",
-          onClick: () => doShowOuter(row),
-        },
-        { default: () => "View / Edit" }
-      );
+      return h(ActionButtons, {
+        onClick: () => showEditPaymentForm(row),
+      });
     },
   },
 ];
 
-const pagination = { pageSize: 10 };
 const route = useRoute();
+const pagination = { pageSize: 10 };
 const routeParamId = ref(route.params?.id);
+const visibleEditForm = ref(false);
+const formRow = ref(null);
+const showEditPaymentForm = (row) => {
+  const obj = omit(toRaw(row), [
+    "created_at",
+    "updated_at",
+    "recipient_type",
+    "txn_id",
+    "recipient_name",
+    "invoice_number",
+  ]);
+  obj.vendor_invoices = obj.vendor_invoices.map((invoice) => ({
+    vendor_invoice_id: invoice.id,
+    payment_amount: invoice.amount_paid,
+  }));
+
+  formRow.value = obj;
+  visibleEditForm.value = true;
+  console.log({ obj, row: toRaw(row) });
+};
 
 const { data: paymentTable, isLoading } = useQuery(
   ["payments_vendor", routeParamId],
   ({ queryKey }) =>
-    axios.get("/payments/vendor/" + queryKey[1]).then((res) => (res.data ? res.data : []))
+    axios
+      .get("/payments/vendor/" + queryKey[1])
+      .then((res) => (res.data ? res.data : []))
 );
 
 watch(
@@ -62,20 +80,14 @@ watch(
   },
   { immediate: true }
 );
-
-function updateVendor(key, val) {}
-
-function handleKeyUp(val) {
-  show.value[val] = true;
-}
-
-function handleKeyDown(val) {
-  show.value[val] = false;
-}
 </script>
 
 <template>
-  <div class="-mt-4 font-sans antialiased">
+  <div class="-mt-4 font-sans">
+    <VendorPaymentEdit
+      :initial-data="formRow"
+      v-model:show-drawer="visibleEditForm"
+    />
     <div class="flex translate-y-[68px] items-center justify-end pr-10">
       <VendorPaymentsAdd />
     </div>
@@ -90,7 +102,7 @@ function handleKeyDown(val) {
         :pagination="pagination"
         :bordered="false"
         :max-height="400"
-        :scroll-x="1000"
+        :scroll-x="900"
       />
     </div>
   </div>

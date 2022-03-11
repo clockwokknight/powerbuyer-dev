@@ -10,7 +10,7 @@ import axios from "axios";
 import dayjs from "dayjs";
 import { useMessage } from "naive-ui";
 
-const props = defineProps(["showDrawer", "initialData"]);
+const props = defineProps(["showDrawer", "initialData", "isDisabled"]);
 const emits = defineEmits(["update:show"]);
 
 const message = useMessage();
@@ -318,7 +318,7 @@ const onRemoveExpenseItem = (index) => {
       :rules="rules"
       size="medium"
       ref="formRef"
-      :disabled="isLoading"
+      :disabled="isLoading || isDisabled"
     >
       <n-form-item label="Invoice Number" path="invoice_number">
         <n-input
@@ -336,6 +336,7 @@ const onRemoveExpenseItem = (index) => {
         #="{ index, value }"
         show-sort-button
         :min="1"
+        :max="isDisabled ? form.expenses?.length : undefined"
       >
         <div class="grid rounded bg-gray-200/50 p-3 dark:bg-gray-800/50">
           <n-form-item
@@ -363,7 +364,6 @@ const onRemoveExpenseItem = (index) => {
               :options="expenseItemsOptions"
               filterable
               @update-value="(val) => onExpenseSelect(val, index)"
-              :disabled="isLoading"
               :loading="isLoading"
               @scroll="handleExpenseTypeSelectScroll"
               v-if="form.expenses[index].showSelect"
@@ -372,7 +372,6 @@ const onRemoveExpenseItem = (index) => {
               v-else
               v-model:value="form.expenses[index].name"
               :loading="isLoading"
-              :disabled="isLoading"
               @keydown.enter.prevent
             />
           </n-form-item>
@@ -381,7 +380,6 @@ const onRemoveExpenseItem = (index) => {
               type="textarea"
               v-model:value="form.expenses[index].description"
               :loading="isLoading"
-              :disabled="isLoading"
               @keydown.enter.prevent
             />
           </n-form-item>
@@ -396,7 +394,6 @@ const onRemoveExpenseItem = (index) => {
               filterable
               v-model:value="form.expenses[index].type"
               :loading="isLoading"
-              :disabled="isLoading"
               @keydown.enter.prevent
             />
           </n-form-item>
@@ -409,7 +406,6 @@ const onRemoveExpenseItem = (index) => {
             <CurrencyInput
               v-model="form.expenses[index].amount"
               :loading="isLoading"
-              :disabled="isLoading"
             />
           </n-form-item>
           <n-form-item
@@ -441,7 +437,7 @@ const onRemoveExpenseItem = (index) => {
       </n-form-item>
     </n-form>
     <template #footer>
-      <div class="flex justify-end gap-x-4">
+      <div class="flex justify-end gap-x-4" v-if="!isDisabled">
         <n-button
           size="large"
           :disabled="isLoading"
