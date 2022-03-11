@@ -71,7 +71,7 @@ function toggleListSlide() {
 watch(
   () => vendorListActive.value,
   (val) => {
-    global.setListActive(val);
+    global.setListActive(val, "vendor");
   }
 );
 </script>

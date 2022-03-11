@@ -237,7 +237,7 @@ function handleTabClick(e) {
           />
         </div>
         <!-- row 2 -->
-        <div class="col-span-6 md:col-span-4">
+        <div class="col-span-12 md:col-span-4">
           <CustomInput
             label="City"
             placeholder=""
@@ -249,7 +249,7 @@ function handleTabClick(e) {
             @focus="currentActiveField = 'city'"
           />
         </div>
-        <div class="col-span-6 md:col-span-4">
+        <div class="col-span-12 md:col-span-4">
           <CustomInput
             type="select"
             label="State"
@@ -263,7 +263,7 @@ function handleTabClick(e) {
             @focus="currentActiveField = 'state'"
           />
         </div>
-        <div class="col-span-6 md:col-span-4">
+        <div class="col-span-12 md:col-span-4">
           <CustomInput
             label="Zip Code"
             placeholder="#####-####"
@@ -277,7 +277,7 @@ function handleTabClick(e) {
           />
         </div>
         <!-- row 3 -->
-        <div class="col-span-6 md:col-span-4">
+        <div class="col-span-12 md:col-span-4">
           <CustomInput
             label="Email"
             placeholder=""
@@ -289,7 +289,7 @@ function handleTabClick(e) {
             @focus="currentActiveField = 'email'"
           />
         </div>
-        <div class="col-span-6 md:col-span-4">
+        <div class="col-span-12 md:col-span-4">
           <CustomInput
             label="Phone"
             placeholder="(###) ###-####"
@@ -302,7 +302,7 @@ function handleTabClick(e) {
             @focus="currentActiveField = 'phone'"
           />
         </div>
-        <div class="col-span-6 md:col-span-4">
+        <div class="col-span-12 md:col-span-4">
           <CustomInput
             label="Fax"
             placeholder="(###) ###-####"
@@ -316,7 +316,7 @@ function handleTabClick(e) {
           />
         </div>
         <!-- row 4 -->
-        <div class="col-span-6 md:col-span-4">
+        <div class="col-span-12 md:col-span-4">
           <CustomInput
             label="DIN"
             placeholder=""
@@ -328,7 +328,7 @@ function handleTabClick(e) {
             @focus="currentActiveField = 'din'"
           />
         </div>
-        <div class="col-span-6 md:col-span-4">
+        <div class="col-span-12 md:col-span-4">
           <CustomInput
             label="Tax ID"
             placeholder=""
@@ -340,7 +340,7 @@ function handleTabClick(e) {
             @focus="currentActiveField = 'tax_id_number'"
           />
         </div>
-        <div class="col-span-6 md:col-span-4">
+        <div class="col-span-12 md:col-span-4">
           <CustomInput
             type="select"
             label="Category"

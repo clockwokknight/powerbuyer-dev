@@ -40,7 +40,7 @@ export const useGlobalState = defineStore('global', {
         toggleList() {
             this.list.active = !this.list.active;
         },
-        setListActive(val) {
+        setListActive(val, context) {
             this.list = { active: val, context: context };
         },
         // sticky nav
