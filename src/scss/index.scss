@@ -16,6 +16,10 @@ body {
   @apply flex justify-center items-center;
 }
 
+.fill-screen {
+  @apply w-full h-full;
+}
+
 .__section {
   @apply scroll-mt-[100px] rounded-round;
 }
