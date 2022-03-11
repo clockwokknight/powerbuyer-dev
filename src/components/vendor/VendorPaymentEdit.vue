@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, toRaw, toRef, unref, watch } from "vue";
+import { computed, ref, toRaw, toRef, unref, watch, watchPostEffect } from "vue";
 import { useMessage } from "naive-ui";
 import dayjs from "dayjs";
 import { clone, pick } from "@/lib/helper";
@@ -110,10 +110,19 @@ const rules = {
       trigger: ["input", "blur"],
     },
     payment_amount: {
-      // type: "number",
+      type: "number",
       required: true,
-      message: "Payment Amount is required",
-      trigger: ["input", "blur"],
+      trigger: ["input", "blur", "change"],
+      validator(rule, value) {
+        if (value <= 0.01) {
+          return new Error("Payment Amount is required");
+        }
+        const payment_invoicesIdx = parseInt(/(.*)([\d])(.*)/.exec(rule.field)[2]);
+        const balance = form.value.payment_invoices[payment_invoicesIdx].balance;
+        if (value > balance) {
+          return new Error("Payment can't exceed current invoice balance $" + balance);
+        }
+      },
     },
   },
   payment_date: {
@@ -128,15 +137,13 @@ const message = useMessage();
 const formRef = ref(null);
 
 watch(showDrawer, (newValue) => {
-  if (newValue) {
-    form.value = clone(initialForm);
-  }
+  form.value = newValue ? clone(props.initialData) : clone(initialForm);
 });
 
 watch(
   () => form.value?.payment_invoices,
   (newFormValue) => {
-    if (newFormValue.length > 0) {
+    if (newFormValue?.length > 0) {
       form.value.amount = newFormValue?.reduce(
         (prev, curr) => prev + parseFloat(curr.payment_amount),
         0
@@ -148,15 +155,18 @@ watch(
   { deep: true }
 );
 
-const { data: invoicesData, isLoading: expensesDataLoading } =
-  vendorInvoices(routeParamId);
-
-const invoiceDataOptions = computed(() =>
-  invoicesData.value?.map((inv) => ({
-    label: inv.invoice_number,
-    value: inv.id,
-  }))
-);
+const { data: invoicesData } = vendorInvoices(routeParamId);
+const invoiceDataOptions = ref([]);
+watchPostEffect(() => {
+  if (invoicesData.value)
+    invoiceDataOptions.value = invoicesData.value?.map((inv) => ({
+      label: inv.invoice_number,
+      value: inv.id,
+      disabled: form.value.payment_invoices.some(
+        (invoice) => invoice.vendor_invoice_id === inv.id
+      ),
+    }));
+});
 
 const { data: gmtvLocations } = getGmtvLocations();
 const gmtvLocationsOptions = computed(() =>
@@ -166,16 +176,13 @@ const gmtvLocationsOptions = computed(() =>
   }))
 );
 const queryClient = useQueryClient();
-const { mutate: createPayment } = useMutation(
-  (data) => axios.post("/payments", data),
-  {
-    onSuccess() {
-      message.success("Payment has been created");
-      queryClient.invalidateQueries(["payments_vendor", routeParamId.value]);
-      showDrawer.value = false;
-    },
-  }
-);
+const { mutate: createPayment } = useMutation((data) => axios.post("/payments", data), {
+  onSuccess() {
+    message.success("Payment has been created");
+    queryClient.invalidateQueries(["payments_vendor", routeParamId.value]);
+    showDrawer.value = false;
+  },
+});
 
 async function submitForm() {
   try {
@@ -198,14 +205,13 @@ const onCreatePaymentInvoice = () => {
   };
 };
 const onInvoiceSelect = (val, index) => {
-  const vendor_invoiceIdx = invoicesData.value.findIndex(
-    (inv) => inv.id === val
-  );
+  const vendor_invoiceIdx = invoicesData.value.findIndex((inv) => inv.id === val);
   const vendor_invoice = invoicesData.value[vendor_invoiceIdx];
 
   form.value.payment_invoices[index] = {
     vendor_invoice_id: vendor_invoice.id,
-    payment_amount: vendor_invoice.balance,
+    payment_amount: parseFloat(vendor_invoice.balance),
+    balance: parseFloat(vendor_invoice.balance),
   };
 };
 </script>
@@ -218,13 +224,7 @@ const onInvoiceSelect = (val, index) => {
     size="huge"
     class="custom-modal relative max-w-screen-md"
   >
-    <n-form
-      :model="form"
-      :label-width="90"
-      :rules="rules"
-      size="medium"
-      ref="formRef"
-    >
+    <n-form :model="form" :label-width="90" :rules="rules" size="medium" ref="formRef">
       <n-form-item label="Payment Status" path="payment_status_id">
         <n-select
           :options="paymentStatusOptions"
@@ -236,10 +236,7 @@ const onInvoiceSelect = (val, index) => {
         <n-input type="text" clearable v-model:value.trim="form.check_number" />
       </n-form-item>
       <n-form-item label="GMTV location" path="gmtv_location_id">
-        <n-select
-          :options="gmtvLocationsOptions"
-          v-model:value="form.gmtv_location_id"
-        />
+        <n-select :options="gmtvLocationsOptions" v-model:value="form.gmtv_location_id" />
       </n-form-item>
       <div>Payment Invoice</div>
       <n-dynamic-input
@@ -268,9 +265,7 @@ const onInvoiceSelect = (val, index) => {
             :rule="rules.payment_invoices.payment_amount"
             label="Payment Amount"
           >
-            <CurrencyInput
-              v-model="form.payment_invoices[index].payment_amount"
-            />
+            <CurrencyInput v-model="form.payment_invoices[index].payment_amount" />
           </n-form-item>
         </div>
       </n-dynamic-input>

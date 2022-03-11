@@ -55,7 +55,7 @@ const showEditPaymentForm = (row) => {
     "recipient_name",
     "invoice_number",
   ]);
-  obj.vendor_invoices = obj.vendor_invoices.map((invoice) => ({
+  obj.payment_invoices = obj.vendor_invoices.map((invoice) => ({
     vendor_invoice_id: invoice.id,
     payment_amount: invoice.amount_paid,
   }));
@@ -68,9 +68,7 @@ const showEditPaymentForm = (row) => {
 const { data: paymentTable, isLoading } = useQuery(
   ["payments_vendor", routeParamId],
   ({ queryKey }) =>
-    axios
-      .get("/payments/vendor/" + queryKey[1])
-      .then((res) => (res.data ? res.data : []))
+    axios.get("/payments/vendor/" + queryKey[1]).then((res) => (res.data ? res.data : []))
 );
 
 watch(
@@ -84,10 +82,7 @@ watch(
 
 <template>
   <div class="-mt-4 font-sans">
-    <VendorPaymentEdit
-      :initial-data="formRow"
-      v-model:show-drawer="visibleEditForm"
-    />
+    <VendorPaymentEdit :initial-data="formRow" v-model:show-drawer="visibleEditForm" />
     <div class="flex translate-y-[68px] items-center justify-end pr-10">
       <VendorPaymentsAdd />
     </div>
