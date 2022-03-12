@@ -1,12 +1,19 @@
 <script setup>
-import { ref, watch, computed, onMounted } from "vue";
+import { ref, watch, toRefs, reactive, computed, onMounted } from "vue";
 import { NInput, NSelect, NConfigProvider } from "naive-ui";
 import { useMessage } from "naive-ui";
 import { useVendors } from "@/store/vendors";
 import { useGlobalState } from "@/store/global";
 import MaskedCustomInput from "@/components/common/MaskedCustomInput.vue";
 
-const emit = defineEmits(["update:value", "focus", "scroll", "edit", "save", "cancel"]);
+const emit = defineEmits([
+  "update:modelValue",
+  "focus",
+  "scroll",
+  "edit",
+  "save",
+  "cancel",
+]);
 
 const props = defineProps([
   "validate",
@@ -151,10 +158,6 @@ function save() {
     setTimeout(edit(), 300);
   }
 }
-
-function handleInput(e) {
-  emit("update:value", e);
-}
 </script>
 
 <template>
@@ -243,7 +246,7 @@ function handleInput(e) {
               :mask="mask"
               :options="options"
               :placeholder="placeholder"
-              @input="(e) => handleInput(e)"
+              @input="(e) => $emit('update:modelValue', e)"
               @focus="(e) => $emit('focus', e)"
               @blur="cancel"
             />
