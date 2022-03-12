@@ -44,7 +44,6 @@ const form = ref({
   country: "",
   phone: "",
   cell: "",
-  fax: "",
   email: "",
   comments: "",
   access_level: "",
@@ -321,26 +320,12 @@ function handleTabClick(e) {
         <div class="col-span-6 md:col-span-4">
           <CustomInput
             label="Cell"
-            :value="form.phone"
+            :value="form.cell"
             :validate="['required', 'cell']"
             @update:value="(val) => (form.cell = val)"
             @save="submitValue('cell')"
             @cancel="resetValue('cell')"
             @focus="currentActiveField = 'cell'"
-          />
-        </div>
-        <!-- row 7 -->
-        <div class="col-span-6 md:col-span-4">
-          <CustomInput
-            label="Fax"
-            placeholder="+1 (###) ###-####"
-            mask="+1 (###) ###-####"
-            :value="form.fax"
-            :validate="['phone']"
-            @update:value="(val) => (form.fax = val)"
-            @save="submitValue('fax')"
-            @cancel="resetValue('fax')"
-            @focus="currentActiveField = 'fax'"
           />
         </div>
         <div class="col-span-6 md:col-span-4">

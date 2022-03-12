@@ -2,15 +2,16 @@
 import { useQuery } from "vue-query";
 import axios from "axios";
 import { useDebounce } from "@vueuse/core";
-import VendorList from "@/components/vendor/VendorList.vue";
 import { onUpdated, ref, watch, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useLoadingBar } from "naive-ui";
 import { TabGroup, TabList, Tab } from "@headlessui/vue";
 import { getVendorById, getVendors } from "@/hooks/vendor";
 import { useGlobalState } from "@/store/global";
-import AddVendor from "@/components/vendor/AddVendor.vue";
 import { useTabsViewStore } from "@/store/tabs";
+
+import VendorList from "@/components/vendor/VendorList.vue";
+import AddVendor from "@/components/vendor/AddVendor.vue";
 import PageTabs from "@/components/PageTabs.vue";
 import Tabs from "@/components/common/Tabs.vue";
 
@@ -84,6 +85,7 @@ watch(
       class="w-[275px] absolute md:relative md:m-0 z-[41]"
       :class="vendorListActive ? 'open-vendor-list' : 'close-vendor-list'"
     >
+      <!-- SearchList.vue / -->
       <aside
         class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-x-hidden bg-background_light dark:bg-background_dark"
       >
