@@ -11,7 +11,7 @@ module.exports = {
       colors: {
 
         primary: "#027BFF", // blue
-        accent: "#027BFF0C", // faint blue
+        accent: "#027BFF55", // faint blue
 
         success: "#36AD6A", // green
         error: "#DC2626", // red
@@ -24,7 +24,7 @@ module.exports = {
     
       },
       borderRadius: {
-        'round': '6px',
+        'round': '3px',
       }
     },
   },
