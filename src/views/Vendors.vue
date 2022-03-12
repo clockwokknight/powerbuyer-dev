@@ -87,9 +87,11 @@ watch(
     >
       <!-- SearchList.vue / -->
       <aside
-        class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-x-hidden bg-background_light dark:bg-background_dark"
+        class="pageItemsList dark:border-r-[1px] dark:border-dark_border relative h-screen min-w-[275px] max-w-[275px] overflow-x-hidden bg-background_light dark:bg-background_dark"
       >
-        <div class="sticky top-0 z-50 bg-foreground_light dark:bg-foreground_dark p-3">
+        <div
+          class="sticky pb-0 top-0 z-50 bg-foreground_light dark:bg-foreground_dark p-3"
+        >
           <div class="flex justify-between mb-3">
             <h1 class="text-xl font-bold uppercase">Vendors</h1>
             <div>
@@ -97,17 +99,11 @@ watch(
             </div>
           </div>
           <div class="flex">
-            <div class="mr-3">
-              <n-input
-                v-model:value.trim="searchText"
-                round
-                clearable
-                placeholder="Search..."
-              />
-            </div>
-            <div content="Filter" v-tippy="{ placement: 'right', duration: 50 }">
+            <n-input v-model:value.trim="searchText" clearable placeholder="Search..." />
+
+            <!--div content="Filter" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
-                class="w-6 h-6 mt-1 text-gray-400 cursor-pointer dark:text-gray-800 hover:text-primary"
+                class="w-6 h-6 mt-1 text-gray-400 cursor-pointer dark:text-white hover:text-primary"
                 viewBox="0 0 24 24"
               >
                 <path
@@ -119,7 +115,7 @@ watch(
                   stroke-linejoin="round"
                 ></path>
               </svg>
-            </div>
+            </div-->
           </div>
           <!-- Filter Component -->
         </div>
@@ -135,7 +131,7 @@ watch(
               <n-skeleton text class="w-[45%]" />
             </div>
           </div>
-          <ul class="bg-foreground_dark dark:bg-foreground_dark">
+          <ul class="bg-foreground_light dark:bg-foreground_dark">
             <template v-if="debouncedSearchText">
               <VendorList
                 v-if="vendorSearchResults"
@@ -181,9 +177,10 @@ watch(
 
     <section
       id="main-content"
-      class="h-screen w-[calc(100vw-60px)] md:w-[calc(100vw-335px)] bg-background_light dark:bg-background_dark"
+      style="height: calc(100vh - 8px)"
+      class="w-[calc(100vw-60px)] md:w-[calc(100vw-335px)] bg-background_light dark:bg-background_dark"
     >
-      <PageTabs page-name="vendors" />
+      <PageTabs :class="global.stuck[0] && 'shadow-lg'" page-name="vendors" />
       <!-- Main Body Content-->
       <div class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
         <main id="container" class="min-h-full p-2 md:p-6">

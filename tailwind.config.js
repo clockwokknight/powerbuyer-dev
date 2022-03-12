@@ -11,7 +11,7 @@ module.exports = {
       colors: {
 
         primary: "#027BFF", // blue
-        accent: "#027BFF55", // faint blue
+        accent: "#027BFF20", // faint blue
 
         success: "#36AD6A", // green
         error: "#DC2626", // red
@@ -19,12 +19,16 @@ module.exports = {
         foreground_light: "#FFFFFF", // white
         background_light: "#EAECEF", // light gray
 
-        foreground_dark: "#2D2F33", // gray
-        background_dark: "#1E2023", // dark gray
+        dark_border: "#26262A", // gray
+        foreground_dark: "#18181C", // darker gray
+        background_dark: "#101014", // darkest gray
     
       },
       borderRadius: {
         'round': '3px',
+      },
+      padding: {
+        'pad': '24px',
       }
     },
   },

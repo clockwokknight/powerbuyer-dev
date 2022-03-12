@@ -85,7 +85,7 @@ function addExpense() {
 </script>
 
 <template>
-  <n-button @click="global.openDrawer('payments')">
+  <n-button class="w-[220px]" @click="global.openDrawer('payments')">
     <n-icon>
       <svg viewBox="0 0 24 24">
         <path

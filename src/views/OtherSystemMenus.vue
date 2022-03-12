@@ -1,7 +1,7 @@
 <script setup></script>
 
 <template>
-  <div class="container overflow-scroll p-5">
+  <div class="container overflow-scroll p-5 w-full">
     <div class="mb-12">
       <div class="p-4 mt-24">
         <h2 class="text-xl font-bold uppercase mb-6">Other Menu Options</h2>

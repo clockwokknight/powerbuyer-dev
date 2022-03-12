@@ -40,12 +40,12 @@ watch(
 
 <template>
   <aside class="flex flex-col sticky top-0 left-0 w-[60px] h-screen bg-black z-50">
-    <div class="w-full text-[#ffffff]">
+    <div class="w-full text-white">
       <nav>
         <ul class="menu-items flex w-[60px] flex-col items-center">
           <router-link to="/">
             <li
-              class="!mt-5 !mb-5 h-[40px] w-[40px] rounded-round !bg-[#027bff] !pt-[8px] text-center text-lg font-bold hover:!bg-[#003874]"
+              class="!mt-5 !mb-5 h-[40px] w-[40px] rounded-round !bg-primary !pt-[8px] text-center text-lg font-bold hover:!bg-primary/25"
             >
               PB
             </li>
@@ -245,7 +245,7 @@ li svg {
 }
 .menu-items li,
 .menu-footer {
-  @apply w-[45px] h-[45px] flex justify-center hover:bg-accent rounded-round cursor-pointer my-[3px] border-2 border-transparent duration-200;
+  @apply w-[45px] h-[45px] flex justify-center items-center hover:bg-accent rounded-round cursor-pointer my-[3px] border-[2px] border-transparent duration-200;
 }
 .menu-items li img,
 .menu-footer img {
@@ -267,7 +267,7 @@ li svg {
 }
 
 .menu-items .router-link-active > li {
-  @apply bg-accent bg-opacity-30 border-primary;
+  @apply bg-primary/25 bg-opacity-30 border-primary;
   position: relative;
 }
 </style>

@@ -27,7 +27,8 @@ const themeOverrides = computed(() => {
       color: "rgba(0,0,0,0)",
       colorFocus: "rgb(0,0,0,0)",
       colorDisabled: "rgba(0,0,0,0)",
-      textColorDisabled: global.isDark ? "#eee" : "#111",
+      textColorDisabled:
+        props.type === "header" ? (global.isDark ? "#FFFFFFDD" : "#1E2023") : "#777",
       border: "none",
       borderHover: "none",
       borderDisabled: "none",
@@ -37,7 +38,7 @@ const themeOverrides = computed(() => {
       paddingSmall: "0px",
       paddingMedium: "0px",
       paddingLarge: "0px",
-      placeholderColor: global.isDark ? "#777" : "#bdbdbd",
+      placeholderColor: global.isDark ? "#555" : "#bdbdbd",
       fontSizeMedium: "12px",
     },
     Select: {
@@ -46,7 +47,8 @@ const themeOverrides = computed(() => {
           color: "rgba(0,0,0,0)",
           colorFocus: "rgba(0,0,0,0)",
           colorDisabled: "rgba(0,0,0,0)",
-          textColorDisabled: global.isDark ? "#eee" : "#111",
+          textColorDisabled:
+            props.type === "header" ? (global.isDark ? "#FFFFFFDD" : "#1E2023") : "#777",
           border: "none",
           borderHover: "none",
           borderDisabled: "none",
@@ -163,7 +165,7 @@ function handleInput(e) {
       <div class="flex">
         <label
           v-if="type !== 'header'"
-          class="absolute z-40 translate-x-4 translate-y-[-2px] bg-transparent px-2 text-[9px] font-bold uppercase tracking-widest text-gray-600 dark:text-background_light"
+          class="absolute z-40 translate-x-4 translate-y-[-2px] bg-transparent px-2 text-[9px] font-medium uppercase tracking-widest text-gray-600 dark:text-background_light"
         >
           <b
             class="text-red-600 duration-[300ms]"
@@ -206,7 +208,7 @@ function handleInput(e) {
             ${
               type === 'header'
                 ? 'dark:bg-transparent dark:!text-white'
-                : 'dark:bg-background_dark'
+                : 'dark:bg-dark_border'
             }
             ${
               (!type || type !== 'header' || global.isDark) &&
