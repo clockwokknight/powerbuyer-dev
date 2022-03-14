@@ -200,7 +200,7 @@ function handleTabClick(e) {
     <!-- left side -->
     <div class="__form col-span-12 md:col-span-8 flex flex-col justify-between">
       <div class="__title">
-        <h3 class="mb-2 translate-x-2 font-bold">VENDOR</h3>
+        <h3 class="mb-2 translate-x-2 font-bold uppercase opacity-[0.44]">Vendor</h3>
         <CustomInput
           type="header"
           placeholder="Company Name"
@@ -360,7 +360,7 @@ function handleTabClick(e) {
     <!-- right side -->
 
     <div
-      class="mt-[24px] md:mt-0 col-span-12 md:col-span-4 flex flex-col md:items-end justify-between"
+      class="mt-[24px] md:w-auto md:mt-0 col-span-12 md:col-span-4 flex flex-col md:items-end justify-between"
     >
       <div class="__invoice-info mb-[24px] md:mb-0">
         <div class="flex md:justify-end">

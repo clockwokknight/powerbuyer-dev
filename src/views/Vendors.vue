@@ -131,7 +131,7 @@ watch(
               <n-skeleton text class="w-[45%]" />
             </div>
           </div>
-          <ul class="bg-foreground_light dark:bg-foreground_dark">
+          <ul class="bg-foreground_light dark:bg-foreground_dark pt-[12px]">
             <template v-if="debouncedSearchText">
               <VendorList
                 v-if="vendorSearchResults"

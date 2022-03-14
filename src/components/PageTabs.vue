@@ -177,8 +177,8 @@ const afterAnimated = () => {
                 @after-enter="afterAnimated"
               >
                 <div
+                  v-show="tabStore.tabs.length >= 1"
                   v-for="(tab, tabIdx) in tabStore.tabs"
-                  v-if="tabStore.tabs.length >= 1"
                   :key="tab?.id"
                   class="group relative grid select-none place-content-center overflow-hidden rounded-round"
                 >
@@ -191,7 +191,7 @@ const afterAnimated = () => {
                       class="relative max-w-xs scroll-mr-3 focus:outline-none"
                       :class="[
                         isActive
-                          ? 'bg-accent font-bold text-primary before:absolute before:inset-y-0 before:left-0 before:h-full before:w-1 before:bg-primary focus:outline-none'
+                          ? 'bg-accent font-medium text-primary before:absolute before:inset-y-0 before:left-0 before:h-full before:w-1 before:bg-primary focus:outline-none'
                           : 'font-medium text-black/75 dark:text-white',
                       ]"
                     >
@@ -199,19 +199,18 @@ const afterAnimated = () => {
                         :href="href"
                         @click="navigate"
                         class="block max-w-[250px] overflow-hidden truncate whitespace-nowrap py-2 pl-6 pr-6 text-xs transition-all focus:outline-none group-hover:pr-9"
-                        :class="[isActive ? 'pr-9' : '']"
+                        :class="[isActive ? 'pr-9' : 'pr-9']"
                       >
                         {{ tab?.name }}
                       </a>
                     </tab>
                   </router-link>
                   <span
-                    class="absolute inset-y-0 right-0 top-[1px] z-10 flex cursor-pointer items-center transition-all group-hover:pr-3.5"
-                    :class="[tabIdx === selectedIndex ? 'pr-3.5' : '']"
+                    class="absolute inset-y-0 right-0 top-[1px] z-10 flex cursor-pointer items-center transition-all pr-3.5"
                     @click.stop="closeTab(tab.id)"
                   >
                     <svg
-                      class="cubic-timing-tab h-2 w-2 text-red-500 transition-transform duration-300 group-hover:scale-100"
+                      class="cubic-timing-tab h-2 w-2 text-red-500 transition-transform duration-200 group-hover:scale-100"
                       :class="[tabIdx === selectedIndex ? 'scale-100' : 'scale-0']"
                       viewBox="0 0 11 11"
                       fill="none"
@@ -282,7 +281,7 @@ const afterAnimated = () => {
 .fade-move,
 .fade-enter-active,
 .fade-leave-active {
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .fade-enter-to {
   opacity: 1;
