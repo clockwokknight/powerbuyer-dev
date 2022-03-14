@@ -38,7 +38,6 @@ onMounted(() => {
       trigger: itemSelector,
       start: () => "top 60px",
       end: () => "bottom 60px",
-      markers: true,
       onEnter: () => {
         if (!shouldDisableScroll.value) active.value = index;
       },
