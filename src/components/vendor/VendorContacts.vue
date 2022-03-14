@@ -144,11 +144,11 @@ const pagination = { pageSize: 10 };
         <VendorAdd />
       </div>
       <div
-        class="rounded border-2 bg-white py-8 px-8 dark:border-0 dark:bg-[#25272A]"
+        class="rounded bg-foreground_light py-8 px-8 dark:bg-foreground_dark"
       >
         <div><p class="pb-8 text-2xl font-bold">Contacts</p></div>
         <n-data-table
-          class="rounded-lg"
+          class="rounded-round"
           :columns="columns"
           :data="vendorContacts"
           :pagination="pagination"
@@ -173,7 +173,7 @@ const pagination = { pageSize: 10 };
           <n-form-item label="First Name" class="pr-12" path="first_name">
             <n-input
               style="width: 400px"
-              class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+              class="rounded-round border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
               :default-value="formValue.first_name"
               type="text"
               v-model:value="formValue.first_name"
@@ -182,7 +182,7 @@ const pagination = { pageSize: 10 };
           <n-form-item label="Last Name" class="pr-12" path="last_name">
             <n-input
               style="width: 400px"
-              class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+              class="rounded-round border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
               type="text"
               v-model:value="formValue.last_name"
             />
@@ -191,7 +191,7 @@ const pagination = { pageSize: 10 };
           <n-form-item label="Email" class="pr-12">
             <n-input
               style="width: 400px"
-              class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+              class="rounded-round border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
               type="text"
               placeholder="Enter Email"
               v-model:value="formValue.email"
@@ -201,7 +201,7 @@ const pagination = { pageSize: 10 };
           <n-form-item label="Position" class="pr-12">
             <n-input
               style="width: 400px"
-              class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+              class="rounded-round border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
               :default-value="formValue.job_title"
               type="text"
               v-model:value="formValue.job_title"
@@ -212,7 +212,7 @@ const pagination = { pageSize: 10 };
           <n-form-item label="Cell Phone" class="pr-12">
             <masked-input
               style="width: 400px"
-              class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+              class="rounded-round border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
               :default-value="formValue.cell_phone"
               mask="(###) ###-####"
               v-model:value="formValue.cell_phone"
@@ -222,7 +222,7 @@ const pagination = { pageSize: 10 };
           <n-form-item label="Office Phone" class="pr-12">
             <masked-input
               style="width: 400px"
-              class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+              class="rounded-round border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
               :default-value="formValue.office_phone"
               mask="(###) ###-####"
               v-model:value="formValue.office_phone"

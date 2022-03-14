@@ -190,7 +190,7 @@ const gmtvLocationsOptions = computed(() =>
 );
 const queryClient = useQueryClient();
 const { mutate: createPayment } = useMutation(
-  (data) => axios.post("/payments", data),
+  (data) => axios.post("/update", data),
   {
     onSuccess() {
       message.success("Payment has been created");
@@ -333,7 +333,7 @@ const onInvoiceSelect = (val, index) => {
       </n-form-item>
 
       <n-button attr-type="submit" size="large" @click="submitForm"
-        >Add</n-button
+        >Update</n-button
       >
     </n-form>
   </n-modal>

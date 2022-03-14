@@ -253,7 +253,7 @@ const onCreateExpenseItems = () => {
 };
 </script>
 <template>
-  <n-button @click="showDrawer = true">
+  <n-button class="w-[220px]" @click="showDrawer = true">
     <n-icon>
       <svg
         xmlns="http://www.w3.org/2000/svg"

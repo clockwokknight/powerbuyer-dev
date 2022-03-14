@@ -8,38 +8,29 @@
 
 body {
   font-family: 'Montserrat', 'sans-serif';
-  @apply bg-[#F5F6F6];
-  @apply dark:text-white;
+  //overflow: hidden;
+  @apply bg-background_light;
+  @apply dark:text-background_light;
 }
+
+// ---- common ----
 
 .center-content {
   @apply flex justify-center items-center;
 }
 
-// ---- menu ----
+.fill-screen {
+  @apply w-full h-screen;
+}
 
-.menu-items li, .menu-footer {
-  @apply w-[45px] h-[45px] flex justify-center hover:bg-[#565656] rounded-lg cursor-pointer my-[3px];
+.__section .bg-foreground_light, .__details, .__tabs {
+  @apply rounded-round box-border border-[1px] border-transparent dark:border-dark_border;
 }
-.menu-items li img, .menu-footer img {
-  @apply max-w-[20px];
+
+.__section {
+  @apply scroll-mt-[100px];
 }
-.menu-items li:hover img, .menu-footer:hover img {
-  filter: invert(0) sepia(0) saturate(1) hue-rotate(0deg) brightness(1.2)
-}
-.menu-items li:hover, .menu-footer:hover {
-  box-shadow: 0px 3px 8px -1px rgba(0, 0, 0, 0.46);
-  -webkit-animation: animation 1000ms linear both;
-  animation: animation 1000ms linear both;
-}
-.menu-items .router-link-active > li {
-  @apply bg-[#565656];
-  position: relative;
-}
-.dark .menu-items .router-link-active > li {
-  @apply bg-[#027BFF] bg-opacity-30 border-2 border-[#027BFF];
-  position: relative;
-}
+
 .pageItemsList {
   box-shadow: 6px 0px 26px -15px rgba(0, 0, 0, 0.25);
 }
@@ -55,10 +46,11 @@ body {
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #888; 
+  background: #555; 
 }
 ::-webkit-scrollbar-track {
   border-radius: 10px;
+  @apply bg-foreground_light dark:bg-foreground_dark;
 }
 
 // ---- tippy ----

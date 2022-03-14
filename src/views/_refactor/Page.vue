@@ -8,15 +8,10 @@ import {
   watch,
   watchEffect,
   nextTick,
-  unref,
 } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useMutation, useQueryClient } from "vue-query";
-import {
-  getInvoiceTotalByVendor,
-  getVendorById,
-  useVendorCategories,
-} from "@/hooks/vendor";
+import { getVendorById, useVendorCategories } from "@/hooks/vendor";
 import { getPaymentTerms, getStates } from "@/hooks/common_query";
 import { useGlobalState } from "@/store/global";
 import { pick } from "@/lib/helper";
@@ -32,7 +27,6 @@ import VendorExpenses from "@/components/vendor/VendorExpenses.vue";
 import VendorPayments from "@/components/vendor/VendorPayments.vue";
 import CustomInput from "@/components/common/CustomInput.vue";
 import Tabs from "@/components/common/Tabs.vue";
-import { useTabsViewStore } from "@/store/tabs";
 
 const VendorContacts = defineAsyncComponent({
   loader: () => import("@/components/vendor/VendorContacts.vue"),
@@ -105,7 +99,7 @@ const paymentTermOptions = computed(() =>
     value: payment.name,
   }))
 );
-const { data: getInvoicesTotal } = getInvoiceTotalByVendor(routeParamId);
+
 const { data: statesList } = getStates();
 
 const { data: vendor, isLoading: isVendorLoading } = getVendorById(routeParamId);
@@ -201,10 +195,10 @@ function handleTabClick(e) {
 <template>
   <div
     id="details"
-    class="__section __vendor-card __details mt-0 grid grid-cols-12 rounded bg-foreground_light p-6 dark:bg-foreground_dark"
+    class="__section __vendor-card mt-4 grid grid-cols-12 rounded bg-foreground_light dark:bg-foreground_dark p-6"
   >
     <!-- left side -->
-    <div class="__form col-span-12 flex flex-col justify-between md:col-span-8">
+    <div class="__form col-span-12 md:col-span-8 flex flex-col justify-between">
       <div class="__title">
         <h3 class="mb-2 translate-x-2 font-bold">VENDOR</h3>
         <CustomInput
@@ -366,14 +360,14 @@ function handleTabClick(e) {
     <!-- right side -->
 
     <div
-      class="col-span-12 mt-[24px] flex flex-col justify-between md:col-span-4 md:mt-0 md:items-end"
+      class="mt-[24px] md:mt-0 col-span-12 md:col-span-4 flex flex-col md:items-end justify-between"
     >
       <div class="__invoice-info mb-[24px] md:mb-0">
         <div class="flex md:justify-end">
           <p class="text-sm font-bold">Open Invoices</p>
         </div>
-        <div class="flex justify-end">
-          <p class="text-2xl font-bold">{{ getInvoicesTotal }}</p>
+        <div class="flex md:justify-end">
+          <p class="text-2xl font-bold">$10,193</p>
         </div>
       </div>
       <div class="align-end max-w-[220px] flex-col justify-between">
@@ -390,30 +384,14 @@ function handleTabClick(e) {
           @focus="currentActiveField = 'payment_terms'"
         />
         <div
-          class="__invoice-buttons mt-4 flex min-w-max max-w-full flex-col items-end justify-center md:mt-20"
+          class="__invoice-buttons mt-[58px] flex min-w-max max-w-full flex-col items-end justify-center"
         >
-          <n-button class="w-[220px]" @click="global.openDrawer('payments')">
-            <n-icon>
-              <svg viewBox="0 0 24 24">
-                <path
-                  d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"
-                  fill="currentColor"
-                ></path>
-              </svg>
-            </n-icon>
-            Add Payment
-          </n-button>
-          <n-button class="mt-4 w-[220px]" @click="active = true">
-            <n-icon>
-              <svg viewBox="0 0 24 24">
-                <path
-                  d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"
-                  fill="currentColor"
-                ></path>
-              </svg>
-            </n-icon>
-            Create Expense
-          </n-button>
+          <button class="__invoice-button" @click="global.openDrawer('payments')">
+            <span><b>+</b> Add payment</span>
+          </button>
+          <button class="__invoice-button">
+            <span><b>+</b> Create expense</span>
+          </button>
         </div>
       </div>
     </div>
@@ -423,8 +401,7 @@ function handleTabClick(e) {
     id="__subtabs"
     type="basic"
     ref="vendorTab"
-    class="sticky top-[-2px] left-0 z-40 mt-4 w-full rounded bg-foreground_light duration-300 dark:bg-foreground_dark"
-    :stuck="global.stuck[1]"
+    class="sticky top-[-2px] left-0 z-40 mt-4 w-full rounded bg-foreground_light dark:bg-foreground_dark duration-300"
     :items="vendorTabs"
     @click="handleTabClick"
   />
@@ -439,14 +416,22 @@ function handleTabClick(e) {
 </template>
 
 <style lang="scss">
-#__subtabs[stuck],
-.__tabs[stuck] {
-  @apply rounded-none bg-[#F4F6F8] shadow-lg shadow-[#00000011] dark:bg-dark_border;
+#__subtabs[stuck] {
+  @apply bg-[#F4F6F8] dark:bg-[#34363A];
+  @apply rounded-none border-2 border-none border-transparent shadow-lg shadow-[#00000011];
 }
 .__veil {
   width: calc(100vw - 370px);
 }
-.__section {
-  @apply scroll-mt-[100px] rounded-md;
+.__invoice-button {
+  transition-timing-function: ease;
+  @apply border-background_light mt-[14px] flex h-10 w-full items-center justify-center rounded-round border-[1px] px-3 text-center duration-[200ms];
+  &:hover {
+    @apply border-success text-success;
+  }
+  svg {
+    transition-timing-function: $overshoot;
+    @apply mr-2 h-full duration-[400ms];
+  }
 }
 </style>

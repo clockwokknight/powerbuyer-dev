@@ -32,8 +32,6 @@ const tabItems = computed(() => props.items || exampleItems.value);
 watch(
   () => global.activateTab,
   (val) => {
-    console.clear();
-    console.log(val, active.value);
     if (props.type === "basic") active.value = val;
   }
 );
@@ -56,21 +54,17 @@ watch(
         }
       "
     >
-      <span class="__tab-title flex text-xs font-bold tracking-widest">
-        <span
-          :class="
-            type !== 'basic' && active === index
-              ? 'mr-6 rounded-lg bg-primarylight py-2 pl-6 pr-0 text-primary duration-300 hover:scale-[0.96]'
-              : 'mr-0 rounded-lg bg-transparent py-2 px-3 text-black dark:text-white duration-300'
-          "
-        >
+      <span class="__tab-title flex text-xs font-bold tracking-widest hover:!opacity-100">
+        <span :class="`${active !== index && 'opacity-[0.3] font-medium'}`">
           {{ item.title }}
         </span>
       </span>
       <div
         v-if="type === 'basic'"
-        class="__indicator h-1 translate-y-[10px] bg-transparent duration-200"
-        :class="`${active === index ? '!w-12 !bg-primary' : 'w-0 bg-gray-300'}`"
+        class="__indicator h-1 translate-y-[19px] bg-transparent duration-200"
+        :class="`${
+          active === index ? '!w-12 !bg-primary' : 'w-0 bg-gray-300 dark:bg-primary'
+        }`"
       ></div>
     </div>
   </div>

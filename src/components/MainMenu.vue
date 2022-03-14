@@ -1,71 +1,273 @@
+<script setup>
+import { watch } from "vue";
+import { useDark, useToggle } from "@vueuse/core";
+import { useGlobalState } from "../store/global";
+
+const userMenu = [
+  {
+    label: "Profile",
+    key: "profile",
+  },
+  {
+    label: "Edit Profile",
+    key: "editProfile",
+  },
+  {
+    label: "Logout",
+    key: "logout",
+  },
+];
+
+const global = useGlobalState();
+
+watch(
+  () => global.value,
+  (val) => {
+    log.label("global", val);
+  }
+);
+
+const isDark = useDark();
+const toggleDark = useToggle(isDark);
+
+watch(
+  () => isDark.value,
+  (val) => {
+    global.setDark(val);
+  }
+);
+</script>
+
 <template>
-  <section class="w-[60px] text-[#ffffff]">
-    <nav>
-      <ul class="menu-items flex w-full flex-col items-center">
-        <router-link to="/">
-          <li
-            class="!mt-5 !mb-5 h-[40px] w-[40px] rounded-md !bg-[#027bff] !pt-[8px] text-center text-lg font-bold hover:!bg-[#003874]"
+  <aside class="flex flex-col sticky top-0 left-0 w-[60px] h-screen bg-black z-50">
+    <div class="w-full text-white">
+      <nav>
+        <ul class="menu-items flex w-[60px] flex-col items-center">
+          <router-link to="/">
+            <li
+              class="!mt-5 !mb-5 h-[40px] w-[40px] rounded-round !bg-primary !pt-[8px] text-center text-lg font-bold hover:!bg-primary/25"
+            >
+              PB
+            </li>
+          </router-link>
+          <router-link to="/">
+            <li content="Dashbaord" v-tippy="{ placement: 'right', duration: 50 }">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M9 21H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h4c1.1 0 2 .9 2 2v14c0 1.1-.9 2-2 2zm6 0h4c1.1 0 2-.9 2-2v-5c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v5c0 1.1.9 2 2 2zm6-13V5c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v3c0 1.1.9 2 2 2h4c1.1 0 2-.9 2-2z"
+                  fill="currentColor"
+                ></path>
+              </svg>
+            </li>
+          </router-link>
+          <router-link to="/deals">
+            <li content="Deals" v-tippy="{ placement: 'right', duration: 50 }">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 24 24"
+              >
+                <g fill="none">
+                  <path
+                    d="M19.75 2A2.25 2.25 0 0 1 22 4.25v5.462a3.25 3.25 0 0 1-.952 2.298l-8.5 8.503a3.255 3.255 0 0 1-4.597.001L3.489 16.06a3.25 3.25 0 0 1-.004-4.596l8.5-8.51a3.25 3.25 0 0 1 2.3-.953h5.465zM17 5.502a1.5 1.5 0 1 0 0 3a1.5 1.5 0 0 0 0-3z"
+                    fill="currentColor"
+                  ></path>
+                </g>
+              </svg>
+            </li>
+          </router-link>
+          <router-link to="/inventory">
+            <li content="Inventory" v-tippy="{ placement: 'right', duration: 50 }">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 480 512"
+              >
+                <path
+                  d="M438.66 212.33l-11.24-28.1l-19.93-49.83C390.38 91.63 349.57 64 303.5 64h-127c-46.06 0-86.88 27.63-103.99 70.4l-19.93 49.83l-11.24 28.1C17.22 221.5 0 244.66 0 272v48c0 16.12 6.16 30.67 16 41.93V416c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32v-32h256v32c0 17.67 14.33 32 32 32h32c17.67 0 32-14.33 32-32v-54.07c9.84-11.25 16-25.8 16-41.93v-48c0-27.34-17.22-50.5-41.34-59.67zm-306.73-54.16c7.29-18.22 24.94-30.17 44.57-30.17h127c19.63 0 37.28 11.95 44.57 30.17L368 208H112l19.93-49.83zM80 319.8c-19.2 0-32-12.76-32-31.9S60.8 256 80 256s48 28.71 48 47.85s-28.8 15.95-48 15.95zm320 0c-19.2 0-48 3.19-48-15.95S380.8 256 400 256s32 12.76 32 31.9s-12.8 31.9-32 31.9z"
+                  fill="currentColor"
+                ></path>
+              </svg>
+            </li>
+          </router-link>
+          <router-link to="/lanes">
+            <li content="Lanes" v-tippy="{ placement: 'right', duration: 50 }">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M19.96 10.59a.514.514 0 0 0-.5-.59H17V8.86a4.01 4.01 0 0 0 2.96-3.27a.514.514 0 0 0-.5-.59H17V4c0-.55-.45-1-1-1H8c-.55 0-1 .45-1 1v1H4.54c-.31 0-.54.28-.5.59A4.01 4.01 0 0 0 7 8.86V10H4.54c-.31 0-.54.28-.5.59A4.01 4.01 0 0 0 7 13.86V15H4.54c-.31 0-.54.28-.5.59A4.01 4.01 0 0 0 7 18.86V20c0 .55.45 1 1 1h8c.55 0 1-.45 1-1v-1.14a4.01 4.01 0 0 0 2.96-3.27a.514.514 0 0 0-.5-.59H17v-1.14a4.01 4.01 0 0 0 2.96-3.27zM12 19a2 2 0 1 1-.001-3.999A2 2 0 0 1 12 19zm0-5a2 2 0 1 1-.001-3.999A2 2 0 0 1 12 14zm0-5a2 2 0 0 1-2-2c0-1.11.89-2 2-2a2 2 0 1 1 0 4z"
+                  fill="currentColor"
+                ></path>
+              </svg>
+            </li>
+          </router-link>
+          <router-link to="/buyers">
+            <li content="Buyers" v-tippy="{ placement: 'right', duration: 50 }">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 24 24"
+              >
+                <g fill="none">
+                  <path
+                    d="M14.75 15c.966 0 1.75.784 1.75 1.75l-.001.962c.117 2.19-1.511 3.297-4.432 3.297c-2.91 0-4.567-1.09-4.567-3.259v-1c0-.966.784-1.75 1.75-1.75h5.5zm-11-5h4.376a4.007 4.007 0 0 0 1.067 3.85l.162.151L9.25 14a2.75 2.75 0 0 0-2.649 2.008l-.034.001C3.657 16.009 2 14.919 2 12.75v-1c0-.966.784-1.75 1.75-1.75zm16.5 0c.966 0 1.75.784 1.75 1.75l-.001.962c.117 2.19-1.511 3.297-4.432 3.297l-.169-.002a2.756 2.756 0 0 0-2.451-2L14.75 14l-.105.001a3.99 3.99 0 0 0 1.229-4L20.25 10zM12 8a3 3 0 1 1 0 6a3 3 0 0 1 0-6zM6.5 3a3 3 0 1 1 0 6a3 3 0 0 1 0-6zm11 0a3 3 0 1 1 0 6a3 3 0 0 1 0-6z"
+                    fill="currentColor"
+                  ></path>
+                </g>
+              </svg>
+            </li>
+          </router-link>
+          <router-link to="/vendors">
+            <li content="Vendors" v-tippy="{ placement: 'right', duration: 50 }">
+              <svg
+                width="560"
+                height="560"
+                viewBox="0 0 560 560"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M336 149.33C336 144.178 340.184 139.998 345.336 139.998C350.485 139.998 354.668 144.178 354.668 149.33C354.668 154.483 350.485 158.666 345.336 158.666C340.184 158.666 336 154.483 336 149.33ZM364 93.3304C369.153 93.3304 373.336 97.514 373.336 102.666C373.336 107.819 369.153 111.998 364 111.998C358.848 111.998 354.668 107.819 354.668 102.666C354.668 97.514 358.848 93.3304 364 93.3304V93.3304ZM410.668 111.998C431.258 111.998 448 128.74 448 149.33C448 169.92 431.258 186.666 410.668 186.666C390.078 186.666 373.336 169.92 373.336 149.33C373.336 128.74 390.078 111.998 410.668 111.998V111.998ZM410.668 74.6664C415.821 74.6664 420 78.8461 420 83.9984C420 89.1507 415.821 93.3304 410.668 93.3304C405.516 93.3304 401.336 89.1507 401.336 83.9984C401.336 78.8461 405.516 74.6664 410.668 74.6664ZM457.336 93.3304C462.485 93.3304 466.668 97.514 466.668 102.666C466.668 107.819 462.485 111.998 457.336 111.998C452.184 111.998 448.001 107.819 448.001 102.666C448.001 97.514 452.184 93.3304 457.336 93.3304ZM476 139.998C481.153 139.998 485.336 144.178 485.336 149.33C485.336 154.483 481.153 158.666 476 158.666C470.848 158.666 466.668 154.483 466.668 149.33C466.668 144.178 470.848 139.998 476 139.998ZM457.336 205.33C452.184 205.33 448.001 201.151 448.001 195.998C448.001 190.846 452.184 186.666 457.336 186.666C462.485 186.666 466.668 190.846 466.668 195.998C466.668 201.151 462.485 205.33 457.336 205.33ZM410.668 223.998C405.516 223.998 401.336 219.819 401.336 214.666C401.336 209.514 405.516 205.33 410.668 205.33C415.821 205.33 420 209.514 420 214.666C420 219.819 415.821 223.998 410.668 223.998ZM364 205.33C358.848 205.33 354.668 201.151 354.668 195.998C354.668 190.846 358.848 186.666 364 186.666C369.153 186.666 373.336 190.846 373.336 195.998C373.336 201.151 369.153 205.33 364 205.33ZM410.668 242.666C462.133 242.666 504 200.795 504 149.33C504 97.8694 462.133 55.9984 410.668 55.9984C359.203 55.9984 317.336 97.8694 317.336 149.33C317.336 200.795 359.203 242.666 410.668 242.666Z"
+                  fill="white"
+                />
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M410.67 168C420.963 168 429.338 159.629 429.338 149.332C429.338 139.039 420.963 130.668 410.67 130.668C400.373 130.668 392.002 139.039 392.002 149.332C392.002 159.629 400.374 168 410.67 168Z"
+                  fill="white"
+                />
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M541.341 436.11C527.646 420.551 507.646 410.665 485.341 410.665C444.169 410.665 410.672 444.165 410.672 485.333C410.672 503.345 417.083 519.895 427.75 532.802L150.3 492.204C182.976 475.001 205.339 440.747 205.339 401.333C205.339 344.716 159.277 298.663 102.669 298.663C97.1422 298.663 91.7475 299.226 86.4585 300.074L263.858 122.674C262.288 131.334 261.339 140.221 261.339 149.33C261.339 231.67 328.331 298.66 410.669 298.66C466.857 298.66 515.849 267.433 541.339 221.457L541.341 436.11ZM485.341 494.665C480.188 494.665 476.005 490.486 476.005 485.333C476.005 480.173 480.188 476.001 485.341 476.001C490.489 476.001 494.672 480.173 494.672 485.333C494.672 490.486 490.489 494.665 485.341 494.665ZM56.0005 401.333C56.0005 375.603 76.9345 354.665 102.668 354.665C128.398 354.665 149.336 375.603 149.336 401.333C149.336 427.063 128.398 448.001 102.668 448.001C76.9345 448.001 56.0005 427.063 56.0005 401.333ZM410.67 37.3334C472.428 37.3334 522.67 87.5634 522.67 149.333C522.67 211.091 472.428 261.333 410.67 261.333C348.912 261.333 298.67 211.091 298.67 149.333C298.67 87.5634 348.912 37.3334 410.67 37.3334ZM410.67 0.00136C352.123 0.00136 301.48 33.9464 277.02 83.1144L40.0705 320.064C40.0236 320.103 40.0119 320.166 39.965 320.213C15.707 339.002 0 368.338 0 401.33C0 457.592 45.512 503.38 101.65 503.94L465.08 557.131C471.529 558.951 478.303 559.998 485.334 559.998H485.35C526.51 559.978 559.998 526.49 559.998 485.33V149.33C559.998 66.982 493.006 0 410.668 0L410.67 0.00136Z"
+                  fill="white"
+                />
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M130.67 401.33C130.67 385.892 118.108 373.33 102.67 373.33C87.2324 373.33 74.6704 385.892 74.6704 401.33C74.6704 416.768 87.2324 429.33 102.67 429.33C118.108 429.33 130.67 416.768 130.67 401.33Z"
+                  fill="white"
+                />
+              </svg>
+            </li>
+          </router-link>
+          <router-link to="/dealers">
+            <li content="Dealers" v-tippy="{ placement: 'right', duration: 50 }">
+              <svg
+                width="549"
+                height="441"
+                viewBox="0 0 549 441"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M29.0084 199.025H43.0084C41.5514 200.966 40.1725 202.834 38.8639 204.627C25.2429 225.272 18.3169 249.619 19.0399 274.346V411.376C19.0399 418.981 22.0594 426.274 27.4383 431.649C32.8172 437.027 40.1103 440.047 47.7113 440.047H84.7853C92.3869 440.047 99.6803 437.027 105.058 431.649C110.433 426.274 113.457 418.981 113.457 411.376V389.872H348.657V268.462C329.954 262.634 313.598 250.993 301.966 235.232C290.333 219.47 284.032 200.412 283.978 180.822V47.3716C283.931 31.9736 287.786 16.8096 295.177 3.3016H274.626C242.435 2.57504 210.243 4.6532 178.415 9.5164C159.149 12.8758 131.263 20.7154 112.11 48.0434C101.356 63.5554 84.1097 102.082 70.5007 136.074H70.5046C62.0476 127.438 50.6566 122.281 38.5826 121.629H27.9966H28.0005C20.606 121.731 13.5435 124.711 8.3125 129.942C3.082 135.168 0.1016 142.235 0 149.63V169.958C0.12891 177.614 3.2266 184.923 8.6367 190.345C14.0469 195.767 21.3517 198.876 29.0077 199.021L29.0084 199.025ZM92.3994 252.841C92.4384 245.935 95.6611 239.435 101.134 235.22C106.606 231.009 113.716 229.556 120.4 231.283L172.873 245.059V245.056C179.713 247.099 185.17 252.278 187.564 259.005C189.958 265.727 189.005 273.193 184.997 279.099C180.99 285.005 174.407 288.645 167.274 288.903H114.688C108.747 288.903 103.051 286.544 98.8484 282.345C94.6492 278.142 92.2898 272.446 92.2898 266.505L92.3994 252.841ZM328.499 180.825V47.375C328.499 34.809 333.492 22.762 342.374 13.875C351.261 4.9922 363.312 0 375.874 0H501.374C513.94 0 525.991 4.9922 534.874 13.875C543.761 22.7617 548.749 34.809 548.749 47.375V180.825C548.749 193.387 543.761 205.438 534.874 214.325C525.992 223.208 513.94 228.2 501.374 228.2H483.901V255.305C483.901 257.723 482.933 260.043 481.214 261.742L460.214 282.742C459.558 283.395 459.19 284.282 459.19 285.207C459.19 286.133 459.558 287.02 460.214 287.672L478.917 306.32C483.53 310.969 483.53 318.468 478.917 323.121L460.214 341.824C459.558 342.476 459.19 343.363 459.19 344.289C459.19 345.211 459.558 346.097 460.214 346.75L481.214 367.75C482.933 369.453 483.901 371.773 483.901 374.191V393.625C483.909 395.731 483.062 397.754 481.55 399.223L442.351 438.422C441.362 439.41 440.023 439.969 438.628 439.969C437.23 439.969 435.89 439.41 434.901 438.422L395.702 399.223C394.23 397.738 393.421 395.715 393.464 393.625V227.975H375.878C363.351 227.975 351.335 223.014 342.456 214.178C333.581 205.342 328.561 193.346 328.503 180.823L328.499 180.825Z"
+                  fill="white"
+                />
+              </svg>
+            </li>
+          </router-link>
+          <router-link to="/auctions">
+            <li content="Auctions" v-tippy="{ placement: 'right', duration: 50 }">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M2 21h10c.55 0 1 .45 1 1s-.45 1-1 1H2c-.55 0-1-.45-1-1s.45-1 1-1zM5.24 8.07l2.83-2.83L20.8 17.97c.78.78.78 2.05 0 2.83c-.78.78-2.05.78-2.83 0L5.24 8.07zm8.49-5.66l2.83 2.83c.78.78.78 2.05 0 2.83l-1.42 1.42l-5.65-5.66l1.41-1.41c.78-.79 2.05-.79 2.83-.01zm-9.9 7.07l5.66 5.66l-1.41 1.41c-.78.78-2.05.78-2.83 0l-2.83-2.83c-.78-.78-.78-2.05 0-2.83l1.41-1.41z"
+                  fill="currentColor"
+                ></path>
+              </svg>
+            </li>
+          </router-link>
+          <router-link to="/system">
+            <li content="More Items" v-tippy="{ placement: 'right', duration: 50 }">
+              <img src="/icons/OverflowMenuVertical.svg" />
+            </li>
+          </router-link>
+        </ul>
+      </nav>
+    </div>
+    <div class="mt-auto mb-4 w-[60px] flex justify-center">
+      <div class="menu-footer center-content">
+        <button
+          :content="global.isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+          v-tippy="{ placement: 'right', duration: 50 }"
+          class="theme-toggle theme-toggle-js h-[55px] w-[55px] p-[8px] cursor-pointer"
+          @click="toggleDark"
+        >
+          <svg
+            v-show="global.isDark"
+            class="fill-white"
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            x="0px"
+            y="0px"
+            viewBox="0 0 512 512"
+            enable-background="new 0 0 512 512"
+            xml:space="preserve"
           >
-            PB
-          </li>
-        </router-link>
-        <router-link to="/">
-          <li
-            content="Dashbaord"
-            v-tippy="{ placement: 'right', duration: 50 }"
-          >
-            <img src="/icons/SpaceDashboardRound.svg" />
-          </li>
-        </router-link>
-        <router-link to="/deals">
-          <li content="Deals" v-tippy="{ placement: 'right', duration: 50 }">
-            <img src="/icons/MdPricetags.svg" />
-          </li>
-        </router-link>
-        <router-link to="/inventory">
-          <li
-            content="Inventory"
-            v-tippy="{ placement: 'right', duration: 50 }"
-          >
-            <img src="/icons/CarSport.svg" />
-          </li>
-        </router-link>
-        <router-link to="/lanes">
-          <li content="Lanes" v-tippy="{ placement: 'right', duration: 50 }">
-            <img class="mt-3 h-5" src="/icons/TrafficLight.svg" />
-          </li>
-        </router-link>
-        <router-link to="/buyers">
-          <li content="Buyers" v-tippy="{ placement: 'right', duration: 50 }">
-            <img src="/icons/GroupsFilled.svg" />
-          </li>
-        </router-link>
-        <router-link to="/vendors">
-          <li content="Vendors" v-tippy="{ placement: 'right', duration: 50 }">
-            <img class="mt-[15px] h-4" src="/icons/Tools.svg" />
-          </li>
-        </router-link>
-        <router-link to="/dealers">
-          <li content="Dealers" v-tippy="{ placement: 'right', duration: 50 }">
-            <img class="mt-[15px] h-4" src="/icons/Tools.svg" />
-          </li>
-        </router-link>
-        <router-link to="/auctions">
-          <li content="Auctions" v-tippy="{ placement: 'right', duration: 50 }">
-            <img src="/icons/GavelRound.svg" />
-          </li>
-        </router-link>
-        <router-link to="/system">
-          <li
-            content="More Items"
-            v-tippy="{ placement: 'right', duration: 50 }"
-          >
-            <img src="/icons/OverflowMenuVertical.svg" />
-          </li>
-        </router-link>
-      </ul>
-    </nav>
-  </section>
+            <path
+              d="M401.4,354.2c-2.9,0.1-5.8,0.2-8.7,0.2c-47.9,0-93-18.9-126.8-53.4c-33.9-34.4-52.5-80.1-52.5-128.8
+	c0-27.7,6.1-54.5,17.5-78.7c3.1-6.6,9.3-16.6,13.6-23.4c1.9-2.9-0.5-6.7-3.9-6.1c-6,0.9-15.2,2.9-27.7,6.8
+	C135.1,95.5,80,168.7,80,255c0,106.6,85.1,193,190.1,193c58,0,110-26.4,144.9-68.1c6-7.2,11.5-13.8,16.4-21.8c1.8-3-0.7-6.7-4.1-6.1
+	C418.8,353.7,410.2,353.8,401.4,354.2z"
+            ></path>
+          </svg>
+          <svg v-show="!global.isDark" viewBox="0 0 24 24">
+            <g>
+              <path
+                d="M12 2a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 12 2zm5 10a5 5 0 1 1-10 0a5 5 0 0 1 10 0zm4.25.75a.75.75 0 0 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5h1.5zM12 19a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 12 19zm-7.75-6.25a.75.75 0 0 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5h1.5zm-.03-8.53a.75.75 0 0 1 1.06 0l1.5 1.5a.75.75 0 0 1-1.06 1.06l-1.5-1.5a.75.75 0 0 1 0-1.06zm1.06 15.56a.75.75 0 1 1-1.06-1.06l1.5-1.5a.75.75 0 1 1 1.06 1.06l-1.5 1.5zm14.5-15.56a.75.75 0 0 0-1.06 0l-1.5 1.5a.75.75 0 0 0 1.06 1.06l1.5-1.5a.75.75 0 0 0 0-1.06zm-1.06 15.56a.75.75 0 1 0 1.06-1.06l-1.5-1.5a.75.75 0 1 0-1.06 1.06l1.5 1.5z"
+                fill="#ffffff"
+              ></path>
+            </g>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </aside>
 </template>
 
-<script></script>
+<style lang="scss" scoped>
+li svg {
+  @apply h-[45px] w-[45px] p-3 fill-white;
+}
+.menu-items li,
+.menu-footer {
+  @apply w-[45px] h-[45px] flex justify-center items-center hover:bg-accent rounded-round cursor-pointer my-[3px] border-[2px] border-transparent duration-200;
+}
+.menu-items li img,
+.menu-footer img {
+  @apply max-w-[20px];
+}
+.menu-items li:hover img,
+.menu-footer:hover img {
+  filter: invert(0) sepia(0) saturate(1) hue-rotate(0deg) brightness(1.2);
+}
+.menu-items li:hover,
+.menu-footer:hover {
+  box-shadow: 0px 3px 8px -1px rgba(0, 0, 0, 0.46);
+  -webkit-animation: animation 1000ms linear both;
+  animation: animation 1000ms linear both;
+}
+
+.menu-footer svg {
+  @apply scale-[0.8];
+}
+
+.menu-items .router-link-active > li {
+  @apply bg-primary/25 bg-opacity-30 border-primary;
+  position: relative;
+}
+</style>

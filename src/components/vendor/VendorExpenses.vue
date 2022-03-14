@@ -94,7 +94,9 @@ function showEditExpenseForm(row) {
       :is-disabled="formDisabled"
     />
     <div class="-mt-4 font-sans">
-      <div class="flex translate-y-[68px] items-center justify-end pr-10">
+      <div
+        class="flex translate-y-[60px] translate-x-[-24px] items-center justify-end"
+      >
         <VendorExpensesAdd />
       </div>
       <div
@@ -104,7 +106,7 @@ function showEditExpenseForm(row) {
           <p class="pb-8 text-2xl font-bold">Invoices & Expenses</p>
         </div>
         <n-data-table
-          class="rounded-md"
+          class="rounded-round"
           striped
           :columns="columns"
           :data="invoicesData"

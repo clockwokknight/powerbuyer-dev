@@ -1,6 +1,7 @@
 <script setup>
 import { getPageTabs } from "@/hooks/pageTabs";
 import { useTabsViewStore } from "@/store/tabs";
+import { useGlobalState } from "@/store/global";
 import { Tab, TabGroup, TabList } from "@headlessui/vue";
 import { useDebounceFn } from "@vueuse/core";
 import axios from "axios";
@@ -8,6 +9,7 @@ import { nextTick, ref, watch } from "vue";
 import { useMutation, useQueryClient } from "vue-query";
 import { useRoute, useRouter } from "vue-router";
 
+const global = useGlobalState();
 const tabStore = useTabsViewStore();
 const props = defineProps(["pageName"]);
 const router = useRouter();
@@ -30,7 +32,6 @@ const ifScrollArrowNeeded = useDebounceFn(() => {
 
 const scrollTo = (type) => {
   const scrollLeft = scrollWrapper.value.scrollLeft;
-
   if (type === "left") {
     scrollWrapper.value.scrollTo({
       left: scrollLeft - 150,
@@ -168,9 +169,12 @@ const afterAnimated = () => {
 
 <template>
   <TabGroup :selected-index="tabStore.selectedIndex" @change="tabChanged">
-    <header class="relative z-40 h-[80px] pl-2 md:pl-6 pr-[calc(0.5rem+5px)] md:pr-[calc(1.5rem+5px)] pt-2 md:pt-6">
+    <header
+      class="z-80 relative h-[88px] pl-2 pr-[calc(0.5rem+5px)] pt-2 md:pl-6 md:pr-[calc(1.5rem+5px)] md:pt-6"
+    >
       <div
-        class="relative flex h-[62px] items-center rounded bg-white dark:bg-[#25272A] shadow-lg"
+        class="__tabs relative flex h-[64px] items-center rounded bg-foreground_light dark:bg-foreground_dark"
+        :class="global.stuck[0] && 'shadow-lg'"
         ref="tabListButtonWrapper"
       >
         <div
@@ -193,7 +197,7 @@ const afterAnimated = () => {
                   v-for="(tab, tabIdx) in tabStore.tabs"
                   v-if="tabStore.tabs.length >= 1"
                   :key="tab?.id"
-                  class="group relative grid select-none place-content-center overflow-hidden rounded-lg"
+                  class="group relative grid select-none place-content-center overflow-hidden rounded-round"
                 >
                   <router-link
                     :to="`/${props.pageName}/${tab?.id}`"
@@ -204,8 +208,8 @@ const afterAnimated = () => {
                       class="relative max-w-xs scroll-mr-3 focus:outline-none"
                       :class="[
                         isActive
-                          ? 'bg-primary/10  font-extrabold text-primary before:absolute before:inset-y-0 before:left-0 before:h-full before:w-1 before:bg-primary focus:outline-none'
-                          : 'font-bold text-black/75 dark:text-white',
+                          ? 'bg-accent font-bold text-primary before:absolute before:inset-y-0 before:left-0 before:h-full before:w-1 before:bg-primary focus:outline-none'
+                          : 'font-medium text-black/75 dark:text-white',
                       ]"
                     >
                       <a
@@ -224,7 +228,7 @@ const afterAnimated = () => {
                     @click.stop="closeTab(tab.id)"
                   >
                     <svg
-                      class="cubic-timing-tab h-3 w-3 text-red-500 transition-transform duration-300 group-hover:scale-100"
+                      class="cubic-timing-tab h-2 w-2 text-red-500 transition-transform duration-300 group-hover:scale-100"
                       :class="[
                         tabIdx === selectedIndex ? 'scale-100' : 'scale-0',
                       ]"
