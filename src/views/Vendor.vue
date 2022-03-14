@@ -34,9 +34,7 @@ import CustomInput from "@/components/common/CustomInput.vue";
 import Tabs from "@/components/common/Tabs.vue";
 import { useTabsViewStore } from "@/store/tabs";
 
-const VendorContacts = defineAsyncComponent({
-  loader: () => import("@/components/vendor/VendorContacts.vue"),
-});
+import VendorContacts from "@/components/vendor/VendorContacts.vue";
 
 const instance = getCurrentInstance();
 
@@ -108,7 +106,8 @@ const paymentTermOptions = computed(() =>
 const { data: getInvoicesTotal } = getInvoiceTotalByVendor(routeParamId);
 const { data: statesList } = getStates();
 
-const { data: vendor, isLoading: isVendorLoading } = getVendorById(routeParamId);
+const { data: vendor, isLoading: isVendorLoading } =
+  getVendorById(routeParamId);
 
 const vendorData = ref({});
 
@@ -176,7 +175,10 @@ function resetValue(key) {
 
 function submitValue(key) {
   mutateAsync({
-    [key]: key === "phone" ? utils.parsePhoneNumber(form.value[key]) : form.value[key],
+    [key]:
+      key === "phone"
+        ? utils.parsePhoneNumber(form.value[key])
+        : form.value[key],
   })
     .then((data) => {
       message.success("Saved");
@@ -424,18 +426,13 @@ function handleTabClick(e) {
     type="basic"
     ref="vendorTab"
     class="sticky top-[-2px] left-0 z-40 mt-4 w-full rounded bg-foreground_light duration-300 dark:bg-foreground_dark"
-    :stuck="global.stuck[1]"
     :items="vendorTabs"
-    @click="handleTabClick"
   />
 
   <VendorExpenses class="__section" />
-  <VendorPayments class="__section" />
-  <VendorExpensesItems class="__section" />
-  <Suspense>
-    <template #default><VendorContacts class="__section" /></template>
-    <template #fallback> Loading... </template>
-  </Suspense>
+  <VendorPayments class="__section" id="payments" />
+  <VendorExpensesItems class="__section" id="expense-items" />
+  <VendorContacts class="__section" />
 </template>
 
 <style lang="scss">

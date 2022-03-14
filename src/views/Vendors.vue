@@ -34,9 +34,8 @@ const addTab = (vendor) => {
 
 // Vendor Search Result
 
-const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
-  ["vendorSearch", debouncedSearchText],
-  ({ queryKey }) => {
+const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
+  useQuery(["vendorSearch", debouncedSearchText], ({ queryKey }) => {
     if (queryKey[1] === "") return null;
     else
       return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => {
@@ -45,8 +44,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
         }
         return res.data;
       });
-  }
-);
+  });
 
 // TODO: we are gonna have to figure this out
 function handleScroll(e) {
@@ -96,7 +94,11 @@ watch(
             </div>
           </div>
           <div class="flex">
-            <n-input v-model:value.trim="searchText" clearable placeholder="Search..." />
+            <n-input
+              v-model:value.trim="searchText"
+              clearable
+              placeholder="Search..."
+            />
 
             <!--div content="Filter" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
@@ -161,7 +163,9 @@ watch(
         id="mobile-slider"
         class="absolute bottom-0 left-0 flex h-[36px] w-[325px] flex-row items-center justify-between bg-white px-4 shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] dark:bg-black"
       >
-        <div class="text-[8px]">{{ vendors?.pages[0].data.length }} Active Vendors</div>
+        <div class="text-[8px]">
+          {{ vendors?.pages[0].data.length }} Active Vendors
+        </div>
         <img
           class="slide-icon h-[18px] w-[18px] cursor-pointer"
           src="/icons/LeftSlide.svg"
@@ -179,7 +183,10 @@ watch(
     >
       <PageTabs :class="global.stuck[0] && 'shadow-lg'" page-name="vendors" />
       <!-- Main Body Content-->
-      <div class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
+      <div
+        id="main"
+        class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden"
+      >
         <main id="container" class="min-h-full p-2 md:p-6">
           <router-view />
         </main>

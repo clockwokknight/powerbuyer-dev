@@ -25,9 +25,8 @@ watch(
     if (route.params?.id) routeParamId.value = route.params?.id;
   }
 );
-const { data: expenseItems, isFetching: expenseItemsFetching } = getVendorExpenseItems(
-  routeParamId
-);
+const { data: expenseItems, isFetching: expenseItemsFetching } =
+  getVendorExpenseItems(routeParamId);
 
 const showUpdateForm = (row) => {
   const obj = pick(row, [
@@ -43,27 +42,23 @@ const showUpdateForm = (row) => {
   visibleForm.value = true;
 };
 
-const { mutate: createExpenseItem, isLoading: createExpenseItemLoading } = useMutation(
-  (data) => axios.post("/expense_items", data),
-  {
+const { mutate: createExpenseItem, isLoading: createExpenseItemLoading } =
+  useMutation((data) => axios.post("/expense_items", data), {
     onSuccess() {
       queryClient.invalidateQueries(["vendorExpenseItems", routeParamId.value]);
       formRow.value = null;
       visibleForm.value = false;
     },
-  }
-);
+  });
 
-const { isLoading: updateExpenseItemLoading, mutate: updateExpenseItem } = useMutation(
-  ({ id, ...rest }) => axios.put(`/expense_items/${id}`, rest),
-  {
+const { isLoading: updateExpenseItemLoading, mutate: updateExpenseItem } =
+  useMutation(({ id, ...rest }) => axios.put(`/expense_items/${id}`, rest), {
     onSuccess() {
       queryClient.invalidateQueries(["vendorExpenseItems", routeParamId.value]);
       formRow.value = null;
       visibleForm.value = false;
     },
-  }
-);
+  });
 
 const { mutate: deleteExpenseItem } = useMutation(
   (id) => axios.delete(`/expense_items/${id}`),
@@ -130,7 +125,7 @@ const onDeleteExpenseItem = (id) => {
 </script>
 
 <template>
-  <div id="expense-items" class="-mt-4 scroll-smooth font-sans antialiased">
+  <div class="-mt-4 scroll-smooth font-sans antialiased">
     <div class="flex translate-y-[68px] items-center justify-end pr-10">
       <n-button @click="showCreateForm">
         <n-icon>
@@ -156,7 +151,7 @@ const onDeleteExpenseItem = (id) => {
       @submit="onSubmitForm"
       @delete="onDeleteExpenseItem"
     />
-    <div class="rounded bg-foreground_light dark:bg-foreground_dark py-8 px-8">
+    <div class="rounded bg-foreground_light py-8 px-8 dark:bg-foreground_dark">
       <div><p class="pb-8 text-2xl font-bold">Expense Items</p></div>
       <n-data-table
         class="rounded-round"
