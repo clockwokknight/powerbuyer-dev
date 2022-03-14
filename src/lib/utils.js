@@ -1,4 +1,4 @@
-export var log = (...args) => console.log(args);
+export var log = (...args) => console.log(...args);
 log.clear = () => console.clear();
 log.label = (label, msg) => console.log(label, msg);
 log.red = (msg) => console.log('\x1b[91m%s\x1b[0m', msg);
@@ -40,5 +40,14 @@ export const utils = {
     },
     parsePhoneNumber: (phone) => {
       return Array.from(phone).filter(digit => /\b\d\b/.test(digit)).join('');
+    },
+    formatPhoneNumber(phone) {
+      var cleaned = ('' + phone).replace(/\D/g, '');
+      var match = cleaned.match(/^(1|)?(\d{3})(\d{3})(\d{4})$/);
+      if (match) {
+        var intlCode = (match[1] ? '+1 ' : '');
+        return [intlCode, '(', match[2], ') ', match[3], '-', match[4]].join('');
+      }
+      return null;
     }
 };
