@@ -1,5 +1,13 @@
 <script setup>
-import { computed, ref, toRaw, toRef, unref, watch, watchPostEffect } from "vue";
+import {
+  computed,
+  ref,
+  toRaw,
+  toRef,
+  unref,
+  watch,
+  watchPostEffect,
+} from "vue";
 import { useMessage } from "naive-ui";
 import dayjs from "dayjs";
 import { clone, pick } from "@/lib/helper";
@@ -117,10 +125,15 @@ const rules = {
         if (value <= 0.01) {
           return new Error("Payment Amount is required");
         }
-        const payment_invoicesIdx = parseInt(/(.*)([\d])(.*)/.exec(rule.field)[2]);
-        const balance = form.value.payment_invoices[payment_invoicesIdx].balance;
+        const payment_invoicesIdx = parseInt(
+          /(.*)([\d])(.*)/.exec(rule.field)[2]
+        );
+        const balance =
+          form.value.payment_invoices[payment_invoicesIdx].balance;
         if (value > balance) {
-          return new Error("Payment can't exceed current invoice balance $" + balance);
+          return new Error(
+            "Payment can't exceed current invoice balance $" + balance
+          );
         }
       },
     },
@@ -176,13 +189,16 @@ const gmtvLocationsOptions = computed(() =>
   }))
 );
 const queryClient = useQueryClient();
-const { mutate: createPayment } = useMutation((data) => axios.post("/payments", data), {
-  onSuccess() {
-    message.success("Payment has been created");
-    queryClient.invalidateQueries(["payments_vendor", routeParamId.value]);
-    showDrawer.value = false;
-  },
-});
+const { mutate: createPayment } = useMutation(
+  (data) => axios.post("/payments", data),
+  {
+    onSuccess() {
+      message.success("Payment has been created");
+      queryClient.invalidateQueries(["payments_vendor", routeParamId.value]);
+      showDrawer.value = false;
+    },
+  }
+);
 
 async function submitForm() {
   try {
@@ -205,7 +221,9 @@ const onCreatePaymentInvoice = () => {
   };
 };
 const onInvoiceSelect = (val, index) => {
-  const vendor_invoiceIdx = invoicesData.value.findIndex((inv) => inv.id === val);
+  const vendor_invoiceIdx = invoicesData.value.findIndex(
+    (inv) => inv.id === val
+  );
   const vendor_invoice = invoicesData.value[vendor_invoiceIdx];
 
   form.value.payment_invoices[index] = {
@@ -222,22 +240,42 @@ const onInvoiceSelect = (val, index) => {
     @update:show="$emit('update:showDrawer', false)"
     preset="card"
     size="huge"
-    class="custom-modal relative max-w-screen-md"
+    class="max-w-screen-md"
   >
-    <n-form :model="form" :label-width="90" :rules="rules" size="medium" ref="formRef">
-      <n-form-item label="Payment Status" path="payment_status_id">
-        <n-select
-          :options="paymentStatusOptions"
-          v-model:value="form.payment_status_id"
-          filterable
-        />
-      </n-form-item>
-      <n-form-item label="Check Number" path="check_number">
-        <n-input type="text" clearable v-model:value.trim="form.check_number" />
-      </n-form-item>
-      <n-form-item label="GMTV location" path="gmtv_location_id">
-        <n-select :options="gmtvLocationsOptions" v-model:value="form.gmtv_location_id" />
-      </n-form-item>
+    <n-form
+      :model="form"
+      :label-width="90"
+      :rules="rules"
+      size="medium"
+      ref="formRef"
+    >
+      <div class="sm:grid sm:grid-cols-2 sm:gap-x-5">
+        <n-form-item label="GMTV print location" path="gmtv_location_id">
+          <n-select
+            :options="gmtvLocationsOptions"
+            v-model:value="form.gmtv_location_id"
+          />
+        </n-form-item>
+        <n-form-item label="Payment Status" path="payment_status_id">
+          <n-select
+            :options="paymentStatusOptions"
+            v-model:value="form.payment_status_id"
+            filterable
+          />
+        </n-form-item>
+      </div>
+      <div class="sm:grid sm:grid-cols-2 sm:gap-x-5">
+        <n-form-item label="Check Number" path="check_number">
+          <n-input
+            type="text"
+            clearable
+            v-model:value.trim="form.check_number"
+          />
+        </n-form-item>
+        <n-form-item label="Account Number" path="account_number">
+          <n-input v-model:value="form.account_number" clearable />
+        </n-form-item>
+      </div>
       <div>Payment Invoice</div>
       <n-dynamic-input
         v-model:value="form.payment_invoices"
@@ -247,7 +285,9 @@ const onInvoiceSelect = (val, index) => {
         show-sort-button
         :min="1"
       >
-        <div class="rounded bg-gray-200/50 p-3 dark:bg-gray-800/50">
+        <div
+          class="rounded bg-gray-200/50 p-3 dark:bg-gray-800/50 sm:grid sm:grid-cols-2 sm:gap-x-5"
+        >
           <n-form-item
             label="Vendor Invoice"
             :path="`payment_invoices[${index}].vendor_invoice_id`"
@@ -265,33 +305,36 @@ const onInvoiceSelect = (val, index) => {
             :rule="rules.payment_invoices.payment_amount"
             label="Payment Amount"
           >
-            <CurrencyInput v-model="form.payment_invoices[index].payment_amount" />
+            <CurrencyInput
+              v-model="form.payment_invoices[index].payment_amount"
+            />
           </n-form-item>
         </div>
       </n-dynamic-input>
-      <n-form-item label="Account Number" path="account_number">
-        <n-input v-model:value="form.account_number" clearable />
-      </n-form-item>
-      <n-form-item label="Payment Date" path="payment_date">
-        <n-date-picker
-          v-model:formatted-value="form.payment_date"
-          value-format="yyyy-MM-dd"
-        />
-      </n-form-item>
+      <div class="sm:grid sm:grid-cols-2 sm:gap-x-5">
+        <n-form-item label="Payment Date" path="payment_date">
+          <n-date-picker
+            v-model:formatted-value="form.payment_date"
+            value-format="yyyy-MM-dd"
+            class="w-full"
+          />
+        </n-form-item>
+        <n-form-item label="Amount" path="amount">
+          <CurrencyInput
+            placeholder="Enter Amount"
+            clearable
+            disabled
+            v-model="form.amount"
+          />
+        </n-form-item>
+      </div>
       <n-form-item label="Notes" path="notes">
         <n-input type="textarea" clearable v-model:value="form.notes" />
       </n-form-item>
-      <n-form-item label="Amount" path="amount">
-        <CurrencyInput
-          placeholder="Enter Amount"
-          clearable
-          disabled
-          v-model="form.amount"
-        />
-      </n-form-item>
+
+      <n-button attr-type="submit" size="large" @click="submitForm"
+        >Add</n-button
+      >
     </n-form>
-    <template #footer>
-      <n-button size="large" @click="submitForm">Update</n-button>
-    </template>
   </n-modal>
 </template>

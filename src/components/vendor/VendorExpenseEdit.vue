@@ -327,6 +327,22 @@ const onRemoveExpenseItem = (index) => {
           :loading="isLoading"
         />
       </n-form-item>
+      <div class="flex flex-col gap-x-5 sm:flex-row">
+        <n-form-item label="Amount Due" path="amount_due">
+          <currency-input
+            clearable
+            v-model="form.amount_due"
+            :loading="isLoading"
+            disabled
+          />
+        </n-form-item>
+        <n-form-item label="Due Date" path="due_date">
+          <n-date-picker
+            v-model:formatted-value="form.due_date"
+            value-format="yyyy-MM-dd"
+          />
+        </n-form-item>
+      </div>
       <div>Expenses</div>
       <n-dynamic-input
         v-model:value="form.expenses"
@@ -339,21 +355,34 @@ const onRemoveExpenseItem = (index) => {
         :max="isDisabled ? form.expenses?.length : undefined"
       >
         <div class="grid rounded bg-gray-200/50 p-3 dark:bg-gray-800/50">
-          <n-form-item
-            label="VIN"
-            :path="`expenses[${index}].deal_id`"
-            :rule="rules.expenses.deal_id"
-          >
-            <n-select
-              placeholder="Search VIN"
-              :options="searchVinResultOptions || dealOptions"
-              v-model:value="form.expenses[index].deal_id"
-              :loading="isLoading || isVendorSearchLoading"
-              filterable
-              remote
-              @search="handleSearch"
-            />
-          </n-form-item>
+          <div class="sm:grid sm:grid-cols-2 sm:justify-between sm:gap-x-5">
+            <n-form-item
+              label="VIN"
+              :path="`expenses[${index}].deal_id`"
+              :rule="rules.expenses.deal_id"
+            >
+              <n-select
+                placeholder="Search VIN"
+                :options="searchVinResultOptions || dealOptions"
+                v-model:value="form.expenses[index].deal_id"
+                :loading="isLoading || isVendorSearchLoading"
+                filterable
+                remote
+                @search="handleSearch"
+              />
+            </n-form-item>
+            <n-form-item
+              label="Expense Date"
+              ignore-path-change
+              :path="`expenses[${index}].expense_date`"
+              :rule="rules.expenses.expense_date"
+            >
+              <n-date-picker
+                v-model:formatted-value="form.expenses[index].expense_date"
+                value-format="yyyy-MM-dd"
+              />
+            </n-form-item>
+          </div>
           <n-form-item
             ignore-path-change
             :path="`expenses[${index}].name`"
@@ -383,58 +412,35 @@ const onRemoveExpenseItem = (index) => {
               @keydown.enter.prevent
             />
           </n-form-item>
-          <n-form-item
-            ignore-path-change
-            :path="`expenses[${index}].type`"
-            :rule="rules.expenses.type"
-            label="Expense Type"
-          >
-            <n-select
-              :options="expenseTypeOptions"
-              filterable
-              v-model:value="form.expenses[index].type"
-              :loading="isLoading"
-              @keydown.enter.prevent
-            />
-          </n-form-item>
-          <n-form-item
-            ignore-path-change
-            :path="`expenses[${index}].amount`"
-            :rule="rules.expenses.amount"
-            label="Amount"
-          >
-            <CurrencyInput
-              v-model="form.expenses[index].amount"
-              :loading="isLoading"
-            />
-          </n-form-item>
-          <n-form-item
-            label="Expense Date"
-            ignore-path-change
-            :path="`expenses[${index}].expense_date`"
-            :rule="rules.expenses.expense_date"
-          >
-            <n-date-picker
-              v-model:formatted-value="form.expenses[index].expense_date"
-              value-format="yyyy-MM-dd"
-            />
-          </n-form-item>
+          <div class="sm:flex sm:gap-x-5">
+            <n-form-item
+              ignore-path-change
+              :path="`expenses[${index}].type`"
+              :rule="rules.expenses.type"
+              label="Expense Type"
+            >
+              <n-select
+                :options="expenseTypeOptions"
+                filterable
+                v-model:value="form.expenses[index].type"
+                :loading="isLoading"
+                @keydown.enter.prevent
+              />
+            </n-form-item>
+            <n-form-item
+              ignore-path-change
+              :path="`expenses[${index}].amount`"
+              :rule="rules.expenses.amount"
+              label="Amount"
+            >
+              <CurrencyInput
+                v-model="form.expenses[index].amount"
+                :loading="isLoading"
+              />
+            </n-form-item>
+          </div>
         </div>
       </n-dynamic-input>
-
-      <n-form-item label="Amount Due" path="amount_due">
-        <currency-input
-          v-model="form.amount_due"
-          :loading="isLoading"
-          disabled
-        />
-      </n-form-item>
-      <n-form-item label="Due Date" path="due_date">
-        <n-date-picker
-          v-model:formatted-value="form.due_date"
-          value-format="yyyy-MM-dd"
-        />
-      </n-form-item>
     </n-form>
     <template #footer>
       <div class="flex justify-end gap-x-4" v-if="!isDisabled">

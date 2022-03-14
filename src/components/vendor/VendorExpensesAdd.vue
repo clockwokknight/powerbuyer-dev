@@ -92,7 +92,10 @@ watch(
   () => form.value?.expenses,
   (newFormValue) => {
     if (newFormValue.length > 0) {
-      form.value.amount_due = newFormValue?.reduce((prev, curr) => prev + curr.amount, 0);
+      form.value.amount_due = newFormValue?.reduce(
+        (prev, curr) => prev + curr.amount,
+        0
+      );
     } else {
       form.value.amount_due = 0;
     }
@@ -173,9 +176,8 @@ const dealOptions = computed(() =>
 const searchVinSelect = ref("");
 const debouncedSearchVin = useDebounce(searchVinSelect, 500);
 
-const { data: searchDealResult, isLoading: isVendorSearchLoading } = searchDealByVin(
-  debouncedSearchVin
-);
+const { data: searchDealResult, isLoading: isVendorSearchLoading } =
+  searchDealByVin(debouncedSearchVin);
 const searchVinResultOptions = computed(() =>
   searchDealResult.value?.map((deal) => ({
     value: deal.id,
@@ -266,7 +268,11 @@ const onCreateExpenseItems = () => {
     </n-icon>
     Create Invoice
   </n-button>
-  <n-modal preset="card" class="custom-modal max-w-screen-md" v-model:show="showDrawer">
+  <n-modal
+    preset="card"
+    class="custom-modal max-w-screen-md"
+    v-model:show="showDrawer"
+  >
     <n-form
       :model="form"
       :rules="rules"
@@ -274,6 +280,22 @@ const onCreateExpenseItems = () => {
       ref="formRef"
       :disabled="isLoading"
     >
+      <div class="flex flex-col gap-x-5 sm:flex-row">
+        <n-form-item label="Amount Due" path="amount_due">
+          <currency-input
+            clearable
+            v-model="form.amount_due"
+            :loading="isLoading"
+            disabled
+          />
+        </n-form-item>
+        <n-form-item label="Due Date" path="due_date">
+          <n-date-picker
+            v-model:formatted-value="form.due_date"
+            value-format="yyyy-MM-dd"
+          />
+        </n-form-item>
+      </div>
       <div>Expenses</div>
       <n-dynamic-input
         v-model:value="form.expenses"
@@ -380,21 +402,6 @@ const onCreateExpenseItems = () => {
           </div>
         </div>
       </n-dynamic-input>
-
-      <n-form-item label="Amount Due" path="amount_due">
-        <currency-input
-          clearable
-          v-model="form.amount_due"
-          :loading="isLoading"
-          disabled
-        />
-      </n-form-item>
-      <n-form-item label="Due Date" path="due_date">
-        <n-date-picker
-          v-model:formatted-value="form.due_date"
-          value-format="yyyy-MM-dd"
-        />
-      </n-form-item>
     </n-form>
     <template #footer>
       <n-button
