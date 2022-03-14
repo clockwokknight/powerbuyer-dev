@@ -23,7 +23,8 @@ const scrollWrapper = ref(null);
 
 // Left and right Click Arrow Scroll
 const ifScrollArrowNeeded = useDebounceFn(() => {
-  const wrapperWidth = tabListButtonWrapper.value?.getBoundingClientRect().width;
+  const wrapperWidth =
+    tabListButtonWrapper.value?.getBoundingClientRect().width;
   const tabWidth = tabListButton.value?.getBoundingClientRect().width;
 
   showScrollArrow.value = wrapperWidth < tabWidth;
@@ -76,13 +77,13 @@ watch(
         });
       } else {
         tabStore.initTabs(JSON.parse(pageTabs.value.tabs));
-        if (tabStore.tabs.length >= 1 && route.path === `/${props.pageName}`) {
-          tabStore.tabs.forEach((tab) => {
-            if (tab.active) {
-              router.push(`/${props.pageName}/${tab.id}`);
-            }
-          });
-        }
+        // if (tabStore.tabs.length >= 1 && route.path === `/${props.pageName}`) {
+        //   tabStore.tabs.forEach((tab) => {
+        //     if (tab.active) {
+        //       router.push(`/${props.pageName}/${tab.id}`);
+        //     }
+        //   });
+        // }
         ifScrollArrowNeeded();
       }
     }
@@ -119,14 +120,26 @@ const tabChanged = (index) => {
       return { ...rest, active: true };
     } else return rest;
   });
+  syncTabs({
+    user_id: 1,
+    page: props.pageName,
+    tabs: JSON.stringify(tabStore.tabs),
+  });
 };
 
 watch(
   () => tabStore.selectedIndex,
   (newValue) => {
     scrollTabToView();
-    if (newValue !== -1 && parseInt(route.params?.id) !== tabStore.tabs[newValue].id) {
+    if (
+      newValue !== -1 &&
+      route.path !== props.pageName &&
+      parseInt(route.params?.id) !== tabStore.tabs[newValue].id
+    ) {
       router.push(`/${props.pageName}/${tabStore.tabs[newValue].id}`);
+
+      // else
+      //   tabStore.addTab()
     }
   }
 );
@@ -157,19 +170,23 @@ const afterAnimated = () => {
 <template>
   <TabGroup :selected-index="tabStore.selectedIndex" @change="tabChanged">
     <header
-      class="relative z-80 h-[88px] pl-2 md:pl-6 pr-[calc(0.5rem+5px)] md:pr-[calc(1.5rem+5px)] pt-2 md:pt-6"
+      class="z-80 relative h-[88px] pl-2 pr-[calc(0.5rem+5px)] pt-2 md:pl-6 md:pr-[calc(1.5rem+5px)] md:pt-6"
     >
       <div
-        class="__tabs relative flex h-[64px] items-center rounded bg-foreground_light dark:bg-foreground_dark"
+        class="__tabs bg-foreground_light dark:bg-foreground_dark relative flex h-[64px] items-center rounded"
         :class="global.stuck[0] && 'shadow-lg'"
         ref="tabListButtonWrapper"
       >
         <div
-          class="flex items-center overflow-x-auto scrollbar:h-0 scrollbar:w-0"
+          class="scrollbar:h-0 scrollbar:w-0 flex items-center overflow-x-auto"
           ref="scrollWrapper"
+          style="scrollbar-width: none"
         >
           <TabList v-slot="{ selectedIndex }">
-            <nav ref="tabListButton" class="flex min-w-max flex-nowrap gap-x-2 pl-5">
+            <nav
+              ref="tabListButton"
+              class="flex min-w-max flex-nowrap gap-x-2 pl-5"
+            >
               <TransitionGroup
                 name="fade"
                 @before-leave="beforeLeaveTab"
@@ -180,7 +197,7 @@ const afterAnimated = () => {
                   v-show="tabStore.tabs.length >= 1"
                   v-for="(tab, tabIdx) in tabStore.tabs"
                   :key="tab?.id"
-                  class="group relative grid select-none place-content-center overflow-hidden rounded-round"
+                  class="group rounded-round relative grid select-none place-content-center overflow-hidden"
                 >
                   <router-link
                     :to="`/${props.pageName}/${tab?.id}`"
@@ -191,7 +208,7 @@ const afterAnimated = () => {
                       class="relative max-w-xs scroll-mr-3 focus:outline-none"
                       :class="[
                         isActive
-                          ? 'bg-accent font-medium text-primary before:absolute before:inset-y-0 before:left-0 before:h-full before:w-1 before:bg-primary focus:outline-none'
+                          ? 'bg-accent text-primary before:bg-primary font-medium before:absolute before:inset-y-0 before:left-0 before:h-full before:w-1 focus:outline-none'
                           : 'font-medium text-black/75 dark:text-white',
                       ]"
                     >
@@ -206,12 +223,14 @@ const afterAnimated = () => {
                     </tab>
                   </router-link>
                   <span
-                    class="absolute inset-y-0 right-0 top-[1px] z-10 flex cursor-pointer items-center transition-all pr-3.5"
+                    class="absolute inset-y-0 right-0 top-[1px] z-10 flex cursor-pointer items-center pr-3.5 transition-all"
                     @click.stop="closeTab(tab.id)"
                   >
                     <svg
-                      class="cubic-timing-tab h-2 w-2 text-red-500 transition-transform duration-200 group-hover:scale-100"
-                      :class="[tabIdx === selectedIndex ? 'scale-100' : 'scale-0']"
+                      class="cubic-timing-tab h-2 w-2 text-red-500 transition-transform duration-300 group-hover:scale-100"
+                      :class="[
+                        tabIdx === selectedIndex ? 'scale-100' : 'scale-0',
+                      ]"
                       viewBox="0 0 11 11"
                       fill="none"
                       stroke="currentColor"

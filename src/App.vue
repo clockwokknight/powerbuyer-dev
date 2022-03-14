@@ -13,7 +13,7 @@ const global = useGlobalState();
         <n-notification-provider>
           <n-dialog-provider>
             <section
-              class="relative flex fill-screen bg-background_light dark:!bg-background_dark"
+              class="fill-screen relative flex bg-background_light dark:!bg-background_dark"
             >
               <MainMenu />
               <router-view />

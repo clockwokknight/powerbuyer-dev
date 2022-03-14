@@ -1,20 +1,15 @@
 <script setup>
-import { h, defineComponent, ref, watch, onUpdated } from "vue";
-import { NTag, NButton, useMessage } from "naive-ui";
-import { useRoute } from "vue-router";
-import vendors from "@/api/vendors";
-import payments from "@/api/payments";
-
-import MaskedInput from "@/components/common/MaskedInput.vue";
-import UpdatableButtonWrapper from "@/components/common/UpdatableButtonWrapper.vue";
 import VendorPaymentsAdd from "@/components/vendor/VendorPaymentsAdd.vue";
+import ActionButtons from "@/components/vendor/ActionButtons.vue";
+import axios from "axios";
+import { NButton } from "naive-ui";
+import { h, ref, toRaw, watch } from "vue";
+import { useQuery } from "vue-query";
+import { useRoute } from "vue-router";
+import { omit, pick } from "@/lib/helper.js";
+import VendorPaymentEdit from "@/components/vendor/VendorPaymentEdit.vue";
 
 const columns = [
-  {
-    title: "Inv #",
-    key: "invoice_number",
-    //fixed: 'left'
-  },
   {
     title: "Check Number",
     key: "check_number",
@@ -27,7 +22,7 @@ const columns = [
   },
   {
     title: "Status",
-    key: "payment_status_id",
+    key: "status",
     //fixed: 'left'
   },
   {
@@ -39,188 +34,76 @@ const columns = [
     title: "",
     key: "edit",
     render(row) {
-      return h(
-        NButton,
-        {
-          strong: true,
-
-          size: "medium",
-          onClick: () => doShowOuter(row),
-        },
-        { default: () => "View / Edit" }
-      );
+      return h(ActionButtons, {
+        onClick: () => showEditPaymentForm(row),
+      });
     },
   },
 ];
 
-const pagination = { pageSize: 10 };
-
-const tableData = ref([]);
-const showOuterRef = ref(false);
-const isLoading = ref(false);
-
-const formValue = ref({
-  vendor_id: 0,
-  invoice_number: "",
-  check_number: "",
-  type: "",
-  amount: "",
-});
-
-const show = ref({
-  invoice_number: false,
-  check_number: false,
-  type: false,
-  amount: false,
-});
-
 const route = useRoute();
+const pagination = { pageSize: 10 };
 const routeParamId = ref(route.params?.id);
+const visibleEditForm = ref(false);
+const formRow = ref(null);
+const showEditPaymentForm = (row) => {
+  const obj = omit(toRaw(row), [
+    "created_at",
+    "updated_at",
+    "recipient_type",
+    "txn_id",
+    "recipient_name",
+    "invoice_number",
+  ]);
+  obj.payment_invoices = obj.vendor_invoices.map((invoice) => ({
+    vendor_invoice_id: invoice.id,
+    payment_amount: invoice.amount_paid,
+  }));
 
-watch(
-  () => route.params?.id,
-  () => {
-    routeParamId.value = route.params?.id;
-    payments.all().then((res) => {
-      tableData.value = res.data;
-    });
-  }
+  formRow.value = obj;
+  visibleEditForm.value = true;
+  console.log({ obj, row: toRaw(row) });
+};
+
+const { data: paymentTable, isLoading } = useQuery(
+  ["payments_vendor", routeParamId],
+  ({ queryKey }) =>
+    axios
+      .get("/payments/vendor/" + queryKey[1])
+      .then((res) => (res.data ? res.data : []))
 );
 
-payments.all().then((res) => {
-  // console.log(res.data)
-  tableData.value = res.data;
-});
-
-function updateVendor(key, val) {}
-
-function handleKeyUp(val) {
-  show.value[val] = true;
-}
-
-function handleKeyDown(val) {
-  show.value[val] = false;
-}
-
-function doShowOuter(row) {
-  console.log(row);
-  console.log(formValue.value.invoice_number);
-  console.log(row.invoice_number);
-  formValue.value.vendor_id = row.vendor_id;
-  formValue.value.invoice_number = row.invoice_number;
-  formValue.value.check_number = row.check_number;
-  formValue.value.amount = row.amount;
-  formValue.value.payment_status_id = row.payment_status_id;
-  console.log(formValue.value);
-  showOuterRef.value = true;
-}
+watch(
+  () => route.params,
+  (toParam) => {
+    if (toParam?.id) routeParamId.value = toParam?.id;
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
-  <div id="payments" class="scroll-smooth">
-    <n-message-provider>
-      <div class="-mt-4 font-sans antialiased">
-        <div class="flex translate-y-[68px] items-center justify-end pr-10">
-          <VendorPaymentsAdd />
-        </div>
-        <div class="rounded bg-foreground_light dark:bg-foreground_dark py-8 px-8">
-          <div><p class="pb-8 text-2xl font-bold">Payments</p></div>
-          <n-data-table
-            class="rounded-round"
-            :columns="columns"
-            :data="tableData"
-            :pagination="pagination"
-            :bordered="false"
-          />
-        </div>
-      </div>
+  <div class="-mt-4 font-sans">
+    <VendorPaymentEdit
+      :initial-data="formRow"
+      v-model:show-drawer="visibleEditForm"
+    />
+    <div class="flex translate-y-[68px] items-center justify-end pr-10">
+      <VendorPaymentsAdd />
+    </div>
+    <div class="border-2 bg-white py-8 px-8 dark:border-0 dark:bg-[#25272A]">
+      <div><p class="pb-8 text-2xl font-bold">Payments</p></div>
 
-      <n-drawer v-model:show="showOuterRef" :width="500">
-        <n-drawer-content title="Payment Details">
-          <n-form :model="formValue" :label-width="90" size="medium" ref="formRef">
-            <n-form-item label="Inv #" class="pr-12">
-              <UpdatableButtonWrapper
-                v-model="formValue.invoice_number"
-                :reset-value="formValue.invoice_number"
-                :shouldUpdate="show.invoice_number"
-                @revert="handleKeyDown('invoice_number')"
-                @save="(val) => updateVendor('invoice_number', val)"
-              >
-                <n-input
-                  style="width: 400px"
-                  class="rounded-round border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
-                  :default-value="formValue.invoice_number"
-                  type="text"
-                  v-model:value="formValue.invoice_number"
-                  :loading="isLoading"
-                  @keyup="handleKeyUp('invoice_number')"
-                />
-              </UpdatableButtonWrapper>
-            </n-form-item>
-            <n-form-item label="Check Number" class="pr-12">
-              <UpdatableButtonWrapper
-                v-model="formValue.check_number"
-                :reset-value="formValue.check_number"
-                :shouldUpdate="show.check_number"
-                @revert="handleKeyDown('check_number')"
-                @save="(val) => updateVendor('check_number', val)"
-              >
-                <n-input
-                  style="width: 400px"
-                  class="rounded-round border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
-                  :default-value="formValue.check_number"
-                  type="text"
-                  v-model:value="formValue.check_number"
-                  :loading="isLoading"
-                  @keyup="handleKeyUp('check_number')"
-                />
-              </UpdatableButtonWrapper>
-            </n-form-item>
-
-            <n-form-item label="Amount" class="pr-12">
-              <UpdatableButtonWrapper
-                v-model="formValue.amount"
-                :reset-value="formValue.amount"
-                :shouldUpdate="show.amount"
-                @revert="handleKeyDown('amount')"
-                @save="(val) => updateVendor('amount', val)"
-              >
-                <n-input
-                  style="width: 400px"
-                  class="rounded-round border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
-                  :default-value="formValue.amount"
-                  type="text"
-                  v-model:value="formValue.amount"
-                  :loading="isLoading"
-                  placeholder="Enter Amount"
-                  @keyup="handleKeyUp('amount')"
-                />
-              </UpdatableButtonWrapper>
-            </n-form-item>
-
-            <n-form-item label="Status" class="pr-12">
-              <UpdatableButtonWrapper
-                v-model="formValue.payment_status_id"
-                :reset-value="formValue.payment_status_id"
-                :shouldUpdate="show.payment_status_id"
-                @revert="handleKeyDown('payment_status_id')"
-                @save="(val) => updateVendor('payment_status_id', val)"
-              >
-                <n-input
-                  style="width: 400px"
-                  class="rounded-round border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
-                  :default-value="formValue.payment_status_id"
-                  type="text"
-                  placeholder="Enter Type"
-                  v-model:value="formValue.payment_status_id"
-                  :loading="isLoading"
-                  @keyup="handleKeyUp('payment_status_id')"
-                />
-              </UpdatableButtonWrapper>
-            </n-form-item>
-          </n-form>
-        </n-drawer-content>
-      </n-drawer>
-    </n-message-provider>
+      <n-data-table
+        class="rounded-md"
+        :columns="columns"
+        :data="paymentTable"
+        :loading="isLoading"
+        :pagination="pagination"
+        :bordered="false"
+        :max-height="400"
+        :scroll-x="900"
+      />
+    </div>
   </div>
 </template>

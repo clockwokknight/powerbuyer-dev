@@ -8,10 +8,15 @@ import {
   watch,
   watchEffect,
   nextTick,
+  unref,
 } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useMutation, useQueryClient } from "vue-query";
-import { getVendorById, useVendorCategories } from "@/hooks/vendor";
+import {
+  getInvoiceTotalByVendor,
+  getVendorById,
+  useVendorCategories,
+} from "@/hooks/vendor";
 import { getPaymentTerms, getStates } from "@/hooks/common_query";
 import { useGlobalState } from "@/store/global";
 import { pick } from "@/lib/helper";
@@ -27,10 +32,9 @@ import VendorExpenses from "@/components/vendor/VendorExpenses.vue";
 import VendorPayments from "@/components/vendor/VendorPayments.vue";
 import CustomInput from "@/components/common/CustomInput.vue";
 import Tabs from "@/components/common/Tabs.vue";
+import { useTabsViewStore } from "@/store/tabs";
 
-const VendorContacts = defineAsyncComponent({
-  loader: () => import("@/components/vendor/VendorContacts.vue"),
-});
+import VendorContacts from "@/components/vendor/VendorContacts.vue";
 
 const instance = getCurrentInstance();
 
@@ -99,7 +103,7 @@ const paymentTermOptions = computed(() =>
     value: payment.name,
   }))
 );
-
+const { data: getInvoicesTotal } = getInvoiceTotalByVendor(routeParamId);
 const { data: statesList } = getStates();
 
 const { data: vendor, isLoading: isVendorLoading } = getVendorById(routeParamId);
@@ -195,10 +199,10 @@ function handleTabClick(e) {
 <template>
   <div
     id="details"
-    class="__section __vendor-card __details mt-0 grid grid-cols-12 rounded bg-foreground_light dark:bg-foreground_dark p-6"
+    class="__section __vendor-card __details bg-foreground_light dark:bg-foreground_dark mt-0 grid grid-cols-12 rounded p-6"
   >
     <!-- left side -->
-    <div class="__form col-span-12 md:col-span-8 flex flex-col justify-between">
+    <div class="__form col-span-12 flex flex-col justify-between md:col-span-8">
       <div class="__title">
         <h3 class="mb-2 translate-x-2 font-bold uppercase opacity-[0.44]">Vendor</h3>
         <CustomInput
@@ -360,14 +364,14 @@ function handleTabClick(e) {
     <!-- right side -->
 
     <div
-      class="mt-[24px] md:w-auto md:mt-0 col-span-12 md:col-span-4 flex flex-col md:items-end justify-between"
+      class="col-span-12 mt-[24px] flex flex-col justify-between md:col-span-4 md:mt-0 md:w-auto md:items-end"
     >
       <div class="__invoice-info mb-[24px] md:mb-0">
         <div class="flex md:justify-end">
           <p class="text-sm font-bold">Open Invoices</p>
         </div>
-        <div class="flex md:justify-end">
-          <p class="text-2xl font-bold">$10,193</p>
+        <div class="flex justify-end">
+          <p class="text-2xl font-bold">{{ getInvoicesTotal }}</p>
         </div>
       </div>
       <div class="align-end max-w-[220px] flex-col justify-between">
@@ -384,7 +388,7 @@ function handleTabClick(e) {
           @focus="currentActiveField = 'payment_terms'"
         />
         <div
-          class="__invoice-buttons mt-4 md:mt-20 flex min-w-max max-w-full flex-col items-end justify-center"
+          class="__invoice-buttons mt-4 flex min-w-max max-w-full flex-col items-end justify-center md:mt-20"
         >
           <n-button class="w-[220px]" @click="global.openDrawer('payments')">
             <n-icon>
@@ -417,27 +421,25 @@ function handleTabClick(e) {
     id="__subtabs"
     type="basic"
     ref="vendorTab"
-    class="sticky top-[-2px] left-0 z-40 mt-4 w-full rounded bg-foreground_light dark:bg-foreground_dark duration-300"
-    :stuck="global.stuck[1]"
+    class="bg-foreground_light dark:bg-foreground_dark sticky top-[-2px] left-0 z-40 mt-4 w-full rounded duration-300"
     :items="vendorTabs"
-    @click="handleTabClick"
   />
 
   <VendorExpenses class="__section" />
-  <VendorPayments class="__section" />
-  <VendorExpensesItems class="__section" />
-  <Suspense>
-    <template #default><VendorContacts class="__section" /></template>
-    <template #fallback> Loading... </template>
-  </Suspense>
+  <VendorPayments class="__section" id="payments" />
+  <VendorExpensesItems class="__section" id="expense-items" />
+  <VendorContacts class="__section" />
 </template>
 
 <style lang="scss">
 #__subtabs[stuck],
 .__tabs[stuck] {
-  @apply bg-[#F4F6F8] dark:bg-dark_border rounded-none shadow-lg shadow-[#00000011];
+  @apply dark:bg-dark_border rounded-none bg-[#F4F6F8] shadow-lg shadow-[#00000011];
 }
 .__veil {
   width: calc(100vw - 370px);
+}
+.__section {
+  @apply scroll-mt-[100px] rounded-md;
 }
 </style>

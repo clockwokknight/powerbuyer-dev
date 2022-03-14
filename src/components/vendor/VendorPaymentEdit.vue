@@ -1,8 +1,16 @@
 <script setup>
-import { computed, ref, toRaw, unref, watch, watchPostEffect } from "vue";
+import {
+  computed,
+  ref,
+  toRaw,
+  toRef,
+  unref,
+  watch,
+  watchPostEffect,
+} from "vue";
 import { useMessage } from "naive-ui";
 import dayjs from "dayjs";
-import { clone, omit, pick } from "@/lib/helper";
+import { clone, pick } from "@/lib/helper";
 import { useMutation, useQuery, useQueryClient } from "vue-query";
 import axios from "axios";
 import CurrencyInput from "@/components/common/CurrencyInput.vue";
@@ -10,9 +18,16 @@ import { useRoute } from "vue-router";
 import { vendorInvoices } from "@/hooks/vendor.js";
 import { getGmtvLocations } from "@/hooks/location.js";
 
+const props = defineProps(["showDrawer", "initialData"]);
+const emits = defineEmits(["update:showDrawer"]);
 const route = useRoute();
 
-const showDrawer = ref(false);
+const showDrawer = toRef(props, "showDrawer");
+watch(showDrawer, (newValue) => {
+  if (newValue) {
+    form.value = { ...props.initialData };
+  }
+});
 const initialForm = {
   // recipient_id: null,
   // recipient_type: null,
@@ -24,9 +39,7 @@ const initialForm = {
   account_number: "",
   notes: "",
   gmtv_location_id: null,
-  payment_invoices: [
-    { vendor_invoice_id: null, payment_amount: 0, balance: 0 },
-  ],
+  payment_invoices: [{ vendor_invoice_id: null, payment_amount: 0 }],
 };
 const form = ref({ ...initialForm });
 
@@ -41,7 +54,7 @@ watch(
 
 const { data: paymentStatus } = useQuery(
   "payment_status",
-  () => axios.get("payment_status").then((res) => res.data),
+  () => axios.get("/payment_status").then((res) => res.data),
   {
     refetchOnMount: false,
   }
@@ -137,15 +150,13 @@ const message = useMessage();
 const formRef = ref(null);
 
 watch(showDrawer, (newValue) => {
-  if (newValue) {
-    form.value = clone(initialForm);
-  }
+  form.value = newValue ? clone(props.initialData) : clone(initialForm);
 });
 
 watch(
   () => form.value?.payment_invoices,
   (newFormValue) => {
-    if (newFormValue.length > 0) {
+    if (newFormValue?.length > 0) {
       form.value.amount = newFormValue?.reduce(
         (prev, curr) => prev + parseFloat(curr.payment_amount),
         0
@@ -157,11 +168,8 @@ watch(
   { deep: true }
 );
 
-const { data: invoicesData, isLoading: expensesDataLoading } =
-  vendorInvoices(routeParamId);
-
+const { data: invoicesData } = vendorInvoices(routeParamId);
 const invoiceDataOptions = ref([]);
-
 watchPostEffect(() => {
   if (invoicesData.value)
     invoiceDataOptions.value = invoicesData.value?.map((inv) => ({
@@ -182,7 +190,7 @@ const gmtvLocationsOptions = computed(() =>
 );
 const queryClient = useQueryClient();
 const { mutate: createPayment } = useMutation(
-  (data) => axios.post("/payments", data),
+  (data) => axios.post("/update", data),
   {
     onSuccess() {
       message.success("Payment has been created");
@@ -198,9 +206,7 @@ async function submitForm() {
     const obj = clone(form.value);
     // obj.recipient_type = 1;
     obj.recipient_id = routeParamId.value;
-    obj.payment_invoices = obj.payment_invoices.map((inv) =>
-      omit(inv, ["balance"])
-    );
+    console.log(form.value);
     createPayment(obj);
   } catch (e) {
     if (Array.isArray(e)) {
@@ -229,19 +235,9 @@ const onInvoiceSelect = (val, index) => {
 </script>
 
 <template>
-  <n-button @click="showDrawer = true">
-    <n-icon>
-      <svg viewBox="0 0 24 24">
-        <path
-          d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"
-          fill="currentColor"
-        ></path>
-      </svg>
-    </n-icon>
-    Add Payment
-  </n-button>
   <n-modal
-    v-model:show="showDrawer"
+    :show="showDrawer"
+    @update:show="$emit('update:showDrawer', false)"
     preset="card"
     size="huge"
     class="max-w-screen-md"
@@ -337,7 +333,7 @@ const onInvoiceSelect = (val, index) => {
       </n-form-item>
 
       <n-button attr-type="submit" size="large" @click="submitForm"
-        >Add</n-button
+        >Update</n-button
       >
     </n-form>
   </n-modal>

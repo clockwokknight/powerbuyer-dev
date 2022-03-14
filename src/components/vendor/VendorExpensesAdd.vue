@@ -3,11 +3,10 @@ import { ref, computed, onMounted, watch, toRef } from "vue";
 import { useRoute } from "vue-router";
 import { useDebounce } from "@vueuse/core";
 import { useMutation, useQueryClient } from "vue-query";
-import { objectFilter, omit, pick } from "@/lib/helper";
+import { clone, objectFilter, omit, pick } from "@/lib/helper";
 import { getExpenseTypes, getVendorExpenseItems } from "@/hooks/expense";
 import { getAllDeals, searchDealByVin } from "@/hooks/deals";
 import { useMessage } from "naive-ui";
-import { useGlobalState } from "@/store/global";
 import dayjs from "dayjs";
 import axios from "axios";
 
@@ -19,23 +18,24 @@ const route = useRoute();
 
 const showDrawer = ref(false);
 const formRef = ref(null);
-const isLoading = ref(false);
 const initialForm = {
-  deal_id: null,
   vendor_id: null,
-  cost: 0,
-  expense_date: null,
+  amount_due: 0,
   invoice_number: "",
-  expense_items: [
-    // {
-    //   name: "",
-    //   description: "",
-    //   amount: 0,
-    //   expense_type_id: null,
-    // },
+  due_date: dayjs().add(30, "day").format("YYYY-MM-DD"),
+  expenses: [
+    {
+      expense_date: dayjs().format("YYYY-MM-DD"),
+      deal_id: null,
+      name: "",
+      description: "",
+      amount: 0,
+      showSelect: true,
+      expense_type_id: null,
+    },
   ],
 };
-const form = ref({ ...initialForm });
+const form = ref(clone(initialForm));
 
 const vendor_id = ref(route.params?.id);
 
@@ -48,7 +48,7 @@ watch(
         form.value.vendor_id = parseInt(route.params?.id);
       }
     } else {
-      form.value = { ...initialForm };
+      form.value = clone(initialForm);
     }
   },
   { immediate: true }
@@ -89,25 +89,22 @@ const expenseTypeOptions = computed(() =>
 );
 
 watch(
-  () => form.value?.expense_items,
+  () => form.value?.expenses,
   (newFormValue) => {
     if (newFormValue.length > 0) {
-      form.value.cost = newFormValue?.reduce((prev, curr) => prev + curr.amount, 0);
+      form.value.amount_due = newFormValue?.reduce(
+        (prev, curr) => prev + curr.amount,
+        0
+      );
     } else {
-      form.value.cost = 0;
+      form.value.amount_due = 0;
     }
   },
   { deep: true }
 );
 
 const rules = {
-  deal_id: {
-    type: "number",
-    required: true,
-    trigger: ["blur", "change"],
-    message: "Please select a VIN",
-  },
-  cost: {
+  amount_due: {
     type: "number",
     required: true,
     validator(rule, value) {
@@ -117,18 +114,28 @@ const rules = {
     },
     trigger: "change",
   },
-  expense_date: {
-    type: "number",
+  // invoice_number: {
+  //   required: true,
+  //   message: "Invoice Number is required",
+  //   trigger: "input",
+  // },
+  due_date: {
     required: true,
     message: "Date is required",
     trigger: ["blur", "change"],
   },
-  invoice_number: {
-    required: true,
-    message: "Invoice Number is required",
-    trigger: "input",
-  },
-  expense_items: {
+  expenses: {
+    expense_date: {
+      required: true,
+      message: "Please pick a date",
+      trigger: ["blur", "change"],
+    },
+    deal_id: {
+      type: "number",
+      required: true,
+      trigger: ["blur", "change"],
+      message: "Please select a VIN",
+    },
     name: {
       required: true,
       message: "Name is required",
@@ -169,9 +176,8 @@ const dealOptions = computed(() =>
 const searchVinSelect = ref("");
 const debouncedSearchVin = useDebounce(searchVinSelect, 500);
 
-const { data: searchDealResult, isLoading: isVendorSearchLoading } = searchDealByVin(
-  debouncedSearchVin
-);
+const { data: searchDealResult, isLoading: isVendorSearchLoading } =
+  searchDealByVin(debouncedSearchVin);
 const searchVinResultOptions = computed(() =>
   searchDealResult.value?.map((deal) => ({
     value: deal.id,
@@ -183,64 +189,44 @@ const handleSearch = (query) => {
   searchVinSelect.value = query;
 };
 
-const { mutateAsync: createExpense } = useMutation((data) =>
-  axios.post("/expenses", data)
-);
-
-const onCreateExpense = (formValue) => {
-  const { expense_items, ...rest } = formValue;
-  if (expense_items.length > 0) {
-    const msg = message.loading("Submitting", { duration: 10000 });
-    isLoading.value = true;
-    Promise.all(
-      expense_items.map(async (item) => {
-        return new Promise(async (resolve) => {
-          setTimeout(async () => {
-            let obj = {
-              ...rest,
-              ...omit(item, ["expense_type_id"]),
-            };
-            obj = objectFilter(obj, (key, value) => value);
-            await createExpense(obj);
-            resolve("working");
-          }, 1000);
-        });
-      })
-    ).then(() => {
-      showDrawer.value = false;
-      queryClient.invalidateQueries(["expensesByVendor", vendor_id.value]);
-      msg.type = "success";
-      msg.content = "Expense Created Successfully";
-      isLoading.value = false;
-      form.value = { ...initialForm };
-      setTimeout(() => {
-        msg.destroy();
-      }, 3000);
-    });
+const { mutateAsync: createExpense, isLoading } = useMutation(
+  (data) => axios.post("/vendor_invoices", { ...data, amount_paid: 0 }),
+  {
+    onSuccess() {
+      queryClient.invalidateQueries(["vendorInvoices", vendor_id.value]);
+    },
   }
-};
+);
 
 async function submitExpense() {
   try {
     await formRef.value.validate();
     // const modifiedForm = omit(form.value, ['cost'])
     const modifiedForm = { ...form.value };
-    if (modifiedForm.expense_date)
-      modifiedForm.expense_date = dayjs(modifiedForm.expense_date).format("YYYY-MM-DD");
-    else delete modifiedForm.expense_date;
 
-    modifiedForm.expense_items = modifiedForm.expense_items.map((item) => ({
-      ...omit(item, ["showSelect", "expense_type_id"]),
-      type: String(item.expense_type_id),
-    }));
-    onCreateExpense(modifiedForm);
+    modifiedForm.expenses = modifiedForm.expenses.map((item) =>
+      objectFilter(
+        {
+          ...omit(item, ["showSelect", "expense_type_id"]),
+          type: String(item.expense_type_id),
+        },
+        (key, value) => value
+      )
+    );
+    console.log({ modifiedForm });
+    await createExpense(modifiedForm);
+    showDrawer.value = false;
+
+    message.success("Expense Created Successfully");
+
+    // onCreateExpense(modifiedForm);
   } catch (e) {
     message.error("Invalid data");
   }
 }
 
 const onExpenseSelect = (value, index) => {
-  let obj = {};
+  let obj;
   if (value === "add") {
     obj = { ...onCreateExpenseItems() };
   } else {
@@ -248,7 +234,11 @@ const onExpenseSelect = (value, index) => {
     obj.amount = parseFloat(obj.amount);
   }
 
-  form.value.expense_items[index] = { ...obj, showSelect: false };
+  form.value.expenses[index] = {
+    ...form.value.expenses[index],
+    ...obj,
+    showSelect: false,
+  };
 };
 
 const onCreateExpenseItems = () => {
@@ -258,6 +248,7 @@ const onCreateExpenseItems = () => {
     amount: 0,
     expense_type_id: null,
     showSelect: true,
+    expense_date: dayjs().format("YYYY-MM-DD"),
   };
 };
 </script>
@@ -275,79 +266,121 @@ const onCreateExpenseItems = () => {
         ></path>
       </svg>
     </n-icon>
-    Create Expense
+    Create Invoice
   </n-button>
-  <n-drawer v-model:show="showDrawer" :width="500">
-    <n-drawer-content title="Create Expense">
-      <n-form
-        :model="form"
-        :rules="rules"
-        size="medium"
-        ref="formRef"
-        :disabled="isLoading"
-      >
-        <n-form-item label="VIN" path="deal_id">
-          <n-select
-            placeholder="Search VIN"
-            :options="searchVinResultOptions || dealOptions"
-            v-model:value="form.deal_id"
-            :loading="isLoading || isVendorSearchLoading"
-            filterable
+  <n-modal
+    preset="card"
+    class="custom-modal max-w-screen-md"
+    v-model:show="showDrawer"
+  >
+    <n-form
+      :model="form"
+      :rules="rules"
+      size="medium"
+      ref="formRef"
+      :disabled="isLoading"
+    >
+      <div class="flex flex-col gap-x-5 sm:flex-row">
+        <n-form-item label="Amount Due" path="amount_due">
+          <currency-input
             clearable
-            remote
-            @search="handleSearch"
+            v-model="form.amount_due"
+            :loading="isLoading"
+            disabled
           />
         </n-form-item>
-
-        <n-dynamic-input
-          v-model:value="form.expense_items"
-          class="custom-dynamic-input my-5"
-          @create="onCreateExpenseItems"
-          #="{ index, value }"
-          show-sort-button
-        >
-          <div class="rounded bg-gray-200/50 p-3">
+        <n-form-item label="Due Date" path="due_date">
+          <n-date-picker
+            v-model:formatted-value="form.due_date"
+            value-format="yyyy-MM-dd"
+          />
+        </n-form-item>
+      </div>
+      <div>Expenses</div>
+      <n-dynamic-input
+        v-model:value="form.expenses"
+        class="custom-dynamic-input my-5"
+        @create="onCreateExpenseItems"
+        #="{ index, value }"
+        show-sort-button
+        :min="1"
+      >
+        <div class="rounded bg-gray-200/50 p-3 dark:bg-gray-800/50">
+          <div class="sm:grid sm:grid-cols-2 sm:justify-between sm:gap-x-5">
             <n-form-item
-              ignore-path-change
-              :path="`expense_items[${index}].name`"
-              :rule="rules.expense_items.name"
-              label="Name"
+              label="VIN"
+              :path="`expenses[${index}].deal_id`"
+              :rule="rules.expenses.deal_id"
             >
               <n-select
-                :options="expenseItemsOptions"
+                placeholder="Search VIN"
+                :options="searchVinResultOptions || dealOptions"
+                v-model:value="form.expenses[index].deal_id"
+                :loading="isLoading || isVendorSearchLoading"
                 filterable
-                @update-value="(val) => onExpenseSelect(val, index)"
-                :disabled="isLoading"
-                :loading="isLoading"
-                v-if="form.expense_items[index].showSelect"
-              />
-              <n-input
-                v-else
-                v-model:value="form.expense_items[index].name"
-                :loading="isLoading"
-                :disabled="isLoading"
-                @keydown.enter.prevent
-              />
-            </n-form-item>
-            <n-form-item label="Description">
-              <n-input
-                type="textarea"
-                v-model:value="form.expense_items[index].description"
-                :loading="isLoading"
-                :disabled="isLoading"
-                @keydown.enter.prevent
+                clearable
+                remote
+                @search="handleSearch"
               />
             </n-form-item>
             <n-form-item
+              label="Expense Date"
               ignore-path-change
-              :path="`expense_items[${index}].expense_type_id`"
-              :rule="rules.expense_items.expense_type_id"
+              :path="`expenses[${index}].expense_date`"
+              :rule="rules.expenses.expense_date"
+            >
+              <n-date-picker
+                v-model:formatted-value="form.expenses[index].expense_date"
+                value-format="yyyy-MM-dd"
+              />
+            </n-form-item>
+          </div>
+
+          <n-form-item
+            ignore-path-change
+            :path="`expenses[${index}].name`"
+            :rule="rules.expenses.name"
+            label="Name"
+            class="max-w-sm"
+          >
+            <n-select
+              :options="expenseItemsOptions"
+              filterable
+              @update-value="(val) => onExpenseSelect(val, index)"
+              :disabled="isLoading"
+              :loading="isLoading"
+              v-if="form.expenses[index].showSelect"
+            />
+            <n-input
+              v-else
+              v-model:value="form.expenses[index].name"
+              :loading="isLoading"
+              :disabled="isLoading"
+              @keydown.enter.prevent
+            />
+          </n-form-item>
+
+          <n-form-item label="Description">
+            <n-input
+              type="textarea"
+              v-model:value="form.expenses[index].description"
+              :loading="isLoading"
+              :disabled="isLoading"
+              @keydown.enter.prevent
+            />
+          </n-form-item>
+          <div class="sm:flex sm:gap-x-5">
+            <n-form-item
+              ignore-path-change
+              :path="`expenses[${index}].expense_type_id`"
+              :rule="rules.expenses.expense_type_id"
               label="Expense Type"
+              class="sm:w-3/4"
             >
               <n-select
                 :options="expenseTypeOptions"
                 filterable
-                v-model:value="form.expense_items[index].expense_type_id"
+                v-model:value="form.expenses[index].expense_type_id"
                 :loading="isLoading"
                 :disabled="isLoading"
                 @keydown.enter.prevent
@@ -355,40 +388,31 @@ const onCreateExpenseItems = () => {
             </n-form-item>
             <n-form-item
               ignore-path-change
-              :path="`expense_items[${index}].amount`"
-              :rule="rules.expense_items.amount"
+              :path="`expenses[${index}].amount`"
+              :rule="rules.expenses.amount"
               label="Amount"
+              class="sm:w-1/4"
             >
               <CurrencyInput
-                v-model="form.expense_items[index].amount"
+                v-model="form.expenses[index].amount"
                 :loading="isLoading"
                 :disabled="isLoading"
               />
             </n-form-item>
           </div>
-        </n-dynamic-input>
-
-        <n-form-item label="Cost" path="cost">
-          <currency-input clearable v-model="form.cost" :loading="isLoading" disabled />
-        </n-form-item>
-        <n-form-item label="Invoice Number" path="invoice_number">
-          <n-input clearable v-model:value="form.invoice_number" :loading="isLoading" />
-        </n-form-item>
-        <n-form-item label="Expense Date" path="expense_date">
-          <n-date-picker v-model:value="form.expense_date" format="yyyy-MM-dd" />
-        </n-form-item>
-      </n-form>
-      <template #footer>
-        <n-button
-          :disabled="isLoading"
-          :loading="isLoading"
-          size="large"
-          @click="submitExpense"
-          >Submit</n-button
-        >
-      </template>
-    </n-drawer-content>
-  </n-drawer>
+        </div>
+      </n-dynamic-input>
+    </n-form>
+    <template #footer>
+      <n-button
+        :disabled="isLoading"
+        :loading="isLoading"
+        size="large"
+        @click="submitExpense"
+        >Submit</n-button
+      >
+    </template>
+  </n-modal>
 </template>
 
 <style lang="scss">

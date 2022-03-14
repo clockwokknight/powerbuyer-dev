@@ -47,8 +47,7 @@ const { data: vendorContacts, isLoading: isVendorContactLoading } = useQuery(
   ({ queryKey }) =>
     axios
       .get(`/vendor_contacts/by_vendor/${queryKey[1]}`)
-      .then((res) => (Array.isArray(res.data) ? res.data : [])),
-  { suspense: true }
+      .then((res) => (Array.isArray(res.data) ? res.data : []))
 );
 
 watch(
@@ -144,7 +143,9 @@ const pagination = { pageSize: 10 };
       <div class="flex translate-y-[68px] items-center justify-end pr-10">
         <VendorAdd />
       </div>
-      <div class="rounded bg-foreground_light dark:bg-foreground_dark py-8 px-8">
+      <div
+        class="rounded bg-foreground_light py-8 px-8 dark:bg-foreground_dark"
+      >
         <div><p class="pb-8 text-2xl font-bold">Contacts</p></div>
         <n-data-table
           class="rounded-round"

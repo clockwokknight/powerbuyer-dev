@@ -2,15 +2,11 @@
 import { useQuery } from "vue-query";
 import axios from "axios";
 import { useDebounce } from "@vueuse/core";
-import { onUpdated, ref, watch, onMounted } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { useLoadingBar } from "naive-ui";
-import { TabGroup, TabList, Tab } from "@headlessui/vue";
-import { getVendorById, getVendors } from "@/hooks/vendor";
+import VendorList from "@/components/vendor/VendorList.vue";
+import { ref, watch } from "vue";
+import { getVendors } from "@/hooks/vendor";
 import { useGlobalState } from "@/store/global";
 import { useTabsViewStore } from "@/store/tabs";
-
-import VendorList from "@/components/vendor/VendorList.vue";
 import AddVendor from "@/components/vendor/AddVendor.vue";
 import PageTabs from "@/components/PageTabs.vue";
 import Tabs from "@/components/common/Tabs.vue";
@@ -38,9 +34,8 @@ const addTab = (vendor) => {
 
 // Vendor Search Result
 
-const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
-  ["vendorSearch", debouncedSearchText],
-  ({ queryKey }) => {
+const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
+  useQuery(["vendorSearch", debouncedSearchText], ({ queryKey }) => {
     if (queryKey[1] === "") return null;
     else
       return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => {
@@ -49,9 +44,9 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
         }
         return res.data;
       });
-  }
-);
+  });
 
+// TODO: we are gonna have to figure this out
 function handleScroll(e) {
   let scroll = e.target.scrollTop;
   global.stick([scroll >= 100, scroll >= 400]);
@@ -78,28 +73,32 @@ watch(
 </script>
 
 <template>
-  <div class="flex w-full vendors">
+  <div class="vendors flex w-full">
     <!-- Don't show PageItemsList on dashboard  | Current Page List -->
     <div
       id="vendors-list"
-      class="w-[275px] absolute md:relative md:m-0 z-[41]"
+      class="absolute z-[41] w-[275px] md:relative md:m-0"
       :class="vendorListActive ? 'open-vendor-list' : 'close-vendor-list'"
     >
       <!-- SearchList.vue / -->
       <aside
-        class="pageItemsList dark:border-r-[1px] dark:border-dark_border relative h-screen min-w-[275px] max-w-[275px] overflow-x-hidden bg-background_light dark:bg-background_dark"
+        class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-x-hidden bg-background_light dark:border-r-[1px] dark:border-dark_border dark:bg-background_dark"
       >
         <div
-          class="sticky pb-0 top-0 z-50 bg-foreground_light dark:bg-foreground_dark p-3"
+          class="sticky top-0 z-50 bg-foreground_light p-3 pb-0 dark:bg-foreground_dark"
         >
-          <div class="flex justify-between mb-3">
+          <div class="mb-3 flex justify-between">
             <h1 class="text-xl font-bold uppercase">Vendors</h1>
             <div>
               <AddVendor />
             </div>
           </div>
           <div class="flex">
-            <n-input v-model:value.trim="searchText" clearable placeholder="Search..." />
+            <n-input
+              v-model:value.trim="searchText"
+              clearable
+              placeholder="Search..."
+            />
 
             <!--div content="Filter" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
@@ -125,7 +124,7 @@ watch(
             <div
               v-for="index in Array.from({ length: 10 })"
               :key="index"
-              class="border-b dark:border-0 px-4 py-4 even:bg-foreground_light dark:even:bg-foreground_dark odd:background_light dark:odd:bg-background_dark"
+              class="odd:background_light border-b px-4 py-4 even:bg-foreground_light dark:border-0 dark:odd:bg-background_dark dark:even:bg-foreground_dark"
             >
               <n-skeleton text :repeat="2" class="w-full" />
               <n-skeleton text class="w-[45%]" />
@@ -152,7 +151,7 @@ watch(
                   (isVisible) => (isVisible ? vendorFetchNextPage() : null)
                 "
                 v-if="hasVendorNextPage"
-                class="grid w-full p-4 place-content-center"
+                class="grid w-full place-content-center p-4"
               >
                 <n-spin size="small" />
               </button>
@@ -162,11 +161,13 @@ watch(
       </aside>
       <div
         id="mobile-slider"
-        class="absolute w-[325px] h-[36px] flex flex-row justify-between bottom-0 left-0 bg-white items-center shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] px-4 dark:bg-black"
+        class="absolute bottom-0 left-0 flex h-[36px] w-[325px] flex-row items-center justify-between bg-white px-4 shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] dark:bg-black"
       >
-        <div class="text-[8px]">{{ vendors?.pages[0].data.length }} Active Vendors</div>
+        <div class="text-[8px]">
+          {{ vendors?.pages[0].data.length }} Active Vendors
+        </div>
         <img
-          class="slide-icon w-[18px] h-[18px] cursor-pointer"
+          class="slide-icon h-[18px] w-[18px] cursor-pointer"
           src="/icons/LeftSlide.svg"
           @click="toggleListSlide"
         />
@@ -178,11 +179,14 @@ watch(
     <section
       id="main-content"
       style="height: calc(100vh - 8px)"
-      class="w-[calc(100vw-60px)] md:w-[calc(100vw-335px)] bg-background_light dark:bg-background_dark"
+      class="w-[calc(100vw-60px)] bg-background_light dark:bg-background_dark md:w-[calc(100vw-335px)]"
     >
       <PageTabs :class="global.stuck[0] && 'shadow-lg'" page-name="vendors" />
       <!-- Main Body Content-->
-      <div class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
+      <div
+        id="main"
+        class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden"
+      >
         <main id="container" class="min-h-full p-2 md:p-6">
           <router-view />
         </main>
