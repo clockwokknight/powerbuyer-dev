@@ -173,12 +173,12 @@ const afterAnimated = () => {
       class="z-80 relative h-[88px] pl-2 pr-[calc(0.5rem+5px)] pt-2 md:pl-6 md:pr-[calc(1.5rem+5px)] md:pt-6"
     >
       <div
-        class="__tabs relative flex h-[64px] items-center rounded bg-foreground_light dark:bg-foreground_dark"
+        class="__tabs bg-foreground_light dark:bg-foreground_dark relative flex h-[64px] items-center rounded"
         :class="global.stuck[0] && 'shadow-lg'"
         ref="tabListButtonWrapper"
       >
         <div
-          class="flex items-center overflow-x-auto scrollbar:h-0 scrollbar:w-0"
+          class="scrollbar:h-0 scrollbar:w-0 flex items-center overflow-x-auto"
           ref="scrollWrapper"
           style="scrollbar-width: none"
         >
@@ -194,10 +194,10 @@ const afterAnimated = () => {
                 @after-enter="afterAnimated"
               >
                 <div
+                  v-show="tabStore.tabs.length >= 1"
                   v-for="(tab, tabIdx) in tabStore.tabs"
-                  v-if="tabStore.tabs.length >= 1"
                   :key="tab?.id"
-                  class="group relative grid select-none place-content-center overflow-hidden rounded-round"
+                  class="group rounded-round relative grid select-none place-content-center overflow-hidden"
                 >
                   <router-link
                     :to="`/${props.pageName}/${tab?.id}`"
@@ -208,7 +208,7 @@ const afterAnimated = () => {
                       class="relative max-w-xs scroll-mr-3 focus:outline-none"
                       :class="[
                         isActive
-                          ? 'bg-accent font-bold text-primary before:absolute before:inset-y-0 before:left-0 before:h-full before:w-1 before:bg-primary focus:outline-none'
+                          ? 'bg-accent text-primary before:bg-primary font-medium before:absolute before:inset-y-0 before:left-0 before:h-full before:w-1 focus:outline-none'
                           : 'font-medium text-black/75 dark:text-white',
                       ]"
                     >
@@ -216,15 +216,14 @@ const afterAnimated = () => {
                         :href="href"
                         @click="navigate"
                         class="block max-w-[250px] overflow-hidden truncate whitespace-nowrap py-2 pl-6 pr-6 text-xs transition-all focus:outline-none group-hover:pr-9"
-                        :class="[isActive ? 'pr-9' : '']"
+                        :class="[isActive ? 'pr-9' : 'pr-9']"
                       >
                         {{ tab?.name }}
                       </a>
                     </tab>
                   </router-link>
                   <span
-                    class="absolute inset-y-0 right-0 top-[1px] z-10 flex cursor-pointer items-center transition-all group-hover:pr-3.5"
-                    :class="[tabIdx === selectedIndex ? 'pr-3.5' : '']"
+                    class="absolute inset-y-0 right-0 top-[1px] z-10 flex cursor-pointer items-center pr-3.5 transition-all"
                     @click.stop="closeTab(tab.id)"
                   >
                     <svg
@@ -301,7 +300,7 @@ const afterAnimated = () => {
 .fade-move,
 .fade-enter-active,
 .fade-leave-active {
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .fade-enter-to {
   opacity: 1;

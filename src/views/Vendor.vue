@@ -106,8 +106,7 @@ const paymentTermOptions = computed(() =>
 const { data: getInvoicesTotal } = getInvoiceTotalByVendor(routeParamId);
 const { data: statesList } = getStates();
 
-const { data: vendor, isLoading: isVendorLoading } =
-  getVendorById(routeParamId);
+const { data: vendor, isLoading: isVendorLoading } = getVendorById(routeParamId);
 
 const vendorData = ref({});
 
@@ -175,10 +174,7 @@ function resetValue(key) {
 
 function submitValue(key) {
   mutateAsync({
-    [key]:
-      key === "phone"
-        ? utils.parsePhoneNumber(form.value[key])
-        : form.value[key],
+    [key]: key === "phone" ? utils.parsePhoneNumber(form.value[key]) : form.value[key],
   })
     .then((data) => {
       message.success("Saved");
@@ -203,12 +199,12 @@ function handleTabClick(e) {
 <template>
   <div
     id="details"
-    class="__section __vendor-card __details mt-0 grid grid-cols-12 rounded bg-foreground_light p-6 dark:bg-foreground_dark"
+    class="__section __vendor-card __details bg-foreground_light dark:bg-foreground_dark mt-0 grid grid-cols-12 rounded p-6"
   >
     <!-- left side -->
     <div class="__form col-span-12 flex flex-col justify-between md:col-span-8">
       <div class="__title">
-        <h3 class="mb-2 translate-x-2 font-bold">VENDOR</h3>
+        <h3 class="mb-2 translate-x-2 font-bold uppercase opacity-[0.44]">Vendor</h3>
         <CustomInput
           type="header"
           placeholder="Company Name"
@@ -368,7 +364,7 @@ function handleTabClick(e) {
     <!-- right side -->
 
     <div
-      class="col-span-12 mt-[24px] flex flex-col justify-between md:col-span-4 md:mt-0 md:items-end"
+      class="col-span-12 mt-[24px] flex flex-col justify-between md:col-span-4 md:mt-0 md:w-auto md:items-end"
     >
       <div class="__invoice-info mb-[24px] md:mb-0">
         <div class="flex md:justify-end">
@@ -425,7 +421,7 @@ function handleTabClick(e) {
     id="__subtabs"
     type="basic"
     ref="vendorTab"
-    class="sticky top-[-2px] left-0 z-40 mt-4 w-full rounded bg-foreground_light duration-300 dark:bg-foreground_dark"
+    class="bg-foreground_light dark:bg-foreground_dark sticky top-[-2px] left-0 z-40 mt-4 w-full rounded duration-300"
     :items="vendorTabs"
   />
 
@@ -438,7 +434,7 @@ function handleTabClick(e) {
 <style lang="scss">
 #__subtabs[stuck],
 .__tabs[stuck] {
-  @apply rounded-none bg-[#F4F6F8] shadow-lg shadow-[#00000011] dark:bg-dark_border;
+  @apply dark:bg-dark_border rounded-none bg-[#F4F6F8] shadow-lg shadow-[#00000011];
 }
 .__veil {
   width: calc(100vw - 370px);
