@@ -71,7 +71,7 @@ const columns = [
       >
         <div><p class="pb-8 text-2xl font-bold">Payments Received</p></div>
         <n-data-table
-          class="rounded-md"
+          class="rounded-round"
           striped
           :columns="columns"
           :data="paymentData?.pages[0]"

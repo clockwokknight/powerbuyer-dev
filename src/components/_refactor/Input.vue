@@ -6,7 +6,14 @@ import { useVendors } from "@/store/vendors";
 import { useGlobalState } from "@/store/global";
 import MaskedCustomInput from "@/components/common/MaskedCustomInput.vue";
 
-const emit = defineEmits(["update:value", "focus", "scroll", "edit", "save", "cancel"]);
+const emit = defineEmits([
+  "update:modelValue",
+  "focus",
+  "scroll",
+  "edit",
+  "save",
+  "cancel",
+]);
 
 const props = defineProps([
   "validate",
@@ -27,8 +34,7 @@ const themeOverrides = computed(() => {
       color: "rgba(0,0,0,0)",
       colorFocus: "rgb(0,0,0,0)",
       colorDisabled: "rgba(0,0,0,0)",
-      textColorDisabled:
-        props.type === "header" ? (global.isDark ? "#FFFFFFDD" : "#1E2023") : "#777",
+      textColorDisabled: global.isDark ? "#eee" : "#111",
       border: "none",
       borderHover: "none",
       borderDisabled: "none",
@@ -38,7 +44,7 @@ const themeOverrides = computed(() => {
       paddingSmall: "0px",
       paddingMedium: "0px",
       paddingLarge: "0px",
-      placeholderColor: global.isDark ? "#555" : "#bdbdbd",
+      placeholderColor: global.isDark ? "#777" : "#bdbdbd",
       fontSizeMedium: "12px",
     },
     Select: {
@@ -47,8 +53,7 @@ const themeOverrides = computed(() => {
           color: "rgba(0,0,0,0)",
           colorFocus: "rgba(0,0,0,0)",
           colorDisabled: "rgba(0,0,0,0)",
-          textColorDisabled:
-            props.type === "header" ? (global.isDark ? "#FFFFFFDD" : "#1E2023") : "#777",
+          textColorDisabled: global.isDark ? "#eee" : "#111",
           border: "none",
           borderHover: "none",
           borderDisabled: "none",
@@ -153,10 +158,6 @@ function save() {
     setTimeout(edit(), 300);
   }
 }
-
-function handleInput(e) {
-  emit("update:value", e);
-}
 </script>
 
 <template>
@@ -165,7 +166,7 @@ function handleInput(e) {
       <div class="flex">
         <label
           v-if="type !== 'header'"
-          class="absolute z-40 translate-x-4 translate-y-[-2px] bg-transparent px-2 text-[9px] font-medium uppercase tracking-widest text-gray-600 dark:text-background_light"
+          class="absolute z-40 translate-x-4 translate-y-[-2px] bg-transparent px-2 text-[9px] font-bold uppercase tracking-widest text-gray-600 dark:text-background_light"
         >
           <b
             class="text-red-600 duration-[300ms]"
@@ -208,7 +209,7 @@ function handleInput(e) {
             ${
               type === 'header'
                 ? 'dark:bg-transparent dark:!text-white'
-                : 'dark:bg-dark_border'
+                : 'dark:bg-background_dark'
             }
             ${
               (!type || type !== 'header' || global.isDark) &&
@@ -245,7 +246,7 @@ function handleInput(e) {
               :mask="mask"
               :options="options"
               :placeholder="placeholder"
-              @input="(e) => handleInput(e)"
+              @input="(e) => $emit('update:modelValue', e)"
               @focus="(e) => $emit('focus', e)"
               @blur="cancel"
             />

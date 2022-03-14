@@ -2,21 +2,20 @@
 import { useQuery } from "vue-query";
 import axios from "axios";
 import { useDebounce } from "@vueuse/core";
-import VendorList from "@/components/vendor/VendorList.vue";
 import { onUpdated, ref, watch, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useLoadingBar } from "naive-ui";
 import { TabGroup, TabList, Tab } from "@headlessui/vue";
 import { getVendorById, getVendors } from "@/hooks/vendor";
 import { useGlobalState } from "@/store/global";
-
-import AddVendor from "@/components/vendor/AddVendor.vue";
 import { useTabsViewStore } from "@/store/tabs";
+
+import VendorList from "@/components/vendor/VendorList.vue";
+import AddVendor from "@/components/vendor/AddVendor.vue";
 import PageTabs from "@/components/PageTabs.vue";
-
 import Tabs from "@/components/common/Tabs.vue";
-const tabStore = useTabsViewStore();
 
+const tabStore = useTabsViewStore();
 const global = useGlobalState();
 
 const searchText = ref("");
@@ -25,6 +24,7 @@ const debouncedSearchText = useDebounce(searchText, 500);
 const vendorListActive = ref(false);
 
 // Showing All Vendors
+
 const {
   data: vendors,
   isLoading: isVendorsLoading,
@@ -37,6 +37,7 @@ const addTab = (vendor) => {
 };
 
 // Vendor Search Result
+
 const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
   ["vendorSearch", debouncedSearchText],
   ({ queryKey }) => {
@@ -71,7 +72,7 @@ function toggleListSlide() {
 watch(
   () => vendorListActive.value,
   (val) => {
-    global.setListActive(val);
+    global.setListActive(val, "vendor");
   }
 );
 </script>
@@ -84,11 +85,12 @@ watch(
       class="w-[275px] absolute md:relative md:m-0 z-[41]"
       :class="vendorListActive ? 'open-vendor-list' : 'close-vendor-list'"
     >
+      <!-- SearchList.vue / -->
       <aside
-        class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-x-hidden bg-white dark:bg-[#1E1F21]"
+        class="pageItemsList dark:border-r-[1px] dark:border-dark_border relative h-screen min-w-[275px] max-w-[275px] overflow-x-hidden bg-background_light dark:bg-background_dark"
       >
         <div
-          class="sticky top-0 z-50 border-b dark:border-0 bg-white dark:bg-[#25272A] p-3"
+          class="sticky pb-0 top-0 z-50 bg-foreground_light dark:bg-foreground_dark p-3"
         >
           <div class="flex justify-between mb-3">
             <h1 class="text-xl font-bold uppercase">Vendors</h1>
@@ -97,17 +99,11 @@ watch(
             </div>
           </div>
           <div class="flex">
-            <div class="mr-3">
-              <n-input
-                v-model:value.trim="searchText"
-                round
-                clearable
-                placeholder="Search..."
-              />
-            </div>
-            <div content="Filter" v-tippy="{ placement: 'right', duration: 50 }">
+            <n-input v-model:value.trim="searchText" clearable placeholder="Search..." />
+
+            <!--div content="Filter" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
-                class="w-6 h-6 mt-1 text-gray-400 cursor-pointer dark:text-gray-800 hover:text-primary"
+                class="w-6 h-6 mt-1 text-gray-400 cursor-pointer dark:text-white hover:text-primary"
                 viewBox="0 0 24 24"
               >
                 <path
@@ -119,23 +115,23 @@ watch(
                   stroke-linejoin="round"
                 ></path>
               </svg>
-            </div>
+            </div-->
           </div>
           <!-- Filter Component -->
         </div>
         <!-- Main Loop List -->
-        <div class="">
+        <div>
           <div v-if="isVendorSearchFetching || isVendorsLoading">
             <div
               v-for="index in Array.from({ length: 10 })"
               :key="index"
-              class="border-b dark:border-0 px-4 py-4 even:bg-[#f8f8fa] dark:even:bg-[#25272A] odd:bg-white dark:odd:bg-[#1E1F21]"
+              class="border-b dark:border-0 px-4 py-4 even:bg-foreground_light dark:even:bg-foreground_dark odd:background_light dark:odd:bg-background_dark"
             >
               <n-skeleton text :repeat="2" class="w-full" />
               <n-skeleton text class="w-[45%]" />
             </div>
           </div>
-          <ul class="bg-white dark:bg-[#25272A]">
+          <ul class="bg-foreground_light dark:bg-foreground_dark">
             <template v-if="debouncedSearchText">
               <VendorList
                 v-if="vendorSearchResults"
@@ -181,9 +177,10 @@ watch(
 
     <section
       id="main-content"
-      class="h-screen w-[calc(100vw-60px)] md:w-[calc(100vw-335px)] bg-lightergray dark:bg-[#1E1F21]"
+      style="height: calc(100vh - 8px)"
+      class="w-[calc(100vw-60px)] md:w-[calc(100vw-335px)] bg-background_light dark:bg-background_dark"
     >
-      <page-tabs page-name="vendors" />
+      <PageTabs :class="global.stuck[0] && 'shadow-lg'" page-name="vendors" />
       <!-- Main Body Content-->
       <div class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
         <main id="container" class="min-h-full p-2 md:p-6">
@@ -193,6 +190,7 @@ watch(
     </section>
   </div>
 </template>
+
 <style scoped>
 .close-vendor-list {
   animation: left-slide 0.5s forwards;

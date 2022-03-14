@@ -9,15 +9,27 @@ module.exports = {
         sans: ["Montserrat", ...defaultTheme.fontFamily.serif],
       },
       colors: {
-        primary: "#027BFF",
-        primarylight: "#027BFF33",
-        primarydark: "#0063CE",
-        secondary: "#36AD6A",
-        secondarylight: "#36AD6A33",
-        lightgray: "#e5e7eb",
-        lightergray: "#F0F0F0",
-        charcoal: "#202124",
+
+        primary: "#027BFF", // blue
+        accent: "#027BFF20", // faint blue
+
+        success: "#36AD6A", // green
+        error: "#DC2626", // red
+
+        foreground_light: "#FFFFFF", // white
+        background_light: "#EAECEF", // light gray
+
+        dark_border: "#26262A", // gray
+        foreground_dark: "#18181C", // darker gray
+        background_dark: "#101014", // darkest gray
+    
       },
+      borderRadius: {
+        'round': '3px',
+      },
+      padding: {
+        'pad': '24px',
+      }
     },
   },
   plugins: [

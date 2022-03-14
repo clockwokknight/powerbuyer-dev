@@ -44,7 +44,6 @@ const form = ref({
   country: "",
   phone: "",
   cell: "",
-  fax: "",
   email: "",
   comments: "",
   access_level: "",
@@ -120,7 +119,7 @@ function handleTabClick(e) {
 <template>
   <div
     id="details"
-    class="__section __vendor-card mt-4 grid grid-cols-12 rounded border-2 bg-white p-6 dark:border-0 dark:bg-[#25272A]"
+    class="__section __vendor-card mt-4 grid grid-cols-12 rounded border-2 bg-white p-6 dark:border-0 dark:bg-foreground_dark"
   >
     <!-- left side -->
     <div class="__form col-span-12 flex flex-col justify-between md:col-span-8">
@@ -321,26 +320,12 @@ function handleTabClick(e) {
         <div class="col-span-6 md:col-span-4">
           <CustomInput
             label="Cell"
-            :value="form.phone"
+            :value="form.cell"
             :validate="['required', 'cell']"
             @update:value="(val) => (form.cell = val)"
             @save="submitValue('cell')"
             @cancel="resetValue('cell')"
             @focus="currentActiveField = 'cell'"
-          />
-        </div>
-        <!-- row 7 -->
-        <div class="col-span-6 md:col-span-4">
-          <CustomInput
-            label="Fax"
-            placeholder="+1 (###) ###-####"
-            mask="+1 (###) ###-####"
-            :value="form.fax"
-            :validate="['phone']"
-            @update:value="(val) => (form.fax = val)"
-            @save="submitValue('fax')"
-            @cancel="resetValue('fax')"
-            @focus="currentActiveField = 'fax'"
           />
         </div>
         <div class="col-span-6 md:col-span-4">

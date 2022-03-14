@@ -107,13 +107,13 @@ function showEditExpenseForm(row) {
       @update:show="visibleEditForm = false"
     />
     <div class="-mt-4 font-sans">
-      <div class="flex translate-y-[68px] items-center justify-end pr-10">
+      <div class="flex translate-y-[60px] translate-x-[-24px] items-center justify-end">
         <VendorExpensesAdd />
       </div>
-      <div class="rounded border-2 dark:border-0 bg-white dark:bg-[#25272A] py-8 px-8">
+      <div class="rounded bg-foreground_light dark:bg-foreground_dark p-[24px]">
         <div><p class="pb-8 text-2xl font-bold">Expenses</p></div>
         <n-data-table
-          class="rounded-md"
+          class="rounded-round"
           striped
           :columns="columns"
           :data="expensesData?.pages[0]"

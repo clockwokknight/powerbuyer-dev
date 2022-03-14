@@ -123,10 +123,10 @@ function doShowOuter(row) {
         <div class="flex translate-y-[68px] items-center justify-end pr-10">
           <VendorPaymentsAdd />
         </div>
-        <div class="rounded border-2 dark:border-0 bg-white dark:bg-[#25272A] py-8 px-8">
+        <div class="rounded bg-foreground_light dark:bg-foreground_dark py-8 px-8">
           <div><p class="pb-8 text-2xl font-bold">Payments</p></div>
           <n-data-table
-            class="rounded-md"
+            class="rounded-round"
             :columns="columns"
             :data="tableData"
             :pagination="pagination"
@@ -137,12 +137,7 @@ function doShowOuter(row) {
 
       <n-drawer v-model:show="showOuterRef" :width="500">
         <n-drawer-content title="Payment Details">
-          <n-form
-            :model="formValue"
-            :label-width="90"
-            size="medium"
-            ref="formRef"
-          >
+          <n-form :model="formValue" :label-width="90" size="medium" ref="formRef">
             <n-form-item label="Inv #" class="pr-12">
               <UpdatableButtonWrapper
                 v-model="formValue.invoice_number"
@@ -153,7 +148,7 @@ function doShowOuter(row) {
               >
                 <n-input
                   style="width: 400px"
-                  class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+                  class="rounded-round border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
                   :default-value="formValue.invoice_number"
                   type="text"
                   v-model:value="formValue.invoice_number"
@@ -172,7 +167,7 @@ function doShowOuter(row) {
               >
                 <n-input
                   style="width: 400px"
-                  class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+                  class="rounded-round border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
                   :default-value="formValue.check_number"
                   type="text"
                   v-model:value="formValue.check_number"
@@ -192,7 +187,7 @@ function doShowOuter(row) {
               >
                 <n-input
                   style="width: 400px"
-                  class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+                  class="rounded-round border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
                   :default-value="formValue.amount"
                   type="text"
                   v-model:value="formValue.amount"
@@ -213,7 +208,7 @@ function doShowOuter(row) {
               >
                 <n-input
                   style="width: 400px"
-                  class="rounded-md border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
+                  class="rounded-round border-2 hover:border-sky-500 hover:ring-0 hover:ring-sky-500"
                   :default-value="formValue.payment_status_id"
                   type="text"
                   placeholder="Enter Type"
