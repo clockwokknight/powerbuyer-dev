@@ -88,7 +88,7 @@ const scrollToSection = (item, index) => {
           </span>
         </span>
         <span
-          class="__indicator h-1 translate-y-[19px] bg-transparent duration-200"
+          class="__indicator h-1 translate-y-[19px] duration-200"
           :class="`${
             selected ? 'w-12 bg-primary' : 'w-0 bg-gray-300 dark:bg-primary'
           }`"
