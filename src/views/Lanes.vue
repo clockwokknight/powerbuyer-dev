@@ -1,6 +1,6 @@
 <script setup>
 import { useRoute } from "vue-router";
-import { ref } from "vue";
+import { computed, reactive, ref } from "vue";
 import { useQuery } from "vue-query";
 import axios from "axios";
 const route = useRoute();
@@ -8,20 +8,35 @@ const route = useRoute();
 const { data: lanes } = useQuery("lanes", () =>
   axios.get("/lanes").then((res) => res.data)
 );
-const columns = [
+const sortStatesRef = ref([]);
+const sortKeyMapOrderRef = computed(() =>
+  sortStatesRef.value.reduce((result, { columnKey, order }) => {
+    result[columnKey] = order;
+    return result;
+  }, {})
+);
+const columns = computed(() => [
   {
     title: "Lane #",
     key: "lane_number",
     fixed: "left",
     width: 100,
-    // sorter: "default",
+    sortOrder: sortKeyMapOrderRef.value.lane_number || false,
+    sorter: {
+      compare: (a, b) => a.lane_number - b.lane_number,
+      multiple: 1,
+    },
   },
   {
     title: "Sale Number",
     key: "sale_number",
     fixed: "left",
     width: 150,
-    // sorter: "default",
+    sortOrder: sortKeyMapOrderRef.value.sale_number || false,
+    sorter: {
+      compare: (a, b) => a.sale_number - b.sale_number,
+      multiple: 2,
+    },
   },
   {
     title: "VHR",
@@ -128,8 +143,12 @@ const columns = [
   //   title: "V",
   //   key: "V",
   // },
-];
-const pagination = { pageSize: 10 };
+]);
+const pagination = { pageSize: 50 };
+const handleSortChange = (sorters) => {
+  console.log({ sorters });
+  sortStatesRef.value = [].concat(sorters);
+};
 </script>
 
 <template>
@@ -167,6 +186,7 @@ const pagination = { pageSize: 10 };
           :max-height="1000"
           :scroll-x="3000"
           virtual-scroll
+          @update:sorter="handleSortChange"
         />
       </n-space>
     </div>
