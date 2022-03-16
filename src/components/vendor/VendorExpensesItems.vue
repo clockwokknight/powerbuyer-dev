@@ -125,7 +125,7 @@ const onDeleteExpenseItem = (id) => {
 </script>
 
 <template>
-  <div id="expense-items" class="-mt-4 scroll-smooth font-sans antialiased">
+  <div class="-mt-4 scroll-smooth font-sans antialiased">
     <div class="flex translate-y-[68px] items-center justify-end pr-10">
       <n-button @click="showCreateForm">
         <n-icon>
@@ -151,10 +151,10 @@ const onDeleteExpenseItem = (id) => {
       @submit="onSubmitForm"
       @delete="onDeleteExpenseItem"
     />
-    <div class="rounded border-2 dark:border-0 bg-white dark:bg-[#25272A] py-8 px-8">
+    <div class="rounded bg-foreground_light py-8 px-8 dark:bg-foreground_dark">
       <div><p class="pb-8 text-2xl font-bold">Expense Items</p></div>
       <n-data-table
-        class="rounded-md"
+        class="rounded-round"
         :columns="columns"
         :data="expenseItems"
         :pagination="pagination"

@@ -1,75 +1,53 @@
 <script setup>
-import { computed, h, ref, watch } from "vue";
-import { useRoute } from "vue-router";
-import { useMutation } from "vue-query";
-import { useGlobalState } from "@/store/global";
-import { utils } from "@/lib/utils";
-import { objectFilter, omit, pick } from "@/lib/helper";
-import { getExpensesByVendor } from "@/hooks/expense";
-import { NTag, NButton, useMessage } from "naive-ui";
-import { useQueryClient } from "vue-query";
-import axios from "axios";
-import dayjs from "dayjs";
-
 import ActionButtons from "@/components/vendor/ActionButtons.vue";
 import VendorExpenseEdit from "@/components/vendor/VendorExpenseEdit.vue";
 import VendorExpensesAdd from "@/components/vendor/VendorExpensesAdd.vue";
+import { vendorInvoices } from "@/hooks/vendor";
+import { clone, omit, pick } from "@/lib/helper";
+import dayjs from "dayjs";
+import { computed, h, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 
-const global = useGlobalState();
 const route = useRoute();
-const message = useMessage();
-
-const isLoading = ref(false);
 
 const routeParamId = ref(route.params?.id);
 
 watch(
-  () => route.params?.id,
-  () => {
-    if (route.params?.id) routeParamId.value = route.params?.id;
+  () => route.params,
+  (toParams) => {
+    if (toParams?.id) routeParamId.value = toParams?.id;
   }
 );
 
-const { data: expensesData, isLoading: expensesDataLoading } =
-  getExpensesByVendor(routeParamId);
+const { data: invoicesData, isLoading: expensesDataLoading } =
+  vendorInvoices(routeParamId);
 
-// const expenseDataComputed = computed(() => expensesData.value ? )
-const rowKey = (row) => row?.deal_id;
+const rowKey = (row) => row?.id;
 const columns = [
   {
-    title: "VIN",
-    key: "vin",
-    //fixed: 'left'
-  },
-  {
-    title: "Name",
-    key: "name",
-    //fixed: 'left'
-  },
-  {
-    title: "Amount",
-    key: "amount",
-    //fixed: 'left'
-  },
-  {
-    title: "DOS",
-    key: "expense_date",
-    //fixed: 'left'
-  },
-  {
-    title: "Inv #",
+    title: "Invoice",
     key: "invoice_number",
+  },
+  {
+    title: "Amount Due",
+    key: "amount_due",
     //fixed: 'left'
+  },
+  {
+    title: "Balance",
+    key: "balance",
+  },
+  {
+    title: "Amount Paid",
+    key: "amount_paid",
   },
   {
     title: "",
     key: "edit",
     render(row) {
-      return row?.children
-        ? h("div")
-        : h(ActionButtons, {
-            onEdit: () => showEditExpenseForm(row),
-          });
+      return h(ActionButtons, {
+        onEdit: () => showEditExpenseForm(row),
+      });
     },
   },
 ];
@@ -77,24 +55,32 @@ const columns = [
 const pagination = { pageSize: 10 };
 const visibleEditForm = ref(false);
 const formRow = ref(null);
+const formDisabled = ref(false);
 
 function showEditExpenseForm(row) {
-  const obj = pick(row, [
-    "name",
-    "deal_id",
-    "description",
-    "expense_date",
-    "id",
-    "vendor_id",
-    "invoice_number",
-    "cost",
+  let obj = clone(row);
+  obj.expenses = clone(row.expenses).map((expense) =>
+    pick(expense, [
+      "id",
+      "amount",
+      "type",
+      "expense_date",
+      "deal_id",
+      "name",
+      "description",
+      "expense_types",
+    ])
+  );
+  obj = omit(obj, [
+    "payments",
+    "balance",
+    "amount_paid",
+    "children",
+    "vendor_name",
   ]);
-  obj.type = parseInt(row.type);
-  obj.amount = parseFloat(row.amount);
-  if (obj?.expense_date) {
-    obj.expense_date = dayjs(obj.expense_date).valueOf();
-  }
-  formRow.value = { ...obj };
+
+  formDisabled.value = Boolean(row?.payments.length);
+  formRow.value = obj;
   visibleEditForm.value = true;
 }
 </script>
@@ -105,18 +91,25 @@ function showEditExpenseForm(row) {
       :show-drawer="visibleEditForm"
       :initial-data="formRow"
       @update:show="visibleEditForm = false"
+      :is-disabled="formDisabled"
     />
     <div class="-mt-4 font-sans">
-      <div class="flex translate-y-[68px] items-center justify-end pr-10">
+      <div
+        class="flex translate-y-[60px] translate-x-[-24px] items-center justify-end"
+      >
         <VendorExpensesAdd />
       </div>
-      <div class="rounded border-2 dark:border-0 bg-white dark:bg-[#25272A] py-8 px-8">
-        <div><p class="pb-8 text-2xl font-bold">Expenses</p></div>
+      <div
+        class="rounded border-2 bg-white py-8 px-8 dark:border-0 dark:bg-[#25272A]"
+      >
+        <div>
+          <p class="pb-8 text-2xl font-bold">Invoices & Expenses</p>
+        </div>
         <n-data-table
-          class="rounded-md"
+          class="rounded-round"
           striped
           :columns="columns"
-          :data="expensesData?.pages[0]"
+          :data="invoicesData"
           :pagination="pagination"
           :bordered="false"
           :loading="expensesDataLoading"

@@ -1,6 +1,7 @@
 <script setup>
 import { getPageTabs } from "@/hooks/pageTabs";
 import { useTabsViewStore } from "@/store/tabs";
+import { useGlobalState } from "@/store/global";
 import { Tab, TabGroup, TabList } from "@headlessui/vue";
 import { useDebounceFn } from "@vueuse/core";
 import axios from "axios";
@@ -8,6 +9,7 @@ import { nextTick, ref, watch } from "vue";
 import { useMutation, useQueryClient } from "vue-query";
 import { useRoute, useRouter } from "vue-router";
 
+const global = useGlobalState();
 const tabStore = useTabsViewStore();
 const props = defineProps(["pageName"]);
 const router = useRouter();
@@ -30,7 +32,6 @@ const ifScrollArrowNeeded = useDebounceFn(() => {
 
 const scrollTo = (type) => {
   const scrollLeft = scrollWrapper.value.scrollLeft;
-
   if (type === "left") {
     scrollWrapper.value.scrollTo({
       left: scrollLeft - 150,
@@ -76,13 +77,13 @@ watch(
         });
       } else {
         tabStore.initTabs(JSON.parse(pageTabs.value.tabs));
-        if (tabStore.tabs.length >= 1 && route.path === `/${props.pageName}`) {
-          tabStore.tabs.forEach((tab) => {
-            if (tab.active) {
-              router.push(`/${props.pageName}/${tab.id}`);
-            }
-          });
-        }
+        // if (tabStore.tabs.length >= 1 && route.path === `/${props.pageName}`) {
+        //   tabStore.tabs.forEach((tab) => {
+        //     if (tab.active) {
+        //       router.push(`/${props.pageName}/${tab.id}`);
+        //     }
+        //   });
+        // }
         ifScrollArrowNeeded();
       }
     }
@@ -119,6 +120,11 @@ const tabChanged = (index) => {
       return { ...rest, active: true };
     } else return rest;
   });
+  syncTabs({
+    user_id: 1,
+    page: props.pageName,
+    tabs: JSON.stringify(tabStore.tabs),
+  });
 };
 
 watch(
@@ -127,9 +133,13 @@ watch(
     scrollTabToView();
     if (
       newValue !== -1 &&
+      route.path !== props.pageName &&
       parseInt(route.params?.id) !== tabStore.tabs[newValue].id
     ) {
       router.push(`/${props.pageName}/${tabStore.tabs[newValue].id}`);
+
+      // else
+      //   tabStore.addTab()
     }
   }
 );
@@ -159,14 +169,18 @@ const afterAnimated = () => {
 
 <template>
   <TabGroup :selected-index="tabStore.selectedIndex" @change="tabChanged">
-    <header class="relative z-40 h-[80px] pl-2 md:pl-6 pr-[calc(0.5rem+5px)] md:pr-[calc(1.5rem+5px)] pt-2 md:pt-6">
+    <header
+      class="z-80 relative h-[88px] pl-2 pr-[calc(0.5rem+5px)] pt-2 md:pl-6 md:pr-[calc(1.5rem+5px)] md:pt-6"
+    >
       <div
-        class="relative flex h-[62px] items-center rounded bg-white dark:bg-[#25272A] shadow-lg"
+        class="__tabs bg-foreground_light dark:bg-foreground_dark relative flex h-[64px] items-center rounded"
+        :class="global.stuck[0] && 'shadow-lg'"
         ref="tabListButtonWrapper"
       >
         <div
-          class="flex items-center overflow-x-auto scrollbar:h-0 scrollbar:w-0"
+          class="scrollbar:h-0 scrollbar:w-0 flex items-center overflow-x-auto"
           ref="scrollWrapper"
+          style="scrollbar-width: none"
         >
           <TabList v-slot="{ selectedIndex }">
             <nav
@@ -180,10 +194,10 @@ const afterAnimated = () => {
                 @after-enter="afterAnimated"
               >
                 <div
+                  v-show="tabStore.tabs.length >= 1"
                   v-for="(tab, tabIdx) in tabStore.tabs"
-                  v-if="tabStore.tabs.length >= 1"
                   :key="tab?.id"
-                  class="group relative grid select-none place-content-center overflow-hidden rounded-lg"
+                  class="group rounded-round relative grid select-none place-content-center overflow-hidden"
                 >
                   <router-link
                     :to="`/${props.pageName}/${tab?.id}`"
@@ -194,27 +208,26 @@ const afterAnimated = () => {
                       class="relative max-w-xs scroll-mr-3 focus:outline-none"
                       :class="[
                         isActive
-                          ? 'bg-primary/10  font-extrabold text-primary before:absolute before:inset-y-0 before:left-0 before:h-full before:w-1 before:bg-primary focus:outline-none'
-                          : 'font-bold text-black/75 dark:text-white',
+                          ? 'bg-accent text-primary before:bg-primary font-medium before:absolute before:inset-y-0 before:left-0 before:h-full before:w-1 focus:outline-none'
+                          : 'font-medium text-black/75 dark:text-white',
                       ]"
                     >
                       <a
                         :href="href"
                         @click="navigate"
                         class="block max-w-[250px] overflow-hidden truncate whitespace-nowrap py-2 pl-6 pr-6 text-xs transition-all focus:outline-none group-hover:pr-9"
-                        :class="[isActive ? 'pr-9' : '']"
+                        :class="[isActive ? 'pr-9' : 'pr-9']"
                       >
                         {{ tab?.name }}
                       </a>
                     </tab>
                   </router-link>
                   <span
-                    class="absolute inset-y-0 right-0 top-[1px] z-10 flex cursor-pointer items-center transition-all group-hover:pr-3.5"
-                    :class="[tabIdx === selectedIndex ? 'pr-3.5' : '']"
+                    class="absolute inset-y-0 right-0 top-[1px] z-10 flex cursor-pointer items-center pr-3.5 transition-all"
                     @click.stop="closeTab(tab.id)"
                   >
                     <svg
-                      class="cubic-timing-tab h-3 w-3 text-red-500 transition-transform duration-300 group-hover:scale-100"
+                      class="cubic-timing-tab h-2 w-2 text-red-500 transition-transform duration-300 group-hover:scale-100"
                       :class="[
                         tabIdx === selectedIndex ? 'scale-100' : 'scale-0',
                       ]"
@@ -287,7 +300,7 @@ const afterAnimated = () => {
 .fade-move,
 .fade-enter-active,
 .fade-leave-active {
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .fade-enter-to {
   opacity: 1;

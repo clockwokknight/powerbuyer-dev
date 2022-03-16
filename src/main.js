@@ -3,9 +3,13 @@ import { createApp } from "vue";
 import axios from "axios";
 import { router } from "@/routes";
 import { VueQueryPlugin } from "vue-query";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin.js";
 
 //UI framework
 import naive from "naive-ui";
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 //Tippy Tooltips
 import VueTippy from "vue-tippy";

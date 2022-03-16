@@ -159,7 +159,14 @@ const handleExpenseTypeSelectScroll = (e) => {
           >
             Delete
           </n-button>
-          <n-button size="large" @click="onSubmitForm">Submit</n-button>
+          <n-button
+            size="large"
+            :loading="isLoading"
+            :disabled="isLoading"
+            @click="onSubmitForm"
+          >
+            Submit
+          </n-button>
         </div>
       </template>
     </n-drawer-content>

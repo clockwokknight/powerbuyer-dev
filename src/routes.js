@@ -25,7 +25,7 @@ import Deal from "@/views/Deal.vue";
 import OtherSystemMenus from "@/views/OtherSystemMenus.vue";
 import BuyerHome from "@/components/buyer/BuyerHome.vue";
 const NotFound = () => import("@/views/NotFound.vue");
-import Components from "@/views/Components.vue";
+import Components from "@/views/_refactor/Components.vue";
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -35,11 +35,6 @@ export const router = createRouter({
       path: "/",
       name: "Dashboard",
       component: Dashboard,
-    },
-    {
-      path: "/components",
-      name: "Components",
-      component: Components,
     },
     {
       path: "/login",
@@ -163,6 +158,11 @@ export const router = createRouter({
       path: "/system",
       name: "System",
       component: OtherSystemMenus,
+    },
+    {
+      path: "/components",
+      name: "Components",
+      component: Components,
     },
     { path: "/:pathMatch(.*)*", name: "NotFound", component: NotFound },
   ],
