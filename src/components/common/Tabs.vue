@@ -4,6 +4,7 @@ import { useGlobalState } from "@/store/global";
 import { Tab, TabGroup, TabList } from "@headlessui/vue";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger.js";
+import { useDebounceFn } from "@vueuse/core";
 
 const global = useGlobalState();
 const props = defineProps(["items", "type"]);
@@ -53,6 +54,9 @@ onUpdated(() => {
 });
 
 const tabItems = computed(() => props.items || exampleItems.value);
+const delay = useDebounceFn(() => {
+  shouldDisableScroll.value = false;
+}, 1000);
 const scrollToSection = (item, index) => {
   shouldDisableScroll.value = true;
   gsap.to("#main", {
@@ -61,7 +65,7 @@ const scrollToSection = (item, index) => {
       offsetY: 60,
     },
     onComplete() {
-      shouldDisableScroll.value = false;
+      delay();
     },
   });
 };
