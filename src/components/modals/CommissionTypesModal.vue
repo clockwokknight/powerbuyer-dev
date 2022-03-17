@@ -1,60 +1,42 @@
 <script setup>
 import axios from "axios";
-import { h, ref, reactive, watch } from "vue";
+import { h, ref, reactive, watch, unref } from "vue";
 import CustomInput from "@/components/common/CustomInput.vue";
 import { NButton } from "naive-ui";
+import { getCommissionTypes } from "@/hooks/commission.js";
+import ActionButtons from "@/components/common/ActionButtons.vue";
+import CurrencyInput from "@/components/common/CurrencyInput.vue";
+import dayjs from "dayjs";
+import { objectFilter } from "@/lib/helper.js";
 
 const props = defineProps(["show"]);
 const emit = defineEmits(["onReturn"]);
 
-const commissionTypes = ref([]);
+// const commissionTypes = ref([]);
 const showEditModal = ref(false);
-const editingCommissionType = ref({
+const formRef = ref(null);
+const initialFormValue = {
   active: 1,
-  amount: "0",
-  date_paid: "2022-2-1",
-  deleted_at: null,
+  amount: 0,
   description: "",
-  effective_date: "2022-2-1",
+  effective_date: dayjs().format("YYYY-MM-DD"),
   name: "",
-  percentage: "",
-  status: 1,
+  percentage: 0,
+  status: true,
   type: 1,
-  updated_at: null,
-});
+};
+const editingCommissionType = ref({ ...initialFormValue });
 const isEditing = ref(false);
+const showModal = ref(false);
 
-const getCommissionTypes = () => {
-  axios
-    .get("/commission_type")
-    .then((res) => {
-      commissionTypes.value = res.data;
-      console.log("commissionTypes: ", commissionTypes.value);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-};
-
-watch(
-  () => props.show,
-  (newValue) => {
-    if (newValue) {
-      getCommissionTypes();
-    }
-  }
-);
-
-const onRemoveCommissionType = (index) => {
-  commissionTypes.value.slice(index, 1);
-};
+const { data: commissionTypes, isLoading } = getCommissionTypes();
 
 const columns = [
   {
     title: "Name",
     key: "name",
     width: 100,
-    //fixed: 'left'
+    // fixed: "left",
   },
   {
     title: "Amount",
@@ -65,7 +47,7 @@ const columns = [
   {
     title: "Percentage",
     key: "percentage",
-    width: 100,
+    width: 110,
     //fixed: 'left'
   },
   {
@@ -83,54 +65,61 @@ const columns = [
   {
     title: "Action",
     key: "actions",
-    width: 150,
+    width: 100,
+    fixed: "right",
     render(row) {
-      return [
-        h(
-          NButton,
-          {
-            size: "small",
-            onClick: () => {
-              isEditing.value = true;
-              showEditModal.value = true;
-              editingCommissionType.value = row;
-            },
-          },
-          { default: () => "Edit" }
-        ),
-        h(
-          NButton,
-          {
-            size: "small",
-            onClick: async () => {
-              await axios.delete(`/commission_type/${row.id}`);
-              getCommissionTypes();
-            },
-          },
-          { default: () => "Delete" }
-        ),
-      ];
+      return h(ActionButtons, {
+        deleteTitle: "Delete Commission Type",
+        showDeleteButton: true,
+        onEdit: () => {
+          isEditing.value = true;
+          showEditModal.value = true;
+          editingCommissionType.value = row;
+        },
+        onDelete: () => {
+          console.log("deleting");
+        },
+      });
     },
   },
 ];
 
+const rules = {
+  name: {
+    required: true,
+    message: "Required",
+    trigger: "input",
+  },
+  amount: {
+    required: true,
+    type: "number",
+    trigger: "input",
+    validator(rules, value) {
+      if (value < 0.01) {
+        return new Error("should be greater than $0.01");
+      }
+    },
+  },
+  effective_date: {
+    required: true,
+    message: "Date is required",
+    trigger: "blur",
+  },
+  percentage: {
+    type: "number",
+    trigger: "input",
+    validator(rules, value) {
+      if (value < 0 || value > 100) {
+        return new Error("should be between 0 and 100");
+      }
+    },
+  },
+};
+
 const addRow = () => {
   showEditModal.value = true;
   isEditing.value = false;
-  const newType = {
-    active: 1,
-    amount: "0",
-    date_paid: "2022-2-1",
-    deleted_at: null,
-    description: "",
-    effective_date: "2022-2-1",
-    name: "",
-    percentage: "",
-    status: 1,
-    type: 1,
-    updated_at: null,
-  };
-  editingCommissionType.value = newType;
+  editingCommissionType.value = { ...initialFormValue };
 };
 
 const onCancelEditingModal = () => {
@@ -138,94 +127,112 @@ const onCancelEditingModal = () => {
 };
 
 const onOkEditingModal = async () => {
-  if (isEditing.value) {
-    await axios.put(
-      `/commission_type/${editingCommissionType.value.id}`,
-      editingCommissionType.value
-    );
-  } else {
-    await axios.post("/commission_type", editingCommissionType.value);
-  }
-  getCommissionTypes();
-  showEditModal.value = false;
+  try {
+    await formRef.value.validate();
+
+    const obj = unref(editingCommissionType);
+    obj.status = Number(obj.status);
+    if (!obj.description) delete obj.description;
+
+    if (isEditing.value) {
+      await axios.put(
+        `/commission_type/${editingCommissionType.value.id}`,
+        obj
+      );
+    } else {
+      await axios.post("/commission_type", obj);
+    }
+    showEditModal.value = false;
+  } catch {}
 };
 </script>
 <template>
-  <n-modal v-model:show="show">
-    <n-card
-      style="width: 1200px"
-      title="Commission Types"
-      :bordered="false"
+  <article>
+    <div class="px-6 pt-6 pb-8" @click="showModal = true">
+      <div class="mb-2 text-lg font-bold">Commission Types</div>
+      <div class="pb-2 text-sm">Click to edit commission types.</div>
+    </div>
+
+    <n-modal
+      v-model:show="showModal"
       size="huge"
-      role="dialog"
-      aria-modal="true"
+      class="max-w-screen-lg"
+      preset="card"
     >
-      <template #header-extra></template>
+      <div class="mb-5 ml-auto w-fit">
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <n-button @click="addRow">+</n-button>
+          </template>
+          Create a Commission Type
+        </n-tooltip>
+      </div>
       <n-data-table
         class="rounded-md"
         striped
         :columns="columns"
         :data="commissionTypes"
         :bordered="false"
-        :loading="paymentDataLoading"
-        :row-key="rowKey"
+        :loading="isLoading"
+        virtual-scroll
+        :max-height="500"
       />
-      <template #footer>
-        <div class="flex flex-row justify-between">
-          <n-button size="large" @click="addRow">Add...</n-button>
-          <n-button size="large" @click="$emit('onReturn')">Cancel</n-button>
-        </div>
-      </template>
-    </n-card>
-  </n-modal>
-  <n-modal v-model:show="showEditModal">
-    <n-card
-      class="w-[600px]"
+    </n-modal>
+    <n-modal
       :title="isEditing ? 'Edit Commission Type' : 'Add Commission Type'"
-      :bordered="false"
-      size="huge"
-      role="dialog"
-      aria-modal="true"
+      preset="card"
+      class="max-w-[600px]"
+      v-model:show="showEditModal"
     >
-      <template #header-extra></template>
-
-      <div class="grid grid-cols-12 gap-2">
-        <div class="col-span-6 md:col-span-4">
-          <CustomInput
-            label="Name"
-            v-model:value="editingCommissionType.name"
-            style="margin-right: 12px"
-          />
+      <n-form
+        ref="formRef"
+        :model="editingCommissionType"
+        :rules="rules"
+        class="grid grid-cols-12 gap-x-5"
+      >
+        <div class="col-span-6">
+          <n-form-item label="Effective Date">
+            <n-date-picker
+              value-format="yyyy-MM-dd"
+              v-model:formatted-value="editingCommissionType.effective_date"
+            />
+          </n-form-item>
         </div>
-        <div class="col-span-6 md:col-span-2">
-          <CustomInput
-            label="Amount"
-            v-model:value="editingCommissionType.amount"
-            style="margin-right: 12px"
-          />
+        <div class="col-span-6">
+          <n-form-item label="Status">
+            <n-switch v-model:value="editingCommissionType.active" />
+          </n-form-item>
         </div>
-        <div class="col-span-6 md:col-span-2">
-          <CustomInput
-            label="Percent"
-            v-model:value="editingCommissionType.percentage"
-            style="margin-right: 12px"
-          />
+        <div class="col-span-4">
+          <n-form-item label="Name" path="name">
+            <n-input v-model:value="editingCommissionType.name" />
+          </n-form-item>
         </div>
-        <div class="col-span-6 md:col-span-4">
-          <CustomInput
-            label="Status"
-            v-model:value="editingCommissionType.status"
-            type="text"
-          />
+        <div class="col-span-4">
+          <n-form-item label="Amount" path="amount">
+            <CurrencyInput v-model="editingCommissionType.amount" />
+          </n-form-item>
+        </div>
+        <div class="col-span-4">
+          <n-form-item label="Percentage" path="percentage">
+            <n-input-number
+              :show-button="false"
+              v-model:value="editingCommissionType.percentage"
+            >
+              <template #suffix> % </template>
+            </n-input-number>
+          </n-form-item>
         </div>
         <div class="col-span-12 md:col-span-12">
-          <n-input
-            placeholder="Description"
-            v-model:value="editingCommissionType.description"
-            type="textarea"
-          />
+          <n-form-item label="Description">
+            <n-input
+              placeholder="Description"
+              v-model:value="editingCommissionType.description"
+              type="textarea"
+            />
+          </n-form-item>
         </div>
-      </div>
+      </n-form>
 
       <template #footer>
         <div class="flex flex-row gap-[10px]">
@@ -233,6 +240,6 @@ const onOkEditingModal = async () => {
           <n-button size="large" @click="onCancelEditingModal">Cancel</n-button>
         </div>
       </template>
-    </n-card>
-  </n-modal>
+    </n-modal>
+  </article>
 </template>

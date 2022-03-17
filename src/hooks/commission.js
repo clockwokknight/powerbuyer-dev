@@ -34,3 +34,10 @@ export const getCommissions = (status_id, buyer_type) =>
 //         : null,
 //   }
 // );
+
+export const getCommissionTypes = (options = {}) =>
+  useQuery(
+    "commission_type",
+    () => axios.get("/commission_type").then((res) => res.data),
+    options
+  );

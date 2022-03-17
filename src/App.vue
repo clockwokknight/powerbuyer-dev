@@ -18,7 +18,7 @@ const global = useGlobalState();
               <MainMenu />
               <router-view />
             </section>
-            <!-- <VueQueryDevTools /> -->
+            <VueQueryDevTools />
           </n-dialog-provider>
         </n-notification-provider>
       </n-message-provider>

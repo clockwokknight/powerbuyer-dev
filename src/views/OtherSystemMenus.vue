@@ -40,29 +40,20 @@ const onClickDealStatus = () => {
 </script>
 
 <template>
-  <div class="container mx-auto overflow-scroll p-5">
-    <div class="mb-12">
+  <main class="overflow-auto overscroll-contain p-5">
+    <section class="mb-12">
       <div class="mt-24 p-4">
         <h2 class="mb-6 text-xl font-bold uppercase">Other Menu Options</h2>
       </div>
-      <div class="grid grid-cols-3">
+      <div class="mx-6 grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-3">
         <!-- Commission Types -->
-        <div
-          class="mx-4 mb-6 cursor-pointer rounded-md border-2 border-gray-200 bg-gray-100 shadow-sm hover:shadow-md"
-          @click="onClickCommissionTypes"
-        >
-          <div class="px-6 pt-6 pb-8">
-            <div class="mb-2 text-lg font-bold">Commission Types</div>
-            <div class="pb-2 text-sm">Click to edit commission types.</div>
-          </div>
-        </div>
+
         <CommissionTypesModal
-          :show="showCommissionTypesModal"
-          @onReturn="showCommissionTypesModal = false"
+          class="cursor-pointer rounded-md border-2 border-gray-200 bg-foreground_light shadow-sm transition-shadow hover:shadow-lg dark:border-dark_border dark:bg-foreground_dark dark:shadow-gray-900"
         />
         <!-- Buyer Types -->
         <div
-          class="mx-4 mb-6 cursor-pointer rounded-md border-2 border-gray-200 bg-gray-100 shadow-sm hover:shadow-md"
+          class="cursor-pointer rounded-md border-2 border-gray-200 bg-foreground_light shadow-sm transition-shadow hover:shadow-lg dark:border-dark_border dark:bg-foreground_dark"
           @click="onClickBuyerTypes"
         >
           <div class="py-6 px-6">
@@ -76,7 +67,7 @@ const onClickDealStatus = () => {
         />
         <!-- Expense Items -->
         <div
-          class="mx-4 mb-6 cursor-pointer rounded-md border-2 border-gray-200 bg-gray-100 shadow-sm hover:shadow-md"
+          class="cursor-pointer rounded-md border-2 border-gray-200 bg-foreground_light shadow-sm transition-shadow hover:shadow-lg dark:border-dark_border dark:bg-foreground_dark"
           @click="onClickExpenseItems"
         >
           <div class="py-6 px-6">
@@ -90,7 +81,7 @@ const onClickDealStatus = () => {
         />
         <!-- GMTV Locations -->
         <div
-          class="mx-4 mb-6 cursor-pointer rounded-md border-2 border-gray-200 bg-gray-100 shadow-sm hover:shadow-md"
+          class="cursor-pointer rounded-md border-2 border-gray-200 bg-foreground_light shadow-sm transition-shadow hover:shadow-lg dark:border-dark_border dark:bg-foreground_dark"
           @click="onClickGmtvLocations"
         >
           <div class="py-6 px-6">
@@ -104,7 +95,7 @@ const onClickDealStatus = () => {
         />
         <!-- Payment Terms -->
         <div
-          class="mx-4 mb-6 cursor-pointer rounded-md border-2 border-gray-200 bg-gray-100 shadow-sm hover:shadow-md"
+          class="cursor-pointer rounded-md border-2 border-gray-200 bg-foreground_light shadow-sm transition-shadow hover:shadow-lg dark:border-dark_border dark:bg-foreground_dark"
           @click="onClickPaymentTerms"
         >
           <div class="py-6 px-6">
@@ -118,7 +109,7 @@ const onClickDealStatus = () => {
         />
         <!-- Deal Status -->
         <div
-          class="mx-4 mb-6 cursor-pointer rounded-md border-2 border-gray-200 bg-gray-100 shadow-sm hover:shadow-md"
+          class="cursor-pointer rounded-md border-2 border-gray-200 bg-foreground_light shadow-sm transition-shadow hover:shadow-lg dark:border-dark_border dark:bg-foreground_dark"
           @click="onClickDealStatus"
         >
           <div class="py-6 px-6">
@@ -131,9 +122,9 @@ const onClickDealStatus = () => {
           @onReturn="showDealStatusModal = false"
         />
       </div>
-    </div>
+    </section>
 
-    <div class="mb-12">
+    <section class="mb-12">
       <div class="mt-24 p-4">
         <h2 class="mb-6 text-xl font-bold uppercase">System Permissions</h2>
       </div>
@@ -195,6 +186,6 @@ const onClickDealStatus = () => {
           </div>
         </div>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 </template>
