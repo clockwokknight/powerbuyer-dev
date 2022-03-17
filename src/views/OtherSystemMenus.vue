@@ -8,20 +8,10 @@ import GmtvLocationsModal from "@/components/modals/GmtvLocationsModal.vue";
 import PaymentTermsModal from "@/components/modals/PaymentTermsModal.vue";
 import DealStatusModal from "@/components/modals/DealStatusModal.vue";
 
-const showCommissionTypesModal = ref(false);
-const showBuyerTypesModal = ref(false);
 const showExpenseItemsModal = ref(false);
 const showGmtvLocationsModal = ref(false);
 const showPaymentTermsModal = ref(false);
 const showDealStatusModal = ref(false);
-
-const onClickCommissionTypes = () => {
-  showCommissionTypesModal.value = true;
-};
-
-const onClickBuyerTypes = () => {
-  showBuyerTypesModal.value = true;
-};
 
 const onClickExpenseItems = () => {
   showExpenseItemsModal.value = true;
@@ -52,60 +42,22 @@ const onClickDealStatus = () => {
           class="cursor-pointer rounded-md border-2 border-gray-200 bg-foreground_light shadow-sm transition-shadow hover:shadow-lg dark:border-dark_border dark:bg-foreground_dark dark:shadow-gray-900"
         />
         <!-- Buyer Types -->
-        <div
-          class="cursor-pointer rounded-md border-2 border-gray-200 bg-foreground_light shadow-sm transition-shadow hover:shadow-lg dark:border-dark_border dark:bg-foreground_dark"
-          @click="onClickBuyerTypes"
-        >
-          <div class="py-6 px-6">
-            <div class="mb-2 text-lg font-bold">Buyer Types</div>
-            <div class="pb-2 text-sm">Click to edit commission types.</div>
-          </div>
-        </div>
+
         <BuyerTypesModal
-          :show="showBuyerTypesModal"
-          @onReturn="showBuyerTypesModal = false"
+          class="cursor-pointer rounded-md border-2 border-gray-200 bg-foreground_light shadow-sm transition-shadow hover:shadow-lg dark:border-dark_border dark:bg-foreground_dark"
         />
         <!-- Expense Items -->
-        <div
-          class="cursor-pointer rounded-md border-2 border-gray-200 bg-foreground_light shadow-sm transition-shadow hover:shadow-lg dark:border-dark_border dark:bg-foreground_dark"
-          @click="onClickExpenseItems"
-        >
-          <div class="py-6 px-6">
-            <div class="mb-2 text-lg font-bold">Expense Items</div>
-            <div class="pb-2 text-sm">Click to edit commission types.</div>
-          </div>
-        </div>
         <ExpenseItemsModal
-          :show="showExpenseItemsModal"
-          @onReturn="showExpenseItemsModal = false"
+          class="cursor-pointer rounded-md border-2 border-gray-200 bg-foreground_light shadow-sm transition-shadow hover:shadow-lg dark:border-dark_border dark:bg-foreground_dark"
         />
         <!-- GMTV Locations -->
-        <div
-          class="cursor-pointer rounded-md border-2 border-gray-200 bg-foreground_light shadow-sm transition-shadow hover:shadow-lg dark:border-dark_border dark:bg-foreground_dark"
-          @click="onClickGmtvLocations"
-        >
-          <div class="py-6 px-6">
-            <div class="mb-2 h-11 text-lg font-bold">GMTV Locations</div>
-            <div class="h-10 pb-2 text-sm">Click to edit commission types.</div>
-          </div>
-        </div>
         <GmtvLocationsModal
-          :show="showGmtvLocationsModal"
-          @onReturn="showGmtvLocationsModal = false"
+          class="cursor-pointer rounded-md border-2 border-gray-200 bg-foreground_light shadow-sm transition-shadow hover:shadow-lg dark:border-dark_border dark:bg-foreground_dark"
         />
         <!-- Payment Terms -->
-        <div
-          class="cursor-pointer rounded-md border-2 border-gray-200 bg-foreground_light shadow-sm transition-shadow hover:shadow-lg dark:border-dark_border dark:bg-foreground_dark"
-          @click="onClickPaymentTerms"
-        >
-          <div class="py-6 px-6">
-            <div class="mb-2 h-11 text-lg font-bold">Payment Terms</div>
-            <div class="h-10 pb-2 text-sm">Click to edit commission types.</div>
-          </div>
-        </div>
+
         <PaymentTermsModal
-          :show="showPaymentTermsModal"
-          @onReturn="showPaymentTermsModal = false"
+          class="cursor-pointer rounded-md border-2 border-gray-200 bg-foreground_light shadow-sm transition-shadow hover:shadow-lg dark:border-dark_border dark:bg-foreground_dark"
         />
         <!-- Deal Status -->
         <div

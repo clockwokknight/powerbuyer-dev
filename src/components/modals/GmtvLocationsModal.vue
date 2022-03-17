@@ -4,11 +4,11 @@ import { h, ref, reactive, watch } from "vue";
 import CustomInput from "@/components/common/CustomInput.vue";
 import { NButton } from "naive-ui";
 
-const props = defineProps(["show"]);
 const emit = defineEmits(["onReturn"]);
 
 const gmtvLocations = ref([]);
 const showEditModal = ref(false);
+const showModal = ref(false);
 const editingGmtvLocation = ref({
   active: 1,
   name: "",
@@ -35,14 +35,11 @@ const getGmtvLocations = () => {
     });
 };
 
-watch(
-  () => props.show,
-  (newValue) => {
-    if (newValue) {
-      getGmtvLocations();
-    }
+watch(showModal, (newValue) => {
+  if (newValue) {
+    getGmtvLocations();
   }
-);
+});
 
 const onRemoveGmtvLocation = (index) => {
   gmtvLocations.value.slice(index, 1);
@@ -149,32 +146,37 @@ const onOkEditingModal = async () => {
 };
 </script>
 <template>
-  <n-modal v-model:show="show">
-    <n-card
-      style="width: 1200px"
-      title="Commission Types"
+  <div class="py-6 px-6" @click="showModal = true" v-bind="$attrs">
+    <div class="mb-2 h-11 text-lg font-bold">GMTV Locations</div>
+    <div class="h-10 pb-2 text-sm">Click to edit commission types.</div>
+  </div>
+
+  <n-modal
+    preset="card"
+    class="max-w-screen-md"
+    title="GMTV Locations"
+    v-model:show="showModal"
+  >
+    <div class="mb-5 ml-auto w-fit">
+      <n-tooltip trigger="hover">
+        <template #trigger>
+          <n-button @click="addRow">+</n-button>
+        </template>
+        Create a Commission Type
+      </n-tooltip>
+    </div>
+
+    <n-data-table
+      class="rounded-md"
+      striped
+      :columns="columns"
+      :data="gmtvLocations"
       :bordered="false"
-      size="huge"
-      role="dialog"
-      aria-modal="true"
-    >
-      <template #header-extra></template>
-      <n-data-table
-        class="rounded-md"
-        striped
-        :columns="columns"
-        :data="gmtvLocations"
-        :bordered="false"
-        :loading="paymentDataLoading"
-        :row-key="rowKey"
-      />
-      <template #footer>
-        <div class="flex flex-row justify-between">
-          <n-button size="large" @click="addRow">Add...</n-button>
-          <n-button size="large" @click="$emit('onReturn')">Cancel</n-button>
-        </div>
-      </template>
-    </n-card>
+      :row-key="rowKey"
+      :max-height="500"
+      virtual-scroll
+      :scroll-x="1000"
+    />
   </n-modal>
   <n-modal v-model:show="showEditModal">
     <n-card

@@ -4,11 +4,11 @@ import { h, ref, reactive, watch } from "vue";
 import CustomInput from "@/components/common/CustomInput.vue";
 import { NButton } from "naive-ui";
 
-const props = defineProps(["show"]);
 const emit = defineEmits(["onReturn"]);
 
 const paymentTerms = ref([]);
 const showEditModal = ref(false);
+const showModal = ref(false);
 const editingPaymentTerm = ref({
   active: 1,
   name: "",
@@ -32,14 +32,11 @@ const getPaymentTerms = () => {
     });
 };
 
-watch(
-  () => props.show,
-  (newValue) => {
-    if (newValue) {
-      getPaymentTerms();
-    }
+watch(showModal, (newValue) => {
+  if (newValue) {
+    getPaymentTerms();
   }
-);
+});
 
 const onRemovePaymentTerm = (index) => {
   paymentTerms.value.slice(index, 1);
@@ -131,7 +128,11 @@ const onOkEditingModal = async () => {
 };
 </script>
 <template>
-  <n-modal v-model:show="show">
+  <div class="py-6 px-6" v-bind="$attrs">
+    <div class="mb-2 h-11 text-lg font-bold">Payment Terms</div>
+    <div class="h-10 pb-2 text-sm">Click to add/edit Payment Terms</div>
+  </div>
+  <n-modal v-model:show="showModal">
     <n-card
       style="width: 800px"
       title="Payment Terms"
