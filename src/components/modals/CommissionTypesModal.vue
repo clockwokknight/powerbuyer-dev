@@ -8,21 +8,22 @@ import ActionButtons from "@/components/common/ActionButtons.vue";
 import CurrencyInput from "@/components/common/CurrencyInput.vue";
 import dayjs from "dayjs";
 import { objectFilter } from "@/lib/helper.js";
+import { useQueryClient } from "vue-query";
 
 const props = defineProps(["show"]);
 const emit = defineEmits(["onReturn"]);
+const queryClient = useQueryClient();
 
 // const commissionTypes = ref([]);
 const showEditModal = ref(false);
 const formRef = ref(null);
 const initialFormValue = {
-  active: 1,
+  active: true,
   amount: 0,
   description: "",
   effective_date: dayjs().format("YYYY-MM-DD"),
   name: "",
   percentage: 0,
-  status: true,
   type: 1,
 };
 const editingCommissionType = ref({ ...initialFormValue });
@@ -74,7 +75,10 @@ const columns = [
         onEdit: () => {
           isEditing.value = true;
           showEditModal.value = true;
-          editingCommissionType.value = row;
+          editingCommissionType.value = {
+            ...row,
+            active: Boolean(row.active),
+          };
         },
         onDelete: () => {
           console.log("deleting");
@@ -131,7 +135,7 @@ const onOkEditingModal = async () => {
     await formRef.value.validate();
 
     const obj = unref(editingCommissionType);
-    obj.status = Number(obj.status);
+    obj.active = Number(obj.active);
     if (!obj.description) delete obj.description;
 
     if (isEditing.value) {
@@ -142,6 +146,7 @@ const onOkEditingModal = async () => {
     } else {
       await axios.post("/commission_type", obj);
     }
+    await queryClient.invalidateQueries("commission_types");
     showEditModal.value = false;
   } catch {}
 };

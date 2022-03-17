@@ -2,6 +2,7 @@
 import axios from "axios";
 import { h, ref, reactive, watch } from "vue";
 import CustomInput from "@/components/common/CustomInput.vue";
+import ActionButtons from "@/components/common/ActionButtons.vue";
 import { NButton } from "naive-ui";
 
 const emit = defineEmits(["onReturn"]);
@@ -16,24 +17,6 @@ const editingExpenseItem = ref({
   updated_at: null,
 });
 const isEditing = ref(false);
-
-const getExpenseItems = () => {
-  axios
-    .get("/expense_types")
-    .then((res) => {
-      expenseItems.value = res.data.data;
-      console.log("expenseItems: ", expenseItems.value);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-};
-
-watch(showModal, (newValue) => {
-  if (newValue) {
-    getExpenseItems();
-  }
-});
 
 const onRemoveExpenseItem = (index) => {
   expenseItems.value.slice(index, 1);
@@ -112,8 +95,8 @@ const onOkEditingModal = async () => {
 <template>
   <div>
     <div class="cursor-pointer py-6 px-6" @click="showModal = true">
-      <div class="mb-2 text-lg font-bold">Expense Items</div>
-      <div class="pb-2 text-sm">Click to edit commission types.</div>
+      <div class="mb-2 text-lg font-bold">Expense Types</div>
+      <div class="pb-2 text-sm">Click to add/edit Expense Types.</div>
     </div>
 
     <n-modal v-model:show="showModal">

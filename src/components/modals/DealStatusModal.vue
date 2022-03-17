@@ -4,11 +4,11 @@ import { h, ref, reactive, watch } from "vue";
 import CustomInput from "@/components/common/CustomInput.vue";
 import { NButton } from "naive-ui";
 
-const props = defineProps(["show"]);
 const emit = defineEmits(["onReturn"]);
 
 const dealStatus = ref([]);
 const showEditModal = ref(false);
+const showModal = ref(false);
 const editingDealStatus = ref({
   active: 1,
   name: "",
@@ -31,14 +31,11 @@ const getDealStatus = () => {
     });
 };
 
-watch(
-  () => props.show,
-  (newValue) => {
-    if (newValue) {
-      getDealStatus();
-    }
+watch(showModal, (newValue) => {
+  if (newValue) {
+    getDealStatus();
   }
-);
+});
 
 const onRemoveDealStatus = (index) => {
   dealStatus.value.slice(index, 1);
@@ -123,7 +120,11 @@ const onOkEditingModal = async () => {
 };
 </script>
 <template>
-  <n-modal v-model:show="show">
+  <div class="py-6 px-6" v-bind="$attrs" @click="showModal = true">
+    <div class="mb-2 h-11 text-lg font-bold">Deal Status</div>
+    <div class="h-10 pb-2 text-sm">Click to edit commission types.</div>
+  </div>
+  <n-modal v-model:show="showModal">
     <n-card
       style="width: 800px"
       title="Deal Status"
