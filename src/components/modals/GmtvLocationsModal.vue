@@ -146,14 +146,14 @@ const onOkEditingModal = async () => {
   <n-modal
     preset="card"
     class="max-w-[600px]"
-    :title="isEditing ? 'Edit Commission Type' : 'Add Commission Type'"
+    :title="isEditing ? 'Edit Gmtv Location' : 'Add Gmtv Location'"
     v-model:show="showEditModal"
   >
     <n-form
       ref="formRef"
       :model="editingGmtvLocation"
       :rules="rules"
-      class="grid grid-cols-12 gap-2"
+      class="grid grid-cols-12 gap-x-6"
     >
       <div class="col-span-6">
         <n-form-item label="Name">
@@ -164,7 +164,6 @@ const onOkEditingModal = async () => {
         <n-form-item label="Address">
           <n-input v-model:value="editingGmtvLocation.address" />
         </n-form-item>
-        />
       </div>
       <div class="col-span-6">
         <n-form-item label="City">
