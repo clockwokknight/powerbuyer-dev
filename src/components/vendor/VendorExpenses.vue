@@ -19,8 +19,9 @@ watch(
   }
 );
 
-const { data: invoicesData, isLoading: expensesDataLoading } =
-  vendorInvoices(routeParamId);
+const { data: invoicesData, isLoading: expensesDataLoading } = vendorInvoices(
+  routeParamId
+);
 
 const rowKey = (row) => row?.id;
 const columns = [
@@ -71,13 +72,7 @@ function showEditExpenseForm(row) {
       "expense_types",
     ])
   );
-  obj = omit(obj, [
-    "payments",
-    "balance",
-    "amount_paid",
-    "children",
-    "vendor_name",
-  ]);
+  obj = omit(obj, ["payments", "balance", "amount_paid", "children", "vendor_name"]);
 
   formDisabled.value = Boolean(row?.payments.length);
   formRow.value = obj;
@@ -94,13 +89,11 @@ function showEditExpenseForm(row) {
       :is-disabled="formDisabled"
     />
     <div class="-mt-4 font-sans">
-      <div
-        class="flex translate-y-[60px] translate-x-[-24px] items-center justify-end"
-      >
+      <div class="flex translate-y-[60px] translate-x-[-24px] items-center justify-end">
         <VendorExpensesAdd />
       </div>
       <div
-        class="rounded border-2 bg-white py-8 px-8 dark:border-0 dark:bg-[#25272A]"
+        class="rounded border-2 bg-white py-8 px-8 dark:border-0 dark:bg-foreground_dark"
       >
         <div>
           <p class="pb-8 text-2xl font-bold">Invoices & Expenses</p>

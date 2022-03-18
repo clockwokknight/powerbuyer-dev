@@ -39,7 +39,9 @@ watch(
 </script>
 
 <template>
-  <aside class="flex flex-col sticky top-0 left-0 w-[60px] h-screen bg-black z-50">
+  <aside
+    class="flex flex-col sticky top-0 left-0 w-[60px] h-[calc(100vh-48px)] bg-black z-50"
+  >
     <div class="w-full text-white">
       <nav>
         <ul class="menu-items flex w-[60px] flex-col items-center">
@@ -296,7 +298,7 @@ watch(
         </ul>
       </nav>
     </div>
-    <div class="mt-auto mb-4 w-[60px] flex justify-center">
+    <div class="mt-auto mb-[6px] w-[60px] flex justify-center">
       <div class="menu-footer center-content">
         <button
           :content="global.isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"

@@ -68,9 +68,7 @@ const showEditPaymentForm = (row) => {
 const { data: paymentTable, isLoading } = useQuery(
   ["payments_vendor", routeParamId],
   ({ queryKey }) =>
-    axios
-      .get("/payments/vendor/" + queryKey[1])
-      .then((res) => (res.data ? res.data : []))
+    axios.get("/payments/vendor/" + queryKey[1]).then((res) => (res.data ? res.data : []))
 );
 
 watch(
@@ -84,14 +82,11 @@ watch(
 
 <template>
   <div class="-mt-4 font-sans">
-    <VendorPaymentEdit
-      :initial-data="formRow"
-      v-model:show-drawer="visibleEditForm"
-    />
+    <VendorPaymentEdit :initial-data="formRow" v-model:show-drawer="visibleEditForm" />
     <div class="flex translate-y-[68px] items-center justify-end pr-10">
       <VendorPaymentsAdd />
     </div>
-    <div class="border-2 bg-white py-8 px-8 dark:border-0 dark:bg-[#25272A]">
+    <div class="border-2 bg-white py-8 px-8 dark:border-0 dark:bg-foreground_dark">
       <div><p class="pb-8 text-2xl font-bold">Payments</p></div>
 
       <n-data-table
