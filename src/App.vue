@@ -8,13 +8,27 @@ import { useGlobalState } from "@/store/global";
 
 const global = useGlobalState();
 
+const themeOverrides = {
+  Button: {
+    textColorHover: "#027BFF",
+    borderHover: "1px solid #027BFF",
+    borderColorHover: "#027BFF",
+    textColorGhostFocus: "#027BFF",
+    borderColorPressed: "#027BFF",
+    textColorPressed: "#027BFF",
+  },
+};
+
 onMounted(() => {
   global.setMobile(window.innerWidth <= 768);
 });
 </script>
 
 <template>
-  <n-config-provider :theme="global.isDark ? darkTheme : null">
+  <n-config-provider
+    :theme="global.isDark ? darkTheme : null"
+    :theme-overrides="themeOverrides"
+  >
     <n-loading-bar-provider>
       <n-message-provider placement="bottom">
         <n-notification-provider>

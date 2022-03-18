@@ -140,7 +140,7 @@ const pagination = { pageSize: 10 };
 <template>
   <div id="contacts" class="_vendor-contacts scroll-smooth">
     <div class="mt-[24px]">
-      <div class="rounded-roundbg-foreground_light py-8 px-8 dark:bg-foreground_dark">
+      <div class="rounded-round bg-foreground_light py-8 px-8 dark:bg-foreground_dark">
         <div class="flex justify-between">
           <p class="pb-8 text-2xl font-bold">Contacts</p>
           <VendorAdd />
