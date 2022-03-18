@@ -1,14 +1,15 @@
 <script setup>
 import ActionButtons from "@/components/common/ActionButtons.vue";
+import { objectFilter } from "@/lib/helper";
 import axios from "axios";
 import { NButton } from "naive-ui";
-import { h, ref, watch } from "vue";
+import { h, ref, unref, watch } from "vue";
 import { useQuery } from "vue-query";
 
 const showEditModal = ref(false);
 const showModal = ref(false);
+const formRef = ref(null);
 const editingDealStatus = ref({
-  active: 1,
   name: "",
   description: "",
 });
@@ -67,11 +68,18 @@ const columns = [
   },
 ];
 
+const rules = {
+  name: {
+    required: true,
+    message: "Name is required",
+    trigger: "input",
+  },
+};
+
 const addRow = () => {
   showEditModal.value = true;
   isEditing.value = false;
   const newType = {
-    active: 1,
     name: "",
     description: "",
   };
@@ -79,13 +87,12 @@ const addRow = () => {
 };
 
 const onOkEditingModal = async () => {
+  const obj = objectFilter(editingDealStatus.value, (key, value) => value);
+
   if (isEditing.value) {
-    await axios.put(
-      `/deal_status/${editingDealStatus.value.id}`,
-      editingDealStatus.value
-    );
+    await axios.put(`/deal_status/${obj.id}`, obj);
   } else {
-    await axios.post("/deal_status", editingDealStatus.value);
+    await axios.post("/deal_status", obj);
   }
   getDealStatus();
   showEditModal.value = false;
@@ -125,9 +132,14 @@ const onOkEditingModal = async () => {
     class="max-w-[600px]"
     v-model:show="showEditModal"
   >
-    <div class="grid grid-cols-12 gap-2">
+    <n-form
+      :model="editingDealStatus"
+      :rules="rules"
+      ref="formRef"
+      class="grid grid-cols-12 gap-2"
+    >
       <div class="col-span-6 md:col-span-4">
-        <n-form-item label="Name">
+        <n-form-item label="Name" path="name">
           <n-input v-model:value="editingDealStatus.name" />
         </n-form-item>
       </div>
@@ -140,7 +152,7 @@ const onOkEditingModal = async () => {
           />
         </n-form-item>
       </div>
-    </div>
+    </n-form>
 
     <template #footer>
       <n-button size="large" @click="onOkEditingModal">Submit</n-button>

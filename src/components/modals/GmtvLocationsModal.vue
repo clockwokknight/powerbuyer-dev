@@ -4,7 +4,9 @@ import { h, ref, reactive, watch } from "vue";
 import ActionButtons from "@/components/common/ActionButtons.vue";
 import { NButton } from "naive-ui";
 import { getGmtvLocations } from "@/hooks/location.js";
+import { getStates } from "@/hooks/common_query";
 import { useQueryClient } from "vue-query";
+import MaskedInput from "@/components/common/MaskedInput.vue";
 
 const queryClient = useQueryClient();
 
@@ -12,7 +14,6 @@ const showEditModal = ref(false);
 const showModal = ref(false);
 const formRef = ref(null);
 const initialForm = {
-  active: 1,
   name: "",
   address: "",
   city: "",
@@ -77,6 +78,8 @@ const columns = [
   },
 ];
 
+const { data: states } = getStates();
+
 const addRow = () => {
   showEditModal.value = true;
   isEditing.value = false;
@@ -97,16 +100,19 @@ const rules = {
   },
 };
 const onOkEditingModal = async () => {
-  if (isEditing.value) {
-    await axios.put(
-      `/gmtv_locations/${editingGmtvLocation.value.id}`,
-      editingGmtvLocation.value
-    );
-  } else {
-    await axios.post("/gmtv_locations", editingGmtvLocation.value);
-  }
-  showEditModal.value = false;
-  await queryClient.invalidateQueries("gmtv_locations");
+  try {
+    await formRef.value.validate();
+    if (isEditing.value) {
+      await axios.put(
+        `/gmtv_locations/${editingGmtvLocation.value.id}`,
+        editingGmtvLocation.value
+      );
+    } else {
+      await axios.post("/gmtv_locations", editingGmtvLocation.value);
+    }
+    showEditModal.value = false;
+    await queryClient.invalidateQueries("gmtv_locations");
+  } catch (error) {}
 };
 </script>
 <template>
@@ -154,28 +160,32 @@ const onOkEditingModal = async () => {
       class="grid grid-cols-12 gap-x-6"
     >
       <div class="col-span-6">
-        <n-form-item label="Name">
+        <n-form-item label="Name" path="name">
           <n-input v-model:value="editingGmtvLocation.name" />
         </n-form-item>
       </div>
       <div class="col-span-6">
-        <n-form-item label="Address">
+        <n-form-item label="Address" path="address">
           <n-input v-model:value="editingGmtvLocation.address" />
         </n-form-item>
       </div>
       <div class="col-span-6">
-        <n-form-item label="City">
+        <n-form-item label="City" path="city">
           <n-input v-model:value="editingGmtvLocation.city" />
         </n-form-item>
       </div>
       <div class="col-span-6">
         <n-form-item label="State">
-          <n-input v-model:value="editingGmtvLocation.state" type="text" />
+          <n-select
+            :options="states"
+            filterable
+            v-model:value="editingGmtvLocation.state"
+          />
         </n-form-item>
       </div>
       <div class="col-span-6">
         <n-form-item label="Zip">
-          <n-input v-model:value="editingGmtvLocation.zip" type="text" />
+          <masked-input v-model:value="editingGmtvLocation.zip" />
         </n-form-item>
       </div>
       <div class="col-span-6">

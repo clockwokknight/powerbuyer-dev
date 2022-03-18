@@ -1,36 +1,20 @@
 <script setup>
 import ActionButtons from "@/components/common/ActionButtons.vue";
+import { getPaymentTerms } from "@/hooks/common_query";
 import axios from "axios";
 import { NButton } from "naive-ui";
 import { h, ref, watch } from "vue";
 
-const paymentTerms = ref([]);
 const showEditModal = ref(false);
 const showModal = ref(false);
 const editingPaymentTerm = ref({
-  active: 1,
   name: "",
   description: "",
   days: 0,
 });
 const isEditing = ref(false);
 
-const getPaymentTerms = () => {
-  axios
-    .get("/payment_terms")
-    .then((res) => {
-      paymentTerms.value = res.data;
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-};
-
-watch(showModal, (newValue) => {
-  if (newValue) {
-    getPaymentTerms();
-  }
-});
+const { data: paymentTerms } = getPaymentTerms();
 
 const columns = [
   {
@@ -96,16 +80,18 @@ const rules = {
 };
 const formRef = ref(null);
 const onOkEditingModal = async () => {
-  await formRef.value.validate();
-  if (isEditing.value) {
-    await axios.put(
-      `/payment_terms/${editingPaymentTerm.value.id}`,
-      editingPaymentTerm.value
-    );
-  } else {
-    await axios.post("/payment_terms", editingPaymentTerm.value);
-  }
-  showEditModal.value = false;
+  try {
+    await formRef.value.validate();
+    if (isEditing.value) {
+      await axios.put(
+        `/payment_terms/${editingPaymentTerm.value.id}`,
+        editingPaymentTerm.value
+      );
+    } else {
+      await axios.post("/payment_terms", editingPaymentTerm.value);
+    }
+    showEditModal.value = false;
+  } catch (error) {}
 };
 </script>
 <template>

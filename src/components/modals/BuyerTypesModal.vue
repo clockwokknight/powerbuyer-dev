@@ -73,10 +73,10 @@ const onOkEditingModal = async () => {
     await buyerTypeFormRef.value.validate();
     const obj = objectFilter(editingBuyerType.value, (key, value) => value);
     if (isEditing.value) {
-      await axios.put(`/buyer_type/${editingBuyerType.value.id}`, editingBuyerType.value);
+      await axios.put(`/buyer_type/${obj.id}`, obj);
       await queryClient.invalidateQueries("buyer_types");
     } else {
-      await axios.post("/buyer_type", editingBuyerType.value);
+      await axios.post("/buyer_type", obj);
     }
     showEditModal.value = false;
   } catch (error) {

@@ -8,6 +8,7 @@ import { getExpenseTypes } from "@/hooks/expense.js";
 
 const showEditModal = ref(false);
 const showModal = ref(false);
+const formRef = ref(null);
 const pagination = reactive({
   page: 1,
   pageSize: 50,
@@ -29,13 +30,17 @@ const {
   isFetching: expenseTypeLoading,
   fetchNextPage,
 } = getExpenseTypes();
+const expenseTypeTable = ref([]);
 watch(
   () => expenseTypes.value,
   (newValue) => {
-    expenseTypeTable.value = newValue.pages[pagination.page - 1].data;
-    pagination.itemCount = newValue.pages[0].total;
-    pagination.pageCount = newValue.pages[0].last_page;
-  }
+    if (newValue) {
+      expenseTypeTable.value = newValue.pages[pagination.page - 1].data;
+      pagination.itemCount = newValue.pages[0].total;
+      pagination.pageCount = newValue.pages[0].last_page;
+    }
+  },
+  { immediate: true }
 );
 const columns = [
   {
@@ -62,7 +67,13 @@ const columns = [
     },
   },
 ];
-const expenseTypeTable = ref([]);
+const rules = {
+  name: {
+    required: true,
+    message: "Name is required",
+    trigger: "input",
+  },
+};
 const addRow = () => {
   showEditModal.value = true;
   isEditing.value = false;
@@ -74,16 +85,19 @@ const addRow = () => {
 };
 
 const onOkEditingModal = async () => {
-  if (isEditing.value) {
-    await axios.put(
-      `/expense_types/${editingExpenseItem.value.id}`,
-      editingExpenseItem.value
-    );
-  } else {
-    await axios.post("/expense_types", editingExpenseItem.value);
-  }
+  try {
+    await formRef.value.validate();
+    if (isEditing.value) {
+      await axios.put(
+        `/expense_types/${editingExpenseItem.value.id}`,
+        editingExpenseItem.value
+      );
+    } else {
+      await axios.post("/expense_types", editingExpenseItem.value);
+    }
 
-  showEditModal.value = false;
+    showEditModal.value = false;
+  } catch (error) {}
 };
 const handlePageChange = (current_page) => {
   pagination.page = current_page;
@@ -131,13 +145,18 @@ const handlePageChange = (current_page) => {
       :title="isEditing ? 'Edit Expense type' : 'Add Expense type'"
       v-model:show="showEditModal"
     >
-      <div class="grid grid-cols-12 gap-2">
+      <n-form
+        :model="editingExpenseItem"
+        ref="formRef"
+        :rules="rules"
+        class="grid grid-cols-12 gap-2"
+      >
         <div class="col-span-6 md:col-span-12">
-          <n-form-item label="name" required>
+          <n-form-item label="name" path="name">
             <n-input v-model:value="editingExpenseItem.name" />
           </n-form-item>
         </div>
-      </div>
+      </n-form>
 
       <template #footer>
         <n-button size="large" @click="onOkEditingModal">Submit</n-button>
