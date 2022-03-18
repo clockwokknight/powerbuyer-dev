@@ -26,19 +26,19 @@ const tabs = ref([
   },
   {
     title: "At Auction",
-    value: "4",
+    value: "5",
   },
   {
     title: "Pending Sale",
-    value: "4",
+    value: "6",
   },
   {
     title: "Sold",
-    value: "4",
+    value: "7",
   },
   {
     title: "Unwound",
-    value: "4",
+    value: "8",
   },
 ]);
 
@@ -50,32 +50,32 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="__deals flex-col w-[calc(100vw-60px)] h-screen p-[60px]">
+  <div class="__deals flex-col w-[calc(100vw-60px)] h-screen p-[36px]">
     <HeaderTabs
       :title="'Deals'"
       :items="tabs"
       :range="range"
       class="bg-foreground_light dark:bg-foreground_dark sticky z-40 mt-[24px] w-full rounded-round duration-300 bordered p-[24px] !pb-0"
     />
-    <div class="flex mt-[48px]">
-      <Card class="w-full mr-[12px] h-[100px]">
+    <div class="flex mt-[36px]">
+      <Card class="w-full mr-[6px] h-[100px]">
         <h4>Last Month's Commission</h4>
         <h1>$0.00</h1>
       </Card>
-      <Card class="w-full mx-[12px] h-[100px]">
+      <Card class="w-full mx-[6px] h-[100px]">
         <h4>EST. Current Month Commission</h4>
         <h1>$0.00</h1>
       </Card>
-      <Card class="w-full mx-[12px] h-[100px]">
+      <Card class="w-full mx-[6px] h-[100px]">
         <h4>EST. Inventory</h4>
         <h1>$0.00</h1>
       </Card>
-      <Card class="w-full ml-[12px] h-[100px]">
+      <Card class="w-full ml-[6px] h-[100px]">
         <h4>EST. Net Profit</h4>
         <h1>$0.00</h1>
       </Card>
     </div>
-    <Card class="w-full h-[250px] mt-[48px]" />
+    <Card class="w-full h-[350px] mt-[36px]" />
     <!--DataTable class="mt-[48px]" /-->
   </div>
 </template>

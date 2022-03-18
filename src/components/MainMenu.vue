@@ -45,7 +45,11 @@ watch(
 <template>
   <aside
     class="flex flex-col sticky top-0 left-0 w-[60px] bg-black z-50"
-    :class="route.name !== 'Deals' ? 'h-[calc(100vh-48px)]' : 'h-[calc(100vh)]'"
+    :class="
+      route.name !== 'Deals' && route.name !== 'System'
+        ? 'h-[calc(100vh-48px)]'
+        : 'h-[calc(100vh)]'
+    "
   >
     <div class="w-full text-white">
       <nav>
@@ -263,7 +267,7 @@ watch(
               </svg>
             </li>
           </router-link>
-          <router-link to="/dealers">
+          <!--router-link to="/dealers">
             <li content="Dealers" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
                 width="549"
@@ -294,7 +298,7 @@ watch(
                 />
               </svg>
             </li>
-          </router-link>
+          </router-link-->
           <router-link to="/system">
             <li content="More Items" v-tippy="{ placement: 'right', duration: 50 }">
               <img src="/icons/OverflowMenuVertical.svg" />

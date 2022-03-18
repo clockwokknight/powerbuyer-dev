@@ -6,7 +6,7 @@ import { Tab, TabGroup, TabList } from "@headlessui/vue";
 import { gsap } from "gsap";
 
 const global = useGlobalState();
-const props = defineProps(["items", "type", "range"]);
+const props = defineProps(["title", "items", "range"]);
 const active = ref(0);
 
 const exampleItems = ref([
@@ -59,6 +59,8 @@ onUpdated(() => {
 
 const tabItems = computed(() => props.items || exampleItems.value);
 
+const query = ref("");
+
 const scrollToSection = (item, index) => {
   shouldDisableScroll.value = true;
   gsap.to("#main", {
@@ -76,15 +78,20 @@ const scrollToSection = (item, index) => {
 <template>
   <div class="flex-col">
     <div class="flex justify-between">
-      <h1 class="font-bold text-2xl">Deals</h1>
-      <div class="w-[250px]">
+      <h1 class="font-bold text-2xl">{{ title }}</h1>
+      <n-input
+        v-model="query"
+        placeholder="Search..."
+        class="mx-[24px] max-w-[350px] translate-y-[-40px] bordered dark:!border-[#45454C dark:bg-[#191919] bg-[#e0e0e0]"
+      />
+      <div class="w-[350px]">
         <n-date-picker v-model:value="range" type="datetimerange" />
         <!--pre>{{ JSON.stringify(range) }}</pre-->
       </div>
     </div>
     <TabGroup class="flex" :selected-index="active">
       <TabList
-        class="subTabList flex items-end h-[180px] w-full overflow-x-auto overflow-y-hidden px-4"
+        class="subTabList flex items-end h-[120px] w-full overflow-x-auto overflow-y-hidden px-4"
       >
         <Tab
           v-for="(item, index) in tabItems"
@@ -110,7 +117,7 @@ const scrollToSection = (item, index) => {
   </div>
 </template>
 
-<style>
+<style lang="scss">
 .__indicator {
   border-radius: 24px 24px 0 0;
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
@@ -119,6 +126,6 @@ const scrollToSection = (item, index) => {
   @apply w-6;
 }
 .n-input-wrapper {
-  font-size: 8px !important;
+  //font-size: 8px !important;
 }
 </style>
