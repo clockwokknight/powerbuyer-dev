@@ -40,7 +40,7 @@
               v-for="value in result.values"
               :key="value.id"
               :value="value"
-              class="__gs_result relative cursor-default select-none py-2 px-4 text-gray-700"
+              class="__gs_result relative cursor-default select-none py-2 px-4 text-gray-700 dark:text-[#f1f1f1]"
             >
               <div>{{ value.vin || value.name || value.company }}</div>
             </ComboboxOption>

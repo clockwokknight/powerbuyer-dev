@@ -1,7 +1,7 @@
 <template>
   <TransitionRoot appear :show="isOpen" as="template">
     <Dialog as="div" @close="closeModal">
-      <div class="fixed inset-0 z-10 overflow-y-auto">
+      <div class="fixed inset-0 z-max overflow-y-auto">
         <div class="min-h-screen px-4 text-center">
           <TransitionChild
             as="template"
@@ -12,7 +12,7 @@
             leave-from="opacity-100 scale-100"
             leave-to="opacity-0 scale-95"
           >
-            <DialogOverlay class="fixed inset-0" />
+            <DialogOverlay class="fixed inset-0 bg-[#00000066]" />
           </TransitionChild>
 
           <span class="inline-block h-screen align-middle" aria-hidden="true">
@@ -29,7 +29,7 @@
             leave-to="opacity-0 scale-95"
           >
             <div
-              class="my-8 ml-[60px] inline-block w-[calc(100%_-_120px)] transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+              class="my-8 ml-[60px] inline-block w-[calc(100%_-_120px)] transform overflow-hidden rounded-2xl bg-gray-200 p-6 text-left align-middle shadow-xl transition-all dark:bg-[#444]"
             >
               <GlobalSearch as="div" />
             </div>
