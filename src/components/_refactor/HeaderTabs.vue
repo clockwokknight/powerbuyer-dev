@@ -82,10 +82,15 @@ const scrollToSection = (item, index) => {
       <n-input
         v-model="query"
         placeholder="Search..."
-        class="mx-[24px] max-w-[350px] translate-y-[-40px] bordered dark:!border-[#45454C dark:bg-[#191919] bg-[#e0e0e0]"
+        class="mx-[24px] max-w-[550px] translate-y-[-40px] bordered dark:!border-[#45454C dark:bg-[#191919] bg-[#f6f6f6] p-2"
       />
-      <div class="w-[350px]">
-        <n-date-picker v-model:value="range" type="datetimerange" />
+      <div class="w-[250px]">
+        <n-date-picker
+          clearable
+          :format="'MM/dd/yy'"
+          v-model:value="range"
+          type="datetimerange"
+        />
         <!--pre>{{ JSON.stringify(range) }}</pre-->
       </div>
     </div>

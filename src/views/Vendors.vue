@@ -6,6 +6,7 @@ import { ref, watch } from "vue";
 import { getVendors } from "@/hooks/vendor";
 import { useGlobalState } from "@/store/global";
 import { useTabsViewStore } from "@/store/tabs";
+import { useVendors } from "@/store/vendors";
 import AddVendor from "@/components/vendor/AddVendor.vue";
 import PageTabs from "@/components/PageTabs.vue";
 import VendorList from "@/components/vendor/VendorList.vue";
@@ -13,6 +14,7 @@ import Tabs from "@/components/common/Tabs.vue";
 
 const tabStore = useTabsViewStore();
 const global = useGlobalState();
+const vendorStore = useVendors();
 
 const searchText = ref("");
 const debouncedSearchText = useDebounce(searchText, 500);
@@ -29,6 +31,7 @@ const {
 } = getVendors();
 
 const addTab = (vendor) => {
+  vendorStore.SET_LATEST(vendor?.id);
   listActive.value = global.isMobile ? false : listActive.value;
   tabStore.addTab({ id: vendor?.id, name: vendor?.name });
 };
@@ -83,7 +86,13 @@ watch(
             </div>
           </div>
           <div class="flex">
-            <n-input v-model:value.trim="searchText" clearable placeholder="Search..." />
+            <n-input
+              style="backdrop-filter: blur(36px)"
+              class="bg-[#f0f0f0] dark:bg-dark_border shadow-lg shadow-black/10"
+              v-model:value.trim="searchText"
+              clearable
+              placeholder="Search..."
+            />
 
             <!--div content="Filter" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
