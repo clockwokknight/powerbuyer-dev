@@ -27,7 +27,7 @@ const initialForm = {
     {
       expense_date: dayjs().format("YYYY-MM-DD"),
       deal_id: null,
-      images: [],
+      // images: [],
       name: "",
       description: "",
       amount: 0,
@@ -362,9 +362,9 @@ const handleUploadChange = (data) => {
               @keydown.enter.prevent
             />
           </n-form-item>
-          <n-form-item label="Upload Images">
+          <!-- <n-form-item label="Upload Images">
             <n-upload multiple @change="handleUploadChange" list-type="image-card" />
-          </n-form-item>
+          </n-form-item> -->
           <n-form-item label="Description">
             <n-input
               type="textarea"
