@@ -1,14 +1,14 @@
 <script setup>
 import { defineComponent, h, ref, watch } from "vue";
-import { useRoute } from "vue-router";
-import { NButton, NModal, useMessage } from "naive-ui";
-import MaskedInput from "@/components/common/MaskedInput.vue";
-import VendorAdd from "@/components/vendor/VendorContactsAdd.vue";
-import ActionButtons from "./ActionButtons.vue";
 import { useMutation, useQuery, useQueryClient } from "vue-query";
-import axios from "axios";
-import { api } from "@/api/config";
+import { NButton, NModal, useMessage } from "naive-ui";
 import { objectFilter, pick } from "@/lib/helper";
+import { useRoute } from "vue-router";
+import { api } from "@/api/config";
+import axios from "axios";
+import ActionButtons from "./ActionButtons.vue";
+import VendorAdd from "@/components/vendor/VendorContactsAdd.vue";
+import MaskedInput from "@/components/common/MaskedInput.vue";
 
 const showOuterRef = ref(false);
 const route = useRoute();
@@ -139,14 +139,12 @@ const pagination = { pageSize: 10 };
 
 <template>
   <div id="contacts" class="_vendor-contacts scroll-smooth">
-    <div class="-mt-4">
-      <div class="flex translate-y-[68px] items-center justify-end pr-10">
-        <VendorAdd />
-      </div>
-      <div
-        class="rounded bg-foreground_light py-8 px-8 dark:bg-foreground_dark"
-      >
-        <div><p class="pb-8 text-2xl font-bold">Contacts</p></div>
+    <div class="mt-[24px]">
+      <div class="rounded-roundbg-foreground_light py-8 px-8 dark:bg-foreground_dark">
+        <div class="flex justify-between">
+          <p class="pb-8 text-2xl font-bold">Contacts</p>
+          <VendorAdd />
+        </div>
         <n-data-table
           class="rounded-round"
           :columns="columns"

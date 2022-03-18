@@ -354,7 +354,7 @@ const onRemoveExpenseItem = (index) => {
         :min="1"
         :max="isDisabled ? form.expenses?.length : undefined"
       >
-        <div class="grid rounded bg-gray-200/50 p-3 dark:bg-gray-800/50">
+        <div class="grid rounded-roundbg-gray-200/50 p-3 dark:bg-gray-800/50">
           <div class="sm:grid sm:grid-cols-2 sm:justify-between sm:gap-x-5">
             <n-form-item
               label="VIN"

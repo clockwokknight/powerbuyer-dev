@@ -290,7 +290,7 @@ const onInvoiceSelect = (val, index) => {
         :min="1"
       >
         <div
-          class="rounded bg-gray-200/50 p-3 dark:bg-gray-800/50 sm:grid sm:grid-cols-2 sm:gap-x-5"
+          class="rounded-roundbg-gray-200/50 p-3 dark:bg-gray-800/50 sm:grid sm:grid-cols-2 sm:gap-x-5"
         >
           <n-form-item
             label="Vendor Invoice"

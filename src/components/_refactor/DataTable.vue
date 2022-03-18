@@ -1,27 +1,13 @@
 <script setup>
+import { computed, h, ref, watch } from "vue";
 import ActionButtons from "@/components/vendor/ActionButtons.vue";
 import VendorExpenseEdit from "@/components/vendor/VendorExpenseEdit.vue";
 import VendorExpensesAdd from "@/components/vendor/VendorExpensesAdd.vue";
 import { vendorInvoices } from "@/hooks/vendor";
 import { clone, omit, pick } from "@/lib/helper";
 import dayjs from "dayjs";
-import { computed, h, ref, watch } from "vue";
-import { useRoute } from "vue-router";
 
-const route = useRoute();
 
-const routeParamId = ref(route.params?.id);
-
-watch(
-  () => route.params,
-  (toParams) => {
-    if (toParams?.id) routeParamId.value = toParams?.id;
-  }
-);
-
-const { data: invoicesData, isLoading: expensesDataLoading } = vendorInvoices(
-  routeParamId
-);
 
 const rowKey = (row) => row?.id;
 const columns = [
@@ -81,22 +67,23 @@ function showEditExpenseForm(row) {
 </script>
 
 <template>
-  <div id="expenses" class="scroll-smooth">
+  <div
+    id="expenses"
+    class="scroll-smooth border-[1px] mt-[24px] border-transparent dark:border-dark_border"
+  >
     <VendorExpenseEdit
       :show-drawer="visibleEditForm"
       :initial-data="formRow"
       @update:show="visibleEditForm = false"
       :is-disabled="formDisabled"
     />
-    <div class="-mt-4 font-sans">
-      <div class="flex translate-y-[60px] translate-x-[-24px] items-center justify-end">
-        <VendorExpensesAdd />
-      </div>
+    <div class="font-sans">
       <div
-        class="rounded border-2 bg-white py-8 px-8 dark:border-0 dark:bg-foreground_dark"
+        class="rounded-roundborder-2 bg-white py-8 px-8 dark:border-0 dark:bg-foreground_dark"
       >
-        <div>
+        <div class="flex justify-between">
           <p class="pb-8 text-2xl font-bold">Invoices & Expenses</p>
+          <VendorExpensesAdd />
         </div>
         <n-data-table
           class="rounded-round"
