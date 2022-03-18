@@ -1,12 +1,8 @@
 <script setup>
-import axios from "axios";
-import { h, ref, reactive, watch } from "vue";
-import CustomInput from "@/components/common/CustomInput.vue";
 import ActionButtons from "@/components/common/ActionButtons.vue";
+import axios from "axios";
 import { NButton } from "naive-ui";
-import { tryOnBeforeUnmount } from "@vueuse/core";
-
-const emit = defineEmits(["onReturn"]);
+import { h, ref, watch } from "vue";
 
 const paymentTerms = ref([]);
 const showEditModal = ref(false);
@@ -82,17 +78,19 @@ const addRow = () => {
     description: "",
     days: 0,
   };
-  editingPaymentTerm.value = newType;
+  editingPaymentTerm.value = { ...newType };
 };
 
 const rules = {
   name: {
     required: true,
     message: "Name is required",
+    trigger: "input",
   },
   days: {
     type: "number",
     required: true,
+    trigger: "input",
     message: "Day is required",
   },
 };
@@ -140,7 +138,7 @@ const onOkEditingModal = async () => {
   >
     <n-form
       ref="formRef"
-      :modal="editingPaymentTerm"
+      :model="editingPaymentTerm"
       :rules="rules"
       class="grid grid-cols-12 gap-x-6"
     >

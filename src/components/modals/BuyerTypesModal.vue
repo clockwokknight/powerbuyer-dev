@@ -5,19 +5,18 @@ import ActionButtons from "@/components/common/ActionButtons.vue";
 import { NButton } from "naive-ui";
 import { getBuyerTypes } from "@/hooks/buyer.js";
 import { useQueryClient } from "vue-query";
+import { objectFilter } from "@/lib/helper";
 
 const showModal = ref(false);
-const emit = defineEmits(["onReturn"]);
 const queryClient = useQueryClient();
 
 const showEditModal = ref(false);
-const editingBuyerType = ref({
-  active: 1,
-  deleted_at: null,
+const buyerTypeFormRef = ref(null);
+const initialForm = {
   description: "",
   name: "",
-  updated_at: null,
-});
+};
+const editingBuyerType = ref({ ...initialForm });
 const isEditing = ref(false);
 
 const { data: buyerTypes, isLoading: isBuyerTypeLoading } = getBuyerTypes();
@@ -59,41 +58,35 @@ const columns = [
 const addRow = () => {
   showEditModal.value = true;
   isEditing.value = false;
-  const newType = {
-    active: 1,
-    deleted_at: null,
-    description: "",
-    name: "",
-    updated_at: null,
-  };
-  editingBuyerType.value = newType;
+
+  editingBuyerType.value = { ...initialForm };
 };
 const rules = {
   name: {
     required: true,
     message: "Name is required",
+    trigger: "input",
   },
 };
-const formRef = ref(null);
 const onOkEditingModal = async () => {
   try {
-    await formRef.value.validate();
+    await buyerTypeFormRef.value.validate();
+    const obj = objectFilter(editingBuyerType.value, (key, value) => value);
     if (isEditing.value) {
-      await axios.put(
-        `/buyer_type/${editingBuyerType.value.id}`,
-        editingBuyerType.value
-      );
+      await axios.put(`/buyer_type/${editingBuyerType.value.id}`, editingBuyerType.value);
       await queryClient.invalidateQueries("buyer_types");
     } else {
       await axios.post("/buyer_type", editingBuyerType.value);
     }
     showEditModal.value = false;
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+  }
 };
 </script>
 <template>
-  <div>
-    <div class="cursor-pointer py-6 px-6" @click="showModal = true">
+  <article>
+    <div class="py-6 px-6 pb-8" @click="showModal = true">
       <div class="mb-2 text-lg font-bold">Buyer Types</div>
       <div class="pb-2 text-sm">Click to edit commission types.</div>
     </div>
@@ -131,10 +124,10 @@ const onOkEditingModal = async () => {
       v-model:show="showEditModal"
     >
       <n-form
-        ref="formRef"
-        :modal="editingBuyerType"
+        ref="buyerTypeFormRef"
+        :model="editingBuyerType"
         :rules="rules"
-        class="grid grid-cols-12"
+        class="grid grid-cols-12 gap-x-5"
       >
         <div class="col-span-6">
           <n-form-item label="Name" path="name">
@@ -158,5 +151,5 @@ const onOkEditingModal = async () => {
         </div>
       </template>
     </n-modal>
-  </div>
+  </article>
 </template>
