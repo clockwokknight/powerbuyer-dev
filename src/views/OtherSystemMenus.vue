@@ -11,9 +11,11 @@ import DealStatusModal from "@/components/modals/DealStatusModal.vue";
   <main class="w-[calc(100vw-60px)] overflow-auto overscroll-contain p-5">
     <section class="mb-12">
       <div class="mt-24 p-4">
-        <h2 class="mb-6 text-xl font-bold uppercase">Other Menu Options</h2>
+        <h2 class="mb-6 text-xl font-bold uppercase">System Settings</h2>
       </div>
-      <div class="mx-6 grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-3">
+      <div
+        class="mx-6 grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      >
         <!-- Commission Types -->
 
         <CommissionTypesModal

@@ -1,5 +1,5 @@
 <template>
-  <TransitionRoot appear :show="isOpen" as="template">
+  <TransitionRoot :show="commandPalletStore.isCommandPalletOpen" as="template">
     <Dialog
       as="div"
       @close="closeModal"
@@ -35,7 +35,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import {
   TransitionRoot,
   TransitionChild,
@@ -46,23 +46,25 @@ import {
 import GlobalSearch from "@/components/global_search/GlobalSearch.vue";
 
 import { useEventListener } from "@vueuse/core";
+import { useCommandPalletStore } from "@/store/commandPallet";
 
 const isOpen = ref(false);
 
 const handleKeyEvent = (evt) => {
-  if (event.key === "k" && (event.metaKey || event.ctrlKey)) {
+  if (evt.key === "k" && (evt.metaKey || evt.ctrlKey)) {
     openModal();
     evt.preventDefault();
   }
 };
+const commandPalletStore = useCommandPalletStore();
 
 useEventListener(window, "keydown", handleKeyEvent);
 
 function closeModal() {
-  isOpen.value = false;
+  commandPalletStore.isCommandPalletOpen = false;
 }
 
 function openModal() {
-  isOpen.value = true;
+  commandPalletStore.isCommandPalletOpen = true;
 }
 </script>
