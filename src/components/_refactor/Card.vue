@@ -4,7 +4,7 @@ import { ref, onMounted, watch } from "vue";
 
 <template>
   <div
-    class="__card border-[1px] rounded-round bg-foreground_light dark:bg-foreground_dark dark:border-dark_border border-transparent p-[24px] flex center-content"
+    class="__card border-[1px] rounded-round bg-foreground_light dark:bg-foreground_dark dark:border-dark_border border-transparent p-[24px] flex-col center-content"
   >
     <slot>Empty card...</slot>
   </div>
