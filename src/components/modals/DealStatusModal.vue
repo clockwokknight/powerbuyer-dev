@@ -78,10 +78,6 @@ const addRow = () => {
   editingDealStatus.value = newType;
 };
 
-const onCancelEditingModal = () => {
-  showEditModal.value = false;
-};
-
 const onOkEditingModal = async () => {
   if (isEditing.value) {
     await axios.put(

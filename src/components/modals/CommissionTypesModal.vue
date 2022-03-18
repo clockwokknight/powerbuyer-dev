@@ -10,8 +10,6 @@ import dayjs from "dayjs";
 import { objectFilter } from "@/lib/helper.js";
 import { useQueryClient } from "vue-query";
 
-const props = defineProps(["show"]);
-const emit = defineEmits(["onReturn"]);
 const queryClient = useQueryClient();
 
 // const commissionTypes = ref([]);

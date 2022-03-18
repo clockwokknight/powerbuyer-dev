@@ -68,18 +68,27 @@ const addRow = () => {
   };
   editingBuyerType.value = newType;
 };
-
+const rules = {
+  name: {
+    required: true,
+    message: "Name is required",
+  },
+};
+const formRef = ref(null);
 const onOkEditingModal = async () => {
-  if (isEditing.value) {
-    await axios.put(
-      `/buyer_type/${editingBuyerType.value.id}`,
-      editingBuyerType.value
-    );
-    await queryClient.invalidateQueries("buyer_types");
-  } else {
-    await axios.post("/buyer_type", editingBuyerType.value);
-  }
-  showEditModal.value = false;
+  try {
+    await formRef.value.validate();
+    if (isEditing.value) {
+      await axios.put(
+        `/buyer_type/${editingBuyerType.value.id}`,
+        editingBuyerType.value
+      );
+      await queryClient.invalidateQueries("buyer_types");
+    } else {
+      await axios.post("/buyer_type", editingBuyerType.value);
+    }
+    showEditModal.value = false;
+  } catch (error) {}
 };
 </script>
 <template>
@@ -121,9 +130,14 @@ const onOkEditingModal = async () => {
       :title="isEditing ? 'Edit Buyer Type' : 'Add Buyer Type'"
       v-model:show="showEditModal"
     >
-      <div class="grid grid-cols-12">
+      <n-form
+        ref="formRef"
+        :modal="editingBuyerType"
+        :rules="rules"
+        class="grid grid-cols-12"
+      >
         <div class="col-span-6">
-          <n-form-item label="Name">
+          <n-form-item label="Name" path="name">
             <n-input v-model:value="editingBuyerType.name" />
           </n-form-item>
         </div>
@@ -136,7 +150,7 @@ const onOkEditingModal = async () => {
             />
           </n-form-item>
         </div>
-      </div>
+      </n-form>
 
       <template #footer>
         <div class="flex flex-row gap-[10px]">

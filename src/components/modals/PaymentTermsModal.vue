@@ -4,6 +4,7 @@ import { h, ref, reactive, watch } from "vue";
 import CustomInput from "@/components/common/CustomInput.vue";
 import ActionButtons from "@/components/common/ActionButtons.vue";
 import { NButton } from "naive-ui";
+import { tryOnBeforeUnmount } from "@vueuse/core";
 
 const emit = defineEmits(["onReturn"]);
 
@@ -34,10 +35,6 @@ watch(showModal, (newValue) => {
     getPaymentTerms();
   }
 });
-
-const onRemovePaymentTerm = (index) => {
-  paymentTerms.value.slice(index, 1);
-};
 
 const columns = [
   {
@@ -81,18 +78,27 @@ const addRow = () => {
   showEditModal.value = true;
   isEditing.value = false;
   const newType = {
-    active: 1,
     name: "",
     description: "",
     days: 0,
-    created_at: null,
-    updated_at: null,
-    deleted_at: null,
   };
   editingPaymentTerm.value = newType;
 };
 
+const rules = {
+  name: {
+    required: true,
+    message: "Name is required",
+  },
+  days: {
+    type: "number",
+    required: true,
+    message: "Day is required",
+  },
+};
+const formRef = ref(null);
 const onOkEditingModal = async () => {
+  await formRef.value.validate();
   if (isEditing.value) {
     await axios.put(
       `/payment_terms/${editingPaymentTerm.value.id}`,
@@ -101,7 +107,6 @@ const onOkEditingModal = async () => {
   } else {
     await axios.post("/payment_terms", editingPaymentTerm.value);
   }
-  getPaymentTerms();
   showEditModal.value = false;
 };
 </script>
@@ -133,14 +138,19 @@ const onOkEditingModal = async () => {
     preset="card"
     v-model:show="showEditModal"
   >
-    <div class="grid grid-cols-12 gap-x-6">
+    <n-form
+      ref="formRef"
+      :modal="editingPaymentTerm"
+      :rules="rules"
+      class="grid grid-cols-12 gap-x-6"
+    >
       <div class="col-span-6">
-        <n-form-item label="Name">
+        <n-form-item label="Name" path="name">
           <n-input v-model:value="editingPaymentTerm.name" />
         </n-form-item>
       </div>
       <div class="col-span-6">
-        <n-form-item label="Days">
+        <n-form-item label="Days" path="days">
           <n-input-number v-model:value="editingPaymentTerm.days" />
         </n-form-item>
       </div>
@@ -153,7 +163,7 @@ const onOkEditingModal = async () => {
           />
         </n-form-item>
       </div>
-    </div>
+    </n-form>
 
     <template #footer>
       <n-button size="large" @click="onOkEditingModal">Submit</n-button>

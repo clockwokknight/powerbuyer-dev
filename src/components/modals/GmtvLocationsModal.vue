@@ -23,8 +23,7 @@ const initialForm = {
 const editingGmtvLocation = ref({ ...initialForm });
 const isEditing = ref(false);
 
-const { data: gmtvLocations, isLoading: isGmtvLocationLoading } =
-  getGmtvLocations();
+const { data: gmtvLocations, isLoading: isGmtvLocationLoading } = getGmtvLocations();
 
 const columns = [
   {
@@ -139,7 +138,6 @@ const onOkEditingModal = async () => {
       :bordered="false"
       :loading="isGmtvLocationLoading"
       :max-height="500"
-      virtual-scroll
       :scroll-x="1000"
     />
   </n-modal>
