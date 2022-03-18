@@ -1,9 +1,8 @@
 <script setup>
-import axios from "axios";
-import { h, ref, reactive, watch } from "vue";
-import CustomInput from "@/components/common/CustomInput.vue";
-import { NButton } from "naive-ui";
 import ActionButtons from "@/components/common/ActionButtons.vue";
+import axios from "axios";
+import { NButton } from "naive-ui";
+import { h, ref, watch } from "vue";
 import { useQuery } from "vue-query";
 
 const showEditModal = ref(false);
@@ -52,7 +51,7 @@ const columns = [
   {
     title: "Action",
     key: "actions",
-    width: 150,
+    width: 100,
     render(row) {
       return h(ActionButtons, {
         onEdit: () => {
@@ -75,9 +74,6 @@ const addRow = () => {
     active: 1,
     name: "",
     description: "",
-    created_at: null,
-    updated_at: null,
-    deleted_at: null,
   };
   editingDealStatus.value = newType;
 };
