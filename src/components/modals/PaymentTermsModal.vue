@@ -4,6 +4,9 @@ import { getPaymentTerms } from "@/hooks/common_query";
 import axios from "axios";
 import { NButton } from "naive-ui";
 import { h, ref, watch } from "vue";
+import { useQueryClient } from "vue-query";
+
+const queryClient = useQueryClient();
 
 const showEditModal = ref(false);
 const showModal = ref(false);
@@ -48,6 +51,7 @@ const columns = [
         },
         onDelete: async () => {
           await axios.delete(`/payment_terms/${row.id}`);
+          queryClient.invalidateQueries("paymentTerms");
         },
       });
     },
@@ -90,6 +94,7 @@ const onOkEditingModal = async () => {
     } else {
       await axios.post("/payment_terms", editingPaymentTerm.value);
     }
+    queryClient.invalidateQueries("paymentTerms");
     showEditModal.value = false;
   } catch (error) {}
 };

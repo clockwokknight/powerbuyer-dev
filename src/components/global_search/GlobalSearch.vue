@@ -1,13 +1,19 @@
 <template>
-  <Combobox v-model="selected">
+  <Combobox
+    as="div"
+    v-model="selected"
+    class="transition-allbg-gray-200 mx-auto max-w-2xl transform divide-y divide-gray-100 overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black ring-opacity-5 dark:bg-[#444]"
+  >
     <!-- Render children directly instead of an `input` -->
-    <div class="flex items-center">
-      <SearchIcon class="h-6 w-6 text-gray-500" />
+    <div class="relative">
+      <SearchIcon
+        class="pointer-events-none absolute top-3.5 left-4 h-5 w-5 text-gray-400"
+      />
       <ComboboxInput
         as="template"
         @change="query = $event.target.value"
         :displayValue="(value) => value.vin || value.name || value.company"
-        class="text-gray-8000 text-md h-14 w-full border-0 bg-transparent placeholder-gray-400 focus:ring-0"
+        class="h-12 w-full border-0 bg-transparent pl-11 pr-4 text-gray-800 placeholder-gray-400 focus:ring-0 sm:text-sm"
         placeholder="Search..."
       >
         <input />
@@ -20,15 +26,12 @@
       @after-leave="query = ''"
     >
       <div class="max-h-96 overflow-y-auto overflow-x-hidden text-sm">
-        <div
-          v-for="result in globalSearchResults"
-          :key="result.key"
-          :value="result"
-        >
-          <hr class="my-2" />
+        <div v-for="result in globalSearchResults" :key="result.key" :value="result">
           <ComboboxOptions>
             <div class="__gs_title">
-              <h3 class="my-2 translate-x-2 font-bold">{{ result.key }}</h3>
+              <h3 class="mt-4 mb-2 px-3 text-xs font-semibold text-gray-500">
+                {{ result.key }}
+              </h3>
             </div>
             <div
               v-if="result.values.length === 0 && query !== ''"
@@ -67,8 +70,9 @@ import SearchIcon from "@/components/global_search/SearchIcon.vue";
 
 const query = ref("");
 const debouncedSearchText = useDebounce(query, 200);
-const { data: globalSearchResults, isFetching: isGlobalSearchFetching } =
-  useQuery(["globalSearch", debouncedSearchText], ({ queryKey }) => {
+const { data: globalSearchResults, isFetching: isGlobalSearchFetching } = useQuery(
+  ["globalSearch", debouncedSearchText],
+  ({ queryKey }) => {
     if (queryKey[1] === "") return null;
     else
       return axios
@@ -88,7 +92,8 @@ const { data: globalSearchResults, isFetching: isGlobalSearchFetching } =
             };
           });
         });
-  });
+  }
+);
 
 const selected = ref();
 </script>
