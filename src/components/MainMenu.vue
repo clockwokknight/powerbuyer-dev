@@ -2,6 +2,9 @@
 import { watch } from "vue";
 import { useDark, useToggle } from "@vueuse/core";
 import { useGlobalState } from "../store/global";
+import { useRoute, useRouter } from "vue-router";
+
+const route = useRoute();
 
 const userMenu = [
   {
@@ -33,6 +36,7 @@ const toggleDark = useToggle(isDark);
 watch(
   () => isDark.value,
   (val) => {
+    console.log(route);
     global.setDark(val);
   }
 );
@@ -40,7 +44,8 @@ watch(
 
 <template>
   <aside
-    class="flex flex-col sticky top-0 left-0 w-[60px] h-[calc(100vh-48px)] bg-black z-50"
+    class="flex flex-col sticky top-0 left-0 w-[60px] bg-black z-50"
+    :class="route.name !== 'Deals' ? 'h-[calc(100vh-48px)]' : 'h-[calc(100vh)]'"
   >
     <div class="w-full text-white">
       <nav>

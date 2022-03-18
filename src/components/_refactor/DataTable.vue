@@ -7,8 +7,6 @@ import { vendorInvoices } from "@/hooks/vendor";
 import { clone, omit, pick } from "@/lib/helper";
 import dayjs from "dayjs";
 
-
-
 const rowKey = (row) => row?.id;
 const columns = [
   {
@@ -79,7 +77,7 @@ function showEditExpenseForm(row) {
     />
     <div class="font-sans">
       <div
-        class="rounded-roundborder-2 bg-white py-8 px-8 dark:border-0 dark:bg-foreground_dark"
+        class="rounded-round border-2 bg-white py-8 px-8 dark:border-0 dark:bg-foreground_dark"
       >
         <div class="flex justify-between">
           <p class="pb-8 text-2xl font-bold">Invoices & Expenses</p>
