@@ -36,16 +36,16 @@ onMounted(() => {
             <section
               class="fill-screen bg-background_light dark:!bg-background_dark relative flex overflow-hidden"
             >
+              <CommandPalette />
               <MainMenu />
               <router-view />
             </section>
-            <VueQueryDevTools />
+            <!-- <VueQueryDevTools /> -->
           </n-dialog-provider>
         </n-notification-provider>
       </n-message-provider>
     </n-loading-bar-provider>
   </n-config-provider>
-  <CommandPalette />
 </template>
 
 <style>
