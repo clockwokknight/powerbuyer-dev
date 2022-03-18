@@ -29,6 +29,9 @@ module.exports = {
       },
       padding: {
         'pad': '24px',
+      },
+      zIndex: {
+        'max': '3000',
       }
     },
   },

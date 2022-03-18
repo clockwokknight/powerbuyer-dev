@@ -3,6 +3,7 @@ import { onMounted } from "vue";
 import { VueQueryDevTools } from "vue-query/devtools";
 import { darkTheme } from "naive-ui";
 import MainMenu from "@/components/MainMenu.vue";
+import CommandPalette from "@/components/global_search/CommandPalette.vue";
 import { useGlobalState } from "@/store/global";
 
 const global = useGlobalState();
@@ -21,6 +22,7 @@ onMounted(() => {
             <section
               class="fill-screen relative flex bg-background_light dark:!bg-background_dark overflow-hidden"
             >
+              <CommandPalette />
               <MainMenu />
               <router-view />
             </section>
