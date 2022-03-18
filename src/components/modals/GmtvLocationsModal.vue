@@ -1,7 +1,6 @@
 <script setup>
 import axios from "axios";
 import { h, ref, reactive, watch } from "vue";
-import CustomInput from "@/components/common/CustomInput.vue";
 import ActionButtons from "@/components/common/ActionButtons.vue";
 import { NButton } from "naive-ui";
 import { getGmtvLocations } from "@/hooks/location.js";
@@ -61,7 +60,8 @@ const columns = [
   {
     title: "Action",
     key: "actions",
-    width: 150,
+    fixed: "right",
+    width: 100,
     render(row) {
       return h(ActionButtons, {
         onEdit: () => {

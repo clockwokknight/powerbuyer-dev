@@ -5,7 +5,6 @@ import CustomInput from "@/components/common/CustomInput.vue";
 import ActionButtons from "@/components/common/ActionButtons.vue";
 import { NButton } from "naive-ui";
 import { getExpenseTypes } from "@/hooks/expense.js";
-import { watchOnce } from "@vueuse/core";
 
 const showEditModal = ref(false);
 const showModal = ref(false);
@@ -130,36 +129,23 @@ const handlePageChange = (current_page) => {
         @update:page="handlePageChange"
       />
     </n-modal>
-    <n-modal v-model:show="showEditModal">
-      <n-card
-        class="w-[400px]"
-        :title="isEditing ? 'Edit Expense Item' : 'Add Expense Item'"
-        :bordered="false"
-        size="huge"
-        role="dialog"
-        aria-modal="true"
-      >
-        <template #header-extra></template>
-
-        <div class="grid grid-cols-12 gap-2">
-          <div class="col-span-6 md:col-span-12">
-            <CustomInput
-              label="Name"
-              v-model:value="editingExpenseItem.name"
-              style="margin-right: 12px"
-            />
-          </div>
+    <n-modal
+      preset="card"
+      class="max-w-md"
+      :title="isEditing ? 'Edit Expense type' : 'Add Expense type'"
+      v-model:show="showEditModal"
+    >
+      <div class="grid grid-cols-12 gap-2">
+        <div class="col-span-6 md:col-span-12">
+          <n-form-item label="name" required>
+            <n-input v-model:value="editingExpenseItem.name" />
+          </n-form-item>
         </div>
+      </div>
 
-        <template #footer>
-          <div class="flex flex-row gap-[10px]">
-            <n-button size="large" @click="onOkEditingModal">OK</n-button>
-            <n-button size="large" @click="onCancelEditingModal"
-              >Cancel</n-button
-            >
-          </div>
-        </template>
-      </n-card>
+      <template #footer>
+        <n-button size="large" @click="onOkEditingModal">Submit</n-button>
+      </template>
     </n-modal>
   </div>
 </template>

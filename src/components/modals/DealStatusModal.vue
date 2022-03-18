@@ -3,22 +3,21 @@ import axios from "axios";
 import { h, ref, reactive, watch } from "vue";
 import CustomInput from "@/components/common/CustomInput.vue";
 import { NButton } from "naive-ui";
+import ActionButtons from "@/components/common/ActionButtons.vue";
+import { useQuery } from "vue-query";
 
-const emit = defineEmits(["onReturn"]);
-
-const dealStatus = ref([]);
 const showEditModal = ref(false);
 const showModal = ref(false);
 const editingDealStatus = ref({
   active: 1,
   name: "",
   description: "",
-  created_at: null,
-  updated_at: null,
-  deleted_at: null,
 });
 const isEditing = ref(false);
 
+const { data: dealStatus } = useQuery("deal_status", () =>
+  axios.get("/deal_status").then((res) => res.data)
+);
 const getDealStatus = () => {
   axios
     .get("/deal_status")
@@ -36,10 +35,6 @@ watch(showModal, (newValue) => {
     getDealStatus();
   }
 });
-
-const onRemoveDealStatus = (index) => {
-  dealStatus.value.slice(index, 1);
-};
 
 const columns = [
   {
@@ -59,31 +54,16 @@ const columns = [
     key: "actions",
     width: 150,
     render(row) {
-      return [
-        h(
-          NButton,
-          {
-            size: "small",
-            onClick: () => {
-              isEditing.value = true;
-              showEditModal.value = true;
-              editingDealStatus.value = row;
-            },
-          },
-          { default: () => "Edit" }
-        ),
-        h(
-          NButton,
-          {
-            size: "small",
-            onClick: async () => {
-              await axios.delete(`/deal_status/${row.id}`);
-              getDealStatus();
-            },
-          },
-          { default: () => "Delete" }
-        ),
-      ];
+      return h(ActionButtons, {
+        onEdit: () => {
+          isEditing.value = true;
+          showEditModal.value = true;
+          editingDealStatus.value = row;
+        },
+        onDelete: async () => {
+          await axios.delete(`/deal_status/${row.id}`);
+        },
+      });
     },
   },
 ];
@@ -124,67 +104,54 @@ const onOkEditingModal = async () => {
     <div class="mb-2 h-11 text-lg font-bold">Deal Status</div>
     <div class="h-10 pb-2 text-sm">Click to edit commission types.</div>
   </div>
-  <n-modal v-model:show="showModal">
-    <n-card
-      style="width: 800px"
-      title="Deal Status"
+  <n-modal
+    preset="card"
+    class="max-w-screen-md"
+    title="Deal Status"
+    v-model:show="showModal"
+  >
+    <div class="mb-5 ml-auto w-fit">
+      <n-tooltip trigger="hover">
+        <template #trigger>
+          <n-button @click="addRow">+</n-button>
+        </template>
+        Create a deal status
+      </n-tooltip>
+    </div>
+    <n-data-table
+      class="rounded-md"
+      striped
+      :columns="columns"
+      :data="dealStatus"
       :bordered="false"
-      size="huge"
-      role="dialog"
-      aria-modal="true"
-    >
-      <template #header-extra></template>
-      <n-data-table
-        class="rounded-md"
-        striped
-        :columns="columns"
-        :data="dealStatus"
-        :bordered="false"
-        :loading="paymentDataLoading"
-        :row-key="rowKey"
-      />
-      <template #footer>
-        <div class="flex flex-row justify-between">
-          <n-button size="large" @click="addRow">Add...</n-button>
-          <n-button size="large" @click="$emit('onReturn')">Cancel</n-button>
-        </div>
-      </template>
-    </n-card>
+      :loading="paymentDataLoading"
+    />
   </n-modal>
-  <n-modal v-model:show="showEditModal">
-    <n-card
-      class="w-[600px]"
-      :title="isEditing ? 'Edit Deal Status' : 'Add Deal Status'"
-      :bordered="false"
-      size="huge"
-      role="dialog"
-      aria-modal="true"
-    >
-      <template #header-extra></template>
-
-      <div class="grid grid-cols-12 gap-2">
-        <div class="col-span-6 md:col-span-4">
-          <CustomInput
-            label="Name"
-            v-model:value="editingDealStatus.name"
-            style="margin-right: 12px"
-          />
-        </div>
-        <div class="col-span-12 md:col-span-12">
+  <n-modal
+    preset="card"
+    :title="isEditing ? 'Edit Deal Status' : 'Add Deal Status'"
+    class="max-w-[600px]"
+    v-model:show="showEditModal"
+  >
+    <div class="grid grid-cols-12 gap-2">
+      <div class="col-span-6 md:col-span-4">
+        <n-form-item label="Name">
+          <n-input v-model:value="editingDealStatus.name" />
+        </n-form-item>
+      </div>
+      <div class="col-span-12 md:col-span-12">
+        <n-form-item label="Description">
           <n-input
             placeholder="Description"
             v-model:value="editingDealStatus.description"
             type="textarea"
           />
-        </div>
+        </n-form-item>
       </div>
+    </div>
 
-      <template #footer>
-        <div class="flex flex-row gap-[10px]">
-          <n-button size="large" @click="onOkEditingModal">OK</n-button>
-          <n-button size="large" @click="onCancelEditingModal">Cancel</n-button>
-        </div>
-      </template>
-    </n-card>
+    <template #footer>
+      <n-button size="large" @click="onOkEditingModal">Submit</n-button>
+    </template>
   </n-modal>
 </template>
