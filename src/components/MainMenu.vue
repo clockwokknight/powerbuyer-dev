@@ -1,8 +1,8 @@
 <script setup>
-import { watch } from "vue";
-import { useDark, useToggle } from "@vueuse/core";
-import { useGlobalState } from "../store/global";
 import { useCommandPalletStore } from "@/store/commandPallet";
+import { useDark, useToggle } from "@vueuse/core";
+import { watch } from "vue";
+import { useGlobalState } from "../store/global";
 
 const userMenu = [
   {
