@@ -17,7 +17,7 @@ const global = useGlobalState();
 const searchText = ref("");
 const debouncedSearchText = useDebounce(searchText, 500);
 
-const listActive = ref(true);
+const listActive = ref(!global.isMobile);
 
 // Showing All Vendors
 
@@ -29,6 +29,7 @@ const {
 } = getVendors();
 
 const addTab = (vendor) => {
+  listActive.value = global.isMobile ? false : listActive.value;
   tabStore.addTab({ id: vendor?.id, name: vendor?.name });
 };
 

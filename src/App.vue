@@ -1,9 +1,15 @@
 <script setup>
+import { onMounted } from "vue";
 import { VueQueryDevTools } from "vue-query/devtools";
 import { darkTheme } from "naive-ui";
 import MainMenu from "@/components/MainMenu.vue";
 import { useGlobalState } from "@/store/global";
+
 const global = useGlobalState();
+
+onMounted(() => {
+  global.setMobile(window.innerWidth <= 768);
+});
 </script>
 
 <template>
