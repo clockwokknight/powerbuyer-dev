@@ -81,10 +81,7 @@ watch(
 </script>
 
 <template>
-  <div
-    id="payments"
-    class="mt-[24px] font-sans rounded-round border-[1px] border-dark_border"
-  >
+  <div id="payments" class="mt-[24px] font-sans rounded-round bordered">
     <VendorPaymentEdit :initial-data="formRow" v-model:show-drawer="visibleEditForm" />
 
     <div class="border-[1px] bg-white p-[24px] dark:border-0 dark:bg-foreground_dark">
