@@ -11,6 +11,21 @@ import DealStatusModal from "@/components/modals/DealStatusModal.vue";
   <main class="w-[calc(100vw-60px)] overflow-auto overscroll-contain p-5">
     <section class="mb-12">
       <div class="mt-24 p-4">
+        <h2 class="mb-6 text-xl font-bold uppercase">Other Menu Options</h2>
+      </div>
+      <div
+        class="mx-6 grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      >
+        <router-link class="single-card h-32 pt-5" to="/auctions">
+          <span class="px-6 pt-6 pb-8 text-lg font-bold"> Auctions</span>
+        </router-link>
+        <router-link class="single-card h-30 pt-5" to="/dealers">
+          <span class="px-6 pt-6 pb-8 text-lg font-bold"> Dealers</span>
+        </router-link>
+      </div>
+    </section>
+    <section class="mb-12">
+      <div class="mt-24 p-4">
         <h2 class="mb-6 text-xl font-bold uppercase">System Settings</h2>
       </div>
       <div
@@ -18,32 +33,20 @@ import DealStatusModal from "@/components/modals/DealStatusModal.vue";
       >
         <!-- Commission Types -->
 
-        <CommissionTypesModal
-          class="bg-foreground_light dark:border-dark_border dark:bg-foreground_dark cursor-pointer rounded-md border-2 border-gray-200 shadow-sm transition-shadow hover:shadow-lg dark:shadow-gray-900"
-        />
+        <CommissionTypesModal class="single-card" />
         <!-- Buyer Types -->
 
-        <BuyerTypesModal
-          class="bg-foreground_light dark:border-dark_border dark:bg-foreground_dark cursor-pointer rounded-md border-2 border-gray-200 shadow-sm transition-shadow hover:shadow-lg dark:shadow-gray-900"
-        />
+        <BuyerTypesModal class="single-card" />
         <!-- Expense Items -->
-        <ExpenseItemsModal
-          class="bg-foreground_light dark:border-dark_border dark:bg-foreground_dark cursor-pointer rounded-md border-2 border-gray-200 shadow-sm transition-shadow hover:shadow-lg dark:shadow-gray-900"
-        />
+        <ExpenseItemsModal class="single-card" />
         <!-- GMTV Locations -->
-        <GmtvLocationsModal
-          class="bg-foreground_light dark:border-dark_border dark:bg-foreground_dark cursor-pointer rounded-md border-2 border-gray-200 shadow-sm transition-shadow hover:shadow-lg dark:shadow-gray-900"
-        />
+        <GmtvLocationsModal class="single-card" />
         <!-- Payment Terms -->
 
-        <PaymentTermsModal
-          class="bg-foreground_light dark:border-dark_border dark:bg-foreground_dark cursor-pointer rounded-md border-2 border-gray-200 shadow-sm transition-shadow hover:shadow-lg dark:shadow-gray-900"
-        />
+        <PaymentTermsModal class="single-card" />
         <!-- Deal Status -->
 
-        <DealStatusModal
-          class="bg-foreground_light dark:border-dark_border dark:bg-foreground_dark cursor-pointer rounded-md border-2 border-gray-200 shadow-sm transition-shadow hover:shadow-lg dark:shadow-gray-900"
-        />
+        <DealStatusModal class="single-card" />
       </div>
     </section>
 
@@ -54,3 +57,9 @@ import DealStatusModal from "@/components/modals/DealStatusModal.vue";
     </section>
   </main>
 </template>
+
+<style scoped>
+.single-card {
+  @apply bg-foreground_light dark:border-dark_border dark:bg-foreground_dark cursor-pointer rounded-md border-2 border-gray-200 shadow-sm transition-shadow hover:shadow-lg dark:shadow-gray-900;
+}
+</style>

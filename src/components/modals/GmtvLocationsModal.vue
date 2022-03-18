@@ -116,89 +116,91 @@ const onOkEditingModal = async () => {
 };
 </script>
 <template>
-  <div class="py-6 px-6" @click="showModal = true" v-bind="$attrs">
-    <div class="mb-2 h-11 text-lg font-bold">GMTV Locations</div>
-    <div class="h-10 pb-2 text-sm">Click to edit commission types.</div>
-  </div>
-
-  <n-modal
-    preset="card"
-    class="max-w-screen-md"
-    title="GMTV Locations"
-    v-model:show="showModal"
-  >
-    <div class="mb-5 ml-auto w-fit">
-      <n-tooltip trigger="hover">
-        <template #trigger>
-          <n-button @click="addRow">+</n-button>
-        </template>
-        Create a GMTV location
-      </n-tooltip>
+  <article>
+    <div class="py-6 px-6" @click="showModal = true">
+      <div class="mb-2 h-11 text-lg font-bold">GMTV Locations</div>
+      <div class="h-10 pb-2 text-sm">Click to edit commission types.</div>
     </div>
 
-    <n-data-table
-      class="rounded-md"
-      striped
-      :columns="columns"
-      :data="gmtvLocations"
-      :bordered="false"
-      :loading="isGmtvLocationLoading"
-      :max-height="500"
-      :scroll-x="1000"
-    />
-  </n-modal>
-  <n-modal
-    preset="card"
-    class="max-w-[600px]"
-    :title="isEditing ? 'Edit Gmtv Location' : 'Add Gmtv Location'"
-    v-model:show="showEditModal"
-  >
-    <n-form
-      ref="formRef"
-      :model="editingGmtvLocation"
-      :rules="rules"
-      class="grid grid-cols-12 gap-x-6"
+    <n-modal
+      preset="card"
+      class="max-w-screen-md"
+      title="GMTV Locations"
+      v-model:show="showModal"
     >
-      <div class="col-span-6">
-        <n-form-item label="Name" path="name">
-          <n-input v-model:value="editingGmtvLocation.name" />
-        </n-form-item>
+      <div class="mb-5 ml-auto w-fit">
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <n-button @click="addRow">+</n-button>
+          </template>
+          Create a GMTV location
+        </n-tooltip>
       </div>
-      <div class="col-span-6">
-        <n-form-item label="Address" path="address">
-          <n-input v-model:value="editingGmtvLocation.address" />
-        </n-form-item>
-      </div>
-      <div class="col-span-6">
-        <n-form-item label="City" path="city">
-          <n-input v-model:value="editingGmtvLocation.city" />
-        </n-form-item>
-      </div>
-      <div class="col-span-6">
-        <n-form-item label="State">
-          <n-select
-            :options="states"
-            filterable
-            v-model:value="editingGmtvLocation.state"
-          />
-        </n-form-item>
-      </div>
-      <div class="col-span-6">
-        <n-form-item label="Zip">
-          <masked-input v-model:value="editingGmtvLocation.zip" />
-        </n-form-item>
-      </div>
-      <div class="col-span-6">
-        <n-form-item label="Hours">
-          <n-input v-model:value="editingGmtvLocation.hours" type="text" />
-        </n-form-item>
-      </div>
-    </n-form>
 
-    <template #footer>
-      <div class="flex flex-row">
-        <n-button size="large" @click="onOkEditingModal">Submit</n-button>
-      </div>
-    </template>
-  </n-modal>
+      <n-data-table
+        class="rounded-md"
+        striped
+        :columns="columns"
+        :data="gmtvLocations"
+        :bordered="false"
+        :loading="isGmtvLocationLoading"
+        :max-height="500"
+        :scroll-x="1000"
+      />
+    </n-modal>
+    <n-modal
+      preset="card"
+      class="max-w-[600px]"
+      :title="isEditing ? 'Edit Gmtv Location' : 'Add Gmtv Location'"
+      v-model:show="showEditModal"
+    >
+      <n-form
+        ref="formRef"
+        :model="editingGmtvLocation"
+        :rules="rules"
+        class="grid grid-cols-12 gap-x-6"
+      >
+        <div class="col-span-6">
+          <n-form-item label="Name" path="name">
+            <n-input v-model:value="editingGmtvLocation.name" />
+          </n-form-item>
+        </div>
+        <div class="col-span-6">
+          <n-form-item label="Address" path="address">
+            <n-input v-model:value="editingGmtvLocation.address" />
+          </n-form-item>
+        </div>
+        <div class="col-span-6">
+          <n-form-item label="City" path="city">
+            <n-input v-model:value="editingGmtvLocation.city" />
+          </n-form-item>
+        </div>
+        <div class="col-span-6">
+          <n-form-item label="State">
+            <n-select
+              :options="states"
+              filterable
+              v-model:value="editingGmtvLocation.state"
+            />
+          </n-form-item>
+        </div>
+        <div class="col-span-6">
+          <n-form-item label="Zip">
+            <masked-input v-model:value="editingGmtvLocation.zip" />
+          </n-form-item>
+        </div>
+        <div class="col-span-6">
+          <n-form-item label="Hours">
+            <n-input v-model:value="editingGmtvLocation.hours" type="text" />
+          </n-form-item>
+        </div>
+      </n-form>
+
+      <template #footer>
+        <div class="flex flex-row">
+          <n-button size="large" @click="onOkEditingModal">Submit</n-button>
+        </div>
+      </template>
+    </n-modal>
+  </article>
 </template>

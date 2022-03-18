@@ -3,10 +3,9 @@ import { useLocalStorage } from "@vueuse/core";
 
 export const useGlobalState = defineStore("global", {
   state: () => {
-    const obj = useLocalStorage("state", {
-      isMobile: false,
+    return useLocalStorage("state", {
+      isMobile: true,
       isDark: true,
-
       stuck: [false, false],
       list: {
         active: false,
@@ -17,15 +16,8 @@ export const useGlobalState = defineStore("global", {
         context: null,
       },
     });
-    return {
-      ...obj,
-      isCommandPalletOpen: false,
-    };
   },
   actions: {
-    toggleCommandPallet() {
-      this.isCommandPalletOpen = !this.isCommandPalletOpen;
-    },
     // mobile
     setMobile(val) {
       this.isMobile = val;

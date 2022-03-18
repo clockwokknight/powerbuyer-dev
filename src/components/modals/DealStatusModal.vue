@@ -99,63 +99,65 @@ const onOkEditingModal = async () => {
 };
 </script>
 <template>
-  <div class="py-6 px-6" v-bind="$attrs" @click="showModal = true">
-    <div class="mb-2 h-11 text-lg font-bold">Deal Status</div>
-    <div class="h-10 pb-2 text-sm">Click to edit commission types.</div>
-  </div>
-  <n-modal
-    preset="card"
-    class="max-w-screen-md"
-    title="Deal Status"
-    v-model:show="showModal"
-  >
-    <div class="mb-5 ml-auto w-fit">
-      <n-tooltip trigger="hover">
-        <template #trigger>
-          <n-button @click="addRow">+</n-button>
-        </template>
-        Create a deal status
-      </n-tooltip>
+  <article>
+    <div class="py-6 px-6" v-bind="$attrs" @click="showModal = true">
+      <div class="mb-2 h-11 text-lg font-bold">Deal Status</div>
+      <div class="h-10 pb-2 text-sm">Click to edit commission types.</div>
     </div>
-    <n-data-table
-      class="rounded-md"
-      striped
-      :columns="columns"
-      :data="dealStatus"
-      :bordered="false"
-      :loading="paymentDataLoading"
-    />
-  </n-modal>
-  <n-modal
-    preset="card"
-    :title="isEditing ? 'Edit Deal Status' : 'Add Deal Status'"
-    class="max-w-[600px]"
-    v-model:show="showEditModal"
-  >
-    <n-form
-      :model="editingDealStatus"
-      :rules="rules"
-      ref="formRef"
-      class="grid grid-cols-12 gap-2"
+    <n-modal
+      preset="card"
+      class="max-w-screen-md"
+      title="Deal Status"
+      v-model:show="showModal"
     >
-      <div class="col-span-6 md:col-span-4">
-        <n-form-item label="Name" path="name">
-          <n-input v-model:value="editingDealStatus.name" />
-        </n-form-item>
+      <div class="mb-5 ml-auto w-fit">
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <n-button @click="addRow">+</n-button>
+          </template>
+          Create a deal status
+        </n-tooltip>
       </div>
-      <div class="col-span-12 md:col-span-12">
-        <n-form-item label="Description">
-          <n-input
-            placeholder="Description"
-            v-model:value="editingDealStatus.description"
-            type="textarea"
-          />
-        </n-form-item>
-      </div>
-    </n-form>
+      <n-data-table
+        class="rounded-md"
+        striped
+        :columns="columns"
+        :data="dealStatus"
+        :bordered="false"
+        :loading="paymentDataLoading"
+      />
+    </n-modal>
+    <n-modal
+      preset="card"
+      :title="isEditing ? 'Edit Deal Status' : 'Add Deal Status'"
+      class="max-w-[600px]"
+      v-model:show="showEditModal"
+    >
+      <n-form
+        :model="editingDealStatus"
+        :rules="rules"
+        ref="formRef"
+        class="grid grid-cols-12 gap-2"
+      >
+        <div class="col-span-6 md:col-span-4">
+          <n-form-item label="Name" path="name">
+            <n-input v-model:value="editingDealStatus.name" />
+          </n-form-item>
+        </div>
+        <div class="col-span-12 md:col-span-12">
+          <n-form-item label="Description">
+            <n-input
+              placeholder="Description"
+              v-model:value="editingDealStatus.description"
+              type="textarea"
+            />
+          </n-form-item>
+        </div>
+      </n-form>
 
-    <template #footer>
-      <n-button size="large" @click="onOkEditingModal">Submit</n-button>
-    </template>
-  </n-modal>
+      <template #footer>
+        <n-button size="large" @click="onOkEditingModal">Submit</n-button>
+      </template>
+    </n-modal>
+  </article>
 </template>

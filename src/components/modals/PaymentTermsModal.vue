@@ -100,62 +100,64 @@ const onOkEditingModal = async () => {
 };
 </script>
 <template>
-  <div class="py-6 px-6" @click="showModal = true" v-bind="$attrs">
-    <div class="mb-2 h-11 text-lg font-bold">Payment Terms</div>
-    <div class="h-10 pb-2 text-sm">Click to add/edit Payment Terms</div>
-  </div>
-  <n-modal preset="card" v-model:show="showModal" class="max-w-screen-md">
-    <div class="mb-5 ml-auto w-fit">
-      <n-tooltip trigger="hover">
-        <template #trigger>
-          <n-button @click="addRow">+</n-button>
-        </template>
-        Add a Payment term
-      </n-tooltip>
+  <article>
+    <div class="py-6 px-6" @click="showModal = true">
+      <div class="mb-2 h-11 text-lg font-bold">Payment Terms</div>
+      <div class="h-10 pb-2 text-sm">Click to add/edit Payment Terms</div>
     </div>
-    <n-data-table
-      class="rounded-md"
-      striped
-      :columns="columns"
-      :data="paymentTerms"
-      :bordered="false"
-    />
-  </n-modal>
-  <n-modal
-    class="max-w-[600px]"
-    :title="isEditing ? 'Edit Payment Term' : 'Add Payment Term'"
-    preset="card"
-    v-model:show="showEditModal"
-  >
-    <n-form
-      ref="formRef"
-      :model="editingPaymentTerm"
-      :rules="rules"
-      class="grid grid-cols-12 gap-x-6"
+    <n-modal preset="card" v-model:show="showModal" class="max-w-screen-md">
+      <div class="mb-5 ml-auto w-fit">
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <n-button @click="addRow">+</n-button>
+          </template>
+          Add a Payment term
+        </n-tooltip>
+      </div>
+      <n-data-table
+        class="rounded-md"
+        striped
+        :columns="columns"
+        :data="paymentTerms"
+        :bordered="false"
+      />
+    </n-modal>
+    <n-modal
+      class="max-w-[600px]"
+      :title="isEditing ? 'Edit Payment Term' : 'Add Payment Term'"
+      preset="card"
+      v-model:show="showEditModal"
     >
-      <div class="col-span-6">
-        <n-form-item label="Name" path="name">
-          <n-input v-model:value="editingPaymentTerm.name" />
-        </n-form-item>
-      </div>
-      <div class="col-span-6">
-        <n-form-item label="Days" path="days">
-          <n-input-number v-model:value="editingPaymentTerm.days" />
-        </n-form-item>
-      </div>
-      <div class="col-span-12">
-        <n-form-item label="Description">
-          <n-input
-            placeholder="Description"
-            v-model:value="editingPaymentTerm.description"
-            type="textarea"
-          />
-        </n-form-item>
-      </div>
-    </n-form>
+      <n-form
+        ref="formRef"
+        :model="editingPaymentTerm"
+        :rules="rules"
+        class="grid grid-cols-12 gap-x-6"
+      >
+        <div class="col-span-6">
+          <n-form-item label="Name" path="name">
+            <n-input v-model:value="editingPaymentTerm.name" />
+          </n-form-item>
+        </div>
+        <div class="col-span-6">
+          <n-form-item label="Days" path="days">
+            <n-input-number v-model:value="editingPaymentTerm.days" />
+          </n-form-item>
+        </div>
+        <div class="col-span-12">
+          <n-form-item label="Description">
+            <n-input
+              placeholder="Description"
+              v-model:value="editingPaymentTerm.description"
+              type="textarea"
+            />
+          </n-form-item>
+        </div>
+      </n-form>
 
-    <template #footer>
-      <n-button size="large" @click="onOkEditingModal">Submit</n-button>
-    </template>
-  </n-modal>
+      <template #footer>
+        <n-button size="large" @click="onOkEditingModal">Submit</n-button>
+      </template>
+    </n-modal>
+  </article>
 </template>

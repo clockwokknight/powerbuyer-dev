@@ -1,10 +1,16 @@
 <script setup>
+import { onMounted } from "vue";
 import { VueQueryDevTools } from "vue-query/devtools";
 import { darkTheme } from "naive-ui";
 import MainMenu from "@/components/MainMenu.vue";
 import CommandPalette from "@/components/global_search/CommandPalette.vue";
 import { useGlobalState } from "@/store/global";
+
 const global = useGlobalState();
+
+onMounted(() => {
+  global.setMobile(window.innerWidth <= 768);
+});
 </script>
 
 <template>
@@ -14,7 +20,7 @@ const global = useGlobalState();
         <n-notification-provider>
           <n-dialog-provider>
             <section
-              class="fill-screen bg-background_light dark:!bg-background_dark relative flex"
+              class="fill-screen bg-background_light dark:!bg-background_dark relative flex overflow-hidden"
             >
               <MainMenu />
               <router-view />
