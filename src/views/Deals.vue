@@ -75,7 +75,7 @@ onMounted(() => {
         <h1>$0.00</h1>
       </Card>
     </div>
-    <Card class="w-full h-[350px] mt-[48px]" />
+    <Card class="w-full h-[250px] mt-[48px]" />
     <!--DataTable class="mt-[48px]" /-->
   </div>
 </template>
