@@ -119,7 +119,7 @@ function handleTabClick(e) {
 <template>
   <div
     id="details"
-    class="__section __vendor-card mt-4 grid grid-cols-12 rounded border-2 bg-white p-6 dark:border-0 dark:bg-foreground_dark"
+    class="__section __vendor-card mt-4 grid grid-cols-12 rounded-roundborder-2 bg-white p-6 dark:border-0 dark:bg-foreground_dark"
   >
     <!-- left side -->
     <div class="__form col-span-12 flex flex-col justify-between md:col-span-8">
@@ -359,7 +359,7 @@ function handleTabClick(e) {
     id="__subtabs"
     type="basic"
     ref="buyerTab"
-    class="sticky top-[-2px] left-0 z-40 mt-4 w-full rounded border-2 border-gray-200 bg-white duration-300 dark:border-0 dark:bg-[#25272A]"
+    class="sticky top-[-2px] left-0 z-40 mt-4 w-full rounded-roundborder-2 border-gray-200 bg-white duration-300 dark:border-0 dark:bg-[#25272A]"
     :items="buyerTabs"
     @click="handleTabClick"
   />

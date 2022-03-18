@@ -4,7 +4,7 @@ import { useLocalStorage } from '@vueuse/core';
 export const useGlobalState = defineStore('global', {
     state: () => {
         return useLocalStorage('state', {
-            isMobile: false,
+            isMobile: true,
             isDark: true,
             stuck: [false, false],
             list: {
