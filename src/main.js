@@ -43,11 +43,11 @@ const vueQueryPluginOptions = {
 };
 
 createApp(App)
-  .use(router)
+  .use(createPinia())
   .use(naive)
   .directive("mask", mask)
   .directive("observe-visibility", ObserveVisibility)
-  .use(createPinia())
   .use(VueTippy)
   .use(VueQueryPlugin, vueQueryPluginOptions)
+  .use(router)
   .mount("#app");

@@ -1,6 +1,7 @@
 <script setup>
-import { watch } from "vue";
+import { useCommandPalletStore } from "@/store/commandPallet";
 import { useDark, useToggle } from "@vueuse/core";
+import { watch } from "vue";
 import { useGlobalState } from "../store/global";
 import { useVendors } from "../store/vendors";
 import { useRoute, useRouter } from "vue-router";
@@ -25,46 +26,38 @@ const userMenu = [
 const vendorStore = useVendors();
 const global = useGlobalState();
 
-watch(
-  () => global.value,
-  (val) => {
-    log.label("global", val);
-  }
-);
-
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
+const commandPalletStore = useCommandPalletStore();
 
 watch(
   () => isDark.value,
   (val) => {
     console.log(route);
     global.setDark(val);
-  }
+  },
+  { immediate: true }
 );
 </script>
 
 <template>
   <aside
-    class="flex flex-col sticky top-0 left-0 w-[60px] bg-black z-50"
-    :class="
-      route.name !== 'Deals' && route.name !== 'System' && route.name !== 'Dashboard'
-        ? 'h-[calc(100vh-48px)]'
-        : 'h-[calc(100vh)]'
-    "
+    class="sticky top-0 left-0 z-50 flex h-screen w-[60px] flex-col bg-black"
   >
     <div class="w-full text-white">
       <nav>
         <ul class="menu-items flex w-[60px] flex-col items-center">
+          <li
+            @click="commandPalletStore.toggleCommandPallet"
+            class="rounded-round bg-primary hover:!bg-primary/[0.44] !mt-5 !mb-5 h-[40px] w-[40px] cursor-pointer text-lg font-bold"
+          >
+            PB
+          </li>
           <router-link to="/">
             <li
-              class="!mt-5 !mb-5 h-[40px] w-[40px] rounded-round !border-transparent !bg-primary text-lg font-bold hover:!bg-primary/[0.44]"
+              content="Dashbaord"
+              v-tippy="{ placement: 'right', duration: 50 }"
             >
-              PB
-            </li>
-          </router-link>
-          <router-link to="/">
-            <li content="Dashbaord" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
                 width="17"
                 height="13"
@@ -104,7 +97,10 @@ watch(
             </li>
           </router-link>
           <router-link to="/inventory">
-            <li content="Inventory" v-tippy="{ placement: 'right', duration: 50 }">
+            <li
+              content="Inventory"
+              v-tippy="{ placement: 'right', duration: 50 }"
+            >
               <svg
                 width="19"
                 height="12"
@@ -252,7 +248,10 @@ watch(
             </li>
           </router-link>
           <router-link :to="`/vendors/${vendorStore.latest}`">
-            <li content="Vendors" v-tippy="{ placement: 'right', duration: 50 }">
+            <li
+              content="Vendors"
+              v-tippy="{ placement: 'right', duration: 50 }"
+            >
               <svg
                 width="19"
                 height="17"
@@ -270,7 +269,10 @@ watch(
             </li>
           </router-link>
           <router-link :to="`/#reports`">
-            <li content="Reports" v-tippy="{ placement: 'right', duration: 50 }">
+            <li
+              content="Reports"
+              v-tippy="{ placement: 'right', duration: 50 }"
+            >
               <svg
                 width="18"
                 height="16"
@@ -341,19 +343,24 @@ watch(
             </li>
           </router-link-->
           <router-link to="/system">
-            <li content="More Items" v-tippy="{ placement: 'right', duration: 50 }">
+            <li
+              content="More Items"
+              v-tippy="{ placement: 'right', duration: 50 }"
+            >
               <img src="/icons/OverflowMenuVertical.svg" />
             </li>
           </router-link>
         </ul>
       </nav>
     </div>
-    <div class="mt-auto mb-[6px] w-[60px] flex justify-center">
+    <div class="mt-auto mb-[6px] flex w-[60px] justify-center">
       <div class="menu-footer center-content">
         <button
-          :content="global.isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
+          :content="
+            global.isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'
+          "
           v-tippy="{ placement: 'right', duration: 50 }"
-          class="theme-toggle theme-toggle-js h-[55px] w-[55px] p-[8px] cursor-pointer"
+          class="theme-toggle theme-toggle-js h-[55px] w-[55px] cursor-pointer p-[8px]"
           @click="toggleDark"
         >
           <svg
@@ -391,11 +398,11 @@ watch(
 
 <style lang="scss" scoped>
 li svg {
-  @apply h-[45px] w-[45px] p-3 fill-white;
+  @apply h-[45px] w-[45px] fill-white p-3;
 }
 .menu-items li,
 .menu-footer {
-  @apply w-[45px] h-[45px] flex justify-center items-center hover:bg-primary/[0.44] rounded-round cursor-pointer my-[3px] border-[2px] border-transparent duration-200;
+  @apply hover:bg-primary/[0.44] rounded-round my-[3px] flex h-[45px] w-[45px] cursor-pointer items-center justify-center border-[2px] border-transparent duration-200;
 }
 .menu-items li img,
 .menu-footer img {
@@ -417,7 +424,7 @@ li svg {
 }
 
 .menu-items .router-link-active > li {
-  @apply bg-primary/[0.44] bg-opacity-30 border-primary;
+  @apply bg-primary/[0.44] border-primary bg-opacity-30;
   position: relative;
 }
 </style>

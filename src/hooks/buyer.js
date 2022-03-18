@@ -8,12 +8,8 @@ export const BUYER_TYPE = {
 };
 
 export const getBuyerTypes = () =>
-  useQuery(
-    "buyer_types",
-    () => axios.get("/buyer_type").then((res) => res.data),
-    {
-      refetchOnWindowFocus: false,
-    }
+  useQuery("buyer_types", () =>
+    axios.get("/buyer_type").then((res) => res.data)
   );
 export const getBuyerManagers = () =>
   useQuery("buyer_managers", () =>

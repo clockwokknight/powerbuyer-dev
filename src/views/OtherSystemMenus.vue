@@ -1,129 +1,65 @@
-<script setup></script>
+<script setup>
+import CommissionTypesModal from "@/components/modals/CommissionTypesModal.vue";
+import BuyerTypesModal from "@/components/modals/BuyerTypesModal.vue";
+import ExpenseItemsModal from "@/components/modals/ExpenseItemsModal.vue";
+import GmtvLocationsModal from "@/components/modals/GmtvLocationsModal.vue";
+import PaymentTermsModal from "@/components/modals/PaymentTermsModal.vue";
+import DealStatusModal from "@/components/modals/DealStatusModal.vue";
+</script>
 
 <template>
-  <div class="container overflow-scroll p-5 w-full">
-    <div class="mb-12">
-      <div class="p-4 mt-24">
-        <h2 class="text-xl font-bold uppercase mb-6">Other Menu Options</h2>
+  <main class="w-[calc(100vw-60px)] overflow-auto overscroll-contain p-5">
+    <section class="mb-12">
+      <div class="mt-24 p-4">
+        <h2 class="mb-6 text-xl font-bold uppercase">Other Menu Options</h2>
       </div>
-      <div class="grid grid-cols-3">
-        <div
-          class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
-        >
-          <div class="pt-6 pb-8 px-6">
-            <div class="font-bold text-lg mb-2">Block title</div>
-            <div class="text-sm pb-2">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi unde ea quam
-              enim velit mollitia ut dolores doloribus reiciendis magni?
-            </div>
-          </div>
-        </div>
-        <div
-          class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
-        >
-          <div class="py-6 px-6">
-            <div class="font-bold text-lg mb-2">Block title</div>
-            <div class="text-sm pb-2">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi unde ea quam
-              enim velit mollitia ut dolores doloribus reiciendis magni?
-            </div>
-          </div>
-        </div>
-        <div
-          class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
-        >
-          <div class="py-6 px-6">
-            <div class="font-bold text-lg mb-2"></div>
-            <div class="text-sm pb-2"></div>
-          </div>
-        </div>
-        <div
-          class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
-        >
-          <div class="py-6 px-6">
-            <div class="font-bold text-lg mb-2 h-11"></div>
-            <div class="text-sm pb-2 h-10"></div>
-          </div>
-        </div>
-        <div
-          class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
-        >
-          <div class="py-6 px-6">
-            <div class="font-bold text-lg mb-2 h-11"></div>
-            <div class="text-sm pb-2 h-10"></div>
-          </div>
-        </div>
-        <div
-          class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
-        >
-          <div class="py-6 px-6">
-            <div class="font-bold text-lg mb-2 h-11"></div>
-            <div class="text-sm pb-2 h-10"></div>
-          </div>
-        </div>
+      <div
+        class="mx-6 grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      >
+        <router-link class="single-card h-32 pt-5" to="/auctions">
+          <span class="px-6 pt-6 pb-8 text-lg font-bold"> Auctions</span>
+        </router-link>
+        <router-link class="single-card h-30 pt-5" to="/dealers">
+          <span class="px-6 pt-6 pb-8 text-lg font-bold"> Dealers</span>
+        </router-link>
       </div>
-    </div>
+    </section>
+    <section class="mb-12">
+      <div class="mt-24 p-4">
+        <h2 class="mb-6 text-xl font-bold uppercase">System Settings</h2>
+      </div>
+      <div
+        class="mx-6 grid grid-cols-1 gap-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      >
+        <!-- Commission Types -->
 
-    <div class="mb-12">
-      <div class="p-4 mt-24">
-        <h2 class="text-xl font-bold uppercase mb-6">System Permissions</h2>
+        <CommissionTypesModal class="single-card" />
+        <!-- Buyer Types -->
+
+        <BuyerTypesModal class="single-card" />
+        <!-- Expense Items -->
+        <ExpenseItemsModal class="single-card" />
+        <!-- GMTV Locations -->
+        <GmtvLocationsModal class="single-card" />
+        <!-- Payment Terms -->
+
+        <PaymentTermsModal class="single-card" />
+        <!-- Deal Status -->
+
+        <DealStatusModal class="single-card" />
       </div>
-      <div class="grid grid-cols-3">
-        <div
-          class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
-        >
-          <div class="pt-6 pb-8 px-6">
-            <div class="font-bold text-lg mb-2">Block title</div>
-            <div class="text-sm pb-2">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi unde ea quam
-              enim velit mollitia ut dolores doloribus reiciendis magni?
-            </div>
-          </div>
-        </div>
-        <div
-          class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
-        >
-          <div class="py-6 px-6">
-            <div class="font-bold text-lg mb-2">Block title</div>
-            <div class="text-sm pb-2">
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi unde ea quam
-              enim velit mollitia ut dolores doloribus reiciendis magni?
-            </div>
-          </div>
-        </div>
-        <div
-          class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
-        >
-          <div class="py-6 px-6">
-            <div class="font-bold text-lg mb-2"></div>
-            <div class="text-sm pb-2"></div>
-          </div>
-        </div>
-        <div
-          class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
-        >
-          <div class="py-6 px-6">
-            <div class="font-bold text-lg mb-2 h-11"></div>
-            <div class="text-sm pb-2 h-10"></div>
-          </div>
-        </div>
-        <div
-          class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
-        >
-          <div class="py-6 px-6">
-            <div class="font-bold text-lg mb-2 h-11"></div>
-            <div class="text-sm pb-2 h-10"></div>
-          </div>
-        </div>
-        <div
-          class="bg-gray-100 mx-4 rounded-round shadow-sm hover:shadow-md mb-6 border-2 cursor-pointer border-gray-200"
-        >
-          <div class="py-6 px-6">
-            <div class="font-bold text-lg mb-2 h-11"></div>
-            <div class="text-sm pb-2 h-10"></div>
-          </div>
-        </div>
+    </section>
+
+    <section class="mb-12">
+      <div class="mt-24 p-4">
+        <h2 class="mb-6 text-xl font-bold uppercase">System Permissions</h2>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 </template>
+
+<style scoped>
+.single-card {
+  @apply bg-foreground_light dark:border-dark_border dark:bg-foreground_dark cursor-pointer rounded-md border-2 border-gray-200 shadow-sm transition-shadow hover:shadow-lg dark:shadow-gray-900;
+}
+</style>
