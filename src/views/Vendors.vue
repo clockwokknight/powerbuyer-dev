@@ -2,13 +2,13 @@
 import { useQuery } from "vue-query";
 import axios from "axios";
 import { useDebounce } from "@vueuse/core";
-import VendorList from "@/components/vendor/VendorList.vue";
 import { ref, watch } from "vue";
 import { getVendors } from "@/hooks/vendor";
 import { useGlobalState } from "@/store/global";
 import { useTabsViewStore } from "@/store/tabs";
 import AddVendor from "@/components/vendor/AddVendor.vue";
 import PageTabs from "@/components/PageTabs.vue";
+import VendorList from "@/components/vendor/VendorList.vue";
 import Tabs from "@/components/common/Tabs.vue";
 
 const tabStore = useTabsViewStore();
@@ -180,7 +180,12 @@ watch(
     <section
       id="main-content"
       style="height: calc(100vh - 8px)"
-      class="w-[calc(100vw-60px)] bg-background_light dark:bg-background_dark md:w-[calc(100vw-335px)]"
+      :class="
+        listActive
+          ? 'md:w-[calc(100vw-335px)] ml-[275px]'
+          : 'md:w-[calc(100vw-60px)] ml-[0px]'
+      "
+      class="duration-[500ms] w-[calc(100vw-60px)] bg-background_light dark:bg-background_dark"
     >
       <PageTabs :class="global.stuck[0] && 'shadow-lg'" page-name="vendors" />
       <!-- Main Body Content-->
