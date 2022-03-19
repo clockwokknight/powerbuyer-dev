@@ -27,6 +27,7 @@ const initialForm = {
       deal_id: null,
       name: "",
       description: "",
+      images: [],
       amount: 0,
       showSelect: true,
       type: null,
@@ -113,8 +114,7 @@ const {
   fetchNextPage: fetchNextExpenseTypePage,
 } = getExpenseTypes();
 
-//TODO: will have to add all the current expense's expense_type to make sure we
-// don't get any error
+//TODO: will have to add all the current expense's expense_type to make sure we don't get any error
 // filter(
 //   (el, index, array) => index === array.findIndex((arr) => arr.id === el.id)
 // )
@@ -300,6 +300,40 @@ const currentRemovedIndex = ref();
 const onRemoveExpenseItem = (index) => {
   currentRemovedIndex.value = index;
 };
+const customRequest = ({
+  file,
+  data,
+  headers,
+  withCredentials,
+  action,
+  onFinish,
+  onError,
+  onProgress,
+}) => {
+  const formData = new FormData();
+  if (data) {
+    Object.keys(data).forEach((key) => {
+      formData.append(key, data[key]);
+    });
+  }
+  formData.append("files", file.file);
+  axios
+    .post(action, formData, {
+      withCredentials,
+      headers,
+      onUploadProgress: ({ loaded, total }) => {
+        onProgress({ percent: Math.ceil((loaded / total) * 100) });
+      },
+    })
+    .then((e) => {
+      message.success(e.data);
+      onFinish();
+    })
+    .catch((error) => {
+      message.success(error.message);
+      onError();
+    });
+};
 </script>
 
 <template>
@@ -347,7 +381,7 @@ const onRemoveExpenseItem = (index) => {
         :min="1"
         :max="isDisabled ? form.expenses?.length : undefined"
       >
-        <div class="grid rounded-roundbg-gray-200/50 p-3 dark:bg-gray-800/50">
+        <div class="rounded-roundbg-gray-200/50 grid p-3 dark:bg-gray-800/50">
           <div class="sm:grid sm:grid-cols-2 sm:justify-between sm:gap-x-5">
             <n-form-item
               label="VIN"
@@ -364,6 +398,7 @@ const onRemoveExpenseItem = (index) => {
                 @search="handleSearch"
               />
             </n-form-item>
+
             <n-form-item
               label="Expense Date"
               ignore-path-change
@@ -376,6 +411,18 @@ const onRemoveExpenseItem = (index) => {
               />
             </n-form-item>
           </div>
+          <n-form-item label="Upload Images">
+            <n-upload
+              :disabled="false"
+              action="https://gmtvinventory.com/api/expenses/file_upload"
+              multiple
+              :data="{
+                expense_id: form.expenses[index].id,
+              }"
+              :custom-request="customRequest"
+              list-type="image-card"
+            />
+          </n-form-item>
           <n-form-item
             ignore-path-change
             :path="`expenses[${index}].name`"
