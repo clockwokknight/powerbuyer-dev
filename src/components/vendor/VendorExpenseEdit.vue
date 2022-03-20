@@ -88,27 +88,23 @@ const { mutate: updateExpense, isLoading: updateExpenseLoading } = useMutation(
     }),
   {
     onSuccess() {
-      queryClient.invalidateQueries([
-        "vendorInvoices",
-        String(vendor_id.value),
-      ]);
+      queryClient.invalidateQueries(["vendorInvoices", String(vendor_id.value)]);
       emits("update:show", false);
       message.success("Expense updated successfully.");
     },
   }
 );
 
-const { mutateAsync: deleteExpense, isLoading: deleteExpenseLoading } =
-  useMutation((id) => axios.delete("/vendor_invoices/" + id), {
+const { mutateAsync: deleteExpense, isLoading: deleteExpenseLoading } = useMutation(
+  (id) => axios.delete("/vendor_invoices/" + id),
+  {
     onSuccess() {
       emits("update:show", false);
-      queryClient.invalidateQueries([
-        "vendorInvoices",
-        String(vendor_id.value),
-      ]);
+      queryClient.invalidateQueries(["vendorInvoices", String(vendor_id.value)]);
       message.success("Expense deleted successfully.");
     },
-  });
+  }
+);
 
 // Queries
 const {
@@ -167,10 +163,11 @@ const expenseItemsOptions = computed(() =>
 const handleSearch = (query) => {
   searchVinSelect.value = query;
 };
-const { data: searchDealResult, isLoading: isVendorSearchLoading } =
-  searchDealByVin(debouncedSearchVin);
+const { data: searchDealResult, isLoading: isVendorSearchLoading } = searchDealByVin(
+  debouncedSearchVin
+);
 const searchVinResultOptions = computed(() =>
-  searchDealResult.value?.map((deal) => ({
+  searchDealResult?.value?.map((deal) => ({
     value: deal.id,
     label: deal.vin,
   }))
@@ -321,11 +318,7 @@ const onRemoveExpenseItem = (index) => {
       :disabled="isLoading || isDisabled"
     >
       <n-form-item label="Invoice Number" path="invoice_number">
-        <n-input
-          v-model:value="form.invoice_number"
-          disabled
-          :loading="isLoading"
-        />
+        <n-input v-model:value="form.invoice_number" disabled :loading="isLoading" />
       </n-form-item>
       <div class="flex flex-col gap-x-5 sm:flex-row">
         <n-form-item label="Amount Due" path="amount_due">
@@ -354,7 +347,7 @@ const onRemoveExpenseItem = (index) => {
         :min="1"
         :max="isDisabled ? form.expenses?.length : undefined"
       >
-        <div class="grid rounded bg-gray-200/50 p-3 dark:bg-gray-800/50">
+        <div class="grid rounded-roundbg-gray-200/50 p-3 dark:bg-gray-800/50">
           <div class="sm:grid sm:grid-cols-2 sm:justify-between sm:gap-x-5">
             <n-form-item
               label="VIN"
@@ -433,10 +426,7 @@ const onRemoveExpenseItem = (index) => {
               :rule="rules.expenses.amount"
               label="Amount"
             >
-              <CurrencyInput
-                v-model="form.expenses[index].amount"
-                :loading="isLoading"
-              />
+              <CurrencyInput v-model="form.expenses[index].amount" :loading="isLoading" />
             </n-form-item>
           </div>
         </div>

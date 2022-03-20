@@ -2,22 +2,24 @@
 import { useQuery } from "vue-query";
 import axios from "axios";
 import { useDebounce } from "@vueuse/core";
-import VendorList from "@/components/vendor/VendorList.vue";
 import { ref, watch } from "vue";
 import { getVendors } from "@/hooks/vendor";
 import { useGlobalState } from "@/store/global";
 import { useTabsViewStore } from "@/store/tabs";
+import { useVendors } from "@/store/vendors";
 import AddVendor from "@/components/vendor/AddVendor.vue";
 import PageTabs from "@/components/PageTabs.vue";
+import VendorList from "@/components/vendor/VendorList.vue";
 import Tabs from "@/components/common/Tabs.vue";
 
 const tabStore = useTabsViewStore();
 const global = useGlobalState();
+const vendorStore = useVendors();
 
 const searchText = ref("");
 const debouncedSearchText = useDebounce(searchText, 500);
 
-const vendorListActive = ref(false);
+const listActive = ref(!global.isMobile);
 
 // Showing All Vendors
 
@@ -29,13 +31,16 @@ const {
 } = getVendors();
 
 const addTab = (vendor) => {
+  vendorStore.SET_LATEST(vendor?.id);
+  listActive.value = global.isMobile ? false : listActive.value;
   tabStore.addTab({ id: vendor?.id, name: vendor?.name });
 };
 
 // Vendor Search Result
 
-const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
-  useQuery(["vendorSearch", debouncedSearchText], ({ queryKey }) => {
+const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
+  ["vendorSearch", debouncedSearchText],
+  ({ queryKey }) => {
     if (queryKey[1] === "") return null;
     else
       return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => {
@@ -44,28 +49,15 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
         }
         return res.data;
       });
-  });
-
-// TODO: we are gonna have to figure this out
-function handleScroll(e) {
-  let scroll = e.target.scrollTop;
-  global.stick([scroll >= 100, scroll >= 400]);
-  global.setActiveTab(
-    [
-      scroll < 400,
-      scroll >= 400 && scroll < 800,
-      scroll >= 800 && scroll < 1600,
-      scroll >= 1600,
-    ].indexOf(true)
-  );
-}
+  }
+);
 
 function toggleListSlide() {
-  vendorListActive.value = !vendorListActive.value;
+  listActive.value = !listActive.value;
 }
 
 watch(
-  () => vendorListActive.value,
+  () => listActive.value,
   (val) => {
     global.setListActive(val, "vendor");
   }
@@ -77,8 +69,8 @@ watch(
     <!-- Don't show PageItemsList on dashboard  | Current Page List -->
     <div
       id="vendors-list"
-      class="absolute z-[41] w-[275px] md:relative md:m-0"
-      :class="vendorListActive ? 'open-vendor-list' : 'close-vendor-list'"
+      class="absolute z-[41] w-[275px]"
+      :class="listActive ? 'open-vendor-list' : 'close-vendor-list'"
     >
       <!-- SearchList.vue / -->
       <aside
@@ -95,6 +87,8 @@ watch(
           </div>
           <div class="flex">
             <n-input
+              style="backdrop-filter: blur(36px)"
+              class="bg-[#f0f0f0] dark:bg-dark_border shadow-lg shadow-black/10"
               v-model:value.trim="searchText"
               clearable
               placeholder="Search..."
@@ -161,16 +155,33 @@ watch(
       </aside>
       <div
         id="mobile-slider"
-        class="absolute bottom-0 left-0 flex h-[36px] w-[325px] flex-row items-center justify-between bg-white px-4 shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] dark:bg-black"
+        style="backdrop-filter: blur(36px)"
+        :class="listActive ? '!w-[335px] ml-[-60px]' : '!bg-dark_border'"
+        class="absolute w-[276px] duration-[500ms] h-[48px] flex flex-row justify-between bottom-0 left-0 bg-background_light/50 dark:bg-dark_border/50 bg-black items-center shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] px-4 cursor-pointer"
+        @click="listActive = !listActive"
       >
-        <div class="text-[8px]">
-          {{ vendors?.pages[0].data.length }} Active Vendors
+        <div
+          class="text-[10px] pl-16 duration-[500ms]"
+          :class="!listActive ? 'opacity-0' : 'opacity-50'"
+        >
+          <b>{{ vendors?.pages[0].data.length }}</b> Active Vendors
         </div>
-        <img
-          class="slide-icon h-[18px] w-[18px] cursor-pointer"
-          src="/icons/LeftSlide.svg"
-          @click="toggleListSlide"
-        />
+        <div class="!bg-black">
+          <div
+            class="h-[48px] w-[60px] absolute left-0 bottom-0 flex center-content bg-[#111111]"
+          >
+            <svg
+              class="absolute h-4 w-4 duration-[500ms]"
+              :class="listActive ? 'rotate-0 ml-[0px]' : 'rotate-180 ml-[432px]'"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M16.88 2.88a1.25 1.25 0 0 0-1.77 0L6.7 11.29a.996.996 0 0 0 0 1.41l8.41 8.41c.49.49 1.28.49 1.77 0s.49-1.28 0-1.77L9.54 12l7.35-7.35c.48-.49.48-1.28-.01-1.77z"
+                fill="white"
+              ></path>
+            </svg>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -179,14 +190,16 @@ watch(
     <section
       id="main-content"
       style="height: calc(100vh - 8px)"
-      class="w-[calc(100vw-60px)] bg-background_light dark:bg-background_dark md:w-[calc(100vw-335px)]"
+      :class="
+        listActive
+          ? 'md:w-[calc(100vw-335px)] ml-[275px]'
+          : 'md:w-[calc(100vw-60px)] ml-[0px]'
+      "
+      class="duration-[500ms] w-[calc(100vw-60px)] bg-background_light dark:bg-background_dark"
     >
       <PageTabs :class="global.stuck[0] && 'shadow-lg'" page-name="vendors" />
       <!-- Main Body Content-->
-      <div
-        id="main"
-        class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden"
-      >
+      <div id="main" class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
         <main id="container" class="min-h-full p-2 md:p-6">
           <router-view />
         </main>
@@ -195,29 +208,24 @@ watch(
   </div>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 .close-vendor-list {
   animation: left-slide 0.5s forwards;
   margin-left: -275px;
 }
-
 .open-vendor-list {
   animation: right-slide 0.5s forwards;
   margin-left: 0px;
 }
-
 .close-vendor-list .slide-icon {
   transform: rotate(180deg);
 }
-
 .open-vendor-list .slide-icon {
   transform: rotate(0deg);
 }
-
 .vendor-list-open {
   margin-left: 0;
 }
-
 .vendor-list-closed {
   margin-left: -275px;
 }
@@ -229,23 +237,11 @@ watch(
     margin-left: -275px;
   }
 }
-
 @keyframes right-slide {
   0% {
     margin-left: -275px;
   }
   100% {
-    margin-left: 0;
-  }
-}
-
-@media only screen and (min-width: 768px) {
-  #mobile-slider {
-    display: none;
-  }
-
-  .close-vendor-list {
-    animation: right-slide 0.5s forwards;
     margin-left: 0;
   }
 }

@@ -1,19 +1,40 @@
 <script setup>
+import { onMounted } from "vue";
 import { VueQueryDevTools } from "vue-query/devtools";
 import { darkTheme } from "naive-ui";
 import MainMenu from "@/components/MainMenu.vue";
+import CommandPalette from "@/components/global_search/CommandPalette.vue";
 import { useGlobalState } from "@/store/global";
+
 const global = useGlobalState();
+
+const themeOverrides = {
+  Button: {
+    textColorHover: "#027BFF",
+    borderHover: "1px solid #027BFF",
+    borderColorHover: "#027BFF",
+    textColorGhostFocus: "#027BFF",
+    borderColorPressed: "#027BFF",
+    textColorPressed: "#027BFF",
+  },
+};
+
+onMounted(() => {
+  global.setMobile(window.innerWidth <= 768);
+});
 </script>
 
 <template>
-  <n-config-provider :theme="global.isDark ? darkTheme : null">
+  <n-config-provider
+    :theme="global.isDark ? darkTheme : null"
+    :theme-overrides="themeOverrides"
+  >
     <n-loading-bar-provider>
       <n-message-provider placement="bottom">
         <n-notification-provider>
           <n-dialog-provider>
             <section
-              class="fill-screen relative flex bg-background_light dark:!bg-background_dark"
+              class="fill-screen bg-background_light dark:!bg-background_dark relative flex overflow-hidden"
             >
               <MainMenu />
               <router-view />
@@ -24,6 +45,7 @@ const global = useGlobalState();
       </n-message-provider>
     </n-loading-bar-provider>
   </n-config-provider>
+  <CommandPalette />
 </template>
 
 <style>

@@ -64,7 +64,7 @@ const columns = [
   <div id="vehicles-sold" class="scroll-smooth">
     <div class="-mt-4 font-sans">
       <div
-        class="rounded border-2 bg-white py-8 px-8 dark:border-0 dark:bg-[#25272A]"
+        class="rounded-roundborder-2 bg-white py-8 px-8 dark:border-0 dark:bg-[#25272A]"
       >
         <div><p class="pb-8 text-2xl font-bold">Vehicles Sold</p></div>
         <n-data-table

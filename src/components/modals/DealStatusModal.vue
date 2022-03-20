@@ -1,24 +1,23 @@
 <script setup>
+import ActionButtons from "@/components/common/ActionButtons.vue";
+import { objectFilter } from "@/lib/helper";
 import axios from "axios";
-import { h, ref, reactive, watch } from "vue";
-import CustomInput from "@/components/common/CustomInput.vue";
 import { NButton } from "naive-ui";
+import { h, ref, unref, watch } from "vue";
+import { useQuery } from "vue-query";
 
-const props = defineProps(["show"]);
-const emit = defineEmits(["onReturn"]);
-
-const dealStatus = ref([]);
 const showEditModal = ref(false);
+const showModal = ref(false);
+const formRef = ref(null);
 const editingDealStatus = ref({
-  active: 1,
   name: "",
   description: "",
-  created_at: null,
-  updated_at: null,
-  deleted_at: null,
 });
 const isEditing = ref(false);
 
+const { data: dealStatus } = useQuery("deal_status", () =>
+  axios.get("/deal_status").then((res) => res.data)
+);
 const getDealStatus = () => {
   axios
     .get("/deal_status")
@@ -31,18 +30,11 @@ const getDealStatus = () => {
     });
 };
 
-watch(
-  () => props.show,
-  (newValue) => {
-    if (newValue) {
-      getDealStatus();
-    }
+watch(showModal, (newValue) => {
+  if (newValue) {
+    getDealStatus();
   }
-);
-
-const onRemoveDealStatus = (index) => {
-  dealStatus.value.slice(index, 1);
-};
+});
 
 const columns = [
   {
@@ -60,79 +52,72 @@ const columns = [
   {
     title: "Action",
     key: "actions",
-    width: 150,
+    width: 100,
     render(row) {
-      return [
-        h(
-          NButton,
-          {
-            size: "small",
-            onClick: () => {
-              isEditing.value = true;
-              showEditModal.value = true;
-              editingDealStatus.value = row;
-            },
-          },
-          { default: () => "Edit" }
-        ),
-        h(
-          NButton,
-          {
-            size: "small",
-            onClick: async () => {
-              await axios.delete(`/deal_status/${row.id}`);
-              getDealStatus();
-            },
-          },
-          { default: () => "Delete" }
-        ),
-      ];
+      return h(ActionButtons, {
+        onEdit: () => {
+          isEditing.value = true;
+          showEditModal.value = true;
+          editingDealStatus.value = row;
+        },
+        onDelete: async () => {
+          await axios.delete(`/deal_status/${row.id}`);
+        },
+      });
     },
   },
 ];
+
+const rules = {
+  name: {
+    required: true,
+    message: "Name is required",
+    trigger: "input",
+  },
+};
 
 const addRow = () => {
   showEditModal.value = true;
   isEditing.value = false;
   const newType = {
-    active: 1,
     name: "",
     description: "",
-    created_at: null,
-    updated_at: null,
-    deleted_at: null,
   };
   editingDealStatus.value = newType;
 };
 
-const onCancelEditingModal = () => {
-  showEditModal.value = false;
-};
-
 const onOkEditingModal = async () => {
+  const obj = objectFilter(editingDealStatus.value, (key, value) => value);
+
   if (isEditing.value) {
-    await axios.put(
-      `/deal_status/${editingDealStatus.value.id}`,
-      editingDealStatus.value
-    );
+    await axios.put(`/deal_status/${obj.id}`, obj);
   } else {
-    await axios.post("/deal_status", editingDealStatus.value);
+    await axios.post("/deal_status", obj);
   }
   getDealStatus();
   showEditModal.value = false;
 };
 </script>
 <template>
-  <n-modal v-model:show="show">
-    <n-card
-      style="width: 800px"
+  <article>
+    <div class="py-6 px-6" v-bind="$attrs" @click="showModal = true">
+      <div class="mb-2 h-11 text-lg font-bold">Deal Status</div>
+      <div class="h-10 pb-2 text-sm">Click to edit commission types.</div>
+    </div>
+    <n-modal
+      preset="card"
+      class="max-w-screen-md"
       title="Deal Status"
-      :bordered="false"
-      size="huge"
-      role="dialog"
-      aria-modal="true"
+      v-model:show="showModal"
     >
-      <template #header-extra></template>
+      <div class="mb-5 ml-auto w-fit">
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <n-button @click="addRow">+</n-button>
+          </template>
+          Create a deal status
+        </n-tooltip>
+      </div>
       <n-data-table
         class="rounded-md"
         striped
@@ -140,50 +125,39 @@ const onOkEditingModal = async () => {
         :data="dealStatus"
         :bordered="false"
         :loading="paymentDataLoading"
-        :row-key="rowKey"
       />
-      <template #footer>
-        <div class="flex flex-row justify-between">
-          <n-button size="large" @click="addRow">Add...</n-button>
-          <n-button size="large" @click="$emit('onReturn')">Cancel</n-button>
-        </div>
-      </template>
-    </n-card>
-  </n-modal>
-  <n-modal v-model:show="showEditModal">
-    <n-card
-      class="w-[600px]"
+    </n-modal>
+    <n-modal
+      preset="card"
       :title="isEditing ? 'Edit Deal Status' : 'Add Deal Status'"
-      :bordered="false"
-      size="huge"
-      role="dialog"
-      aria-modal="true"
+      class="max-w-[600px]"
+      v-model:show="showEditModal"
     >
-      <template #header-extra></template>
-
-      <div class="grid grid-cols-12 gap-2">
+      <n-form
+        :model="editingDealStatus"
+        :rules="rules"
+        ref="formRef"
+        class="grid grid-cols-12 gap-2"
+      >
         <div class="col-span-6 md:col-span-4">
-          <CustomInput
-            label="Name"
-            v-model:value="editingDealStatus.name"
-            style="margin-right: 12px"
-          />
+          <n-form-item label="Name" path="name">
+            <n-input v-model:value="editingDealStatus.name" />
+          </n-form-item>
         </div>
         <div class="col-span-12 md:col-span-12">
-          <n-input
-            placeholder="Description"
-            v-model:value="editingDealStatus.description"
-            type="textarea"
-          />
+          <n-form-item label="Description">
+            <n-input
+              placeholder="Description"
+              v-model:value="editingDealStatus.description"
+              type="textarea"
+            />
+          </n-form-item>
         </div>
-      </div>
+      </n-form>
 
       <template #footer>
-        <div class="flex flex-row gap-[10px]">
-          <n-button size="large" @click="onOkEditingModal">OK</n-button>
-          <n-button size="large" @click="onCancelEditingModal">Cancel</n-button>
-        </div>
+        <n-button size="large" @click="onOkEditingModal">Submit</n-button>
       </template>
-    </n-card>
-  </n-modal>
+    </n-modal>
+  </article>
 </template>

@@ -1,52 +1,30 @@
 <script setup>
 import axios from "axios";
 import { h, ref, reactive, watch } from "vue";
-import CustomInput from "@/components/common/CustomInput.vue";
+import ActionButtons from "@/components/common/ActionButtons.vue";
 import { NButton } from "naive-ui";
+import { getGmtvLocations } from "@/hooks/location.js";
+import { getStates } from "@/hooks/common_query";
+import { useQueryClient } from "vue-query";
+import MaskedInput from "@/components/common/MaskedInput.vue";
 
-const props = defineProps(["show"]);
-const emit = defineEmits(["onReturn"]);
+const queryClient = useQueryClient();
 
-const gmtvLocations = ref([]);
 const showEditModal = ref(false);
-const editingGmtvLocation = ref({
-  active: 1,
+const showModal = ref(false);
+const formRef = ref(null);
+const initialForm = {
   name: "",
   address: "",
   city: "",
   state: "",
   zip: "",
-  manager_id: null,
-  created_at: null,
-  updated_at: null,
-  deleted_at: null,
-});
+  // manager_id: null,
+};
+const editingGmtvLocation = ref({ ...initialForm });
 const isEditing = ref(false);
 
-const getGmtvLocations = () => {
-  axios
-    .get("/gmtv_locations")
-    .then((res) => {
-      gmtvLocations.value = res.data;
-      console.log("gmtvLocations: ", gmtvLocations.value);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-};
-
-watch(
-  () => props.show,
-  (newValue) => {
-    if (newValue) {
-      getGmtvLocations();
-    }
-  }
-);
-
-const onRemoveGmtvLocation = (index) => {
-  gmtvLocations.value.slice(index, 1);
-};
+const { data: gmtvLocations, isLoading: isGmtvLocationLoading } = getGmtvLocations();
 
 const columns = [
   {
@@ -82,153 +60,147 @@ const columns = [
   {
     title: "Action",
     key: "actions",
-    width: 150,
+    fixed: "right",
+    width: 100,
     render(row) {
-      return [
-        h(
-          NButton,
-          {
-            size: "small",
-            onClick: () => {
-              isEditing.value = true;
-              showEditModal.value = true;
-              editingGmtvLocation.value = row;
-            },
-          },
-          { default: () => "Edit" }
-        ),
-        h(
-          NButton,
-          {
-            size: "small",
-            onClick: async () => {
-              await axios.delete(`/gmtv_locations/${row.id}`);
-              getGmtvLocations();
-            },
-          },
-          { default: () => "Delete" }
-        ),
-      ];
+      return h(ActionButtons, {
+        onEdit: () => {
+          isEditing.value = true;
+          showEditModal.value = true;
+          editingGmtvLocation.value = row;
+        },
+        onDelete: async () => {
+          await axios.delete(`/gmtv_locations/${row.id}`);
+          await queryClient.invalidateQueries("gmtv_locations");
+        },
+      });
     },
   },
 ];
 
+const { data: states } = getStates();
+
 const addRow = () => {
   showEditModal.value = true;
   isEditing.value = false;
-  const newType = {
-    active: 1,
-    name: "",
-    address: "",
-    city: "",
-    state: "",
-    zip: "",
-    manager_id: null,
-    created_at: null,
-    updated_at: null,
-    deleted_at: null,
-  };
-  editingGmtvLocation.value = newType;
+  editingGmtvLocation.value = { ...initialForm };
 };
-
-const onCancelEditingModal = () => {
-  showEditModal.value = false;
+const rules = {
+  name: {
+    required: true,
+    message: "Name is required",
+  },
+  address: {
+    required: true,
+    message: "Address is required",
+  },
+  city: {
+    required: true,
+    message: "City is required",
+  },
 };
-
 const onOkEditingModal = async () => {
-  if (isEditing.value) {
-    await axios.put(
-      `/gmtv_locations/${editingGmtvLocation.value.id}`,
-      editingGmtvLocation.value
-    );
-  } else {
-    await axios.post("/gmtv_locations", editingGmtvLocation.value);
-  }
-  getGmtvLocations();
-  showEditModal.value = false;
+  try {
+    await formRef.value.validate();
+    if (isEditing.value) {
+      await axios.put(
+        `/gmtv_locations/${editingGmtvLocation.value.id}`,
+        editingGmtvLocation.value
+      );
+    } else {
+      await axios.post("/gmtv_locations", editingGmtvLocation.value);
+    }
+    showEditModal.value = false;
+    await queryClient.invalidateQueries("gmtv_locations");
+  } catch (error) {}
 };
 </script>
 <template>
-  <n-modal v-model:show="show">
-    <n-card
-      style="width: 1200px"
-      title="Commission Types"
-      :bordered="false"
-      size="huge"
-      role="dialog"
-      aria-modal="true"
+  <article>
+    <div class="py-6 px-6" @click="showModal = true">
+      <div class="mb-2 h-11 text-lg font-bold">GMTV Locations</div>
+      <div class="h-10 pb-2 text-sm">Click to edit commission types.</div>
+    </div>
+
+    <n-modal
+      preset="card"
+      class="max-w-screen-md"
+      title="GMTV Locations"
+      v-model:show="showModal"
     >
-      <template #header-extra></template>
+      <div class="mb-5 ml-auto w-fit">
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <n-button @click="addRow">+</n-button>
+          </template>
+          Create a GMTV location
+        </n-tooltip>
+      </div>
+
       <n-data-table
         class="rounded-md"
         striped
         :columns="columns"
         :data="gmtvLocations"
         :bordered="false"
-        :loading="paymentDataLoading"
-        :row-key="rowKey"
+        :loading="isGmtvLocationLoading"
+        :max-height="500"
+        :scroll-x="1000"
       />
-      <template #footer>
-        <div class="flex flex-row justify-between">
-          <n-button size="large" @click="addRow">Add...</n-button>
-          <n-button size="large" @click="$emit('onReturn')">Cancel</n-button>
-        </div>
-      </template>
-    </n-card>
-  </n-modal>
-  <n-modal v-model:show="showEditModal">
-    <n-card
-      class="w-[600px]"
-      :title="isEditing ? 'Edit Commission Type' : 'Add Commission Type'"
-      :bordered="false"
-      size="huge"
-      role="dialog"
-      aria-modal="true"
+    </n-modal>
+    <n-modal
+      preset="card"
+      class="max-w-[600px]"
+      :title="isEditing ? 'Edit Gmtv Location' : 'Add Gmtv Location'"
+      v-model:show="showEditModal"
     >
-      <template #header-extra></template>
-
-      <div class="grid grid-cols-12 gap-2">
-        <div class="col-span-6 md:col-span-6">
-          <CustomInput label="Name" v-model:value="editingGmtvLocation.name" />
+      <n-form
+        ref="formRef"
+        :model="editingGmtvLocation"
+        :rules="rules"
+        class="grid grid-cols-12 gap-x-6"
+      >
+        <div class="col-span-6">
+          <n-form-item label="Name" path="name">
+            <n-input v-model:value="editingGmtvLocation.name" />
+          </n-form-item>
         </div>
-        <div class="col-span-6 md:col-span-6">
-          <CustomInput
-            label="Address"
-            v-model:value="editingGmtvLocation.address"
-          />
+        <div class="col-span-6">
+          <n-form-item label="Address" path="address">
+            <n-input v-model:value="editingGmtvLocation.address" />
+          </n-form-item>
         </div>
-        <div class="col-span-6 md:col-span-6">
-          <CustomInput label="City" v-model:value="editingGmtvLocation.city" />
+        <div class="col-span-6">
+          <n-form-item label="City" path="city">
+            <n-input v-model:value="editingGmtvLocation.city" />
+          </n-form-item>
         </div>
-        <div class="col-span-6 md:col-span-6">
-          <CustomInput
-            label="State"
-            v-model:value="editingGmtvLocation.state"
-            type="text"
-          />
+        <div class="col-span-6">
+          <n-form-item label="State">
+            <n-select
+              :options="states"
+              filterable
+              v-model:value="editingGmtvLocation.state"
+            />
+          </n-form-item>
         </div>
-        <div class="col-span-6 md:col-span-6">
-          <CustomInput
-            label="Zip"
-            v-model:value="editingGmtvLocation.zip"
-            type="text"
-          />
+        <div class="col-span-6">
+          <n-form-item label="Zip">
+            <masked-input v-model:value="editingGmtvLocation.zip" />
+          </n-form-item>
         </div>
-        <div class="col-span-6 md:col-span-6">
-          <CustomInput
-            label="Hours"
-            v-model:value="editingGmtvLocation.hours"
-            type="text"
-          />
+        <div class="col-span-6">
+          <n-form-item label="Hours">
+            <n-input v-model:value="editingGmtvLocation.hours" type="text" />
+          </n-form-item>
         </div>
-      </div>
+      </n-form>
 
       <template #footer>
-        <div class="flex flex-row gap-[10px]">
-          <n-button size="large" @click="onOkEditingModal">OK</n-button>
-          <n-button size="large" @click="onCancelEditingModal">Cancel</n-button>
+        <div class="flex flex-row">
+          <n-button size="large" @click="onOkEditingModal">Submit</n-button>
         </div>
       </template>
-    </n-card>
-  </n-modal>
+    </n-modal>
+  </article>
 </template>

@@ -12,7 +12,8 @@ export const useVendors = defineStore( 'vendors', {
             active: {},
             selected: {}
         },
-        searchText: ''
+        searchText: '',
+        latest: '1'
     } ),
     getters: {
         GET_VENDORS(state) {
@@ -89,6 +90,11 @@ export const useVendors = defineStore( 'vendors', {
         },
         TRIGGER_INPUT_BLUR(el) {
             el.blur();
+        },
+        SET_LATEST(id) {
+            if (id) {
+                this.latest = id;
+            }
         }
     },
 } );

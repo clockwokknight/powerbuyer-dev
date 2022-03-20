@@ -2,13 +2,21 @@
 import axios from "axios";
 import { h, ref, reactive, watch } from "vue";
 import CustomInput from "@/components/common/CustomInput.vue";
+import ActionButtons from "@/components/common/ActionButtons.vue";
 import { NButton } from "naive-ui";
+import { getExpenseTypes } from "@/hooks/expense.js";
 
-const props = defineProps(["show"]);
-const emit = defineEmits(["onReturn"]);
-
-const expenseItems = ref([]);
 const showEditModal = ref(false);
+const showModal = ref(false);
+const formRef = ref(null);
+const pagination = reactive({
+  page: 1,
+  pageSize: 50,
+  pageCount: 1,
+  prefix({ itemCount }) {
+    return `Total is ${itemCount}.`;
+  },
+});
 const editingExpenseItem = ref({
   name: "",
   active: 1,
@@ -17,31 +25,23 @@ const editingExpenseItem = ref({
 });
 const isEditing = ref(false);
 
-const getExpenseItems = () => {
-  axios
-    .get("/expense_types")
-    .then((res) => {
-      expenseItems.value = res.data.data;
-      console.log("expenseItems: ", expenseItems.value);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-};
-
+const {
+  data: expenseTypes,
+  isFetching: expenseTypeLoading,
+  fetchNextPage,
+} = getExpenseTypes();
+const expenseTypeTable = ref([]);
 watch(
-  () => props.show,
+  () => expenseTypes.value,
   (newValue) => {
     if (newValue) {
-      getExpenseItems();
+      expenseTypeTable.value = newValue.pages[pagination.page - 1].data;
+      pagination.itemCount = newValue.pages[0].total;
+      pagination.pageCount = newValue.pages[0].last_page;
     }
-  }
+  },
+  { immediate: true }
 );
-
-const onRemoveExpenseItem = (index) => {
-  expenseItems.value.slice(index, 1);
-};
-
 const columns = [
   {
     title: "Name",
@@ -54,119 +54,113 @@ const columns = [
     key: "actions",
     width: 50,
     render(row) {
-      return [
-        h(
-          NButton,
-          {
-            size: "small",
-            onClick: () => {
-              isEditing.value = true;
-              showEditModal.value = true;
-              editingExpenseItem.value = row;
-            },
-          },
-          { default: () => "Edit" }
-        ),
-        h(
-          NButton,
-          {
-            size: "small",
-            onClick: async () => {
-              await axios.delete(`/expense_types/${row.id}`);
-              getExpenseItems();
-            },
-          },
-          { default: () => "Delete" }
-        ),
-      ];
+      return h(ActionButtons, {
+        onEdit: () => {
+          isEditing.value = true;
+          showEditModal.value = true;
+          editingExpenseItem.value = row;
+        },
+        onDelete: async () => {
+          await axios.delete(`/expense_types/${row.id}`);
+        },
+      });
     },
   },
 ];
-
+const rules = {
+  name: {
+    required: true,
+    message: "Name is required",
+    trigger: "input",
+  },
+};
 const addRow = () => {
   showEditModal.value = true;
   isEditing.value = false;
   const newType = {
     name: "",
     active: 1,
-    created_at: null,
-    updated_at: null,
   };
   editingExpenseItem.value = newType;
 };
 
-const onCancelEditingModal = () => {
-  showEditModal.value = false;
-};
-
 const onOkEditingModal = async () => {
-  if (isEditing.value) {
-    await axios.put(
-      `/expense_types/${editingExpenseItem.value.id}`,
-      editingExpenseItem.value
-    );
-  } else {
-    await axios.post("/expense_types", editingExpenseItem.value);
-  }
-  getExpenseItems();
-  showEditModal.value = false;
+  try {
+    await formRef.value.validate();
+    if (isEditing.value) {
+      await axios.put(
+        `/expense_types/${editingExpenseItem.value.id}`,
+        editingExpenseItem.value
+      );
+    } else {
+      await axios.post("/expense_types", editingExpenseItem.value);
+    }
+
+    showEditModal.value = false;
+  } catch (error) {}
+};
+const handlePageChange = (current_page) => {
+  pagination.page = current_page;
+  fetchNextPage.value(current_page);
 };
 </script>
 <template>
-  <n-modal v-model:show="show">
-    <n-card
-      style="width: 600px"
-      title="Expense Items"
-      :bordered="false"
-      size="huge"
-      role="dialog"
-      aria-modal="true"
+  <div>
+    <div class="cursor-pointer py-6 px-6" @click="showModal = true">
+      <div class="mb-2 text-lg font-bold">Expense Types</div>
+      <div class="pb-2 text-sm">Click to add/edit Expense Types</div>
+    </div>
+
+    <n-modal
+      preset="card"
+      class="max-w-screen-md"
+      title="Expense Types"
+      v-model:show="showModal"
     >
-      <template #header-extra></template>
+      <div class="mb-5 ml-auto w-fit">
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <n-button @click="addRow">+</n-button>
+          </template>
+          Create an Expense Type
+        </n-tooltip>
+      </div>
       <n-data-table
+        remote
         class="rounded-md"
         striped
         :columns="columns"
-        :data="expenseItems"
+        :data="expenseTypeTable"
         :bordered="false"
-        :loading="paymentDataLoading"
-        :row-key="rowKey"
+        :loading="expenseTypeLoading"
+        :max-height="500"
+        :pagination="pagination"
+        virtual-scroll
+        @update:page="handlePageChange"
       />
-      <template #footer>
-        <div class="flex flex-row justify-between">
-          <n-button size="large" @click="addRow">Add...</n-button>
-          <n-button size="large" @click="$emit('onReturn')">Cancel</n-button>
-        </div>
-      </template>
-    </n-card>
-  </n-modal>
-  <n-modal v-model:show="showEditModal">
-    <n-card
-      class="w-[400px]"
-      :title="isEditing ? 'Edit Expense Item' : 'Add Expense Item'"
-      :bordered="false"
-      size="huge"
-      role="dialog"
-      aria-modal="true"
+    </n-modal>
+    <n-modal
+      preset="card"
+      class="max-w-md"
+      :title="isEditing ? 'Edit Expense type' : 'Add Expense type'"
+      v-model:show="showEditModal"
     >
-      <template #header-extra></template>
-
-      <div class="grid grid-cols-12 gap-2">
+      <n-form
+        :model="editingExpenseItem"
+        ref="formRef"
+        :rules="rules"
+        class="grid grid-cols-12 gap-2"
+      >
         <div class="col-span-6 md:col-span-12">
-          <CustomInput
-            label="Name"
-            v-model:value="editingExpenseItem.name"
-            style="margin-right: 12px"
-          />
+          <n-form-item label="name" path="name">
+            <n-input v-model:value="editingExpenseItem.name" />
+          </n-form-item>
         </div>
-      </div>
+      </n-form>
 
       <template #footer>
-        <div class="flex flex-row gap-[10px]">
-          <n-button size="large" @click="onOkEditingModal">OK</n-button>
-          <n-button size="large" @click="onCancelEditingModal">Cancel</n-button>
-        </div>
+        <n-button size="large" @click="onOkEditingModal">Submit</n-button>
       </template>
-    </n-card>
-  </n-modal>
+    </n-modal>
+  </div>
 </template>

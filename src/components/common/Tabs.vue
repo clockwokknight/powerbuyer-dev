@@ -28,10 +28,12 @@ const exampleItems = ref([
     value: "4",
   },
 ]);
+
 const shouldDisableScroll = ref(false);
+
 onMounted(() => {
   const tabListHeight = document.querySelector(".subTabList").offsetHeight;
-  console.log({ tabListHeight });
+
   props.items.forEach((item, index) => {
     const itemSelector = document.querySelector(item.value);
     ScrollTrigger.create({
@@ -49,14 +51,19 @@ onMounted(() => {
   });
   gsap.to("#main", { scrollTo: 0 });
 });
+
 onUpdated(() => {
   ScrollTrigger.refresh();
 });
 
 const tabItems = computed(() => props.items || exampleItems.value);
+<<<<<<< HEAD
 const delay = useDebounceFn(() => {
   shouldDisableScroll.value = false;
 }, 1000);
+=======
+
+>>>>>>> 07fa05d243bbc5e87cefcc09d66d368a8fdd666b
 const scrollToSection = (item, index) => {
   shouldDisableScroll.value = true;
   gsap.to("#main", {
@@ -93,9 +100,7 @@ const scrollToSection = (item, index) => {
         </span>
         <span
           class="__indicator h-1 translate-y-[19px] duration-200"
-          :class="`${
-            selected ? 'w-12 bg-primary' : 'w-0 bg-gray-300 dark:bg-primary'
-          }`"
+          :class="`${selected ? 'w-12 bg-primary' : 'w-0 bg-gray-300 dark:bg-primary'}`"
         ></span>
       </Tab>
     </TabList>

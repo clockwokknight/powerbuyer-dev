@@ -1,47 +1,25 @@
 <script setup>
 import axios from "axios";
 import { h, ref, reactive, watch } from "vue";
-import CustomInput from "@/components/common/CustomInput.vue";
+import ActionButtons from "@/components/common/ActionButtons.vue";
 import { NButton } from "naive-ui";
+import { getBuyerTypes } from "@/hooks/buyer.js";
+import { useQueryClient } from "vue-query";
+import { objectFilter } from "@/lib/helper";
 
-const props = defineProps(["show"]);
-const emit = defineEmits(["onReturn"]);
+const showModal = ref(false);
+const queryClient = useQueryClient();
 
-const buyerTypes = ref([]);
 const showEditModal = ref(false);
-const editingBuyerType = ref({
-  active: 1,
-  deleted_at: null,
+const buyerTypeFormRef = ref(null);
+const initialForm = {
   description: "",
   name: "",
-  updated_at: null,
-});
+};
+const editingBuyerType = ref({ ...initialForm });
 const isEditing = ref(false);
 
-const getBuyerTypes = () => {
-  axios
-    .get("/buyer_type")
-    .then((res) => {
-      buyerTypes.value = res.data;
-      console.log("buyerTypes: ", buyerTypes.value);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-};
-
-watch(
-  () => props.show,
-  (newValue) => {
-    if (newValue) {
-      getBuyerTypes();
-    }
-  }
-);
-
-const onRemoveBuyerType = (index) => {
-  buyerTypes.value.slice(index, 1);
-};
+const { data: buyerTypes, isLoading: isBuyerTypeLoading } = getBuyerTypes();
 
 const columns = [
   {
@@ -61,31 +39,18 @@ const columns = [
     key: "actions",
     width: 150,
     render(row) {
-      return [
-        h(
-          NButton,
-          {
-            size: "small",
-            onClick: () => {
-              isEditing.value = true;
-              showEditModal.value = true;
-              editingBuyerType.value = row;
-            },
-          },
-          { default: () => "Edit" }
-        ),
-        h(
-          NButton,
-          {
-            size: "small",
-            onClick: async () => {
-              await axios.delete(`/buyer_type/${row.id}`);
-              getBuyerTypes();
-            },
-          },
-          { default: () => "Delete" }
-        ),
-      ];
+      return h(ActionButtons, {
+        showDeleteButton: true,
+        onEdit: () => {
+          isEditing.value = true;
+          showEditModal.value = true;
+          editingBuyerType.value = row;
+        },
+        onDelete: async () => {
+          await axios.delete(`/buyer_type/${row.id}`);
+          await queryClient.invalidateQueries("buyer_types");
+        },
+      });
     },
   },
 ];
@@ -93,95 +58,98 @@ const columns = [
 const addRow = () => {
   showEditModal.value = true;
   isEditing.value = false;
-  const newType = {
-    active: 1,
-    deleted_at: null,
-    description: "",
-    name: "",
-    updated_at: null,
-  };
-  editingBuyerType.value = newType;
-};
 
-const onCancelEditingModal = () => {
-  showEditModal.value = false;
+  editingBuyerType.value = { ...initialForm };
 };
-
+const rules = {
+  name: {
+    required: true,
+    message: "Name is required",
+    trigger: "input",
+  },
+};
 const onOkEditingModal = async () => {
-  if (isEditing.value) {
-    await axios.put(
-      `/buyer_type/${editingBuyerType.value.id}`,
-      editingBuyerType.value
-    );
-  } else {
-    await axios.post("/buyer_type", editingBuyerType.value);
+  try {
+    await buyerTypeFormRef.value.validate();
+    const obj = objectFilter(editingBuyerType.value, (key, value) => value);
+    if (isEditing.value) {
+      await axios.put(`/buyer_type/${obj.id}`, obj);
+      await queryClient.invalidateQueries("buyer_types");
+    } else {
+      await axios.post("/buyer_type", obj);
+    }
+    showEditModal.value = false;
+  } catch (error) {
+    console.log(error);
   }
-  getBuyerTypes();
-  showEditModal.value = false;
 };
 </script>
 <template>
-  <n-modal v-model:show="show">
-    <n-card
-      style="width: 1200px"
+  <article>
+    <div class="py-6 px-6 pb-8" @click="showModal = true">
+      <div class="mb-2 text-lg font-bold">Buyer Types</div>
+      <div class="pb-2 text-sm">Click to edit commission types.</div>
+    </div>
+
+    <n-modal
+      preset="card"
+      class="max-w-screen-md"
       title="Buyer Types"
-      :bordered="false"
-      size="huge"
-      role="dialog"
-      aria-modal="true"
+      v-model:show="showModal"
     >
-      <template #header-extra></template>
+      <div class="mb-5 ml-auto w-fit">
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <n-button @click="addRow">+</n-button>
+          </template>
+          Create a Commission Type
+        </n-tooltip>
+      </div>
       <n-data-table
         class="rounded-md"
         striped
         :columns="columns"
         :data="buyerTypes"
         :bordered="false"
-        :loading="paymentDataLoading"
-        :row-key="rowKey"
+        :loading="isBuyerTypeLoading"
+        virtual-scroll
+        :max-height="500"
+        :scroll-x="1000"
       />
-      <template #footer>
-        <div class="flex flex-row justify-between">
-          <n-button size="large" @click="addRow">Add...</n-button>
-          <n-button size="large" @click="$emit('onReturn')">Cancel</n-button>
-        </div>
-      </template>
-    </n-card>
-  </n-modal>
-  <n-modal v-model:show="showEditModal">
-    <n-card
-      class="w-[600px]"
+    </n-modal>
+    <n-modal
+      class="max-w-[600px]"
+      preset="card"
       :title="isEditing ? 'Edit Buyer Type' : 'Add Buyer Type'"
-      :bordered="false"
-      size="huge"
-      role="dialog"
-      aria-modal="true"
+      v-model:show="showEditModal"
     >
-      <template #header-extra></template>
-
-      <div class="grid grid-cols-12 gap-2">
-        <div class="col-span-6 md:col-span-4">
-          <CustomInput
-            label="Name"
-            v-model:value="editingBuyerType.name"
-            style="margin-right: 12px"
-          />
+      <n-form
+        ref="buyerTypeFormRef"
+        :model="editingBuyerType"
+        :rules="rules"
+        class="grid grid-cols-12 gap-x-5"
+      >
+        <div class="col-span-6">
+          <n-form-item label="Name" path="name">
+            <n-input v-model:value="editingBuyerType.name" />
+          </n-form-item>
         </div>
-        <div class="col-span-12 md:col-span-12">
-          <n-input
-            placeholder="Description"
-            v-model:value="editingBuyerType.description"
-            type="textarea"
-          />
+        <div class="col-span-12">
+          <n-form-item label="Description">
+            <n-input
+              placeholder="Description"
+              v-model:value="editingBuyerType.description"
+              type="textarea"
+            />
+          </n-form-item>
         </div>
-      </div>
+      </n-form>
 
       <template #footer>
         <div class="flex flex-row gap-[10px]">
-          <n-button size="large" @click="onOkEditingModal">OK</n-button>
-          <n-button size="large" @click="onCancelEditingModal">Cancel</n-button>
+          <n-button size="large" @click="onOkEditingModal">Submit</n-button>
         </div>
       </template>
-    </n-card>
-  </n-modal>
+    </n-modal>
+  </article>
 </template>

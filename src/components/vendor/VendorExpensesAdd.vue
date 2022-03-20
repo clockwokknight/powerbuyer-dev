@@ -27,6 +27,7 @@ const initialForm = {
     {
       expense_date: dayjs().format("YYYY-MM-DD"),
       deal_id: null,
+      // images: [],
       name: "",
       description: "",
       amount: 0,
@@ -92,10 +93,7 @@ watch(
   () => form.value?.expenses,
   (newFormValue) => {
     if (newFormValue.length > 0) {
-      form.value.amount_due = newFormValue?.reduce(
-        (prev, curr) => prev + curr.amount,
-        0
-      );
+      form.value.amount_due = newFormValue?.reduce((prev, curr) => prev + curr.amount, 0);
     } else {
       form.value.amount_due = 0;
     }
@@ -176,8 +174,9 @@ const dealOptions = computed(() =>
 const searchVinSelect = ref("");
 const debouncedSearchVin = useDebounce(searchVinSelect, 500);
 
-const { data: searchDealResult, isLoading: isVendorSearchLoading } =
-  searchDealByVin(debouncedSearchVin);
+const { data: searchDealResult, isLoading: isVendorSearchLoading } = searchDealByVin(
+  debouncedSearchVin
+);
 const searchVinResultOptions = computed(() =>
   searchDealResult.value?.map((deal) => ({
     value: deal.id,
@@ -251,6 +250,14 @@ const onCreateExpenseItems = () => {
     expense_date: dayjs().format("YYYY-MM-DD"),
   };
 };
+/**
+ * invoke function when Upload image changes
+ * @param {Object} data
+ * @param {import('naive-ui').UploadFileInfo[]} data.fileList
+ */
+const handleUploadChange = (data) => {
+  console.log(data.fileList);
+};
 </script>
 <template>
   <n-button class="w-[220px]" @click="showDrawer = true">
@@ -268,11 +275,7 @@ const onCreateExpenseItems = () => {
     </n-icon>
     Create Invoice
   </n-button>
-  <n-modal
-    preset="card"
-    class="custom-modal max-w-screen-md"
-    v-model:show="showDrawer"
-  >
+  <n-modal preset="card" class="custom-modal max-w-screen-md" v-model:show="showDrawer">
     <n-form
       :model="form"
       :rules="rules"
@@ -305,7 +308,7 @@ const onCreateExpenseItems = () => {
         show-sort-button
         :min="1"
       >
-        <div class="rounded bg-gray-200/50 p-3 dark:bg-gray-800/50">
+        <div class="rounded-roundbg-gray-200/50 p-3 dark:bg-gray-800/50">
           <div class="sm:grid sm:grid-cols-2 sm:justify-between sm:gap-x-5">
             <n-form-item
               label="VIN"
@@ -359,7 +362,9 @@ const onCreateExpenseItems = () => {
               @keydown.enter.prevent
             />
           </n-form-item>
-
+          <!-- <n-form-item label="Upload Images">
+            <n-upload multiple @change="handleUploadChange" list-type="image-card" />
+          </n-form-item> -->
           <n-form-item label="Description">
             <n-input
               type="textarea"
