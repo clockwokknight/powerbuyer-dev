@@ -1,10 +1,10 @@
 <script setup>
-import { ref, computed, onMounted, watch, toRef, toRaw, onUpdated } from "vue";
 import { useGlobalState } from "@/store/global";
 import { Tab, TabGroup, TabList } from "@headlessui/vue";
+import { useDebounceFn } from "@vueuse/core";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger.js";
-import { useDebounceFn } from "@vueuse/core";
+import { computed, onMounted, onUpdated, ref, toRaw } from "vue";
 
 const global = useGlobalState();
 const props = defineProps(["items", "type"]);
@@ -57,13 +57,9 @@ onUpdated(() => {
 });
 
 const tabItems = computed(() => props.items || exampleItems.value);
-<<<<<<< HEAD
 const delay = useDebounceFn(() => {
   shouldDisableScroll.value = false;
 }, 1000);
-=======
-
->>>>>>> 07fa05d243bbc5e87cefcc09d66d368a8fdd666b
 const scrollToSection = (item, index) => {
   shouldDisableScroll.value = true;
   gsap.to("#main", {
@@ -100,7 +96,7 @@ const scrollToSection = (item, index) => {
         </span>
         <span
           class="__indicator h-1 translate-y-[19px] duration-200"
-          :class="`${selected ? 'w-12 bg-primary' : 'w-0 bg-gray-300 dark:bg-primary'}`"
+          :class="`${selected ? 'bg-primary w-12' : 'dark:bg-primary w-0 bg-gray-300'}`"
         ></span>
       </Tab>
     </TabList>
