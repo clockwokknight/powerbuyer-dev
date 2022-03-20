@@ -48,8 +48,6 @@ import GlobalSearch from "@/components/global_search/GlobalSearch.vue";
 import { useEventListener } from "@vueuse/core";
 import { useCommandPalletStore } from "@/store/commandPallet";
 
-const isOpen = ref(false);
-
 const handleKeyEvent = (evt) => {
   if (evt.key === "k" && (evt.metaKey || evt.ctrlKey)) {
     openModal();

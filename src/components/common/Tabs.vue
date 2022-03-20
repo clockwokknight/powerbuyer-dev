@@ -4,6 +4,7 @@ import { useGlobalState } from "@/store/global";
 import { Tab, TabGroup, TabList } from "@headlessui/vue";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger.js";
+import { useDebounceFn } from "@vueuse/core";
 
 const global = useGlobalState();
 const props = defineProps(["items", "type"]);
@@ -56,7 +57,9 @@ onUpdated(() => {
 });
 
 const tabItems = computed(() => props.items || exampleItems.value);
-
+const throttleDisableScroll = useDebounceFn(() => {
+  shouldDisableScroll.value = false;
+}, 1000);
 const scrollToSection = (item, index) => {
   shouldDisableScroll.value = true;
   gsap.to("#main", {
@@ -64,9 +67,7 @@ const scrollToSection = (item, index) => {
       y: toRaw(item).value,
       offsetY: 60,
     },
-    onComplete() {
-      shouldDisableScroll.value = false;
-    },
+    onComplete: throttleDisableScroll,
   });
 };
 </script>
@@ -93,7 +94,7 @@ const scrollToSection = (item, index) => {
         </span>
         <span
           class="__indicator h-1 translate-y-[19px] duration-200"
-          :class="`${selected ? 'w-12 bg-primary' : 'w-0 bg-gray-300 dark:bg-primary'}`"
+          :class="`${selected ? 'bg-primary w-12' : 'dark:bg-primary w-0 bg-gray-300'}`"
         ></span>
       </Tab>
     </TabList>

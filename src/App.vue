@@ -36,6 +36,7 @@ onMounted(() => {
             <section
               class="fill-screen bg-background_light dark:!bg-background_dark relative flex overflow-hidden"
             >
+              <CommandPalette />
               <MainMenu />
               <router-view />
             </section>
@@ -45,7 +46,6 @@ onMounted(() => {
       </n-message-provider>
     </n-loading-bar-provider>
   </n-config-provider>
-  <CommandPalette />
 </template>
 
 <style>
