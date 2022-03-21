@@ -34,6 +34,7 @@ const initialForm = {
 const form = ref({ ...initialForm });
 
 const routeParamId = ref(route.params?.id);
+
 const { data: payment_types } = getPaymentTypes();
 const paymentTypeOptions = computed(() =>
   payment_types.value?.map((paymentType) => ({
@@ -311,14 +312,14 @@ const onInvoiceSelect = (val, index) => {
       <div>Payment Invoice</div>
       <n-dynamic-input
         v-model:value="form.payment_invoices"
-        class="my-5 custom-dynamic-input"
+        class="custom-dynamic-input my-5"
         @create="onCreatePaymentInvoice"
         #="{ index, value }"
         show-sort-button
         :min="1"
       >
         <div
-          class="p-3 rounded-roundbg-gray-200/50 dark:bg-gray-800/50 sm:grid sm:grid-cols-2 sm:gap-x-5"
+          class="rounded-roundbg-gray-200/50 p-3 dark:bg-gray-800/50 sm:grid sm:grid-cols-2 sm:gap-x-5"
         >
           <n-form-item
             label="Vendor Invoice"
