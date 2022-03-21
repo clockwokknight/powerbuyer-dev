@@ -25,8 +25,6 @@ import compare from "just-compare";
 import axios from "axios";
 import { log, utils } from "@/lib/utils";
 import { useIntersectionObserver } from "@vueuse/core";
-import UpdatableButtonWrapper from "@/components/common/UpdatableButtonWrapper.vue";
-import MaskedInput from "@/components/common/MaskedInput.vue";
 import VendorExpensesItems from "@/components/vendor/VendorExpensesItems.vue";
 import VendorExpenses from "@/components/vendor/VendorExpenses.vue";
 import VendorPayments from "@/components/vendor/VendorPayments.vue";
@@ -199,7 +197,7 @@ function handleTabClick(e) {
 <template>
   <div
     id="details"
-    class="__section __vendor-card __details bg-foreground_light dark:bg-foreground_dark mt-0 grid grid-cols-12 rounded-round p-6"
+    class="__section __vendor-card __details bg-foreground_light dark:bg-foreground_dark rounded-round mt-0 grid grid-cols-12 p-6"
   >
     <!-- left side -->
     <div class="__form col-span-12 flex flex-col justify-between md:col-span-8">
@@ -421,7 +419,7 @@ function handleTabClick(e) {
     id="__subtabs"
     type="basic"
     ref="vendorTab"
-    class="bg-foreground_light dark:bg-foreground_dark sticky top-[-2px] left-0 z-40 mt-[24px] w-full rounded-round duration-300"
+    class="bg-foreground_light dark:bg-foreground_dark rounded-round sticky top-[-2px] left-0 z-40 mt-[24px] w-full duration-300"
     :items="vendorTabs"
   />
 

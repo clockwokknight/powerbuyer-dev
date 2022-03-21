@@ -4,7 +4,9 @@ import { objectFilter } from "@/lib/helper";
 import axios from "axios";
 import { NButton } from "naive-ui";
 import { h, ref, unref, watch } from "vue";
-import { useQuery } from "vue-query";
+import { useQuery, useQueryClient } from "vue-query";
+
+const queryClient = useQueryClient();
 
 const showEditModal = ref(false);
 const showModal = ref(false);
@@ -15,26 +17,9 @@ const editingDealStatus = ref({
 });
 const isEditing = ref(false);
 
-const { data: dealStatus } = useQuery("deal_status", () =>
+const { data: dealStatus, isLoading } = useQuery("deal_status", () =>
   axios.get("/deal_status").then((res) => res.data)
 );
-const getDealStatus = () => {
-  axios
-    .get("/deal_status")
-    .then((res) => {
-      dealStatus.value = res.data;
-      console.log("dealStatus: ", dealStatus.value);
-    })
-    .catch((error) => {
-      console.log(error);
-    });
-};
-
-watch(showModal, (newValue) => {
-  if (newValue) {
-    getDealStatus();
-  }
-});
 
 const columns = [
   {
@@ -62,6 +47,7 @@ const columns = [
         },
         onDelete: async () => {
           await axios.delete(`/deal_status/${row.id}`);
+          queryClient.invalidateQueries("deal_status");
         },
       });
     },
@@ -94,7 +80,7 @@ const onOkEditingModal = async () => {
   } else {
     await axios.post("/deal_status", obj);
   }
-  getDealStatus();
+  queryClient.invalidateQueries("deal_status");
   showEditModal.value = false;
 };
 </script>
@@ -110,7 +96,7 @@ const onOkEditingModal = async () => {
       title="Deal Status"
       v-model:show="showModal"
     >
-      <div class="mb-5 ml-auto w-fit">
+      <div class="mb-5">
         <n-tooltip trigger="hover">
           <template #trigger>
             <n-button @click="addRow">+</n-button>
@@ -124,7 +110,7 @@ const onOkEditingModal = async () => {
         :columns="columns"
         :data="dealStatus"
         :bordered="false"
-        :loading="paymentDataLoading"
+        :loading="isLoading"
       />
     </n-modal>
     <n-modal

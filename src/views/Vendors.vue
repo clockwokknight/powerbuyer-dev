@@ -10,7 +10,6 @@ import { useVendors } from "@/store/vendors";
 import AddVendor from "@/components/vendor/AddVendor.vue";
 import PageTabs from "@/components/PageTabs.vue";
 import VendorList from "@/components/vendor/VendorList.vue";
-import Tabs from "@/components/common/Tabs.vue";
 
 const tabStore = useTabsViewStore();
 const global = useGlobalState();
@@ -38,9 +37,8 @@ const addTab = (vendor) => {
 
 // Vendor Search Result
 
-const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
-  ["vendorSearch", debouncedSearchText],
-  ({ queryKey }) => {
+const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
+  useQuery(["vendorSearch", debouncedSearchText], ({ queryKey }) => {
     if (queryKey[1] === "") return null;
     else
       return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => {
@@ -49,8 +47,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
         }
         return res.data;
       });
-  }
-);
+  });
 
 function toggleListSlide() {
   listActive.value = !listActive.value;
@@ -74,10 +71,10 @@ watch(
     >
       <!-- SearchList.vue / -->
       <aside
-        class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-x-hidden bg-background_light dark:border-r-[1px] dark:border-dark_border dark:bg-background_dark"
+        class="pageItemsList bg-background_light dark:border-dark_border dark:bg-background_dark relative h-screen min-w-[275px] max-w-[275px] overflow-x-hidden dark:border-r-[1px]"
       >
         <div
-          class="sticky top-0 z-50 bg-foreground_light p-3 pb-0 dark:bg-foreground_dark"
+          class="bg-foreground_light dark:bg-foreground_dark sticky top-0 z-50 p-3 pb-0"
         >
           <div class="mb-3 flex justify-between">
             <h1 class="text-xl font-bold uppercase">Vendors</h1>
@@ -88,7 +85,7 @@ watch(
           <div class="flex">
             <n-input
               style="backdrop-filter: blur(36px)"
-              class="bg-[#f0f0f0] dark:bg-dark_border shadow-lg shadow-black/10"
+              class="dark:bg-dark_border bg-[#f0f0f0] shadow-lg shadow-black/10"
               v-model:value.trim="searchText"
               clearable
               placeholder="Search..."
@@ -118,7 +115,7 @@ watch(
             <div
               v-for="index in Array.from({ length: 10 })"
               :key="index"
-              class="odd:background_light border-b px-4 py-4 even:bg-foreground_light dark:border-0 dark:odd:bg-background_dark dark:even:bg-foreground_dark"
+              class="odd:background_light even:bg-foreground_light dark:odd:bg-background_dark dark:even:bg-foreground_dark border-b px-4 py-4 dark:border-0"
             >
               <n-skeleton text :repeat="2" class="w-full" />
               <n-skeleton text class="w-[45%]" />
@@ -156,23 +153,25 @@ watch(
       <div
         id="mobile-slider"
         style="backdrop-filter: blur(36px)"
-        :class="listActive ? '!w-[335px] ml-[-60px]' : '!bg-dark_border'"
-        class="absolute w-[276px] duration-[500ms] h-[48px] flex flex-row justify-between bottom-0 left-0 bg-background_light/50 dark:bg-dark_border/50 bg-black items-center shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] px-4 cursor-pointer"
+        :class="listActive ? 'ml-[-60px] !w-[335px]' : '!bg-dark_border'"
+        class="bg-background_light/50 dark:bg-dark_border/50 absolute bottom-0 left-0 flex h-[48px] w-[276px] cursor-pointer flex-row items-center justify-between bg-black px-4 shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] duration-[500ms]"
         @click="listActive = !listActive"
       >
         <div
-          class="text-[10px] pl-16 duration-[500ms]"
+          class="pl-16 text-[10px] duration-[500ms]"
           :class="!listActive ? 'opacity-0' : 'opacity-50'"
         >
           <b>{{ vendors?.pages[0].data.length }}</b> Active Vendors
         </div>
         <div class="!bg-black">
           <div
-            class="h-[48px] w-[60px] absolute left-0 bottom-0 flex center-content bg-[#111111]"
+            class="center-content absolute left-0 bottom-0 flex h-[48px] w-[60px] bg-[#111111]"
           >
             <svg
               class="absolute h-4 w-4 duration-[500ms]"
-              :class="listActive ? 'rotate-0 ml-[0px]' : 'rotate-180 ml-[432px]'"
+              :class="
+                listActive ? 'ml-[0px] rotate-0' : 'ml-[432px] rotate-180'
+              "
               viewBox="0 0 24 24"
             >
               <path
@@ -192,14 +191,17 @@ watch(
       style="height: calc(100vh - 8px)"
       :class="
         listActive
-          ? 'md:w-[calc(100vw-335px)] ml-[275px]'
-          : 'md:w-[calc(100vw-60px)] ml-[0px]'
+          ? 'ml-[275px] md:w-[calc(100vw-335px)]'
+          : 'ml-[0px] md:w-[calc(100vw-60px)]'
       "
-      class="duration-[500ms] w-[calc(100vw-60px)] bg-background_light dark:bg-background_dark"
+      class="bg-background_light dark:bg-background_dark w-[calc(100vw-60px)] duration-[500ms]"
     >
       <PageTabs :class="global.stuck[0] && 'shadow-lg'" page-name="vendors" />
       <!-- Main Body Content-->
-      <div id="main" class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
+      <div
+        id="main"
+        class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden"
+      >
         <main id="container" class="min-h-full p-2 md:p-6">
           <router-view />
         </main>
