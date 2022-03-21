@@ -1,13 +1,19 @@
 <script setup>
-import { useRoute } from "vue-router";
+import { getAllLanes } from "@/hooks/lanes";
 import { computed, reactive, ref } from "vue";
-import { useQuery } from "vue-query";
-import axios from "axios";
+import { useRoute } from "vue-router";
 const route = useRoute();
-
-const { data: lanes } = useQuery("lanes", () =>
-  axios.get("/lanes").then((res) => res.data)
-);
+const filter = reactive({
+  page: 1,
+  per_page: 20,
+});
+const { data: lanes, isFetching } = getAllLanes(filter);
+const pagination = computed(() => ({
+  pageSize: filter.per_page,
+  page: filter.page,
+  itemCount: lanes.value?.total ?? 1,
+  pageCount: lanes.value?.last_page ?? 1,
+}));
 const sortStatesRef = ref([]);
 const sortKeyMapOrderRef = computed(() =>
   sortStatesRef.value.reduce((result, { columnKey, order }) => {
@@ -51,11 +57,11 @@ const columns = computed(() => [
   },
   {
     title: "Make",
-    key: "address",
+    key: "deal.vehicle.vehicle_make.name",
   },
   {
     title: "Model",
-    key: "name",
+    key: "deal.vehicle.vehicle_model.name",
     width: "max-content",
   },
   {
@@ -64,7 +70,7 @@ const columns = computed(() => [
   },
   {
     title: "Mileage",
-    key: "address",
+    key: "deal.mileage",
   },
 
   {
@@ -88,12 +94,12 @@ const columns = computed(() => [
     key: "address",
   },
   {
-    title: "DOP",
-    key: "name",
+    title: "Purchased Date",
+    key: "deal.date_purchased",
   },
   {
     title: "VIN",
-    key: "age",
+    key: "deal.vin",
   },
   {
     title: "T",
@@ -101,7 +107,7 @@ const columns = computed(() => [
   },
   {
     title: "Dealer",
-    key: "name",
+    key: "deal.dealer.name",
   },
   {
     title: "Designation Code",
@@ -144,10 +150,13 @@ const columns = computed(() => [
   //   key: "V",
   // },
 ]);
-const pagination = { pageSize: 50 };
+
 const handleSortChange = (sorters) => {
   console.log({ sorters });
   sortStatesRef.value = [].concat(sorters);
+};
+const handlePageChange = (current_page) => {
+  filter.page = current_page;
 };
 </script>
 
@@ -155,7 +164,7 @@ const handleSortChange = (sorters) => {
   <!-- Main Tabs App Content -->
   <div class="h-screen w-[calc(100%-60px)]">
     <!-- Main Body Content-->
-    <div class="h-screen overflow-auto bg-white px-5 py-5">
+    <div class="h-screen px-5 py-5 overflow-auto bg-white">
       <!-- Body Content -->
       <div class="mb-3">
         <h1 class="text-xl font-bold uppercase">Lane Numberings</h1>
@@ -179,13 +188,15 @@ const handleSortChange = (sorters) => {
           <n-button>Clear Sorters</n-button>
         </n-space>
         <n-data-table
+          remote
           ref="table"
           :columns="columns"
-          :data="lanes"
+          :data="lanes?.data"
           :pagination="pagination"
           :max-height="1000"
           :scroll-x="3000"
-          virtual-scroll
+          :loading="isFetching"
+          @update:page="handlePageChange"
           @update:sorter="handleSortChange"
         />
       </n-space>

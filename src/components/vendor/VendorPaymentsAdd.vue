@@ -9,6 +9,7 @@ import CurrencyInput from "@/components/common/CurrencyInput.vue";
 import { useRoute } from "vue-router";
 import { vendorInvoices } from "@/hooks/vendor.js";
 import { getGmtvLocations } from "@/hooks/location.js";
+import { getPaymentTypes } from "@/hooks/payments";
 
 const route = useRoute();
 
@@ -19,9 +20,11 @@ const initialForm = {
   payment_status_id: null,
   check_number: "",
   amount: 0,
+  type: null,
   payment_date: dayjs().format("YYYY-MM-DD"),
   invoice_number: "",
   account_number: "",
+  ach_transfer_number: "",
   notes: "",
   gmtv_location_id: null,
   payment_invoices: [
@@ -31,6 +34,13 @@ const initialForm = {
 const form = ref({ ...initialForm });
 
 const routeParamId = ref(route.params?.id);
+const { data: payment_types } = getPaymentTypes();
+const paymentTypeOptions = computed(() =>
+  payment_types.value?.map((paymentType) => ({
+    label: paymentType.name,
+    value: paymentType.id,
+  }))
+);
 
 watch(
   () => route.params,
@@ -80,6 +90,12 @@ const rules = {
     required: true,
     message: "Check Number is required",
     trigger: ["input", "blur"],
+  },
+  type: {
+    type: "number",
+    required: true,
+    message: "Payment type is required",
+    trigger: ["blur", "change"],
   },
   description: {
     required: false,
@@ -280,17 +296,29 @@ const onInvoiceSelect = (val, index) => {
           <n-input v-model:value="form.account_number" clearable />
         </n-form-item>
       </div>
+      <div class="sm:grid sm:grid-cols-2 sm:gap-x-5">
+        <n-form-item label="Payment Type" path="type">
+          <n-select
+            filterable
+            :options="paymentTypeOptions"
+            v-model:value="form.type"
+          />
+        </n-form-item>
+        <n-form-item label="ACH transfer Number">
+          <n-input v-model:value="form.ach_transfer_number" />
+        </n-form-item>
+      </div>
       <div>Payment Invoice</div>
       <n-dynamic-input
         v-model:value="form.payment_invoices"
-        class="custom-dynamic-input my-5"
+        class="my-5 custom-dynamic-input"
         @create="onCreatePaymentInvoice"
         #="{ index, value }"
         show-sort-button
         :min="1"
       >
         <div
-          class="rounded-roundbg-gray-200/50 p-3 dark:bg-gray-800/50 sm:grid sm:grid-cols-2 sm:gap-x-5"
+          class="p-3 rounded-roundbg-gray-200/50 dark:bg-gray-800/50 sm:grid sm:grid-cols-2 sm:gap-x-5"
         >
           <n-form-item
             label="Vendor Invoice"
