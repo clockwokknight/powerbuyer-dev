@@ -82,7 +82,6 @@ function showEditExpenseForm(row) {
 
 <template>
   <div
-    id="expenses"
     class="scroll-smooth border-[1px] mt-[24px] border-transparent dark:border-dark_border"
   >
     <VendorExpenseEdit

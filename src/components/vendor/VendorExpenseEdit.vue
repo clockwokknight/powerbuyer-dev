@@ -20,10 +20,10 @@ const initialForm = {
   vendor_id: null,
   amount_due: 0,
   invoice_number: "",
-  due_date: null,
+  due_date: Date.now(),
   expenses: [
     {
-      expense_date: dayjs().format("YYYY-MM-DD"),
+      expense_date: Date.now(),
       deal_id: null,
       name: "",
       description: "",
@@ -45,9 +45,11 @@ const showDrawer = toRef(props, "showDrawer");
 watch(showDrawer, (newValue) => {
   if (newValue) {
     form.value = clone(props.initialData);
+    form.value.due_date = dayjs(form.value.due_date).valueOf();
     form.value.expenses = form.value.expenses.map((expense) => ({
       ...expense,
       showSelect: false,
+      expense_date: dayjs(expense.expense_date).valueOf(),
     }));
     vendor_id.value = form.value.vendor_id;
   } else {
@@ -58,7 +60,7 @@ const deletedExpenses = ref([]);
 watch(
   () => form.value?.expenses,
   (newFormValue, prevValue) => {
-    if (newFormValue.length > 0) {
+    if (newFormValue && newFormValue?.length > 0) {
       form.value.amount_due = newFormValue?.reduce(
         (prev, curr) => prev + parseFloat(curr.amount),
         0
@@ -195,6 +197,7 @@ const rules = {
   },
   due_date: {
     required: true,
+    type: "number",
     message: "Date is required",
     trigger: ["blur", "change"],
   },
@@ -241,10 +244,13 @@ const submitForm = async () => {
     obj.expenses = toRaw(form.value.expenses);
     // remove Proxy each object from array and remove 'showSelect' and 'expense_types'
     obj.expenses = obj.expenses
-      .map((expense) => omit(toRaw(expense), ["expense_types", "showSelect"]))
+      .map((expense) => ({
+        ...omit(toRaw(expense), ["expense_types", "showSelect"]),
+        expense_date: dayjs(expense.expense_date).format("YYYY-MM-DD"),
+      }))
       // Also add deleted Expense array so that it removes from the database as well.
       .concat(unref(deletedExpenses));
-
+    obj.due_date = dayjs(obj.due_date).format("YYYY-MM-DD");
     obj = omit(obj, ["invoice_number"]);
 
     updateExpense(obj);
@@ -371,10 +377,7 @@ const customRequest = ({
           />
         </n-form-item>
         <n-form-item label="Due Date" path="due_date">
-          <n-date-picker
-            v-model:formatted-value="form.due_date"
-            value-format="yyyy-MM-dd"
-          />
+          <n-date-picker v-model:value="form.due_date" format="MM/dd/yyyy" />
         </n-form-item>
       </div>
       <div>Expenses</div>
@@ -388,7 +391,7 @@ const customRequest = ({
         :min="1"
         :max="isDisabled ? form.expenses?.length : undefined"
       >
-        <div class="rounded-roundbg-gray-200/50 grid p-3 dark:bg-gray-800/50">
+        <div class="rounded-round grid bg-gray-200/50 p-3 dark:bg-gray-800/50">
           <div class="sm:grid sm:grid-cols-2 sm:justify-between sm:gap-x-5">
             <n-form-item
               label="VIN"
@@ -413,8 +416,8 @@ const customRequest = ({
               :rule="rules.expenses.expense_date"
             >
               <n-date-picker
-                v-model:formatted-value="form.expenses[index].expense_date"
-                value-format="yyyy-MM-dd"
+                v-model:value="form.expenses[index].expense_date"
+                format="MM/dd/yyyy"
               />
             </n-form-item>
           </div>

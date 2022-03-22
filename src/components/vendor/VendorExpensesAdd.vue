@@ -22,10 +22,10 @@ const initialForm = {
   vendor_id: null,
   amount_due: 0,
   invoice_number: "",
-  due_date: dayjs().add(30, "day").format("YYYY-MM-DD"),
+  due_date: dayjs().add(30, "day").valueOf(),
   expenses: [
     {
-      expense_date: dayjs().format("YYYY-MM-DD"),
+      expense_date: Date.now(),
       deal_id: null,
       // images: [],
       name: "",
@@ -119,6 +119,7 @@ const rules = {
   // },
   due_date: {
     required: true,
+    type: "number",
     message: "Date is required",
     trigger: ["blur", "change"],
   },
@@ -198,16 +199,18 @@ const { mutateAsync: createExpense, isLoading } = useMutation(
 );
 
 async function submitExpense() {
+  const convertDate = (date) => dayjs(date).format("YYYY-MM-DD");
   try {
     await formRef.value.validate();
     // const modifiedForm = omit(form.value, ['cost'])
     const modifiedForm = { ...form.value };
-
+    modifiedForm.due_date = convertDate(modifiedForm.due_date);
     modifiedForm.expenses = modifiedForm.expenses.map((item) =>
       objectFilter(
         {
           ...omit(item, ["showSelect", "expense_type_id"]),
           type: String(item.expense_type_id),
+          expense_date: convertDate(item.expense_date),
         },
         (key, value) => value
       )
@@ -247,7 +250,7 @@ const onCreateExpenseItems = () => {
     amount: 0,
     expense_type_id: null,
     showSelect: true,
-    expense_date: dayjs().format("YYYY-MM-DD"),
+    expense_date: dayjs().valueOf(),
   };
 };
 /**
@@ -293,10 +296,7 @@ const handleUploadChange = (data) => {
           />
         </n-form-item>
         <n-form-item label="Due Date" path="due_date">
-          <n-date-picker
-            v-model:formatted-value="form.due_date"
-            value-format="yyyy-MM-dd"
-          />
+          <n-date-picker v-model:value="form.due_date" format="MM/dd/yyyy" />
         </n-form-item>
       </div>
       <div>Expenses</div>
@@ -333,8 +333,8 @@ const handleUploadChange = (data) => {
               :rule="rules.expenses.expense_date"
             >
               <n-date-picker
-                v-model:formatted-value="form.expenses[index].expense_date"
-                value-format="yyyy-MM-dd"
+                v-model:value="form.expenses[index].expense_date"
+                format="MM/dd/yyyy"
               />
             </n-form-item>
           </div>

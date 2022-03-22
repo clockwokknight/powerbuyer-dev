@@ -104,7 +104,8 @@ const paymentTermOptions = computed(() =>
 const { data: getInvoicesTotal } = getInvoiceTotalByVendor(routeParamId);
 const { data: statesList } = getStates();
 
-const { data: vendor, isLoading: isVendorLoading } = getVendorById(routeParamId);
+const { data: vendor, isLoading: isVendorLoading } =
+  getVendorById(routeParamId);
 
 const vendorData = ref({});
 
@@ -172,7 +173,10 @@ function resetValue(key) {
 
 function submitValue(key) {
   mutateAsync({
-    [key]: key === "phone" ? utils.parsePhoneNumber(form.value[key]) : form.value[key],
+    [key]:
+      key === "phone"
+        ? utils.parsePhoneNumber(form.value[key])
+        : form.value[key],
   })
     .then((data) => {
       message.success("Saved");
@@ -202,7 +206,9 @@ function handleTabClick(e) {
     <!-- left side -->
     <div class="__form col-span-12 flex flex-col justify-between md:col-span-8">
       <div class="__title">
-        <h3 class="mb-2 translate-x-2 font-bold uppercase opacity-[0.44]">Vendor</h3>
+        <h3 class="mb-2 translate-x-2 font-bold uppercase opacity-[0.44]">
+          Vendor
+        </h3>
         <CustomInput
           type="header"
           placeholder="Company Name"
@@ -423,7 +429,7 @@ function handleTabClick(e) {
     :items="vendorTabs"
   />
 
-  <VendorExpenses class="__section" />
+  <VendorExpenses class="__section" id="expenses" />
   <VendorPayments class="__section" id="payments" />
   <VendorExpensesItems class="__section" id="expense-items" />
   <VendorContacts class="__section" />

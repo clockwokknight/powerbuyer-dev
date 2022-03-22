@@ -21,7 +21,7 @@ const initialForm = {
   check_number: "",
   amount: 0,
   type: null,
-  payment_date: dayjs().format("YYYY-MM-DD"),
+  payment_date: dayjs().valueOf(),
   invoice_number: "",
   account_number: "",
   ach_transfer_number: "",
@@ -144,6 +144,7 @@ const rules = {
   },
   payment_date: {
     required: true,
+    type: "number",
     message: "Please enter a valid Date",
     trigger: ["input", "blur"],
   },
@@ -215,6 +216,7 @@ async function submitForm() {
     const obj = clone(form.value);
     // obj.recipient_type = 1;
     obj.recipient_id = routeParamId.value;
+    obj.payment_date = dayjs(form.value.payment_date).format("YYYY-MM-DD");
     obj.payment_invoices = obj.payment_invoices.map((inv) =>
       omit(inv, ["balance"])
     );
@@ -347,8 +349,8 @@ const onInvoiceSelect = (val, index) => {
       <div class="sm:grid sm:grid-cols-2 sm:gap-x-5">
         <n-form-item label="Payment Date" path="payment_date">
           <n-date-picker
-            v-model:formatted-value="form.payment_date"
-            value-format="yyyy-MM-dd"
+            v-model:value="form.payment_date"
+            format="MM/dd/yyyy"
             class="w-full"
           />
         </n-form-item>

@@ -1,6 +1,7 @@
 <script setup>
 import { getAllLanes } from "@/hooks/lanes";
-import { computed, reactive, ref } from "vue";
+import { NTag } from "naive-ui";
+import { computed, h, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
 const route = useRoute();
 const filter = reactive({
@@ -66,7 +67,7 @@ const columns = computed(() => [
   },
   {
     title: "Body",
-    key: "age",
+    key: "deal.body",
   },
   {
     title: "Mileage",
@@ -91,7 +92,27 @@ const columns = computed(() => [
   },
   {
     title: "Color",
-    key: "address",
+    key: "deal.vehicle.interior_color",
+    render(row) {
+      const vehicleColor = (color, type) =>
+        color
+          ? h(
+              NTag,
+              {
+                type: "info",
+                style: {
+                  marginRight: "6px",
+                },
+              },
+              { default: () => `${type}: ${color.color}` }
+            )
+          : h("div");
+
+      return [
+        vehicleColor(row.deal.vehicle.interior_color, "interior"),
+        vehicleColor(row.deal.vehicle.exterior_color, "exterior"),
+      ];
+    },
   },
   {
     title: "Purchased Date",
@@ -102,17 +123,13 @@ const columns = computed(() => [
     key: "deal.vin",
   },
   {
-    title: "T",
-    key: "address",
-  },
-  {
     title: "Dealer",
     key: "deal.dealer.name",
   },
-  {
-    title: "Designation Code",
-    key: "age",
-  },
+  // {
+  //   title: "Designation Code",
+  //   key: "age",
+  // },
   // {
   //   title: "Buyer Code",
   //   key: "address",
@@ -164,7 +181,7 @@ const handlePageChange = (current_page) => {
   <!-- Main Tabs App Content -->
   <div class="h-screen w-[calc(100%-60px)]">
     <!-- Main Body Content-->
-    <div class="h-screen px-5 py-5 overflow-auto bg-white">
+    <div class="h-screen overflow-auto bg-white px-5 py-5">
       <!-- Body Content -->
       <div class="mb-3">
         <h1 class="text-xl font-bold uppercase">Lane Numberings</h1>
