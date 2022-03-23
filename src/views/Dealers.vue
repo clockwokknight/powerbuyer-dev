@@ -123,7 +123,7 @@ watch(
           class="text-[10px] pl-16 duration-[500ms]"
           :class="!listActive ? 'opacity-0' : 'opacity-50'"
         >
-          <b>{{ vendors?.pages[0].data.length }}</b> Active Vendors
+          <b>{{ dealers?.pages[0].data.length }}</b> Active Dealers
         </div>
         <div class="!bg-black">
           <div
@@ -154,7 +154,7 @@ watch(
       "
       class="duration-[500ms] w-[calc(100vw-60px)] bg-background_light dark:bg-background_dark"
     >
-      <PageTabs :class="global.stuck[0] && 'shadow-lg'" page-name="vendors" />
+      <PageTabs :class="global.stuck[0] && 'shadow-lg'" page-name="dealers" />
       <!-- Main Body Content-->
       <div id="main" class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
         <main id="container" class="min-h-full p-2 md:p-6">
