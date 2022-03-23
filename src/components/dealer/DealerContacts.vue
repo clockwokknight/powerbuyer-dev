@@ -153,8 +153,8 @@ const onDeleteExpenseItem = (id) => {
 };
 </script>
 <template>
-  <div class="mt-4 px-4">
-    <div class="justify-end pb-4">
+  <div class="mt-4 px-4 bg-white dark:bg-foreground_dark rounded-[3px]">
+    <div class="justify-end py-4">
       <n-button @click="showCreateForm">
         <n-icon>
           <svg
@@ -180,7 +180,7 @@ const onDeleteExpenseItem = (id) => {
       @delete="onDeleteExpenseItem"
     />
 
-    <div class="rounded-round border-2 py-8 px-8">
+    <div class="rounded-round py-8 px-8">
       <div><p class="pb-8 text-2xl font-bold">Contacts</p></div>
       <n-data-table
         class="rounded-round"

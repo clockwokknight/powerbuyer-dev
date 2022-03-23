@@ -7,7 +7,7 @@ defineEmits(["click:tab"]);
   <li
     v-for="dealer in dealers"
     :key="dealer?.id"
-    class="border-b px-4 py-4 even:bg-[#f8f8fa] hover:bg-gray-100"
+    class="border-b dark:border-[0px] px-4 py-4 odd:bg-[#ffffff] dark:odd:bg-foreground_dark even:bg-[#f8f8fa] dark:even:bg-foreground_dark hover:bg-gray-100 dark:hover:bg-background_dark"
     @click="$emit('click:tab', dealer)"
   >
     <router-link
