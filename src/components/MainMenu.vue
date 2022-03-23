@@ -309,7 +309,7 @@ watch(
               </svg>
             </li>
           </router-link>
-          <!--router-link to="/dealers">
+          <router-link to="/dealers">
             <li content="Dealers" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
                 width="549"
@@ -340,7 +340,7 @@ watch(
                 />
               </svg>
             </li>
-          </router-link-->
+          </router-link>
           <router-link to="/system">
             <li content="More Items" v-tippy="{ placement: 'right', duration: 50 }">
               <img src="/icons/OverflowMenuVertical.svg" />

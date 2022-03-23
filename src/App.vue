@@ -40,7 +40,6 @@ onMounted(() => {
               <MainMenu />
               <router-view />
             </section>
-            <VueQueryDevTools />
           </n-dialog-provider>
         </n-notification-provider>
       </n-message-provider>
