@@ -52,20 +52,8 @@ const form = ref({
 
 const dealerTabs = ref([
   {
-    title: "Tab1",
-    value: "#tab1",
-  },
-  {
-    title: "Tab2",
-    value: "#tab2",
-  },
-  {
-    title: "Tab3",
-    value: "#tab3",
-  },
-  {
-    title: "Tab4",
-    value: "#tab4",
+    title: "CONTACTS",
+    value: "#dealer-contacts",
   },
 ]);
 
@@ -94,7 +82,7 @@ function handleTabClick(e) {
 <template>
   <div
     id="details"
-    class="__section __vendor-card mt-4 grid grid-cols-12 rounded border-2 bg-white p-6 dark:border-0 dark:bg-[#25272A]"
+    class="__section __vendor-card mt-4 grid grid-cols-12 rounded border-2 bg-white p-6 dark:border-0 dark:bg-foreground_dark"
   >
     <!-- left side -->
     <div class="__form col-span-12 flex flex-col justify-between md:col-span-12">
@@ -329,6 +317,16 @@ function handleTabClick(e) {
       </div>
     </div>
   </div>
+
+  <Tabs
+    id="__subtabs"
+    type="basic"
+    ref="dealerTab"
+    class="bg-foreground_light dark:bg-foreground_dark sticky top-[-2px] left-0 z-40 mt-[24px] w-full rounded-round duration-300"
+    :items="dealerTabs"
+  />
+
+  <DealerContacts id="dealer-contacnts" />
 </template>
 
 <style lang="scss">
