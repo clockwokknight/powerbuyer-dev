@@ -19,7 +19,7 @@ const route = useRoute();
 const showDrawer = ref(false);
 const formRef = ref(null);
 const initialForm = {
-  vendor_id: null,
+  vendor_id: parseInt(route.params?.id),
   amount_due: 0,
   invoice_number: "",
   due_date: dayjs().add(30, "day").valueOf(),
@@ -39,25 +39,26 @@ const initialForm = {
 const form = ref(clone(initialForm));
 
 const vendor_id = ref(route.params?.id);
-
 watch(
-  showDrawer,
-  (newValue) => {
-    if (newValue) {
-      if (route.params?.id) {
-        vendor_id.value = route.params?.id;
-        form.value.vendor_id = parseInt(route.params?.id);
-      }
-    } else {
-      form.value = clone(initialForm);
+  () => route.params,
+  (toParams) => {
+    if (toParams?.id) {
+      vendor_id.value = route.params?.id;
     }
   },
   { immediate: true }
 );
+watch(
+  showDrawer,
+  (newValue) => {
+    if (newValue) {
+      form.value.vendor_id = parseInt(route.params?.id);
+    } else form.value = clone(initialForm);
+  },
+  { immediate: true }
+);
 
-const { data: expenseItems } = getVendorExpenseItems(vendor_id, {
-  enabled: showDrawer,
-});
+const { data: expenseItems } = getVendorExpenseItems(vendor_id);
 
 const expenseItemsOptions = computed(() =>
   [{ label: "+ Add new", value: "add" }].concat(
@@ -126,6 +127,7 @@ const rules = {
   expenses: {
     expense_date: {
       required: true,
+      type: "number",
       message: "Please pick a date",
       trigger: ["blur", "change"],
     },

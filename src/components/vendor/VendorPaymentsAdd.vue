@@ -1,5 +1,13 @@
 <script setup>
-import { computed, ref, toRaw, unref, watch, watchPostEffect } from "vue";
+import {
+  computed,
+  ref,
+  toRaw,
+  unref,
+  watch,
+  watchPostEffect,
+  watchEffect,
+} from "vue";
 import { useMessage } from "naive-ui";
 import dayjs from "dayjs";
 import { clone, omit, pick } from "@/lib/helper";
@@ -180,15 +188,17 @@ const { data: invoicesData, isLoading: expensesDataLoading } =
 
 const invoiceDataOptions = ref([]);
 
-watchPostEffect(() => {
+watchEffect(() => {
   if (invoicesData.value)
-    invoiceDataOptions.value = invoicesData.value?.map((inv) => ({
-      label: inv.invoice_number,
-      value: inv.id,
-      disabled: form.value.payment_invoices.some(
-        (invoice) => invoice.vendor_invoice_id === inv.id
-      ),
-    }));
+    invoiceDataOptions.value = invoicesData.value
+      ?.filter((inv) => parseFloat(inv.balance) !== 0)
+      .map((inv) => ({
+        label: inv.invoice_number,
+        value: inv.id,
+        disabled: form.value.payment_invoices.some(
+          (invoice) => invoice.vendor_invoice_id === inv.id
+        ),
+      }));
 });
 
 const { data: gmtvLocations } = getGmtvLocations();
@@ -214,8 +224,8 @@ async function submitForm() {
   try {
     await formRef.value.validate();
     const obj = clone(form.value);
-    // obj.recipient_type = 1;
-    obj.recipient_id = routeParamId.value;
+    obj.recipient_type = 1;
+    obj.recipient_id = Number(routeParamId.value);
     obj.payment_date = dayjs(form.value.payment_date).format("YYYY-MM-DD");
     obj.payment_invoices = obj.payment_invoices.map((inv) =>
       omit(inv, ["balance"])
@@ -373,3 +383,4 @@ const onInvoiceSelect = (val, index) => {
     </n-form>
   </n-modal>
 </template>
+abel-wid

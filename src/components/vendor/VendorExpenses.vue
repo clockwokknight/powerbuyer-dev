@@ -7,6 +7,7 @@ import { clone, omit, pick } from "@/lib/helper";
 import dayjs from "dayjs";
 import { computed, h, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import VendorExpenseShow from "./VendorExpenseShow.vue";
 
 const route = useRoute();
 
@@ -47,6 +48,8 @@ const columns = [
     key: "edit",
     render(row) {
       return h(ActionButtons, {
+        showViewButton: true,
+        onView: () => showViewExpense(row),
         onEdit: () => showEditExpenseForm(row),
       });
     },
@@ -57,6 +60,12 @@ const pagination = { pageSize: 10 };
 const visibleEditForm = ref(false);
 const formRow = ref(null);
 const formDisabled = ref(false);
+const showReadOnlyInvoice = ref(false);
+
+const showViewExpense = (row) => {
+  formRow.value = clone(row);
+  showReadOnlyInvoice.value = true;
+};
 
 function showEditExpenseForm(row) {
   let obj = clone(row);
@@ -82,8 +91,9 @@ function showEditExpenseForm(row) {
 
 <template>
   <div
-    class="scroll-smooth border-[1px] mt-[24px] border-transparent dark:border-dark_border"
+    class="dark:border-dark_border mt-[24px] scroll-smooth border-[1px] border-transparent"
   >
+    <VendorExpenseShow v-model:show="showReadOnlyInvoice" :formRow="formRow" />
     <VendorExpenseEdit
       :show-drawer="visibleEditForm"
       :initial-data="formRow"
@@ -92,7 +102,7 @@ function showEditExpenseForm(row) {
     />
     <div class="font-sans">
       <div
-        class="rounded-round border-[1px] bg-white p-[24px] dark:border-0 dark:bg-foreground_dark"
+        class="rounded-round dark:bg-foreground_dark border-[1px] bg-white p-[24px] dark:border-0"
       >
         <div class="flex justify-between">
           <p class="pb-8 text-2xl font-bold">Invoices & Expenses</p>

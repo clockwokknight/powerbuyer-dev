@@ -12,13 +12,21 @@ import { getGmtvLocations } from "@/hooks/location.js";
 import { getPaymentTypes } from "@/hooks/payments.js";
 
 const props = defineProps(["showDrawer", "initialData"]);
-const emits = defineEmits(["update:showDrawer"]);
+defineEmits(["update:showDrawer"]);
 const route = useRoute();
+const queryClient = useQueryClient();
+const message = useMessage();
+const formRef = ref(null);
 
 const showDrawer = toRef(props, "showDrawer");
 watch(showDrawer, (newValue) => {
   if (newValue) {
-    form.value = { ...props.initialData };
+    form.value = {
+      ...props.initialData,
+      payment_date: dayjs(props.initialData.payment_date).valueOf(),
+    };
+  } else {
+    form.value = clone(initialForm);
   }
 });
 const initialForm = {
@@ -38,6 +46,12 @@ const initialForm = {
 const form = ref({ ...initialForm });
 
 const routeParamId = ref(route.params?.id);
+watch(
+  () => route.params,
+  (toParam) => {
+    if (toParam?.id) routeParamId.value = toParam?.id;
+  }
+);
 
 const { data: payment_types } = getPaymentTypes();
 const paymentTypeOptions = computed(() =>
@@ -45,13 +59,6 @@ const paymentTypeOptions = computed(() =>
     label: paymentType.name,
     value: paymentType.id,
   }))
-);
-
-watch(
-  () => route.params,
-  (toParam) => {
-    if (toParam?.id) routeParamId.value = toParam?.id;
-  }
 );
 
 const { data: paymentStatus } = useQuery(
@@ -149,14 +156,6 @@ const rules = {
   },
 };
 
-const message = useMessage();
-
-const formRef = ref(null);
-
-watch(showDrawer, (newValue) => {
-  form.value = newValue ? clone(props.initialData) : clone(initialForm);
-});
-
 watch(
   () => form.value?.payment_invoices,
   (newFormValue) => {
@@ -172,6 +171,7 @@ watch(
   { deep: true }
 );
 
+// Getting invoice data options
 const { data: invoicesData } = vendorInvoices(routeParamId);
 const invoiceDataOptions = ref([]);
 watchPostEffect(() => {
@@ -184,12 +184,10 @@ watchPostEffect(() => {
         (invoice) => invoice.vendor_invoice_id === inv.id
       ),
     }));
-  } else {
-    console.warn("fetched debug data");
-    console.log(invoicesData);
   }
 });
 
+// GMTV locations select options
 const { data: gmtvLocations } = getGmtvLocations();
 const gmtvLocationsOptions = computed(() =>
   gmtvLocations.value?.map((location) => ({
@@ -197,10 +195,11 @@ const gmtvLocationsOptions = computed(() =>
     value: location.id,
   }))
 );
-const queryClient = useQueryClient();
-const { mutate: createPayment } = useMutation((data) => axios.post("/update", data), {
+
+// Payment Update Mutation
+const { mutate: updatePayment } = useMutation((data) => axios.post("/update", data), {
   onSuccess() {
-    message.success("Payment has been created");
+    message.success("Payment has been updated");
     queryClient.invalidateQueries(["payments_vendor", routeParamId.value]);
     showDrawer.value = false;
   },
@@ -211,10 +210,10 @@ async function submitForm() {
     await formRef.value.validate();
     const obj = clone(form.value);
     // obj.recipient_type = 1;
-    obj.recipient_id = routeParamId.value;
+    // obj.recipient_id = routeParamId.value;
     obj.payment_date = dayjs(form.value.payment_date).format("YYYY-MM-DD");
 
-    createPayment(obj);
+    updatePayment(obj);
   } catch (e) {
     if (Array.isArray(e)) {
       e.flat().forEach((err) => message.error(err.message));
