@@ -10,16 +10,17 @@ import MaskedCustomInput from "@/components/common/MaskedCustomInput.vue";
 
 const emit = defineEmits(["update:value", "focus", "scroll", "edit", "save", "cancel"]);
 
-const props = defineProps([
-  "validate",
-  "value",
-  "type",
-  "label",
-  "placeholder",
-  "filterable",
-  "options",
-  "mask",
-]);
+const props = defineProps({
+  basic: Boolean,
+  validate: Array,
+  value: [String, Number],
+  type: String,
+  label: String,
+  placeholder: String,
+  filterable: Boolean,
+  options: Array,
+  mask: String,
+});
 
 const { text, copy } = useClipboard();
 const global = useGlobalState();
@@ -103,15 +104,9 @@ const validators = {
   },
 };
 
-watch(
-  () => props.value,
-  (newVal) => {
-    isValid.value = validation(newVal);
-  }
-);
-
 onMounted(() => {
   if (!props.validate) isValid.value = true;
+  if (props.basic) editing.value = true;
 });
 
 function validation(input) {
@@ -132,6 +127,7 @@ function edit() {
 
 function cancel() {
   emit("cancel");
+  focusing.value = false;
   editing.value = false;
   done.value = true;
   setTimeout(() => (done.value = false), 500);
@@ -157,6 +153,7 @@ function save() {
 
 function handleInput(e) {
   emit("update:value", e);
+  isValid.value = validation(e);
 }
 
 function handleCopy() {
@@ -241,7 +238,18 @@ function handleCopy() {
             }
         `"
         >
-          <div class="__inputs w-full">
+          <div
+            @click="
+              if (basic) {
+                edit();
+                focusing = true;
+              }
+            "
+            @mouseenter="basic && type === 'select' && edit()"
+            @mouseleave="basic && type === 'select' && !focusing && cancel()"
+            class="__inputs w-full"
+            :class="basic && 'cursor-text'"
+          >
             <masked-custom-input
               ref="inputEl"
               :value="value"
@@ -250,7 +258,7 @@ function handleCopy() {
               :masked="type !== 'select'"
               :mask="mask"
               :options="options"
-              :placeholder="placeholder"
+              :placeholder="placeholder || mask"
               @input="(e) => handleInput(e)"
               @focus="(e) => $emit('focus', e)"
               @blur="cancel"
@@ -258,6 +266,7 @@ function handleCopy() {
           </div>
 
           <div
+            v-if="!basic"
             class="__buttons flex items-center justify-center duration-200"
             :class="`
                 ${(hoverInput || editing || type === 'header') && '!opacity-100'}
