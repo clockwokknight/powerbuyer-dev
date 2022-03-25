@@ -3,9 +3,20 @@ import { getExpenseTypes, getVendorExpenseItems } from "@/hooks/expense";
 import { getAllDeals, searchDealByVin } from "@/hooks/deals";
 import { computed, ref } from "vue";
 import { useDebounce } from "@vueuse/core";
-import { pick } from "@/lib/helper";
+import { omit, pick } from "@/lib/helper";
 import CurrencyInput from "@/components/common/CurrencyInput.vue";
 
+const props = defineProps({
+  expense: {
+    type: Object,
+    required: true,
+  },
+  vendor_id: {
+    type: String,
+    required: true,
+  },
+});
+const emits = defineEmits(["submit"]);
 const isLoading = false;
 const searchVinSelect = ref("");
 const debouncedSearchVin = useDebounce(searchVinSelect, 500);
@@ -36,18 +47,17 @@ const expenseItemsOptions = computed(() =>
   )
 );
 
-const props = defineProps(["expense", "vendor_id"]);
 const initialForm = {
   expense_date: Date.now(),
   deal_id: null,
   name: "",
   description: "",
-  files: [],
+  // files: [],
   amount: 0,
   showSelect: true,
   type: null,
 };
-const form = ref({ ...initialForm });
+const form = ref({ ...initialForm, ...props.expense });
 
 // Queries
 const {
@@ -159,10 +169,14 @@ const onExpenseSelect = (value) => {
     showSelect: false,
   };
 };
+
+const onSubmitForm = () => {
+  emits("submit", omit(form.value, ["showSelect"]));
+};
 </script>
 
 <template>
-  <n-form :model="form" :rules="rules">
+  <n-form :model="form" @submit.prevent="onSubmitForm" :rules="rules">
     <div class="sm:grid sm:grid-cols-2 sm:justify-between sm:gap-x-5">
       <n-form-item label="VIN" path="deal_id">
         <n-select
@@ -218,5 +232,8 @@ const onExpenseSelect = (value) => {
         <CurrencyInput v-model="form.amount" :loading="isLoading" />
       </n-form-item>
     </div>
+    <n-space>
+      <n-button attr-type="submit">Save</n-button>
+    </n-space>
   </n-form>
 </template>

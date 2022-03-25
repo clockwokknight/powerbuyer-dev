@@ -19,3 +19,8 @@ export const getStates = () =>
       refetchOnMount: false,
     }
   );
+
+export const getInvoiceStatus = () =>
+  useQuery("invoice_status", () =>
+    axios.get("/api/invoice_status").then((res) => res.data)
+  );

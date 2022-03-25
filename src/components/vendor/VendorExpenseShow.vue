@@ -28,14 +28,25 @@ const columns = [
   {
     title: "VIN",
     key: "deal.vin",
+    width: "200px",
+    fixed: "left",
   },
   {
     title: "Item",
     key: "name",
+    width: "100",
   },
   {
     title: "Description",
     key: "description",
+    width: "200",
+    render(row) {
+      return h(
+        "span",
+        { class: "text-[8px] text-center" },
+        { default: () => row.description }
+      );
+    },
   },
   {
     title: "DOS",
@@ -49,6 +60,10 @@ const columns = [
         }
       );
     },
+  },
+  {
+    title: "Type",
+    key: "expense_type.name",
   },
   {
     title: "Amount",
@@ -79,6 +94,7 @@ const columns = [
     },
   },
 ];
+const onSubmitExpense = (expense) => {};
 </script>
 <template>
   <n-modal
@@ -124,6 +140,8 @@ const columns = [
         :columns="columns"
         striped
         class="pt-2"
+        :max-height="500"
+        :scroll-x="1300"
         row-class-name="group py-2"
       />
 
@@ -165,6 +183,10 @@ const columns = [
     :title="(currentExpense ? 'Edit' : 'Add') + ' Expense'"
     v-model:show="showExpenseModal"
   >
-    <expense-modal :expense="currentExpense" :vendor_id="vendor_id" />
+    <expense-modal
+      :expense="currentExpense"
+      :vendor_id="vendor_id"
+      @save="onSubmitExpense"
+    />
   </n-modal>
 </template>
