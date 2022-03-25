@@ -1,13 +1,12 @@
 <script setup>
-import { ref, watch } from "vue";
 import { useQuery } from "vue-query";
+import axios from "axios";
 import { useDebounce } from "@vueuse/core";
+import { ref, watch } from "vue";
 import { getVendors } from "@/hooks/vendor";
 import { useGlobalState } from "@/store/global";
 import { useTabsViewStore } from "@/store/tabs";
 import { useVendors } from "@/store/vendors";
-import axios from "axios";
-
 import AddVendor from "@/components/vendor/AddVendor.vue";
 import PageTabs from "@/components/PageTabs.vue";
 import VendorList from "@/components/vendor/VendorList.vue";
