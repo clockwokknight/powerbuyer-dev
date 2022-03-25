@@ -70,7 +70,7 @@ const { data: paymentTable, isLoading } = useQuery(
   ({ queryKey }) =>
     axios
       .get("/payments/vendor/" + queryKey[1])
-      .then((res) => (res.data ? res.data : []))
+      .then((res) => (res.data ? res.data.data : []))
 );
 
 watch(
@@ -84,14 +84,9 @@ watch(
 
 <template>
   <div class="rounded-round bordered mt-[24px] font-sans">
-    <VendorPaymentEdit
-      :initial-data="formRow"
-      v-model:show-drawer="visibleEditForm"
-    />
+    <VendorPaymentEdit :initial-data="formRow" v-model:show-drawer="visibleEditForm" />
 
-    <div
-      class="dark:bg-foreground_dark border-[1px] bg-white p-[24px] dark:border-0"
-    >
+    <div class="dark:bg-foreground_dark border-[1px] bg-white p-[24px] dark:border-0">
       <div class="flex justify-between">
         <p class="pb-8 text-2xl font-bold">Payments</p>
         <VendorPaymentsAdd />

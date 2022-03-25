@@ -1,6 +1,7 @@
 <script setup>
 import dayjs from "dayjs";
 import { h } from "vue";
+import VendorExpenseAction from "./VendorExpenseAction.vue";
 
 defineProps({
   showDrawer: {
@@ -39,6 +40,28 @@ const columns = [
       );
     },
   },
+  {
+    title: "Amount",
+    key: "amount",
+    render(row) {
+      return h(
+        "span",
+        {
+          class:
+            "font-semibold bg-gray-800/10 border-2 rounded border-gray-500 px-3 py-2",
+        },
+        {
+          default: () => `$${row.amount}`,
+        }
+      );
+    },
+  },
+  {
+    key: "action",
+    render(row) {
+      return h(VendorExpenseAction);
+    },
+  },
 ];
 </script>
 <template>
@@ -64,9 +87,9 @@ const columns = [
         </div>
       </section>
       <section class="space-y-3">
-        <button class="bg-primary/10 border-primary border px-4 py-1 font-bold uppercase">
+        <div class="bg-primary/10 border-primary border px-4 py-1 font-bold uppercase">
           open
-        </button>
+        </div>
         <div class="text-right">
           <span class="block text-xs uppercase">Due Date</span>
           <span class="text-sm font-bold">{{ formRow.due_date }}</span>
@@ -92,12 +115,31 @@ const columns = [
           <h5 class="font-medium uppercase">Inv Total</h5>
           <span class="text-lg font-bold">${{ formRow.amount_due }}</span>
         </div>
-
-        <div class="">
-          <h5 class="font-medium uppercase">Payments</h5>
-          <!-- <span>{{formRow?.payment_invoices}}</span> -->
+        <div class="space-y-2 px-4 pt-5">
+          <div>
+            <h5 class="font-medium uppercase">Payments</h5>
+            <span class="text-lg font-bold">${{ formRow.amount_paid }}</span>
+          </div>
+          <div>
+            <h5 class="font-medium uppercase">Balance</h5>
+            <span class="text-lg font-bold">${{ formRow.balance }}</span>
+          </div>
         </div>
       </section>
     </main>
+    <template #footer>
+      <div class="flex gap-x-5">
+        <button
+          class="border-primary bg-primary/40 rounded border-2 px-8 py-3 text-sm font-bold text-white"
+        >
+          SAVE
+        </button>
+        <button
+          class="border-primary rounded border-2 px-5 py-3 text-sm font-bold text-white"
+        >
+          DELETE
+        </button>
+      </div>
+    </template>
   </n-modal>
 </template>

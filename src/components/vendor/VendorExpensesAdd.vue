@@ -27,7 +27,7 @@ const initialForm = {
     {
       expense_date: Date.now(),
       deal_id: null,
-      // images: [],
+      files: [],
       name: "",
       description: "",
       amount: 0,
@@ -94,7 +94,10 @@ watch(
   () => form.value?.expenses,
   (newFormValue) => {
     if (newFormValue.length > 0) {
-      form.value.amount_due = newFormValue?.reduce((prev, curr) => prev + curr.amount, 0);
+      form.value.amount_due = newFormValue?.reduce(
+        (prev, curr) => prev + curr.amount,
+        0
+      );
     } else {
       form.value.amount_due = 0;
     }
@@ -177,9 +180,8 @@ const dealOptions = computed(() =>
 const searchVinSelect = ref("");
 const debouncedSearchVin = useDebounce(searchVinSelect, 500);
 
-const { data: searchDealResult, isLoading: isVendorSearchLoading } = searchDealByVin(
-  debouncedSearchVin
-);
+const { data: searchDealResult, isLoading: isVendorSearchLoading } =
+  searchDealByVin(debouncedSearchVin);
 const searchVinResultOptions = computed(() =>
   searchDealResult.value?.map((deal) => ({
     value: deal.id,
@@ -192,7 +194,7 @@ const handleSearch = (query) => {
 };
 
 const { mutateAsync: createExpense, isLoading } = useMutation(
-  (data) => axios.post("/vendor_invoices", { ...data, amount_paid: 0 }),
+  (data) => axios.post("/vendor_invoices", data),
   {
     onSuccess() {
       queryClient.invalidateQueries(["vendorInvoices", vendor_id.value]);
@@ -206,18 +208,20 @@ async function submitExpense() {
     await formRef.value.validate();
     // const modifiedForm = omit(form.value, ['cost'])
     const modifiedForm = { ...form.value };
+    modifiedForm.amount_paid = 0;
     modifiedForm.due_date = convertDate(modifiedForm.due_date);
-    modifiedForm.expenses = modifiedForm.expenses.map((item) =>
-      objectFilter(
+    modifiedForm.expenses = modifiedForm.expenses.map((item) => {
+      const obj = objectFilter(
         {
-          ...omit(item, ["showSelect", "expense_type_id"]),
+          ...omit(item, ["showSelect", "expense_type_id", "files"]),
           type: String(item.expense_type_id),
           expense_date: convertDate(item.expense_date),
         },
         (key, value) => value
-      )
-    );
-    console.log({ modifiedForm });
+      );
+
+      return obj;
+    });
     await createExpense(modifiedForm);
     showDrawer.value = false;
 
@@ -225,6 +229,7 @@ async function submitExpense() {
 
     // onCreateExpense(modifiedForm);
   } catch (e) {
+    console.error(e);
     message.error("Invalid data");
   }
 }
@@ -263,6 +268,18 @@ const onCreateExpenseItems = () => {
 const handleUploadChange = (data) => {
   console.log(data.fileList);
 };
+
+/**
+ * Update list of files
+ * @param {import('naive-ui').UploadFileInfo[]} fileList
+ * @param {number} index
+ */
+const onFileListUpdate = (fileList, index) => {
+  form.value.expenses[index].files = fileList.map((file) => ({
+    ...file,
+    status: "finished",
+  }));
+};
 </script>
 <template>
   <n-button class="w-[220px]" @click="showDrawer = true">
@@ -280,7 +297,11 @@ const handleUploadChange = (data) => {
     </n-icon>
     Create Invoice
   </n-button>
-  <n-modal preset="card" class="custom-modal max-w-screen-md" v-model:show="showDrawer">
+  <n-modal
+    preset="card"
+    class="custom-modal max-w-screen-md"
+    v-model:show="showDrawer"
+  >
     <n-form
       :model="form"
       :rules="rules"
@@ -364,9 +385,17 @@ const handleUploadChange = (data) => {
               @keydown.enter.prevent
             />
           </n-form-item>
-          <!-- <n-form-item label="Upload Images">
-            <n-upload multiple @change="handleUploadChange" list-type="image-card" />
-          </n-form-item> -->
+          <n-form-item label="Upload Images">
+            <n-upload
+              multiple
+              :default-upload="false"
+              :file-list="form.expenses[index].files"
+              @update:file-list="
+                (fileList) => onFileListUpdate(fileList, index)
+              "
+              list-type="image-card"
+            />
+          </n-form-item>
           <n-form-item label="Description">
             <n-input
               type="textarea"

@@ -83,7 +83,7 @@ function showEditExpenseForm(row) {
   );
   obj = omit(obj, ["payments", "balance", "amount_paid", "children", "vendor_name"]);
 
-  formDisabled.value = Boolean(row?.payments.length);
+  // formDisabled.value = Boolean(row?.payments.length);
   formRow.value = obj;
   visibleEditForm.value = true;
 }

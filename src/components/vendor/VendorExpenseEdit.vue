@@ -201,6 +201,7 @@ const rules = {
   expenses: {
     expense_date: {
       required: true,
+      type: "number",
       message: "Date is required",
       trigger: ["blur", "change"],
     },
@@ -416,7 +417,7 @@ const customRequest = ({
           </div>
           <n-form-item label="Upload Images">
             <n-upload
-              action="https://gmtvinventory.com/api/expenses/file_upload"
+              action="https://gmtvinventory.com/api/expenses/expense_files"
               multiple
               :data="{
                 expense_id: form.expenses[index].id,
