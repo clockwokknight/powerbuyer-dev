@@ -8,7 +8,7 @@ import { useVendors } from "../store/vendors";
 
 const route = useRoute();
 
-const hasList = ["SingleVendor", "BuyerHome"];
+const hasList = ["Vendor", "Buyers Overview"];
 
 const userMenu = [
   {

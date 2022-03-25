@@ -65,7 +65,7 @@ export const router = createRouter({
       children: [
         {
           path: "",
-          name: "BuyerHome",
+          name: "Buyers Overview",
           component: BuyerHome,
         },
         {
@@ -97,12 +97,12 @@ export const router = createRouter({
       children: [
         {
           path: "",
-          name: "VendorHome",
+          name: "Vendors Overview",
           component: VendorHome,
         },
         {
           path: ":id",
-          name: "SingleVendor",
+          name: "Vendor",
           component: Vendor,
         },
       ],
@@ -173,6 +173,11 @@ router.beforeEach(async (to, from, next) => {
   loading && loading.start();
   next();
   loading && loading.finish();
+  console.clear();
+  console.log(to.name);
+  document.title = window.innerWidth <= 768 
+    ? `${to.name} – PowerBuyer (Mobile)` 
+    : `${to.name} – PowerBuyer`;
 });
 
 router.afterEach(() => {
