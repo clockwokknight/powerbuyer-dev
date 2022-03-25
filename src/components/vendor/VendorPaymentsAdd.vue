@@ -1,13 +1,5 @@
 <script setup>
-import {
-  computed,
-  ref,
-  toRaw,
-  unref,
-  watch,
-  watchPostEffect,
-  watchEffect,
-} from "vue";
+import { computed, ref, toRaw, unref, watch, watchPostEffect, watchEffect } from "vue";
 import { useMessage } from "naive-ui";
 import dayjs from "dayjs";
 import { clone, omit, pick } from "@/lib/helper";
@@ -35,9 +27,7 @@ const initialForm = {
   ach_transfer_number: "",
   notes: "",
   gmtv_location_id: null,
-  payment_invoices: [
-    { vendor_invoice_id: null, payment_amount: 0, balance: 0 },
-  ],
+  payment_invoices: [{ vendor_invoice_id: null, payment_amount: 0, balance: 0 }],
 };
 const form = ref({ ...initialForm });
 
@@ -137,15 +127,10 @@ const rules = {
         if (value <= 0.01) {
           return new Error("Payment Amount is required");
         }
-        const payment_invoicesIdx = parseInt(
-          /(.*)([\d])(.*)/.exec(rule.field)[2]
-        );
-        const balance =
-          form.value.payment_invoices[payment_invoicesIdx].balance;
+        const payment_invoicesIdx = parseInt(/(.*)([\d])(.*)/.exec(rule.field)[2]);
+        const balance = form.value.payment_invoices[payment_invoicesIdx].balance;
         if (value > balance) {
-          return new Error(
-            "Payment can't exceed current invoice balance $" + balance
-          );
+          return new Error("Payment can't exceed current invoice balance $" + balance);
         }
       },
     },
@@ -165,6 +150,11 @@ const formRef = ref(null);
 watch(showDrawer, (newValue) => {
   if (newValue) {
     form.value = clone(initialForm);
+    paymentStatusOptions.value.forEach((status) => {
+      if (status.label?.toLowerCase() === "draft") {
+        form.value.payment_status_id = status.value;
+      }
+    });
   }
 });
 
@@ -183,8 +173,9 @@ watch(
   { deep: true }
 );
 
-const { data: invoicesData, isLoading: expensesDataLoading } =
-  vendorInvoices(routeParamId);
+const { data: invoicesData, isLoading: expensesDataLoading } = vendorInvoices(
+  routeParamId
+);
 
 const invoiceDataOptions = ref([]);
 
@@ -209,16 +200,13 @@ const gmtvLocationsOptions = computed(() =>
   }))
 );
 const queryClient = useQueryClient();
-const { mutate: createPayment } = useMutation(
-  (data) => axios.post("/payments", data),
-  {
-    onSuccess() {
-      message.success("Payment has been created");
-      queryClient.invalidateQueries(["payments_vendor", routeParamId.value]);
-      showDrawer.value = false;
-    },
-  }
-);
+const { mutate: createPayment } = useMutation((data) => axios.post("/payments", data), {
+  onSuccess() {
+    message.success("Payment has been created");
+    queryClient.invalidateQueries(["payments_vendor", routeParamId.value]);
+    showDrawer.value = false;
+  },
+});
 
 async function submitForm() {
   try {
@@ -227,9 +215,7 @@ async function submitForm() {
     obj.recipient_type = 1;
     obj.recipient_id = Number(routeParamId.value);
     obj.payment_date = dayjs(form.value.payment_date).format("YYYY-MM-DD");
-    obj.payment_invoices = obj.payment_invoices.map((inv) =>
-      omit(inv, ["balance"])
-    );
+    obj.payment_invoices = obj.payment_invoices.map((inv) => omit(inv, ["balance"]));
     createPayment(obj);
   } catch (e) {
     if (Array.isArray(e)) {
@@ -244,9 +230,7 @@ const onCreatePaymentInvoice = () => {
   };
 };
 const onInvoiceSelect = (val, index) => {
-  const vendor_invoiceIdx = invoicesData.value.findIndex(
-    (inv) => inv.id === val
-  );
+  const vendor_invoiceIdx = invoicesData.value.findIndex((inv) => inv.id === val);
   const vendor_invoice = invoicesData.value[vendor_invoiceIdx];
 
   form.value.payment_invoices[index] = {
@@ -269,19 +253,8 @@ const onInvoiceSelect = (val, index) => {
     </n-icon>
     Add Payment
   </n-button>
-  <n-modal
-    v-model:show="showDrawer"
-    preset="card"
-    size="huge"
-    class="max-w-screen-md"
-  >
-    <n-form
-      :model="form"
-      :label-width="90"
-      :rules="rules"
-      size="medium"
-      ref="formRef"
-    >
+  <n-modal v-model:show="showDrawer" preset="card" size="huge" class="max-w-screen-md">
+    <n-form :model="form" :label-width="90" :rules="rules" size="medium" ref="formRef">
       <div class="sm:grid sm:grid-cols-2 sm:gap-x-5">
         <n-form-item label="GMTV print location" path="gmtv_location_id">
           <n-select
@@ -299,11 +272,7 @@ const onInvoiceSelect = (val, index) => {
       </div>
       <div class="sm:grid sm:grid-cols-2 sm:gap-x-5">
         <n-form-item label="Check Number" path="check_number">
-          <n-input
-            type="text"
-            clearable
-            v-model:value.trim="form.check_number"
-          />
+          <n-input type="text" clearable v-model:value.trim="form.check_number" />
         </n-form-item>
         <n-form-item label="Account Number" path="account_number">
           <n-input v-model:value="form.account_number" clearable />
@@ -311,11 +280,7 @@ const onInvoiceSelect = (val, index) => {
       </div>
       <div class="sm:grid sm:grid-cols-2 sm:gap-x-5">
         <n-form-item label="Payment Type" path="type">
-          <n-select
-            filterable
-            :options="paymentTypeOptions"
-            v-model:value="form.type"
-          />
+          <n-select filterable :options="paymentTypeOptions" v-model:value="form.type" />
         </n-form-item>
         <n-form-item label="ACH transfer Number">
           <n-input v-model:value="form.ach_transfer_number" />
@@ -350,9 +315,7 @@ const onInvoiceSelect = (val, index) => {
             :rule="rules.payment_invoices.payment_amount"
             label="Payment Amount"
           >
-            <CurrencyInput
-              v-model="form.payment_invoices[index].payment_amount"
-            />
+            <CurrencyInput v-model="form.payment_invoices[index].payment_amount" />
           </n-form-item>
         </div>
       </n-dynamic-input>
@@ -377,9 +340,7 @@ const onInvoiceSelect = (val, index) => {
         <n-input type="textarea" clearable v-model:value="form.notes" />
       </n-form-item>
 
-      <n-button attr-type="submit" size="large" @click="submitForm"
-        >Add</n-button
-      >
+      <n-button attr-type="submit" size="large" @click="submitForm">Add</n-button>
     </n-form>
   </n-modal>
 </template>

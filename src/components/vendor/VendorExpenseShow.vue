@@ -1,9 +1,10 @@
 <script setup>
 import dayjs from "dayjs";
-import { h } from "vue";
-import VendorExpenseAction from "./VendorExpenseAction.vue";
+import { h, ref, watch } from "vue";
+import VendorExpenseAction from "./invoice/VendorExpenseAction.vue";
+import ExpenseModal from "./invoice/ExpenseModal.vue";
 
-defineProps({
+const props = defineProps({
   showDrawer: {
     type: Boolean,
     default: false,
@@ -13,6 +14,15 @@ defineProps({
   },
 });
 defineEmits(["update:showDrawer"]);
+watch(
+  () => props.showDrawer,
+  () => {
+    console.log(props.formRow);
+  }
+);
+const showExpenseModal = ref(false);
+const currentExpense = ref(null);
+const vendor_id = ref();
 
 const columns = [
   {
@@ -43,7 +53,7 @@ const columns = [
   {
     title: "Amount",
     key: "amount",
-    render(row) {
+    render(row, index) {
       return h(
         "span",
         {
@@ -59,7 +69,13 @@ const columns = [
   {
     key: "action",
     render(row) {
-      return h(VendorExpenseAction);
+      return h(VendorExpenseAction, {
+        onAdd: () => {
+          showExpenseModal.value = true;
+          vendor_id.value = props.formRow.vendor[0].id;
+          currentExpense.value = null;
+        },
+      });
     },
   },
 ];
@@ -69,6 +85,7 @@ const columns = [
     preset="card"
     class="max-w-screen-lg"
     :show="showDrawer"
+    v-bind="$attrs"
     @update:show="$emit('update:showDrawer')"
   >
     <header class="flex content-center justify-between">
@@ -141,5 +158,13 @@ const columns = [
         </button>
       </div>
     </template>
+  </n-modal>
+  <n-modal
+    preset="card"
+    class="max-w-screen-sm"
+    :title="(currentExpense ? 'Edit' : 'Add') + ' Expense'"
+    v-model:show="showExpenseModal"
+  >
+    <expense-modal :expense="currentExpense" :vendor_id="vendor_id" />
   </n-modal>
 </template>

@@ -1,8 +1,13 @@
-<script setup></script>
+<script setup>
+defineEmits(["add", "edit", "delete"]);
+</script>
 
 <template>
   <div class="flex content-center space-x-3">
-    <button class="hover:text-primary invisible text-gray-300 group-hover:visible">
+    <button
+      class="hover:text-primary invisible text-gray-300 group-hover:visible"
+      @click="$emit('edit')"
+    >
       <n-icon>
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -19,7 +24,7 @@
       </n-icon>
     </button>
     <n-button-group>
-      <n-button round class="w-4">
+      <n-button round class="w-4" @click="$emit('delete')">
         <n-icon>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
             <line
@@ -38,9 +43,13 @@
           </svg>
         </n-icon>
       </n-button>
-      <n-button round class="w-4">
+      <n-button round class="w-4" @click="$emit('add')">
         <n-icon>
-          <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            viewBox="0 0 512 512"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               d="M256 112V400M400 256H112"
               stroke="currentColor"

@@ -91,23 +91,27 @@ const { mutate: updateExpense, isLoading: updateExpenseLoading } = useMutation(
     }),
   {
     onSuccess() {
-      queryClient.invalidateQueries(["vendorInvoices", String(vendor_id.value)]);
+      queryClient.invalidateQueries([
+        "vendorInvoices",
+        String(vendor_id.value),
+      ]);
       emits("update:show", false);
       message.success("Expense updated successfully.");
     },
   }
 );
 
-const { mutateAsync: deleteExpense, isLoading: deleteExpenseLoading } = useMutation(
-  (id) => axios.delete("/vendor_invoices/" + id),
-  {
+const { mutateAsync: deleteExpense, isLoading: deleteExpenseLoading } =
+  useMutation((id) => axios.delete("/vendor_invoices/" + id), {
     onSuccess() {
       emits("update:show", false);
-      queryClient.invalidateQueries(["vendorInvoices", String(vendor_id.value)]);
+      queryClient.invalidateQueries([
+        "vendorInvoices",
+        String(vendor_id.value),
+      ]);
       message.success("Expense deleted successfully.");
     },
-  }
-);
+  });
 
 // Queries
 const {
@@ -165,9 +169,8 @@ const expenseItemsOptions = computed(() =>
 const handleSearch = (query) => {
   searchVinSelect.value = query;
 };
-const { data: searchDealResult, isLoading: isVendorSearchLoading } = searchDealByVin(
-  debouncedSearchVin
-);
+const { data: searchDealResult, isLoading: isVendorSearchLoading } =
+  searchDealByVin(debouncedSearchVin);
 const searchVinResultOptions = computed(() =>
   searchDealResult?.value?.map((deal) => ({
     value: deal.id,
@@ -359,7 +362,11 @@ const customRequest = ({
       :disabled="isLoading || isDisabled"
     >
       <n-form-item label="Invoice Number" path="invoice_number">
-        <n-input v-model:value="form.invoice_number" disabled :loading="isLoading" />
+        <n-input
+          v-model:value="form.invoice_number"
+          disabled
+          :loading="isLoading"
+        />
       </n-form-item>
       <div class="flex flex-col gap-x-5 sm:flex-row">
         <n-form-item label="Amount Due" path="amount_due">
@@ -476,7 +483,10 @@ const customRequest = ({
               :rule="rules.expenses.amount"
               label="Amount"
             >
-              <CurrencyInput v-model="form.expenses[index].amount" :loading="isLoading" />
+              <CurrencyInput
+                v-model="form.expenses[index].amount"
+                :loading="isLoading"
+              />
             </n-form-item>
           </div>
         </div>

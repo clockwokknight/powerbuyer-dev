@@ -94,10 +94,7 @@ watch(
   () => form.value?.expenses,
   (newFormValue) => {
     if (newFormValue.length > 0) {
-      form.value.amount_due = newFormValue?.reduce(
-        (prev, curr) => prev + curr.amount,
-        0
-      );
+      form.value.amount_due = newFormValue?.reduce((prev, curr) => prev + curr.amount, 0);
     } else {
       form.value.amount_due = 0;
     }
@@ -180,8 +177,9 @@ const dealOptions = computed(() =>
 const searchVinSelect = ref("");
 const debouncedSearchVin = useDebounce(searchVinSelect, 500);
 
-const { data: searchDealResult, isLoading: isVendorSearchLoading } =
-  searchDealByVin(debouncedSearchVin);
+const { data: searchDealResult, isLoading: isVendorSearchLoading } = searchDealByVin(
+  debouncedSearchVin
+);
 const searchVinResultOptions = computed(() =>
   searchDealResult.value?.map((deal) => ({
     value: deal.id,
@@ -299,6 +297,7 @@ const onFileListUpdate = (fileList, index) => {
   </n-button>
   <n-modal
     preset="card"
+    title="Create an Invoice"
     class="custom-modal max-w-screen-md"
     v-model:show="showDrawer"
   >
@@ -390,9 +389,7 @@ const onFileListUpdate = (fileList, index) => {
               multiple
               :default-upload="false"
               :file-list="form.expenses[index].files"
-              @update:file-list="
-                (fileList) => onFileListUpdate(fileList, index)
-              "
+              @update:file-list="(fileList) => onFileListUpdate(fileList, index)"
               list-type="image-card"
             />
           </n-form-item>
