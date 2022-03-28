@@ -2,20 +2,21 @@
 import { ref, watch } from "vue";
 import { useQuery } from "vue-query";
 import { useDebounce } from "@vueuse/core";
-import { getVehicles } from "@/hooks/vehicle";
+import { getVendors } from "@/hooks/vendor";
 import { useGlobalState } from "@/store/global";
 import { useTabsViewStore } from "@/store/tabs";
-import { useVehicles } from "@/store/vehicles";
+import { useVendors } from "@/store/vendors";
 import axios from "axios";
 
 import AddVendor from "@/components/vendor/AddVendor.vue";
 import PageTabs from "@/components/PageTabs.vue";
 import VendorList from "@/components/vendor/VendorList.vue";
 import Tabs from "@/components/common/Tabs.vue";
+import Card from "@/components/_refactor/Card.vue";
 
 const tabStore = useTabsViewStore();
 const global = useGlobalState();
-const vehicleStore = useVehicles();
+const vendorStore = useVendors();
 
 const searchText = ref("");
 const debouncedSearchText = useDebounce(searchText, 500);
@@ -32,7 +33,7 @@ const {
 } = getVendors();
 
 const addTab = (vendor) => {
-  vehicleStore.SET_LATEST(vendor?.id);
+  vendorStore.SET_LATEST(vendor?.id);
   listActive.value = global.isMobile ? false : listActive.value;
   tabStore.addTab({ id: vendor?.id, name: vendor?.name });
 };
@@ -127,11 +128,7 @@ watch(
           </div>
           <ul class="bg-foreground_light dark:bg-foreground_dark pt-[12px]">
             <template v-if="debouncedSearchText">
-              <VendorList
-                v-if="vendorSearchResults"
-                :vendors="vendorSearchResults"
-                @click:tab="addTab"
-              />
+              <VendorList v-if="vendorSearchResults" :vendors="[]" @click:tab="addTab" />
             </template>
 
             <template v-else>
@@ -139,7 +136,7 @@ watch(
                 v-for="(vendorPage, vendorPageIdx) in vendors?.pages"
                 :key="vendorPageIdx"
               >
-                <VendorList :vendors="vendorPage.data" @click:tab="addTab" />
+                <VendorList :vendors="[]" @click:tab="addTab" />
               </template>
               <button
                 v-observe-visibility="
@@ -198,11 +195,21 @@ watch(
       "
       class="duration-[500ms] w-[calc(100vw-60px)] bg-background_light dark:bg-background_dark"
     >
-      <PageTabs :class="global.stuck[0] && 'shadow-lg'" page-name="vendors" />
+      <PageTabs :class="global.stuck[0] && 'shadow-lg'" page-name="inventory" />
       <!-- Main Body Content-->
       <div id="main" class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
         <main id="container" class="min-h-full p-2 md:p-6">
-          <router-view />
+          <Card class="h-[400px]">Detalis</Card>
+          <Card class="h-[80px] mt-[24px]">Tabs</Card>
+          <div class="grid grid-cols-2 gap-[24px] w-full mt-[24px]">
+            <Card class="h-[420px]"></Card>
+            <Card class="h-[420px]"></Card>
+          </div>
+          <Card class="mt-[24px] h-[400px]">Manheim Details</Card>
+          <div class="grid grid-cols-2 gap-[24px] w-full mt-[24px]">
+            <Card class="h-[420px]"></Card>
+            <Card class="h-[420px]"></Card>
+          </div>
         </main>
       </div>
     </section>

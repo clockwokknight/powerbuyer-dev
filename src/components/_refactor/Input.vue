@@ -1,7 +1,6 @@
 <script setup>
 import { ref, watchEffect, toRefs, reactive, computed, onMounted } from "vue";
 import { useGlobalState } from "@/store/global";
-import { useVendors } from "@/store/vendors";
 import { useClipboard } from "@vueuse/core";
 import { utils, log } from "@/lib/utils";
 import { useMessage } from "naive-ui";
@@ -48,7 +47,6 @@ const sampleOptions = ref([
 
 const { text, copy } = useClipboard();
 const global = useGlobalState();
-const vendors = useVendors();
 const message = useMessage();
 
 const inputEl = ref(null);
