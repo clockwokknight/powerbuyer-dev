@@ -4,7 +4,7 @@ import { getExpenseTypes, getVendorExpenseItems } from "@/hooks/expense";
 import { omit, pick } from "@/lib/helper";
 import { useDebounce } from "@vueuse/core";
 import axios from "axios";
-import { computed, ref, watch } from "vue";
+import { computed, ref, toRaw, watch } from "vue";
 import CurrencyInput from "@/components/common/CurrencyInput.vue";
 
 const props = defineProps({
@@ -53,7 +53,7 @@ const initialForm = {
   deal_id: null,
   name: "",
   description: "",
-  // files: [],
+  files: [],
   amount: 0,
   showSelect: true,
   type: null,
@@ -205,46 +205,16 @@ const onExpenseSelect = (value) => {
 const onSubmitForm = async () => {
   try {
     await formRef.value.validate();
-    emits("save:expense", omit(form.value, ["showSelect"]));
+    emits("save:expense", form.value);
   } catch (error) {}
 };
-const customUploadRequest = ({
-  file,
-  data,
-  headers,
-  withCredentials,
-  action,
-  onFinish,
-  onError,
-  onProgress,
-}) => {
-  const formData = new FormData();
-  if (data) {
-    Object.keys(data).forEach((key) => {
-      formData.append(key, data[key]);
-    });
+const handleFinishImage = ({ file, fileList, event }) => {
+  if (event?.target.response) {
+    const response = JSON.parse(event?.target.response);
+    const index = fileList.findIndex((currentFile) => currentFile.id === file.id);
+    fileList[index].file_id = response.expense_files_id[0];
   }
-  formData.append("files[]", file.file);
-  axios
-    .post(action, formData, {
-      withCredentials,
-      headers,
-      onUploadProgress: ({ loaded, total }) => {
-        onProgress({ percent: Math.ceil((loaded / total) * 100) });
-      },
-    })
-    .then((e) => {
-      console.log(file.name, e.data);
-      // message.success(e.data);
-      onFinish();
-    })
-    .catch((error) => {
-      // message.success(error.message);
-      onError();
-    });
-};
-const onUpdateFileList = (fileList) => {
-  form.value.files = fileList;
+  console.log({ file, fileList });
 };
 </script>
 
@@ -267,16 +237,16 @@ const onUpdateFileList = (fileList) => {
         <n-date-picker v-model:value="form.expense_date" format="MM/dd/yyyy" />
       </n-form-item>
     </div>
-    <!--    <n-form-item label="Images">-->
-    <!--      <n-upload-->
-    <!--        action="https://gmtvinventory.com/api/expense_files"-->
-    <!--        multiple-->
-    <!--        :file-list="form.files"-->
-    <!--        :custom-request="customUploadRequest"-->
-    <!--        @update:file-list="onUpdateFileList"-->
-    <!--        list-type="image-card"-->
-    <!--      />-->
-    <!--    </n-form-item>-->
+    <n-form-item label="Images">
+      <n-upload
+        action="https://gmtvinventory.com/api/expense_files"
+        multiple
+        v-model:file-list="form.files"
+        name="files[]"
+        @change="handleFinishImage"
+        list-type="image-card"
+      />
+    </n-form-item>
     <n-form-item path="name" label="Name">
       <n-select
         :options="expenseItemsOptions"

@@ -7,6 +7,8 @@ import { clone, pick } from "@/lib/helper";
 import { useQueryClient, useMutation } from "vue-query";
 import { useMessage } from "naive-ui";
 import axios from "axios";
+import CustomInput from "../common/CustomInput.vue";
+import { format } from "v-money3";
 
 const props = defineProps({
   show: {
@@ -28,6 +30,8 @@ const deleteInvoiceModal = ref(false);
 const initialForm = {
   vendor_id: null,
   amount_due: 0,
+  amount_paid: 0,
+  balance: 0,
   invoice_number: "",
   due_date: Date.now(),
   expenses: [
@@ -47,10 +51,12 @@ const form = ref({ ...initialForm });
 watch(
   () => props.show,
   (newValue) => {
-    console.log(newValue);
     if (newValue) {
       form.value = clone(props.initialData);
       form.value.due_date = dayjs(form.value.due_date).valueOf();
+      form.value.amount_due = parseFloat(props.initialData.amount_due);
+      form.value.amount_paid = parseFloat(props.initialData.amount_paid);
+      form.value.balance = parseFloat(props.initialData.balance);
       form.value.expenses = form.value.expenses.map((expense) => ({
         ...pick(expense, [
           "deal",
@@ -62,6 +68,13 @@ watch(
           "expense_date",
           "id",
         ]),
+        files: expense.files.map((file) => ({
+          id: file.id,
+          name: file.filename,
+          url: file.storage,
+          type: file.mime_type,
+          status: "finished",
+        })),
         amount: parseFloat(expense.amount),
         showSelect: false,
       }));
@@ -71,17 +84,26 @@ watch(
     }
   }
 );
+watch(
+  () => form.value?.expenses,
+  (newFormValue) => {
+    if (newFormValue && newFormValue?.length > 0) {
+      form.value.amount_due = form.value.balance = newFormValue?.reduce(
+        (prev, curr) => prev + parseFloat(curr.amount),
+        0
+      );
+    } else {
+      form.value.amount_due = 0;
+    }
+  },
+  { deep: true, flush: "post" }
+);
 
 // Mutations
 const queryClient = useQueryClient();
 const message = useMessage();
 const { mutate: updateExpense, isLoading: updateExpenseLoading } = useMutation(
-  ({ id, ...data }) =>
-    axios.put(`/vendor_invoices/${id}`, {
-      ...data,
-      amount_paid: 0,
-      balance: data.amount_due,
-    }),
+  ({ id, ...data }) => axios.put(`/vendor_invoices/${id}`, data),
   {
     onSuccess() {
       queryClient.invalidateQueries([
@@ -105,8 +127,15 @@ const { mutateAsync: deleteExpense, isLoading: deleteExpenseLoading } =
       message.success("Expense deleted successfully.");
     },
   });
-
+const editExpenseIndex = ref();
 const columns = [
+  {
+    title: "",
+    key: "files",
+    render(row) {
+      // return h()
+    },
+  },
   {
     title: "VIN",
     key: "deal.vin",
@@ -150,17 +179,19 @@ const columns = [
   {
     title: "Amount",
     key: "amount",
-    render(row, index) {
-      return h(
-        "span",
-        {
-          class:
-            "font-semibold bg-gray-800/10 border-2 rounded border-gray-500 px-3 py-2",
-        },
-        {
-          default: () => `$${row.amount}`,
-        }
-      );
+    render(row) {
+      return form.value.amount_paid > 0
+        ? h("div")
+        : h(
+            "span",
+            {
+              class:
+                "font-semibold bg-gray-800/10 border-2 rounded border-gray-500 px-3 py-2",
+            },
+            {
+              default: () => `$${row.amount}`,
+            }
+          );
     },
   },
   {
@@ -173,6 +204,7 @@ const columns = [
           showExpenseModal.value = true;
           vendor_id.value = props.initialData.vendor[0].id;
           currentExpense.value = null;
+          editExpenseIndex.value = null;
         },
         onEdit: () => {
           vendor_id.value = props.initialData.vendor[0].id;
@@ -181,6 +213,7 @@ const columns = [
             currentExpense.value.expense_date
           ).valueOf();
           showExpenseModal.value = true;
+          editExpenseIndex.value = rowIndex;
         },
         onDelete: () => {
           if (row.id) {
@@ -194,8 +227,9 @@ const columns = [
 ];
 const onSaveExpense = (expense) => {
   showExpenseModal.value = false;
-  if (expense.id) {
-    console.log(expense);
+  console.log(toRaw(expense));
+  if (editExpenseIndex.value) {
+    form.value.expenses[editExpenseIndex.value] = expense;
   } else {
     form.value.expenses.push({ ...expense });
   }
@@ -203,11 +237,31 @@ const onSaveExpense = (expense) => {
 const onDeleteInvoice = () => {
   deleteExpense(initialData.id);
 };
+const submitForm = async () => {
+  try {
+    await formRef.value.validate();
+    let obj = unref(form);
+    // remove Proxy from expenses array
+    obj.expenses = toRaw(form.value.expenses);
+    // remove Proxy each object from array and remove 'showSelect' and 'expense_types'
+    obj.expenses = obj.expenses
+      .map((expense) => ({
+        ...omit(toRaw(expense), ["expense_type", "showSelect", "deal"]),
+        expense_date: dayjs(expense.expense_date).format("YYYY-MM-DD"),
+      }))
+      // Also add deleted Expense array so that it removes from the database as well.
+      .concat(unref(deletedExpenses));
+    obj.due_date = dayjs(obj.due_date).format("YYYY-MM-DD");
+    obj = omit(obj, ["invoice_number"]);
+    console.log(obj);
+    // updateExpense(obj);
+  } catch (e) {}
+};
 </script>
 <template>
   <n-modal
     preset="card"
-    class="max-w-screen-lg"
+    class="max-w-screen-lg lg:max-w-[80vw]"
     :show="show"
     v-bind="$attrs"
     @update:show="(val) => $emit('update:show', val)"
@@ -220,7 +274,9 @@ const onDeleteInvoice = () => {
         </div>
         <div class="text-left">
           <span class="block text-xs uppercase">Inv Date</span>
-          <span class="text-sm font-bold">03/19/2022</span>
+          <span class="text-sm font-bold">{{
+            dayjs(initialData.created_at).format("MM/DD/YYYY")
+          }}</span>
         </div>
         <div class="text-left">
           <span class="block text-xs uppercase">Vendor</span>
@@ -231,7 +287,7 @@ const onDeleteInvoice = () => {
       </section>
       <section class="space-y-3">
         <div
-          class="border border-primary bg-primary/10 px-4 py-1 font-bold uppercase"
+          class="border-primary bg-primary/10 border px-4 py-1 font-bold uppercase"
         >
           open
         </div>
@@ -258,11 +314,11 @@ const onDeleteInvoice = () => {
       />
 
       <section
-        class="dark:bg- ml-auto mt-5 w-full max-w-xs rounded bg-dark_border p-4"
+        class="dark:bg- bg-dark_border ml-auto mt-5 w-full max-w-xs rounded p-4"
       >
         <div class="bg-foreground_dark p-4">
           <h5 class="font-medium uppercase">Inv Total</h5>
-          <span class="text-lg font-bold">${{ initialData.amount_due }}</span>
+          <span class="text-lg font-bold">${{ format(form.amount_due) }}</span>
         </div>
         <div class="space-y-2 px-4 pt-5">
           <div>
@@ -273,20 +329,21 @@ const onDeleteInvoice = () => {
           </div>
           <div>
             <h5 class="font-medium uppercase">Balance</h5>
-            <span class="text-lg font-bold">${{ initialData.balance }}</span>
+            <span class="text-lg font-bold">${{ format(form.balance) }}</span>
           </div>
         </div>
       </section>
     </main>
     <template #footer>
-      <div class="flex gap-x-5">
+      <div class="flex gap-x-5" v-if="form.amount_paid === 0">
         <button
-          class="rounded border-2 border-primary bg-primary/40 px-8 py-3 text-sm font-bold text-white"
+          class="border-primary bg-primary/40 rounded border-2 px-8 py-3 text-sm font-bold text-white"
+          @click="submitForm"
         >
           SAVE
         </button>
         <button
-          class="rounded border-2 border-primary px-5 py-3 text-sm font-bold text-white"
+          class="border-primary rounded border-2 px-5 py-3 text-sm font-bold text-white"
         >
           DELETE
         </button>
