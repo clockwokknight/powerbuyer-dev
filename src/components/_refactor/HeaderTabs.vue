@@ -7,6 +7,7 @@ import { gsap } from "gsap";
 
 const global = useGlobalState();
 const props = defineProps(["title", "items", "range"]);
+defineEmits(["selected", "dateChanged", "searchTextChange"]);
 const active = ref(0);
 
 const exampleItems = ref([
@@ -73,6 +74,7 @@ const scrollToSection = (item, index) => {
     },
   });
 };
+
 </script>
 
 <template>
@@ -81,7 +83,8 @@ const scrollToSection = (item, index) => {
       <h1 class="font-bold text-2xl">{{ title }}</h1>
       <n-input
         v-model="query"
-        placeholder="Search..."
+        @change="$emit('searchTextChange', value)"
+        placeholder="Search by vin..."
         class="mx-[24px] max-w-[550px] translate-y-[-40px] bordered dark:!border-[#45454C dark:bg-[#191919] bg-[#f6f6f6] p-2"
       />
       <div class="w-[250px]">
@@ -90,6 +93,7 @@ const scrollToSection = (item, index) => {
           :format="'MM/dd/yy'"
           v-model:value="range"
           type="datetimerange"
+          @update:value="(value) => $emit('dateChanged', value)"
         />
         <!--pre>{{ JSON.stringify(range) }}</pre-->
       </div>
@@ -103,7 +107,7 @@ const scrollToSection = (item, index) => {
           :key="index"
           class="__tab-item uppercase translate-y-[-18px] flex max-w-lg cursor-pointer flex-col items-center justify-center whitespace-nowrap px-1 text-center mx-4"
           v-slot="{ selected }"
-          @click="scrollToSection(item, index)"
+          @click="$emit('selected', item, index)"
         >
           <span
             class="__tab-title flex text-[10px] font-bold tracking-widest hover:!opacity-100"
