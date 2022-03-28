@@ -1,35 +1,23 @@
 import { createApp } from "vue";
-
-import axios from "axios";
+import { createPinia } from "pinia";
 import { router } from "@/routes";
 import { VueQueryPlugin } from "vue-query";
-import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin.js";
-
-//UI framework
-import naive from "naive-ui";
-gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
-
-//Tippy Tooltips
 import VueTippy from "vue-tippy";
-
+import axios from "axios";
 import App from "./App.vue";
-
-//Tailwind CSS
+import naive from "naive-ui";
+import { gsap } from "gsap";
 import "./scss/index.scss";
-
-//Pinia
-import { createPinia } from "pinia";
-
-//Custom Directives
 import mask from "@/directives/mask";
 import ObserveVisibility from "@/directives/observe-visibility";
+
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
 axios.defaults.baseURL = "https://gmtvinventory.com/api";
 
 /**
- *
  * @type VueQueryPluginOptions
  */
 const vueQueryPluginOptions = {

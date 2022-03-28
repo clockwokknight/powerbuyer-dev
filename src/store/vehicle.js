@@ -1,7 +1,7 @@
-import vendors from "@/api/vendors";
+import vehicles from "@/api/vehicles";
 import { defineStore } from "pinia";
 
-export const useVendors = defineStore('vendors', {
+export const useVehicles = defineStore('vehicles', {
     state: () => ( {
         list: {
             all: [],
@@ -16,10 +16,10 @@ export const useVendors = defineStore('vendors', {
         latest: '1'
     } ),
     getters: {
-        GET_VENDORS(state) {
+        GET_VEHICLES(state) {
             return state.list.all
         },
-        GET_FILTERED_VENDORS(state) {
+        GET_FILTERED_VEHICLES(state) {
             return state.list.filtered
         },
         GET_TABS(state) {
@@ -38,13 +38,13 @@ export const useVendors = defineStore('vendors', {
         SET_SEARCH_TERM(text) {
             this.$state.searchText = text;
         },
-        SET_VENDOR_VALUE(key, val) {
+        SET_VEHICLE_VALUE(key, val) {
             this.$state.tab.active[key] = val;
         },
-        SET_CURRENT_VENDOR(payload) {
+        SET_CURRENT_VEHICLE(payload) {
             this.$state.tab.selected = payload;
         },
-        GET_ALL_VENDORS() {
+        GET_ALL_VEHICLES() {
             vendors.all().then( res => {
                 const data = res.data
                 this.$state.list.all = res.data.data

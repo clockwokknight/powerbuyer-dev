@@ -18,7 +18,7 @@ const route = useRoute();
   >
     <!-- Company Name -->
     <router-link
-      :to="{ name: 'SingleVendor', params: { id: vendor?.id } }"
+      :to="{ name: 'Vendor', params: { id: vendor?.id } }"
       active-class="text-primary dark:text-white"
       class="block"
     >

@@ -1,12 +1,14 @@
 <script setup>
 import { useCommandPalletStore } from "@/store/commandPallet";
 import { useDark, useToggle } from "@vueuse/core";
-import { watch } from "vue";
+import { watchEffect, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useGlobalState } from "../store/global";
 import { useVendors } from "../store/vendors";
 
 const route = useRoute();
+
+const hasList = ["Vendor", "Buyers Overview"];
 
 const userMenu = [
   {
@@ -27,33 +29,19 @@ const vendorStore = useVendors();
 const global = useGlobalState();
 const commandPallet = useCommandPalletStore();
 
-watch(
-  () => global.value,
-  (val) => {
-    log.label("global", val);
-  }
-);
-
 const isDark = useDark();
 const toggleDark = useToggle(isDark);
 
-watch(
-  () => isDark.value,
-  (val) => {
-    console.log(route);
-    global.setDark(val);
-  }
-);
+watchEffect(() => {
+  global.setDark(isDark.value);
+  console.log(route);
+});
 </script>
 
 <template>
   <aside
     class="sticky top-0 left-0 z-50 flex w-[60px] flex-col bg-black"
-    :class="
-      route.name !== 'Deals' && route.name !== 'System' && route.name !== 'Dashboard'
-        ? 'h-[calc(100vh-48px)]'
-        : 'h-[calc(100vh)]'
-    "
+    :class="hasList.includes(route.name) ? 'h-[calc(100vh-48px)]' : 'h-[calc(100vh)]'"
   >
     <div class="w-full text-white">
       <nav>

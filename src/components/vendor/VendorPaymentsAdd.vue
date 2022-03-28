@@ -6,6 +6,7 @@ import { clone, omit, pick } from "@/lib/helper";
 import { useMutation, useQuery, useQueryClient } from "vue-query";
 import axios from "axios";
 import CurrencyInput from "@/components/common/CurrencyInput.vue";
+import CustomInput from "@/components/common/CustomInput.vue";
 import { useRoute } from "vue-router";
 import { vendorInvoices } from "@/hooks/vendor.js";
 import { getGmtvLocations } from "@/hooks/location.js";
@@ -24,9 +25,7 @@ const initialForm = {
   account_number: "",
   notes: "",
   gmtv_location_id: null,
-  payment_invoices: [
-    { vendor_invoice_id: null, payment_amount: 0, balance: 0 },
-  ],
+  payment_invoices: [{ vendor_invoice_id: null, payment_amount: 0, balance: 0 }],
 };
 const form = ref({ ...initialForm });
 
@@ -112,15 +111,10 @@ const rules = {
         if (value <= 0.01) {
           return new Error("Payment Amount is required");
         }
-        const payment_invoicesIdx = parseInt(
-          /(.*)([\d])(.*)/.exec(rule.field)[2]
-        );
-        const balance =
-          form.value.payment_invoices[payment_invoicesIdx].balance;
+        const payment_invoicesIdx = parseInt(/(.*)([\d])(.*)/.exec(rule.field)[2]);
+        const balance = form.value.payment_invoices[payment_invoicesIdx].balance;
         if (value > balance) {
-          return new Error(
-            "Payment can't exceed current invoice balance $" + balance
-          );
+          return new Error("Payment can't exceed current invoice balance $" + balance);
         }
       },
     },
@@ -157,8 +151,9 @@ watch(
   { deep: true }
 );
 
-const { data: invoicesData, isLoading: expensesDataLoading } =
-  vendorInvoices(routeParamId);
+const { data: invoicesData, isLoading: expensesDataLoading } = vendorInvoices(
+  routeParamId
+);
 
 const invoiceDataOptions = ref([]);
 
@@ -181,16 +176,13 @@ const gmtvLocationsOptions = computed(() =>
   }))
 );
 const queryClient = useQueryClient();
-const { mutate: createPayment } = useMutation(
-  (data) => axios.post("/payments", data),
-  {
-    onSuccess() {
-      message.success("Payment has been created");
-      queryClient.invalidateQueries(["payments_vendor", routeParamId.value]);
-      showDrawer.value = false;
-    },
-  }
-);
+const { mutate: createPayment } = useMutation((data) => axios.post("/payments", data), {
+  onSuccess() {
+    message.success("Payment has been created");
+    queryClient.invalidateQueries(["payments_vendor", routeParamId.value]);
+    showDrawer.value = false;
+  },
+});
 
 async function submitForm() {
   try {
@@ -198,9 +190,7 @@ async function submitForm() {
     const obj = clone(form.value);
     // obj.recipient_type = 1;
     obj.recipient_id = routeParamId.value;
-    obj.payment_invoices = obj.payment_invoices.map((inv) =>
-      omit(inv, ["balance"])
-    );
+    obj.payment_invoices = obj.payment_invoices.map((inv) => omit(inv, ["balance"]));
     createPayment(obj);
   } catch (e) {
     if (Array.isArray(e)) {
@@ -215,9 +205,7 @@ const onCreatePaymentInvoice = () => {
   };
 };
 const onInvoiceSelect = (val, index) => {
-  const vendor_invoiceIdx = invoicesData.value.findIndex(
-    (inv) => inv.id === val
-  );
+  const vendor_invoiceIdx = invoicesData.value.findIndex((inv) => inv.id === val);
   const vendor_invoice = invoicesData.value[vendor_invoiceIdx];
 
   form.value.payment_invoices[index] = {
@@ -240,19 +228,8 @@ const onInvoiceSelect = (val, index) => {
     </n-icon>
     Add Payment
   </n-button>
-  <n-modal
-    v-model:show="showDrawer"
-    preset="card"
-    size="huge"
-    class="max-w-screen-md"
-  >
-    <n-form
-      :model="form"
-      :label-width="90"
-      :rules="rules"
-      size="medium"
-      ref="formRef"
-    >
+  <n-modal v-model:show="showDrawer" preset="card" size="huge" class="max-w-screen-md">
+    <n-form :model="form" :label-width="90" :rules="rules" size="medium" ref="formRef">
       <div class="sm:grid sm:grid-cols-2 sm:gap-x-5">
         <n-form-item label="GMTV print location" path="gmtv_location_id">
           <n-select
@@ -270,11 +247,7 @@ const onInvoiceSelect = (val, index) => {
       </div>
       <div class="sm:grid sm:grid-cols-2 sm:gap-x-5">
         <n-form-item label="Check Number" path="check_number">
-          <n-input
-            type="text"
-            clearable
-            v-model:value.trim="form.check_number"
-          />
+          <n-input type="text" clearable v-model:value.trim="form.check_number" />
         </n-form-item>
         <n-form-item label="Account Number" path="account_number">
           <n-input v-model:value="form.account_number" clearable />
@@ -289,9 +262,7 @@ const onInvoiceSelect = (val, index) => {
         show-sort-button
         :min="1"
       >
-        <div
-          class="rounded-roundbg-gray-200/50 p-3 dark:bg-gray-800/50 sm:grid sm:grid-cols-2 sm:gap-x-5"
-        >
+        <div class="rounded-round sm:grid sm:grid-cols-2 sm:gap-x-5">
           <n-form-item
             label="Vendor Invoice"
             :path="`payment_invoices[${index}].vendor_invoice_id`"
@@ -309,9 +280,7 @@ const onInvoiceSelect = (val, index) => {
             :rule="rules.payment_invoices.payment_amount"
             label="Payment Amount"
           >
-            <CurrencyInput
-              v-model="form.payment_invoices[index].payment_amount"
-            />
+            <CurrencyInput v-model="form.payment_invoices[index].payment_amount" />
           </n-form-item>
         </div>
       </n-dynamic-input>
@@ -336,9 +305,7 @@ const onInvoiceSelect = (val, index) => {
         <n-input type="textarea" clearable v-model:value="form.notes" />
       </n-form-item>
 
-      <n-button attr-type="submit" size="large" @click="submitForm"
-        >Add</n-button
-      >
+      <n-button attr-type="submit" size="large" @click="submitForm">Add</n-button>
     </n-form>
   </n-modal>
 </template>

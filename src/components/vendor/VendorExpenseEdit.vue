@@ -381,7 +381,7 @@ const customRequest = ({
         :min="1"
         :max="isDisabled ? form.expenses?.length : undefined"
       >
-        <div class="rounded-roundbg-gray-200/50 grid p-3 dark:bg-gray-800/50">
+        <div class="rounded-round bg-gray-200/50 grid p-3 dark:bg-gray-800/50">
           <div class="sm:grid sm:grid-cols-2 sm:justify-between sm:gap-x-5">
             <n-form-item
               label="VIN"

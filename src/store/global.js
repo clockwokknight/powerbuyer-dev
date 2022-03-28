@@ -4,6 +4,7 @@ import { useLocalStorage } from "@vueuse/core";
 export const useGlobalState = defineStore("global", {
   state: () => {
     return useLocalStorage("state", {
+      documentTitle: "PowerBuyer",
       isMobile: true,
       isDark: true,
       stuck: [false, false],
@@ -47,5 +48,8 @@ export const useGlobalState = defineStore("global", {
     stick(val) {
       this.stuck = val;
     },
+    setDocumentTitle(title) {
+      this.documentTitle = title;
+    }
   },
 });

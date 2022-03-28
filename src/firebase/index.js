@@ -2,9 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
-
 const firebaseConfig = {
-  apiKey: "AIzaSyC-8KoYSEkjoa0LNG4S7tXRZ-AtFnR0f1E",
   authDomain: "vue-firebase-ad9a1.firebaseapp.com",
   projectId: "vue-firebase-ad9a1",
   storageBucket: "vue-firebase-ad9a1.appspot.com",
@@ -13,7 +11,10 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig) 
-const auth = getAuth(app)
+const app = initializeApp({
+  apiKey: import.meta.env(VITE_APP_FIREBASE_API_KEY),
+  ...firebaseConfig,
+}); 
 
-export{ auth }
+const auth = getAuth(app);
+export{ auth };
