@@ -2,7 +2,6 @@
 import { ref, computed, watchEffect, onMounted } from "vue";
 import { useGlobalState } from "@/store/global";
 import { utils, log } from "@/lib/utils";
-import { component as VueCodeHighlight } from "vue-code-highlight";
 
 import Input from "@/components/_refactor/Input.vue";
 import CustomInput from "@/components/common/CustomInput.vue";
