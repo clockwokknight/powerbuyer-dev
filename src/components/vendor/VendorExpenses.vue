@@ -20,9 +20,8 @@ watch(
   }
 );
 
-const { data: invoicesData, isLoading: expensesDataLoading } = vendorInvoices(
-  routeParamId
-);
+const { data: invoicesData, isLoading: expensesDataLoading } =
+  vendorInvoices(routeParamId);
 
 const rowKey = (row) => row?.id;
 const columns = [
@@ -81,7 +80,13 @@ function showEditExpenseForm(row) {
       "expense_types",
     ])
   );
-  obj = omit(obj, ["payments", "balance", "amount_paid", "children", "vendor_name"]);
+  obj = omit(obj, [
+    "payments",
+    "balance",
+    "amount_paid",
+    "children",
+    "vendor_name",
+  ]);
 
   // formDisabled.value = Boolean(row?.payments.length);
   formRow.value = obj;
@@ -91,9 +96,12 @@ function showEditExpenseForm(row) {
 
 <template>
   <div
-    class="dark:border-dark_border mt-[24px] scroll-smooth border-[1px] border-transparent"
+    class="mt-[24px] scroll-smooth border-[1px] border-transparent dark:border-dark_border"
   >
-    <VendorExpenseShow v-model:show="showReadOnlyInvoice" :formRow="formRow" />
+    <VendorExpenseShow
+      v-model:show="showReadOnlyInvoice"
+      :initial-data="formRow"
+    />
     <VendorExpenseEdit
       :show-drawer="visibleEditForm"
       :initial-data="formRow"
@@ -102,7 +110,7 @@ function showEditExpenseForm(row) {
     />
     <div class="font-sans">
       <div
-        class="rounded-round dark:bg-foreground_dark border-[1px] bg-white p-[24px] dark:border-0"
+        class="rounded-round border-[1px] bg-white p-[24px] dark:border-0 dark:bg-foreground_dark"
       >
         <div class="flex justify-between">
           <p class="pb-8 text-2xl font-bold">Invoices & Expenses</p>

@@ -180,16 +180,15 @@ const { data: invoicesData, isLoading: expensesDataLoading } = vendorInvoices(
 const invoiceDataOptions = ref([]);
 
 watchEffect(() => {
-  if (invoicesData.value)
-    invoiceDataOptions.value = invoicesData.value
-      ?.filter((inv) => parseFloat(inv.balance) !== 0)
-      .map((inv) => ({
-        label: inv.invoice_number,
-        value: inv.id,
-        disabled: form.value.payment_invoices.some(
-          (invoice) => invoice.vendor_invoice_id === inv.id
-        ),
-      }));
+  if (invoicesData.value) invoiceDataOptions.value = invoicesData.value;
+  // ?.filter((inv) => parseFloat(inv.balance) !== 0)
+  // .map((inv) => ({
+  //   label: inv.invoice_number,
+  //   value: inv.id,
+  //   disabled: form.value.payment_invoices.some(
+  //     (invoice) => invoice.vendor_invoice_id === inv.id
+  //   ),
+  // }));
 });
 
 const { data: gmtvLocations } = getGmtvLocations();

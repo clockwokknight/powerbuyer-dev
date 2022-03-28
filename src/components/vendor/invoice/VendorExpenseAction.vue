@@ -1,5 +1,12 @@
 <script setup>
-defineEmits(["add", "edit", "delete"]);
+import { ref } from "vue";
+
+const emits = defineEmits(["add", "edit", "delete"]);
+const deleteModal = ref(false);
+const onDelete = () => {
+  emits("delete");
+  deleteModal.value = false;
+};
 </script>
 
 <template>
@@ -24,7 +31,7 @@ defineEmits(["add", "edit", "delete"]);
       </n-icon>
     </button>
     <n-button-group>
-      <n-button round class="w-4" @click="$emit('delete')">
+      <n-button round class="w-4" @click="deleteModal = true">
         <n-icon>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
             <line
@@ -45,11 +52,7 @@ defineEmits(["add", "edit", "delete"]);
       </n-button>
       <n-button round class="w-4" @click="$emit('add')">
         <n-icon>
-          <svg
-            viewBox="0 0 512 512"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+          <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
               d="M256 112V400M400 256H112"
               stroke="currentColor"
@@ -62,4 +65,16 @@ defineEmits(["add", "edit", "delete"]);
       </n-button>
     </n-button-group>
   </div>
+  <n-modal
+    preset="dialog"
+    type="error"
+    title="Delete Expense"
+    content="Are you sure?"
+    positive-text="Delete"
+    negative-text="Cancel"
+    @negative-click="deleteModal = false"
+    @positive-click="onDelete"
+    v-model:show="deleteModal"
+  >
+  </n-modal>
 </template>

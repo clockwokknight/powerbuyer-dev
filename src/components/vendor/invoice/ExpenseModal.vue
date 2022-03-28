@@ -1,24 +1,25 @@
 <script setup>
-import { getExpenseTypes, getVendorExpenseItems } from "@/hooks/expense";
 import { getAllDeals, searchDealByVin } from "@/hooks/deals";
-import { computed, ref } from "vue";
-import { useDebounce } from "@vueuse/core";
+import { getExpenseTypes, getVendorExpenseItems } from "@/hooks/expense";
 import { omit, pick } from "@/lib/helper";
+import { useDebounce } from "@vueuse/core";
+import axios from "axios";
+import { computed, ref, watch } from "vue";
 import CurrencyInput from "@/components/common/CurrencyInput.vue";
 
 const props = defineProps({
   expense: {
-    type: Object,
-    required: true,
+    type: [Object, null],
   },
   vendor_id: {
-    type: String,
+    type: [String, Number],
     required: true,
   },
 });
-const emits = defineEmits(["submit"]);
+const emits = defineEmits(["save:expense"]);
 const isLoading = false;
 const searchVinSelect = ref("");
+const formRef = ref(null);
 const debouncedSearchVin = useDebounce(searchVinSelect, 500);
 // VIN search
 const handleSearch = (query) => {
@@ -34,7 +35,7 @@ const searchVinResultOptions = computed(() =>
   }))
 );
 
-const { data: expenseItems } = getVendorExpenseItems(props.vendor_id);
+const { data: expenseItems } = getVendorExpenseItems(String(props.vendor_id));
 
 const expenseItemsOptions = computed(() =>
   [{ label: "+ Add new", value: "add" }].concat(
@@ -56,6 +57,8 @@ const initialForm = {
   amount: 0,
   showSelect: true,
   type: null,
+  deal: {},
+  expense_type: {},
 };
 const form = ref({ ...initialForm, ...props.expense });
 
@@ -97,6 +100,35 @@ const dealOptions = computed(() =>
   )
 );
 
+const getResultFromArray = (arr, id) => {
+  return arr.find((val) => val.value === id);
+};
+watch(
+  () => form.value.deal_id,
+  (newValue) => {
+    if (newValue) {
+      form.value.deal = {
+        id: form.value.deal_id,
+        vin: searchVinSelect.value
+          ? getResultFromArray(searchVinResultOptions.value, newValue).label
+          : getResultFromArray(dealOptions.value, newValue).label,
+      };
+    }
+  }
+);
+
+watch(
+  () => form.value.type,
+  (newValue) => {
+    if (newValue) {
+      form.value.expense_type = {
+        id: form.value.type,
+        name: getResultFromArray(expenseTypeOptions.value, newValue).label,
+      };
+    }
+  }
+);
+
 const rules = {
   expense_date: {
     required: true,
@@ -119,7 +151,7 @@ const rules = {
     type: "number",
     required: true,
     message: "Expense type is required",
-    trigger: "blur",
+    trigger: ["blur", "change"],
   },
   amount: {
     required: true,
@@ -170,13 +202,54 @@ const onExpenseSelect = (value) => {
   };
 };
 
-const onSubmitForm = () => {
-  emits("submit", omit(form.value, ["showSelect"]));
+const onSubmitForm = async () => {
+  try {
+    await formRef.value.validate();
+    emits("save:expense", omit(form.value, ["showSelect"]));
+  } catch (error) {}
+};
+const customUploadRequest = ({
+  file,
+  data,
+  headers,
+  withCredentials,
+  action,
+  onFinish,
+  onError,
+  onProgress,
+}) => {
+  const formData = new FormData();
+  if (data) {
+    Object.keys(data).forEach((key) => {
+      formData.append(key, data[key]);
+    });
+  }
+  formData.append("files[]", file.file);
+  axios
+    .post(action, formData, {
+      withCredentials,
+      headers,
+      onUploadProgress: ({ loaded, total }) => {
+        onProgress({ percent: Math.ceil((loaded / total) * 100) });
+      },
+    })
+    .then((e) => {
+      console.log(file.name, e.data);
+      // message.success(e.data);
+      onFinish();
+    })
+    .catch((error) => {
+      // message.success(error.message);
+      onError();
+    });
+};
+const onUpdateFileList = (fileList) => {
+  form.value.files = fileList;
 };
 </script>
 
 <template>
-  <n-form :model="form" @submit.prevent="onSubmitForm" :rules="rules">
+  <n-form :model="form" ref="formRef" @submit.prevent="onSubmitForm" :rules="rules">
     <div class="sm:grid sm:grid-cols-2 sm:justify-between sm:gap-x-5">
       <n-form-item label="VIN" path="deal_id">
         <n-select
@@ -194,17 +267,16 @@ const onSubmitForm = () => {
         <n-date-picker v-model:value="form.expense_date" format="MM/dd/yyyy" />
       </n-form-item>
     </div>
-    <!-- <n-form-item label="Upload Images">
-            <n-upload
-              action="https://gmtvinventory.com/api/expenses/expense_files"
-              multiple
-              :data="{
-                expense_id: form.id,
-              }"
-              :custom-request="customRequest"
-              list-type="image-card"
-            />
-          </n-form-item> -->
+    <!--    <n-form-item label="Images">-->
+    <!--      <n-upload-->
+    <!--        action="https://gmtvinventory.com/api/expense_files"-->
+    <!--        multiple-->
+    <!--        :file-list="form.files"-->
+    <!--        :custom-request="customUploadRequest"-->
+    <!--        @update:file-list="onUpdateFileList"-->
+    <!--        list-type="image-card"-->
+    <!--      />-->
+    <!--    </n-form-item>-->
     <n-form-item path="name" label="Name">
       <n-select
         :options="expenseItemsOptions"
