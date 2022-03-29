@@ -13,6 +13,7 @@ const onChange = (newValue) => {
   emits("update:modelValue", parseFloat(unformat(newValue)));
 };
 </script>
+
 <script>
 import { Money3Directive } from "v-money3";
 export default {
@@ -21,6 +22,7 @@ export default {
   },
 };
 </script>
+
 <template>
   <n-input :value="format(modelValue)" @update-value="onChange" type="tel">
     <template #prefix> $ </template>

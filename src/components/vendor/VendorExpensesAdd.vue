@@ -330,7 +330,7 @@ const onFileListUpdate = (fileList, index) => {
         show-sort-button
         :min="1"
       >
-        <div class="rounded-roundbg-gray-200/50 p-3 dark:bg-gray-800/50">
+        <div class="rounded-round bg-gray-200/50 p-3 dark:bg-gray-800/50">
           <div class="sm:grid sm:grid-cols-2 sm:justify-between sm:gap-x-5">
             <n-form-item
               label="VIN"

@@ -48,16 +48,16 @@ const initialForm = {
   ],
 };
 const rules = {
-  amount_due: {
-    type: "number",
-    required: true,
-    validator(rule, value) {
-      if (value <= 0.01) {
-        return new Error("Amount should be more than 0.01");
-      }
-    },
-    trigger: "change",
-  },
+  // amount_due: {
+  //   type: "number",
+  //   required: true,
+  //   validator(rule, value) {
+  //     if (value <= 0.01) {
+  //       return new Error("Amount should be more than 0.01");
+  //     }
+  //   },
+  //   trigger: "change",
+  // },
   invoice_number: {
     required: true,
     message: "Invoice Number is required",
@@ -255,36 +255,47 @@ const onSaveExpense = (expense) => {
 const onDeleteInvoice = () => {
   deleteExpense(initialData.id);
 };
+const formRef = ref(null);
 const submitForm = async () => {
-  // try {
-  // await formRef.value.validate();
-  let obj = omit(unref(form), ["vendor", "payment_invoices"]);
-  // remove Proxy from expenses array
-  obj.expenses = toRaw(form.value.expenses);
-  // remove Proxy each object from array and remove 'showSelect' and 'expense_types'
-  obj.expenses = obj.expenses
-    .map((expense) => {
-      const modifiedExpense = {
-        ...omit(toRaw(expense), ["expense_type", "showSelect", "deal", "files"]),
-        expense_date: dayjs(expense.expense_date).format("YYYY-MM-DD"),
-      };
-      if (!modifiedExpense?.id) {
-        modifiedExpense.expense_files_ids = toRaw(expense).files.map(
-          (exp) => exp.file_id
-        );
-      }
-      return modifiedExpense;
-    })
-    // Also add deleted Expense array so that it removes from the database as well.
-    .concat(unref(deletedExpenses));
-  obj.due_date = dayjs(obj.due_date).format("YYYY-MM-DD");
-  obj = omit(obj, ["invoice_number"]);
-  console.log(obj);
-  updateExpense(obj);
-  // } catch (e) {}
+  try {
+    await formRef.value.validate();
+    let obj = omit(unref(form), ["vendor", "payment_invoices"]);
+    // remove Proxy from expenses array
+    obj.expenses = toRaw(form.value.expenses);
+    // remove Proxy each object from array and remove 'showSelect' and 'expense_types'
+    obj.expenses = obj.expenses
+      .map((expense) => {
+        const modifiedExpense = {
+          ...omit(toRaw(expense), ["expense_type", "showSelect", "deal", "files"]),
+          expense_date: dayjs(expense.expense_date).format("YYYY-MM-DD"),
+        };
+        if (!modifiedExpense?.id) {
+          modifiedExpense.expense_files_ids = toRaw(expense).files.map(
+            (exp) => exp.file_id
+          );
+        }
+        return modifiedExpense;
+      })
+      // Also add deleted Expense array so that it removes from the database as well.
+      .concat(unref(deletedExpenses));
+    obj.due_date = dayjs(obj.due_date).format("YYYY-MM-DD");
+    obj = omit(obj, ["invoice_number"]);
+    console.log(obj);
+    updateExpense(obj);
+  } catch (e) {}
 };
 const onInvoiceDelete = () => {
   console.log("deleting");
+};
+
+const themeOverrides = {
+  Input: {
+    color: "rgba(255, 255, 255, 0)",
+    border: "none",
+  },
+  Form: {
+    labelPaddingVertical: "0 0 0 0",
+  },
 };
 </script>
 <template>
@@ -295,38 +306,55 @@ const onInvoiceDelete = () => {
     v-bind="$attrs"
     @update:show="(val) => $emit('update:show', val)"
   >
-    <n-form :model="form" :rules="rules">
-      <header class="flex content-center justify-between">
-        <section class="space-y-4">
-          <div class="font-bold">
-            <h3 class="text-xl">Invoice</h3>
-            <h4># {{ initialData.invoice_number }}</h4>
-          </div>
-          <div class="text-left">
-            <span class="block text-xs uppercase">Inv Date</span>
-            <span class="text-sm font-bold">{{
-              dayjs(initialData.created_at).format("MM/DD/YYYY")
-            }}</span>
-          </div>
-          <div class="text-left">
-            <span class="block text-xs uppercase">Vendor</span>
-            <span class="text-sm font-bold">{{ initialData?.vendor[0]?.name }}</span>
-          </div>
-        </section>
-        <section class="space-y-3">
-          <div class="border-primary bg-primary/10 border px-4 py-1 font-bold uppercase">
-            open
-          </div>
-          <div class="text-right">
-            <span class="block text-xs uppercase">Due Date</span>
-            <span class="text-sm font-bold">{{ initialData.due_date }}</span>
-          </div>
-          <div class="text-right">
-            <span class="block text-xs uppercase">Terms</span>
-            <span class="text-sm font-bold">Net 30</span>
-          </div>
-        </section>
-      </header>
+    <n-form ref="formRef" :model="form" :rules="rules">
+      <n-config-provider :theme-overrides="themeOverrides" inline-theme-disabled>
+        <header class="flex content-center justify-between">
+          <section class="space-y-4">
+            <div class="font-bold">
+              <h3 class="text-xl">Invoice</h3>
+              <h4># {{ initialData.invoice_number }}</h4>
+            </div>
+            <div class="text-left">
+              <span class="block text-xs uppercase">Inv Date</span>
+              <span class="text-sm font-bold">{{
+                dayjs(initialData.created_at).format("MM/DD/YYYY")
+              }}</span>
+            </div>
+            <div class="text-left">
+              <span class="block text-xs uppercase">Vendor</span>
+              <span class="text-sm font-bold">{{ initialData?.vendor[0]?.name }}</span>
+            </div>
+          </section>
+          <section class="space-y-3">
+            <div
+              class="border-primary bg-primary/10 ml-auto max-w-[80px] border px-4 py-1 font-bold uppercase"
+            >
+              open
+            </div>
+            <div class="text-right">
+              <!-- <span class="block text-xs uppercase">Due Date</span>
+            <span class="text-sm font-bold">{{ initialData.due_date }}</span> -->
+              <n-form-item
+                size="small"
+                label-align="right"
+                label="Due Date"
+                path="due_date"
+              >
+                <n-date-picker
+                  format="MM/dd/yyyy"
+                  class="custom-date-picker max-w-[130px]"
+                  v-model:value="form.due_date"
+                  :is-date-disabled="(ts) => ts < Date.now()"
+                />
+              </n-form-item>
+            </div>
+            <div class="text-right">
+              <span class="block text-xs uppercase">Terms</span>
+              <span class="text-sm font-bold">Net 30</span>
+            </div>
+          </section>
+        </header>
+      </n-config-provider>
       <main class="mt-4">
         <h3 class="text-sm font-bold">Expenses</h3>
         <n-data-table
@@ -398,3 +426,13 @@ const onInvoiceDelete = () => {
     v-model:show="deleteInvoiceModal"
   />
 </template>
+<style lang="scss" scoped>
+.custom-date-picker {
+  :deep(.n-input__input-el) {
+    @apply font-bold;
+  }
+  :deep(.n-input__suffix) {
+    display: none;
+  }
+}
+</style>

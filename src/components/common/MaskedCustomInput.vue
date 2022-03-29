@@ -5,8 +5,9 @@ import { watch, ref, toRefs } from "vue";
 const emit = defineEmits(["update:value", "blur", "focus", "input"]);
 
 const props = defineProps({
-  type: String,
   value: [String, Number],
+  currency: Boolean,
+  type: String,
   mask: String,
   masked: Boolean,
   styles: String,
@@ -103,7 +104,9 @@ function handleBlur(e) {
     "
     @focus="(e) => $emit('focus', e)"
     @blur="handleBlur"
-  />
+  >
+    <template v-if="currency" #prefix> $ </template>
+  </n-input>
   <n-select
     v-if="type === 'select'"
     ref="inputRef"

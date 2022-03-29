@@ -12,6 +12,7 @@ export default {
 import { ref, watch, toRefs, reactive, computed, onMounted } from "vue";
 import { NInput, NSelect, NConfigProvider } from "naive-ui";
 import { useGlobalState } from "@/store/global";
+import { useVendors } from "@/store/vendors";
 import { useClipboard } from "@vueuse/core";
 import { utils, log } from "@/lib/utils";
 import { useMessage } from "naive-ui";
@@ -22,10 +23,12 @@ import MaskedCustomInput from "@/components/common/MaskedCustomInput.vue";
 const emit = defineEmits(["update:value", "focus", "scroll", "edit", "save", "cancel"]);
 
 const props = defineProps({
-  basic: Boolean,
-  currency: Boolean,
-  validate: Array,
   value: [String, Number],
+  basic: Boolean,
+  select: Boolean,
+  currency: Boolean,
+  phone: Boolean,
+  required: Boolean,
   type: String,
   label: String,
   placeholder: String,
@@ -34,8 +37,11 @@ const props = defineProps({
   mask: String,
 });
 
+const maskRef = computed(() => props.mask);
+
 const { text, copy } = useClipboard();
 const global = useGlobalState();
+const vendors = useVendors();
 const message = useMessage();
 
 const inputEl = ref(null);
@@ -54,6 +60,10 @@ const caretX = ref("18px");
 const caretFill = ref(hoverInput.value ? "#bdbdbd00" : "#bdbdbd");
 
 const isValid = ref(false);
+
+const implyMask = computed(() => {
+  return props.phone ? `(###) ###-####` : null;
+});
 
 const themeOverrides = computed(() => {
   return {
@@ -113,18 +123,26 @@ const validators = {
       input
     );
   },
+  currency: (input) => {
+    return /^[+-]?[0-9]{1,3}(?:,?[0-9]{3})*\.[0-9]{2}$/.test(input);
+  },
 };
 
+const validate = computed(() => {
+  return utils.filterKeys(props, (prop) => utils.getKeys(validators).includes(prop));
+});
+
 onMounted(() => {
-  if (!props.validate) isValid.value = true;
-  //if (props.basic) editing.value = true;
+  console.log(Object.entries(props).filter((prop) => prop[1] === true));
+  console.log(validate.value);
+  console.log("maskRef: ", maskRef);
 });
 
 function validation(input) {
-  if (props.validate) {
+  if (validate.value.length > 0) {
     let tests = [];
-    props.validate.forEach((test) => tests.push(validators[test](input)));
-    return props.validate.length === tests.filter((test) => test).length;
+    validate.value.forEach((test) => tests.push(validators[test](input)));
+    return validate.value.length === tests.filter((test) => test).length;
   }
   return true;
 }
@@ -188,7 +206,7 @@ function handleCopy() {
           <b
             class="text-red-600 duration-[300ms]"
             :class="
-              !(validate && validate.includes('required') && (!value || value === '')) &&
+              !(validate.includes('required') && (!value || value === '')) &&
               'mr-[-10px] scale-50 opacity-0'
             "
           >
@@ -260,8 +278,8 @@ function handleCopy() {
                 focusing = true;
               }
             "
-            @mouseenter="basic && type === 'select' && edit()"
-            @mouseleave="basic && type === 'select' && !focusing && cancel()"
+            @mouseenter="basic && select && edit()"
+            @mouseleave="basic && select && !focusing && cancel()"
             class="__inputs w-full"
             :class="basic && 'cursor-text'"
           >
@@ -269,12 +287,14 @@ function handleCopy() {
               ref="inputEl"
               :currency="currency"
               :value="currency ? format(value) : value"
-              :type="type"
+              :select="select"
+              :phone="phone"
+              :currency="currency"
               :editing="editing"
-              :masked="type !== 'select'"
-              :mask="mask"
+              :masked="select"
+              :mask="mask || implyMask"
+              :placeholder="placeholder || mask || implyMask"
               :options="options"
-              :placeholder="placeholder || mask"
               @input="(e) => handleInput(e)"
               @focus="(e) => $emit('focus', e)"
               @blur="cancel"

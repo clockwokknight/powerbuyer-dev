@@ -1,12 +1,14 @@
 <script setup>
-import { onMounted } from "vue";
+import { onMounted, watchEffect } from "vue";
 import { VueQueryDevTools } from "vue-query/devtools";
 import { darkTheme } from "naive-ui";
 import MainMenu from "@/components/MainMenu.vue";
 import CommandPalette from "@/components/global_search/CommandPalette.vue";
 import { useGlobalState } from "@/store/global";
+import { useRoute } from "vue-router";
 
 const global = useGlobalState();
+const route = useRoute();
 
 const themeOverrides = {
   Button: {
@@ -40,7 +42,6 @@ onMounted(() => {
               <MainMenu />
               <router-view />
             </section>
-            <VueQueryDevTools />
           </n-dialog-provider>
         </n-notification-provider>
       </n-message-provider>
