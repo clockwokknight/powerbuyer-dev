@@ -1,9 +1,9 @@
 <script setup>
 import dayjs from "dayjs";
-import { h, ref, toRaw, watch, toRef } from "vue";
+import { h, ref, toRaw, watch, toRef, unref } from "vue";
 import VendorExpenseAction from "./invoice/VendorExpenseAction.vue";
 import ExpenseModal from "./invoice/ExpenseModal.vue";
-import { clone, pick } from "@/lib/helper";
+import { clone, pick, omit } from "@/lib/helper";
 import { useQueryClient, useMutation } from "vue-query";
 import { useMessage } from "naive-ui";
 import axios from "axios";
@@ -19,7 +19,7 @@ const props = defineProps({
     type: Object,
   },
 });
-defineEmits(["update:show"]);
+const emits = defineEmits(["update:show"]);
 
 const showExpenseModal = ref(false);
 const currentExpense = ref(null);
@@ -46,6 +46,29 @@ const initialForm = {
     //   type: null,
     // },
   ],
+};
+const rules = {
+  amount_due: {
+    type: "number",
+    required: true,
+    validator(rule, value) {
+      if (value <= 0.01) {
+        return new Error("Amount should be more than 0.01");
+      }
+    },
+    trigger: "change",
+  },
+  invoice_number: {
+    required: true,
+    message: "Invoice Number is required",
+    trigger: "input",
+  },
+  due_date: {
+    required: true,
+    type: "number",
+    message: "Date is required",
+    trigger: ["blur", "change"],
+  },
 };
 const form = ref({ ...initialForm });
 watch(
@@ -106,36 +129,32 @@ const { mutate: updateExpense, isLoading: updateExpenseLoading } = useMutation(
   ({ id, ...data }) => axios.put(`/vendor_invoices/${id}`, data),
   {
     onSuccess() {
-      queryClient.invalidateQueries([
-        "vendorInvoices",
-        String(vendor_id.value),
-      ]);
+      queryClient.invalidateQueries(["vendorInvoices", String(vendor_id.value)]);
       emits("update:show", false);
       message.success("Expense updated successfully.");
     },
   }
 );
 
-const { mutateAsync: deleteExpense, isLoading: deleteExpenseLoading } =
-  useMutation((id) => axios.delete("/vendor_invoices/" + id), {
+const { mutateAsync: deleteExpense, isLoading: deleteExpenseLoading } = useMutation(
+  (id) => axios.delete("/vendor_invoices/" + id),
+  {
     onSuccess() {
       emits("update:show", false);
-      queryClient.invalidateQueries([
-        "vendorInvoices",
-        String(vendor_id.value),
-      ]);
+      queryClient.invalidateQueries(["vendorInvoices", String(vendor_id.value)]);
       message.success("Expense deleted successfully.");
     },
-  });
+  }
+);
 const editExpenseIndex = ref();
 const columns = [
-  {
-    title: "",
-    key: "files",
-    render(row) {
-      // return h()
-    },
-  },
+  // {
+  //   title: "",
+  //   key: "files",
+  //   render(row) {
+  //      return h()
+  //   },
+  // },
   {
     title: "VIN",
     key: "deal.vin",
@@ -227,8 +246,7 @@ const columns = [
 ];
 const onSaveExpense = (expense) => {
   showExpenseModal.value = false;
-  console.log(toRaw(expense));
-  if (editExpenseIndex.value) {
+  if (editExpenseIndex.value !== null) {
     form.value.expenses[editExpenseIndex.value] = expense;
   } else {
     form.value.expenses.push({ ...expense });
@@ -238,24 +256,35 @@ const onDeleteInvoice = () => {
   deleteExpense(initialData.id);
 };
 const submitForm = async () => {
-  try {
-    await formRef.value.validate();
-    let obj = unref(form);
-    // remove Proxy from expenses array
-    obj.expenses = toRaw(form.value.expenses);
-    // remove Proxy each object from array and remove 'showSelect' and 'expense_types'
-    obj.expenses = obj.expenses
-      .map((expense) => ({
-        ...omit(toRaw(expense), ["expense_type", "showSelect", "deal"]),
+  // try {
+  // await formRef.value.validate();
+  let obj = omit(unref(form), ["vendor", "payment_invoices"]);
+  // remove Proxy from expenses array
+  obj.expenses = toRaw(form.value.expenses);
+  // remove Proxy each object from array and remove 'showSelect' and 'expense_types'
+  obj.expenses = obj.expenses
+    .map((expense) => {
+      const modifiedExpense = {
+        ...omit(toRaw(expense), ["expense_type", "showSelect", "deal", "files"]),
         expense_date: dayjs(expense.expense_date).format("YYYY-MM-DD"),
-      }))
-      // Also add deleted Expense array so that it removes from the database as well.
-      .concat(unref(deletedExpenses));
-    obj.due_date = dayjs(obj.due_date).format("YYYY-MM-DD");
-    obj = omit(obj, ["invoice_number"]);
-    console.log(obj);
-    // updateExpense(obj);
-  } catch (e) {}
+      };
+      if (!modifiedExpense?.id) {
+        modifiedExpense.expense_files_ids = toRaw(expense).files.map(
+          (exp) => exp.file_id
+        );
+      }
+      return modifiedExpense;
+    })
+    // Also add deleted Expense array so that it removes from the database as well.
+    .concat(unref(deletedExpenses));
+  obj.due_date = dayjs(obj.due_date).format("YYYY-MM-DD");
+  obj = omit(obj, ["invoice_number"]);
+  console.log(obj);
+  updateExpense(obj);
+  // } catch (e) {}
+};
+const onInvoiceDelete = () => {
+  console.log("deleting");
 };
 </script>
 <template>
@@ -266,84 +295,79 @@ const submitForm = async () => {
     v-bind="$attrs"
     @update:show="(val) => $emit('update:show', val)"
   >
-    <header class="flex content-center justify-between">
-      <section class="space-y-4">
-        <div class="font-bold">
-          <h3 class="text-xl">Invoice</h3>
-          <h4># {{ initialData.invoice_number }}</h4>
-        </div>
-        <div class="text-left">
-          <span class="block text-xs uppercase">Inv Date</span>
-          <span class="text-sm font-bold">{{
-            dayjs(initialData.created_at).format("MM/DD/YYYY")
-          }}</span>
-        </div>
-        <div class="text-left">
-          <span class="block text-xs uppercase">Vendor</span>
-          <span class="text-sm font-bold">{{
-            initialData?.vendor[0]?.name
-          }}</span>
-        </div>
-      </section>
-      <section class="space-y-3">
-        <div
-          class="border-primary bg-primary/10 border px-4 py-1 font-bold uppercase"
-        >
-          open
-        </div>
-        <div class="text-right">
-          <span class="block text-xs uppercase">Due Date</span>
-          <span class="text-sm font-bold">{{ initialData.due_date }}</span>
-        </div>
-        <div class="text-right">
-          <span class="block text-xs uppercase">Terms</span>
-          <span class="text-sm font-bold">Net 30</span>
-        </div>
-      </section>
-    </header>
-    <main class="mt-4">
-      <h3 class="text-sm font-bold">Expenses</h3>
-      <n-data-table
-        :data="form.expenses"
-        :columns="columns"
-        striped
-        class="pt-2"
-        :max-height="500"
-        :scroll-x="1300"
-        row-class-name="group py-2"
-      />
+    <n-form :model="form" :rules="rules">
+      <header class="flex content-center justify-between">
+        <section class="space-y-4">
+          <div class="font-bold">
+            <h3 class="text-xl">Invoice</h3>
+            <h4># {{ initialData.invoice_number }}</h4>
+          </div>
+          <div class="text-left">
+            <span class="block text-xs uppercase">Inv Date</span>
+            <span class="text-sm font-bold">{{
+              dayjs(initialData.created_at).format("MM/DD/YYYY")
+            }}</span>
+          </div>
+          <div class="text-left">
+            <span class="block text-xs uppercase">Vendor</span>
+            <span class="text-sm font-bold">{{ initialData?.vendor[0]?.name }}</span>
+          </div>
+        </section>
+        <section class="space-y-3">
+          <div class="border-primary bg-primary/10 border px-4 py-1 font-bold uppercase">
+            open
+          </div>
+          <div class="text-right">
+            <span class="block text-xs uppercase">Due Date</span>
+            <span class="text-sm font-bold">{{ initialData.due_date }}</span>
+          </div>
+          <div class="text-right">
+            <span class="block text-xs uppercase">Terms</span>
+            <span class="text-sm font-bold">Net 30</span>
+          </div>
+        </section>
+      </header>
+      <main class="mt-4">
+        <h3 class="text-sm font-bold">Expenses</h3>
+        <n-data-table
+          :data="form.expenses"
+          :columns="columns"
+          striped
+          class="pt-2"
+          :max-height="500"
+          :scroll-x="1300"
+          row-class-name="group py-2"
+        />
 
-      <section
-        class="dark:bg- bg-dark_border ml-auto mt-5 w-full max-w-xs rounded p-4"
-      >
-        <div class="bg-foreground_dark p-4">
-          <h5 class="font-medium uppercase">Inv Total</h5>
-          <span class="text-lg font-bold">${{ format(form.amount_due) }}</span>
-        </div>
-        <div class="space-y-2 px-4 pt-5">
-          <div>
-            <h5 class="font-medium uppercase">Payments</h5>
-            <span class="text-lg font-bold"
-              >${{ initialData.amount_paid }}</span
-            >
+        <section class="dark:bg- bg-dark_border mt-5 ml-auto w-full max-w-xs rounded p-4">
+          <div class="bg-foreground_dark p-4">
+            <h5 class="font-medium uppercase">Inv Total</h5>
+            <span class="text-lg font-bold">${{ format(form.amount_due) }}</span>
           </div>
-          <div>
-            <h5 class="font-medium uppercase">Balance</h5>
-            <span class="text-lg font-bold">${{ format(form.balance) }}</span>
+          <div class="space-y-2 px-4 pt-5">
+            <div>
+              <h5 class="font-medium uppercase">Payments</h5>
+              <span class="text-lg font-bold">${{ initialData.amount_paid }}</span>
+            </div>
+            <div>
+              <h5 class="font-medium uppercase">Balance</h5>
+              <span class="text-lg font-bold">${{ format(form.balance) }}</span>
+            </div>
           </div>
-        </div>
-      </section>
-    </main>
+        </section>
+      </main>
+    </n-form>
     <template #footer>
       <div class="flex gap-x-5" v-if="form.amount_paid === 0">
         <button
           class="border-primary bg-primary/40 rounded border-2 px-8 py-3 text-sm font-bold text-white"
-          @click="submitForm"
+          @click.prevent="submitForm"
         >
           SAVE
         </button>
         <button
           class="border-primary rounded border-2 px-5 py-3 text-sm font-bold text-white"
+          @click.prevent="onInvoiceDelete"
         >
           DELETE
         </button>

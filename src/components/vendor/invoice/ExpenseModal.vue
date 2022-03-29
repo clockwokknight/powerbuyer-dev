@@ -201,7 +201,14 @@ const onExpenseSelect = (value) => {
     showSelect: false,
   };
 };
-
+const onRemoveImage = async ({ file }) => {
+  if (typeof file.id === "number") {
+    await axios.delete("/expense_files/" + file.id);
+  } else if (file.file_id) {
+    await axios.delete("/expense_files/" + file.file_id);
+  }
+  return true;
+};
 const onSubmitForm = async () => {
   try {
     await formRef.value.validate();
@@ -212,9 +219,9 @@ const handleFinishImage = ({ file, fileList, event }) => {
   if (event?.target.response) {
     const response = JSON.parse(event?.target.response);
     const index = fileList.findIndex((currentFile) => currentFile.id === file.id);
-    fileList[index].file_id = response.expense_files_id[0];
+    fileList[index].file_id = response?.expense_files_id[0].id ?? undefined;
+    fileList[index].url = response?.expense_files_id[0].storage ?? null;
   }
-  console.log({ file, fileList });
 };
 </script>
 
@@ -242,9 +249,11 @@ const handleFinishImage = ({ file, fileList, event }) => {
         action="https://gmtvinventory.com/api/expense_files"
         multiple
         v-model:file-list="form.files"
+        :data="form.id ? { expense_id: form.id } : undefined"
         name="files[]"
         @change="handleFinishImage"
         list-type="image-card"
+        @remove="onRemoveImage"
       />
     </n-form-item>
     <n-form-item path="name" label="Name">
