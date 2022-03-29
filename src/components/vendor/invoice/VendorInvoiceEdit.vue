@@ -1,13 +1,12 @@
 <script setup>
 import dayjs from "dayjs";
 import { h, ref, toRaw, watch, toRef, unref } from "vue";
-import VendorExpenseAction from "./invoice/VendorExpenseAction.vue";
-import ExpenseModal from "./invoice/ExpenseModal.vue";
+import VendorExpenseAction from "./VendorExpenseAction.vue";
+import ExpenseModal from "./ExpenseModal.vue";
 import { clone, pick, omit } from "@/lib/helper";
 import { useQueryClient, useMutation } from "vue-query";
 import { useMessage } from "naive-ui";
 import axios from "axios";
-import CustomInput from "../common/CustomInput.vue";
 import { format } from "v-money3";
 
 const props = defineProps({
@@ -129,23 +128,27 @@ const { mutate: updateExpense, isLoading: updateExpenseLoading } = useMutation(
   ({ id, ...data }) => axios.put(`/vendor_invoices/${id}`, data),
   {
     onSuccess() {
-      queryClient.invalidateQueries(["vendorInvoices", String(vendor_id.value)]);
+      queryClient.invalidateQueries([
+        "vendorInvoices",
+        String(vendor_id.value),
+      ]);
       emits("update:show", false);
       message.success("Expense updated successfully.");
     },
   }
 );
 
-const { mutateAsync: deleteExpense, isLoading: deleteExpenseLoading } = useMutation(
-  (id) => axios.delete("/vendor_invoices/" + id),
-  {
+const { mutateAsync: deleteExpense, isLoading: deleteExpenseLoading } =
+  useMutation((id) => axios.delete("/vendor_invoices/" + id), {
     onSuccess() {
       emits("update:show", false);
-      queryClient.invalidateQueries(["vendorInvoices", String(vendor_id.value)]);
+      queryClient.invalidateQueries([
+        "vendorInvoices",
+        String(vendor_id.value),
+      ]);
       message.success("Expense deleted successfully.");
     },
-  }
-);
+  });
 const editExpenseIndex = ref();
 const columns = [
   // {
@@ -252,9 +255,6 @@ const onSaveExpense = (expense) => {
     form.value.expenses.push({ ...expense });
   }
 };
-const onDeleteInvoice = () => {
-  deleteExpense(initialData.id);
-};
 const formRef = ref(null);
 const submitForm = async () => {
   try {
@@ -266,7 +266,12 @@ const submitForm = async () => {
     obj.expenses = obj.expenses
       .map((expense) => {
         const modifiedExpense = {
-          ...omit(toRaw(expense), ["expense_type", "showSelect", "deal", "files"]),
+          ...omit(toRaw(expense), [
+            "expense_type",
+            "showSelect",
+            "deal",
+            "files",
+          ]),
           expense_date: dayjs(expense.expense_date).format("YYYY-MM-DD"),
         };
         if (!modifiedExpense?.id) {
@@ -307,7 +312,10 @@ const themeOverrides = {
     @update:show="(val) => $emit('update:show', val)"
   >
     <n-form ref="formRef" :model="form" :rules="rules">
-      <n-config-provider :theme-overrides="themeOverrides" inline-theme-disabled>
+      <n-config-provider
+        :theme-overrides="themeOverrides"
+        inline-theme-disabled
+      >
         <header class="flex content-center justify-between">
           <section class="space-y-4">
             <div class="font-bold">
@@ -322,12 +330,14 @@ const themeOverrides = {
             </div>
             <div class="text-left">
               <span class="block text-xs uppercase">Vendor</span>
-              <span class="text-sm font-bold">{{ initialData?.vendor[0]?.name }}</span>
+              <span class="text-sm font-bold">
+                {{ initialData?.vendor[0]?.name }}
+              </span>
             </div>
           </section>
           <section class="space-y-3">
             <div
-              class="border-primary bg-primary/10 ml-auto max-w-[80px] border px-4 py-1 font-bold uppercase"
+              class="ml-auto max-w-[80px] border border-primary bg-primary/10 px-4 py-1 font-bold uppercase"
             >
               open
             </div>
@@ -367,15 +377,21 @@ const themeOverrides = {
           row-class-name="group py-2"
         />
 
-        <section class="dark:bg- bg-dark_border mt-5 ml-auto w-full max-w-xs rounded p-4">
+        <section
+          class="dark:bg- mt-5 ml-auto w-full max-w-xs rounded bg-dark_border p-4"
+        >
           <div class="bg-foreground_dark p-4">
             <h5 class="font-medium uppercase">Inv Total</h5>
-            <span class="text-lg font-bold">${{ format(form.amount_due) }}</span>
+            <span class="text-lg font-bold"
+              >${{ format(form.amount_due) }}</span
+            >
           </div>
           <div class="space-y-2 px-4 pt-5">
             <div>
               <h5 class="font-medium uppercase">Payments</h5>
-              <span class="text-lg font-bold">${{ initialData.amount_paid }}</span>
+              <span class="text-lg font-bold"
+                >${{ initialData.amount_paid }}</span
+              >
             </div>
             <div>
               <h5 class="font-medium uppercase">Balance</h5>
@@ -388,13 +404,13 @@ const themeOverrides = {
     <template #footer>
       <div class="flex gap-x-5" v-if="form.amount_paid === 0">
         <button
-          class="border-primary bg-primary/40 rounded border-2 px-8 py-3 text-sm font-bold text-white"
+          class="rounded border-2 border-primary bg-primary/40 px-8 py-3 text-sm font-bold text-white"
           @click.prevent="submitForm"
         >
           SAVE
         </button>
         <button
-          class="border-primary rounded border-2 px-5 py-3 text-sm font-bold text-white"
+          class="rounded border-2 border-primary px-5 py-3 text-sm font-bold text-white"
           @click.prevent="onInvoiceDelete"
         >
           DELETE
@@ -408,7 +424,7 @@ const themeOverrides = {
     :title="(currentExpense ? 'Edit' : 'Add') + ' Expense'"
     v-model:show="showExpenseModal"
   >
-    <expense-modal
+    <ExpenseModal
       :expense="currentExpense"
       :vendor_id="vendor_id"
       @save:expense="onSaveExpense"

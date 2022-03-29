@@ -140,8 +140,10 @@ const rules = {
         if (value <= 0.01) {
           return new Error("Payment Amount is required");
         }
+        // Getting the balance field from current payment invoice index
         const payment_invoicesIdx = parseInt(/(.*)([\d])(.*)/.exec(rule.field)[2]);
         const balance = form.value.payment_invoices[payment_invoicesIdx].balance;
+        // and throwing error if the balance is greater than balance
         if (value > balance) {
           return new Error("Payment can't exceed current invoice balance $" + balance);
         }

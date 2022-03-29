@@ -4,7 +4,7 @@ import { getExpenseTypes, getVendorExpenseItems } from "@/hooks/expense";
 import { omit, pick } from "@/lib/helper";
 import { useDebounce } from "@vueuse/core";
 import axios from "axios";
-import { computed, ref, toRaw, watch } from "vue";
+import { computed, ref, toRaw, unref, watch } from "vue";
 import CurrencyInput from "@/components/common/CurrencyInput.vue";
 
 const props = defineProps({
@@ -25,9 +25,8 @@ const debouncedSearchVin = useDebounce(searchVinSelect, 500);
 const handleSearch = (query) => {
   searchVinSelect.value = query;
 };
-const { data: searchDealResult, isLoading: isVendorSearchLoading } = searchDealByVin(
-  debouncedSearchVin
-);
+const { data: searchDealResult, isLoading: isVendorSearchLoading } =
+  searchDealByVin(debouncedSearchVin);
 const searchVinResultOptions = computed(() =>
   searchDealResult?.value?.map((deal) => ({
     value: deal.id,
@@ -73,8 +72,8 @@ const {
 // filter(
 //   (el, index, array) => index === array.findIndex((arr) => arr.id === el.id)
 // )
-const expenseTypeOptions = computed(() =>
-  expense_types.value?.pages.reduce(
+const expenseTypeOptions = computed(() => {
+  let expenseTypeComputed = expense_types.value?.pages.reduce(
     (prev, current) =>
       prev.concat(
         current?.data.map((expense) => ({
@@ -83,22 +82,45 @@ const expenseTypeOptions = computed(() =>
         })) ?? []
       ),
     []
-  )
-);
+  );
+  if (props.expense?.expense_type)
+    expenseTypeComputed = expenseTypeComputed
+      .concat([
+        {
+          value: props.expense.expense_type.id,
+          label: props.expense.expense_type.name,
+        },
+      ])
+      .filter(
+        (el, index, array) =>
+          index === array.findIndex((arr) => arr.value === el.value)
+      );
+  return expenseTypeComputed;
+});
 
 const { data: deals } = getAllDeals();
-const dealOptions = computed(() =>
-  deals.value?.pages.reduce(
-    (prev, current) =>
-      prev.concat(
-        current.data.map((deal) => ({
-          value: deal.id,
-          label: deal.vin,
-        }))
-      ),
-    []
-  )
-);
+const dealOptions = computed(() => {
+  let computedDeals =
+    deals.value?.pages.reduce(
+      (prev, current) =>
+        prev.concat(
+          current?.data.map((deal) => ({
+            value: deal.id,
+            label: deal.vin,
+          })) ?? []
+        ),
+      []
+    ) ?? [];
+  if (props.expense && props.expense?.deal) {
+    computedDeals = computedDeals
+      .concat([{ value: props.expense.deal.id, label: props.expense.deal.vin }])
+      .filter(
+        (el, index, array) =>
+          index === array.findIndex((arr) => arr.value === el.value)
+      );
+  }
+  return computedDeals;
+});
 
 const getResultFromArray = (arr, id) => {
   return arr.find((val) => val.value === id);
@@ -212,13 +234,24 @@ const onRemoveImage = async ({ file }) => {
 const onSubmitForm = async () => {
   try {
     await formRef.value.validate();
+    const expense = unref(form.value);
+    expense.files = expense.files.filter((file) => file.status === "finished");
     emits("save:expense", form.value);
   } catch (error) {}
 };
-const handleFinishImage = ({ file, fileList, event }) => {
-  if (event?.target.response) {
+/**
+ * Update list of files
+ * @param {object} data
+ * @param {import('naive-ui').UploadFileInfo[]} data.fileList
+ * @param {import('naive-ui').UploadFileInfo} data.file
+ * @param {ProgressEvent} data.event
+ */
+const handleChangeImage = ({ file, fileList, event }) => {
+  if (event?.target?.status === 200 && event?.target.response) {
     const response = JSON.parse(event?.target.response);
-    const index = fileList.findIndex((currentFile) => currentFile.id === file.id);
+    const index = fileList.findIndex(
+      (currentFile) => currentFile.id === file.id
+    );
     fileList[index].file_id = response?.expense_files_id[0].id ?? undefined;
     fileList[index].url = response?.expense_files_id[0].storage ?? null;
   }
@@ -226,7 +259,12 @@ const handleFinishImage = ({ file, fileList, event }) => {
 </script>
 
 <template>
-  <n-form :model="form" ref="formRef" @submit.prevent="onSubmitForm" :rules="rules">
+  <n-form
+    :model="form"
+    ref="formRef"
+    @submit.prevent="onSubmitForm"
+    :rules="rules"
+  >
     <div class="sm:grid sm:grid-cols-2 sm:justify-between sm:gap-x-5">
       <n-form-item label="VIN" path="deal_id">
         <n-select
@@ -251,7 +289,7 @@ const handleFinishImage = ({ file, fileList, event }) => {
         v-model:file-list="form.files"
         :data="form.id ? { expense_id: form.id } : undefined"
         name="files[]"
-        @change="handleFinishImage"
+        @change="handleChangeImage"
         list-type="image-card"
         @remove="onRemoveImage"
       />
@@ -262,7 +300,6 @@ const handleFinishImage = ({ file, fileList, event }) => {
         filterable
         @update-value="onExpenseSelect"
         :loading="isLoading"
-        @scroll="handleExpenseTypeSelectScroll"
         v-if="form.showSelect"
       />
       <n-input v-else v-model:value="form.name" :loading="isLoading" />
@@ -276,6 +313,7 @@ const handleFinishImage = ({ file, fileList, event }) => {
           :options="expenseTypeOptions"
           filterable
           v-model:value="form.type"
+          @scroll="handleExpenseTypeSelectScroll"
           :loading="isLoading"
         />
       </n-form-item>

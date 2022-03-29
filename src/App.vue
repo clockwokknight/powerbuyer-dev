@@ -41,6 +41,7 @@ onMounted(() => {
               <CommandPalette />
               <MainMenu />
               <router-view />
+              <VueQueryDevTools />
             </section>
           </n-dialog-provider>
         </n-notification-provider>

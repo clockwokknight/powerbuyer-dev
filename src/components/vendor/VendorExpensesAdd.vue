@@ -214,6 +214,7 @@ async function submitExpense() {
           ...omit(item, ["showSelect", "expense_type_id", "files"]),
           type: String(item.expense_type_id),
           expense_date: convertDate(item.expense_date),
+          expense_files_ids: item.files.map((exp) => exp.file_id),
         },
         (key, value) => value
       );
@@ -258,25 +259,21 @@ const onCreateExpenseItems = () => {
     expense_date: dayjs().valueOf(),
   };
 };
-/**
- * invoke function when Upload image changes
- * @param {Object} data
- * @param {import('naive-ui').UploadFileInfo[]} data.fileList
- */
-const handleUploadChange = (data) => {
-  console.log(data.fileList);
-};
 
 /**
  * Update list of files
- * @param {import('naive-ui').UploadFileInfo[]} fileList
- * @param {number} index
+ * @param {object} data
+ * @param {import('naive-ui').UploadFileInfo[]} data.fileList
+ * @param {import('naive-ui').UploadFileInfo} data.file
+ * @param {ProgressEvent} data.event
  */
-const onFileListUpdate = (fileList, index) => {
-  form.value.expenses[index].files = fileList.map((file) => ({
-    ...file,
-    status: "finished",
-  }));
+const handleChangeImage = ({ file, fileList, event }) => {
+  if (event?.target.response) {
+    const response = JSON.parse(event?.target.response);
+    const index = fileList.findIndex((currentFile) => currentFile.id === file.id);
+    fileList[index].file_id = response?.expense_files_id[0].id ?? undefined;
+    fileList[index].url = response?.expense_files_id[0].storage ?? null;
+  }
 };
 </script>
 <template>
@@ -386,10 +383,11 @@ const onFileListUpdate = (fileList, index) => {
           </n-form-item>
           <n-form-item label="Upload Images">
             <n-upload
+              action="https://gmtvinventory.com/api/expense_files"
               multiple
-              :default-upload="false"
-              :file-list="form.expenses[index].files"
-              @update:file-list="(fileList) => onFileListUpdate(fileList, index)"
+              name="files[]"
+              @change="handleChangeImage"
+              v-model:file-list="form.expenses[index].files"
               list-type="image-card"
             />
           </n-form-item>

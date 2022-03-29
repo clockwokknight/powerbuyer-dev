@@ -22,5 +22,5 @@ export const getStates = () =>
 
 export const getInvoiceStatus = () =>
   useQuery("invoice_status", () =>
-    axios.get("/api/invoice_status").then((res) => res.data)
+    axios.get("/invoice_status").then((res) => res.data)
   );

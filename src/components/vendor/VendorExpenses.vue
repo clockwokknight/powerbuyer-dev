@@ -7,7 +7,8 @@ import { clone, omit, pick } from "@/lib/helper";
 import dayjs from "dayjs";
 import { computed, h, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import VendorExpenseShow from "./VendorExpenseShow.vue";
+import InvoiceEdit from "@/components/vendor/invoice/VendorInvoiceEdit.vue";
+import CreateVendorInvoice from "@/components/vendor/invoice/create/CreateVendorInvoice.vue";
 
 const route = useRoute();
 
@@ -47,9 +48,7 @@ const columns = [
     key: "edit",
     render(row) {
       return h(ActionButtons, {
-        showViewButton: true,
-        onView: () => showViewExpense(row),
-        onEdit: () => showEditExpenseForm(row),
+        onEdit: () => showViewExpense(row),
       });
     },
   },
@@ -98,23 +97,21 @@ function showEditExpenseForm(row) {
   <div
     class="mt-[24px] scroll-smooth border-[1px] border-transparent dark:border-dark_border"
   >
-    <VendorExpenseShow
-      v-model:show="showReadOnlyInvoice"
-      :initial-data="formRow"
-    />
-    <VendorExpenseEdit
+    <InvoiceEdit v-model:show="showReadOnlyInvoice" :initial-data="formRow" />
+    <!-- <VendorExpenseEdit
       :show-drawer="visibleEditForm"
       :initial-data="formRow"
       @update:show="visibleEditForm = false"
       :is-disabled="formDisabled"
-    />
+    /> -->
     <div class="font-sans">
       <div
         class="rounded-round border-[1px] bg-white p-[24px] dark:border-0 dark:bg-foreground_dark"
       >
         <div class="flex justify-between">
           <p class="pb-8 text-2xl font-bold">Invoices & Expenses</p>
-          <VendorExpensesAdd />
+          <!--          <VendorExpensesAdd />-->
+          <CreateVendorInvoice />
         </div>
         <n-data-table
           class="rounded-round"
