@@ -285,7 +285,7 @@ const submitForm = async () => {
   } catch (e) {}
 };
 const onInvoiceDelete = () => {
-  console.log("deleting");
+  deleteInvoiceModal.value = true;
 };
 
 const themeOverrides = {
@@ -422,7 +422,7 @@ const themeOverrides = {
     positive-text="Delete"
     negative-text="Cancel"
     @negative-click="deleteInvoiceModal = false"
-    @positive-click="onDeleteInvoice"
+    @positive-click="deleteExpense(form?.id)"
     v-model:show="deleteInvoiceModal"
   />
 </template>
