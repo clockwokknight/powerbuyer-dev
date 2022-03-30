@@ -1,6 +1,6 @@
 <script setup>
 import dayjs from "dayjs";
-import { h, ref, toRaw, watch, toRef, unref } from "vue";
+import { h, ref, toRaw, watch, toRef, unref, computed } from "vue";
 import VendorExpenseAction from "./VendorExpenseAction.vue";
 import ExpenseModal from "./ExpenseModal.vue";
 import { clone, pick, omit } from "@/lib/helper";
@@ -8,6 +8,7 @@ import { useQueryClient, useMutation } from "vue-query";
 import { useMessage } from "naive-ui";
 import axios from "axios";
 import { format } from "v-money3";
+import { getInvoiceStatus } from "@/hooks/common_query.js";
 
 const props = defineProps({
   show: {
@@ -26,13 +27,25 @@ const vendor_id = ref();
 const deletedExpenses = ref([]);
 const deleteInvoiceModal = ref(false);
 
+const { data: invoice_status } = getInvoiceStatus();
+const invoiceStatusOptions = computed(() =>
+  invoice_status.value
+    ?.filter((status) => status.name.toLowerCase() !== "paid")
+    .map((status) => ({
+      label: status.name,
+      value: status.id,
+    }))
+);
+
 const initialForm = {
   vendor_id: null,
   amount_due: 0,
   amount_paid: 0,
   balance: 0,
+  status: 1,
   invoice_number: "",
   due_date: Date.now(),
+  invoice_date: Date.now(),
   expenses: [
     // {
     //   expense_date: Date.now(),
@@ -295,8 +308,16 @@ const onInvoiceDelete = () => {
 
 const themeOverrides = {
   Input: {
-    color: "rgba(255, 255, 255, 0)",
     border: "none",
+    groupLabelColor: "rgba(255, 255, 255, 0.1)",
+    color: "rgba(255, 255, 255, 0)",
+    borderHover: "1px solid transparent",
+    borderHoverWarning: "none",
+    borderHoverError: "none",
+    clearColorHover: "rgba(255, 255, 255, 0)",
+    boxShadowFocus: "none",
+    borderFocus: "none",
+    colorFocus: "rgba(99, 226, 183, 0)",
   },
   Form: {
     labelPaddingVertical: "0 0 0 0",
@@ -306,7 +327,7 @@ const themeOverrides = {
 <template>
   <n-modal
     preset="card"
-    class="max-w-screen-lg lg:max-w-[80vw]"
+    class="relative max-w-screen-lg lg:max-w-[80vw]"
     :show="show"
     v-bind="$attrs"
     @update:show="(val) => $emit('update:show', val)"
@@ -323,10 +344,18 @@ const themeOverrides = {
               <h4># {{ initialData.invoice_number }}</h4>
             </div>
             <div class="text-left">
-              <span class="block text-xs uppercase">Inv Date</span>
-              <span class="text-sm font-bold">{{
-                dayjs(initialData.created_at).format("MM/DD/YYYY")
-              }}</span>
+              <n-form-item
+                size="small"
+                label-align="left"
+                label="Invoice Date"
+                path="invoice_date"
+              >
+                <n-date-picker
+                  format="MM/dd/yyyy"
+                  class="custom-date-picker max-w-[130px]"
+                  v-model:value="form.invoice_date"
+                />
+              </n-form-item>
             </div>
             <div class="text-left">
               <span class="block text-xs uppercase">Vendor</span>
@@ -335,11 +364,19 @@ const themeOverrides = {
               </span>
             </div>
           </section>
-          <section class="space-y-3">
-            <div
-              class="ml-auto max-w-[80px] border border-primary bg-primary/10 px-4 py-1 font-bold uppercase"
-            >
-              open
+          <section class="flex flex-col items-end gap-y-3">
+            <!--            <div-->
+            <!--              class="ml-auto max-w-[80px] border border-primary bg-primary/10 px-4 py-1 font-bold uppercase"-->
+            <!--            >-->
+            <!--              open-->
+            <!--            </div>-->
+            <div>
+              <n-select
+                :options="invoiceStatusOptions"
+                class="custom-select max-w-[90px]"
+                v-model:value="form.status"
+                filterable
+              />
             </div>
             <div class="text-right">
               <!-- <span class="block text-xs uppercase">Due Date</span>
@@ -354,7 +391,6 @@ const themeOverrides = {
                   format="MM/dd/yyyy"
                   class="custom-date-picker max-w-[130px]"
                   v-model:value="form.due_date"
-                  :is-date-disabled="(ts) => ts < Date.now()"
                 />
               </n-form-item>
             </div>
@@ -378,13 +414,13 @@ const themeOverrides = {
         />
 
         <section
-          class="dark:bg- mt-5 ml-auto w-full max-w-xs rounded bg-dark_border p-4"
+          class="mt-5 ml-auto w-full max-w-xs rounded bg-gray-100 p-4 dark:bg-dark_border"
         >
-          <div class="bg-foreground_dark p-4">
+          <div class="bg-foreground_light p-4 dark:bg-foreground_dark">
             <h5 class="font-medium uppercase">Inv Total</h5>
-            <span class="text-lg font-bold"
-              >${{ format(form.amount_due) }}</span
-            >
+            <span class="text-lg font-bold">
+              ${{ format(form.amount_due) }}
+            </span>
           </div>
           <div class="space-y-2 px-4 pt-5">
             <div>
@@ -400,23 +436,20 @@ const themeOverrides = {
           </div>
         </section>
       </main>
-    </n-form>
-    <template #footer>
-      <div class="flex gap-x-5" v-if="form.amount_paid === 0">
-        <button
-          class="rounded border-2 border-primary bg-primary/40 px-8 py-3 text-sm font-bold text-white"
-          @click.prevent="submitForm"
-        >
+      <div class="sticky bottom-2 flex gap-x-5" v-if="form.amount_paid === 0">
+        <n-button size="medium" type="primary" @click.prevent="submitForm">
           SAVE
-        </button>
-        <button
-          class="rounded border-2 border-primary px-5 py-3 text-sm font-bold text-white"
+        </n-button>
+        <n-button
+          type="error"
+          size="medium"
+          ghost
           @click.prevent="onInvoiceDelete"
         >
           DELETE
-        </button>
+        </n-button>
       </div>
-    </template>
+    </n-form>
   </n-modal>
   <n-modal
     preset="card"
@@ -449,6 +482,13 @@ const themeOverrides = {
   }
   :deep(.n-input__suffix) {
     display: none;
+  }
+}
+.custom-select {
+  :deep(.n-base-selection .n-base-selection-label) {
+    --n-padding-single: 0 12px;
+    background-color: rgb(2 123 255 / 0.1);
+    @apply border border-primary text-center font-bold uppercase;
   }
 }
 </style>

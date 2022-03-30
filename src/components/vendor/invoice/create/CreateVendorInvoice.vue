@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, h, toRaw } from "vue";
 import { useMessage } from "naive-ui";
 import { useMutation, useQueryClient } from "vue-query";
 import { useRoute } from "vue-router";
@@ -9,6 +9,8 @@ import axios from "axios";
 import { format } from "v-money3";
 import { getVendorById } from "@/hooks/vendor.js";
 import { getInvoiceStatus } from "@/hooks/common_query.js";
+import VendorExpenseAction from "@/components/vendor/invoice/VendorExpenseAction.vue";
+import ExpenseModal from "@/components/vendor/invoice/ExpenseModal.vue";
 
 const message = useMessage();
 const queryClient = useQueryClient();
@@ -16,6 +18,10 @@ const route = useRoute();
 
 const showDrawer = ref(false);
 const formRef = ref(null);
+const currentExpense = ref(null);
+const editExpenseIndex = ref();
+const showExpenseModal = ref(false);
+
 const initialForm = {
   vendor_id: parseInt(route.params?.id),
   amount_due: 0,
@@ -24,6 +30,7 @@ const initialForm = {
   invoice_number: "",
   status: 1,
   due_date: dayjs().add(30, "day").valueOf(),
+  invoice_date: dayjs().valueOf(),
   expenses: [
     // {
     //   expense_date: Date.now(),
@@ -37,7 +44,7 @@ const initialForm = {
     // },
   ],
 };
-const form = ref(clone(initialForm));
+const form = ref({ ...initialForm });
 
 const vendor_id = ref(route.params?.id);
 const { data: current_vendor } = getVendorById(vendor_id);
@@ -95,8 +102,106 @@ const rules = {
     message: "Date is required",
     trigger: ["blur", "change"],
   },
+  invoice_date: {
+    required: true,
+    type: "number",
+    message: "Date is required",
+    trigger: ["blur", "change"],
+  },
 };
-
+const columns = [
+  // {
+  //   title: "",
+  //   key: "files",
+  //   render(row) {
+  //      return h()
+  //   },
+  // },
+  {
+    title: "VIN",
+    key: "deal.vin",
+    width: "200px",
+    fixed: "left",
+  },
+  {
+    title: "Item",
+    key: "name",
+    width: "100",
+  },
+  {
+    title: "Description",
+    key: "description",
+    width: "200",
+    render(row) {
+      return h(
+        "span",
+        { class: "text-[8px] text-center" },
+        { default: () => row.description }
+      );
+    },
+  },
+  {
+    title: "DOS",
+    key: "expense_date",
+    render(row) {
+      return h(
+        "span",
+        {},
+        {
+          default: () => dayjs(row.expense_date).format("MM/DD/YYYY"),
+        }
+      );
+    },
+  },
+  {
+    title: "Type",
+    key: "expense_type.name",
+  },
+  {
+    title: "Amount",
+    key: "amount",
+    render(row) {
+      return form.value.amount_paid > 0
+        ? h("div")
+        : h(
+            "span",
+            {
+              class:
+                "font-semibold bg-gray-800/10 border-2 rounded border-gray-500 px-3 py-2",
+            },
+            {
+              default: () => `$${row.amount}`,
+            }
+          );
+    },
+  },
+  {
+    key: "action",
+    fixed: "right",
+    width: "140",
+    render(row, rowIndex) {
+      return h(VendorExpenseAction, {
+        onAdd: onAddExpense,
+        onEdit: () => {
+          currentExpense.value = toRaw(row);
+          currentExpense.value.expense_date = dayjs(
+            currentExpense.value.expense_date
+          ).valueOf();
+          showExpenseModal.value = true;
+          editExpenseIndex.value = rowIndex;
+        },
+        onDelete: () => {
+          form.value.expenses.splice(rowIndex, 1);
+        },
+      });
+    },
+  },
+];
+const onAddExpense = () => {
+  showExpenseModal.value = true;
+  currentExpense.value = null;
+  editExpenseIndex.value = null;
+};
 const { mutateAsync: createExpense, isLoading } = useMutation(
   (data) => axios.post("/vendor_invoices", data),
   {
@@ -107,11 +212,22 @@ const { mutateAsync: createExpense, isLoading } = useMutation(
 );
 const { data: invoice_status } = getInvoiceStatus();
 const invoiceStatusOptions = computed(() =>
-  invoice_status.value?.map((status) => ({
-    label: status.name,
-    value: status.id,
-  }))
+  invoice_status.value
+    ?.filter((status) => status.name.toLowerCase() !== "paid")
+    .map((status) => ({
+      label: status.name,
+      value: status.id,
+    }))
 );
+
+const onSaveExpense = (expense) => {
+  showExpenseModal.value = false;
+  if (editExpenseIndex.value !== null) {
+    form.value.expenses[editExpenseIndex.value] = expense;
+  } else {
+    form.value.expenses.push({ ...expense });
+  }
+};
 
 async function submitInvoice() {
   const convertDate = (date) => dayjs(date).format("YYYY-MM-DD");
@@ -134,8 +250,7 @@ async function submitInvoice() {
 
       return obj;
     });
-    // await createExpense(modifiedForm);
-    console.log(modifiedForm);
+    await createExpense(modifiedForm);
     showDrawer.value = false;
 
     message.success("Expense Created Successfully");
@@ -149,8 +264,16 @@ async function submitInvoice() {
 
 const themeOverrides = {
   Input: {
-    color: "rgba(255, 255, 255, 0)",
     border: "none",
+    groupLabelColor: "rgba(255, 255, 255, 0.1)",
+    color: "rgba(255, 255, 255, 0)",
+    borderHover: "1px solid transparent",
+    borderHoverWarning: "none",
+    borderHoverError: "none",
+    clearColorHover: "rgba(255, 255, 255, 0)",
+    boxShadowFocus: "none",
+    borderFocus: "none",
+    colorFocus: "rgba(99, 226, 183, 0)",
   },
   Form: {
     labelPaddingVertical: "0 0 0 0",
@@ -177,41 +300,47 @@ const themeOverrides = {
   <n-modal
     preset="card"
     title="Create an Invoice"
-    class="custom-modal max-w-screen-md"
+    class="custom-modal relative max-w-screen-md"
     v-model:show="showDrawer"
   >
     <n-form :model="form" :rules="rules" size="medium" ref="formRef">
-      <header class="flex content-center justify-between">
-        <section class="space-y-4">
-          <div class="h-10"></div>
-          <div class="text-left">
-            <span class="block text-xs uppercase">Inv Date</span>
-            <span class="text-sm font-bold">{{
-              dayjs().format("MM/DD/YYYY")
-            }}</span>
-          </div>
-          <div class="text-left">
-            <span class="block text-xs uppercase">Vendor</span>
-            <span class="text-sm font-bold">{{ current_vendor?.name }}</span>
-          </div>
-        </section>
-        <section class="flex flex-col items-end gap-y-3">
-          <div
-            class="ml-auto max-w-[80px] border border-primary bg-primary/10 px-4 py-1 font-bold uppercase"
-          >
-            open
-          </div>
-          <div>
-            <n-select
-              :options="invoiceStatusOptions"
-              v-model:value="form.status"
-              filterable
-            />
-          </div>
-          <n-config-provider
-            inline-theme-disabled
-            :theme-overrides="themeOverrides"
-          >
+      <n-config-provider
+        inline-theme-disabled
+        :theme-overrides="themeOverrides"
+      >
+        <header class="flex content-center justify-between">
+          <section class="space-y-4">
+            <div class="h-10"></div>
+            <div class="text-left">
+              <n-form-item
+                size="small"
+                label-align="left"
+                label="Invoice Date"
+                path="invoice_date"
+              >
+                <n-date-picker
+                  format="MM/dd/yyyy"
+                  class="custom-date-picker max-w-[130px]"
+                  v-model:value="form.invoice_date"
+                  :clearable="false"
+                />
+              </n-form-item>
+            </div>
+            <div class="text-left">
+              <span class="block text-xs uppercase">Vendor</span>
+              <span class="text-sm font-bold">{{ current_vendor?.name }}</span>
+            </div>
+          </section>
+          <section class="flex flex-col items-end gap-y-3">
+            <div>
+              <n-select
+                :options="invoiceStatusOptions"
+                class="custom-select max-w-[90px]"
+                v-model:value="form.status"
+                filterable
+              />
+            </div>
+
             <div class="text-right">
               <n-form-item
                 size="small"
@@ -223,22 +352,39 @@ const themeOverrides = {
                   format="MM/dd/yyyy"
                   class="custom-date-picker max-w-[130px]"
                   v-model:value="form.due_date"
+                  :clearable="false"
                   :is-date-disabled="(ts) => ts <= Date.now()"
                 />
               </n-form-item>
             </div>
-          </n-config-provider>
-          <div class="text-right">
-            <span class="block text-xs uppercase">Terms</span>
-            <span class="text-sm font-bold">Net 30</span>
-          </div>
-        </section>
-      </header>
-      <main>
+            <div class="text-right">
+              <span class="block text-xs uppercase">Terms</span>
+              <span class="text-sm font-bold">Net 30</span>
+            </div>
+          </section>
+        </header>
+      </n-config-provider>
+      <main class="mt-4">
+        <h3 class="text-sm font-bold">Expenses</h3>
+        <n-data-table
+          :data="form.expenses"
+          :columns="columns"
+          striped
+          class="pt-2"
+          :max-height="500"
+          :scroll-x="1300"
+          row-class-name="group py-2"
+          v-if="form.expenses.length > 0"
+        />
+        <div v-else class="mt-4">
+          <n-button @click="onAddExpense" dashed type="primary" class="w-full">
+            + Create</n-button
+          >
+        </div>
         <section
-          class="dark:bg- mt-5 ml-auto w-full max-w-xs rounded bg-dark_border p-4"
+          class="mt-5 ml-auto w-full max-w-xs rounded bg-gray-100 p-4 dark:bg-dark_border"
         >
-          <div class="bg-foreground_dark p-4">
+          <div class="bg-foreground_light p-4 dark:bg-foreground_dark">
             <h5 class="font-medium uppercase">Inv Total</h5>
             <span class="text-lg font-bold"
               >${{ format(form.amount_due) }}</span
@@ -256,22 +402,33 @@ const themeOverrides = {
           </div>
         </section>
       </main>
-    </n-form>
-    <template #footer>
-      <div class="flex gap-x-5">
-        <button
-          class="rounded border-2 border-primary bg-primary/40 px-8 py-3 text-sm font-bold text-white"
-          @click.prevent="submitInvoice"
-        >
+      <div class="sticky bottom-2 flex gap-x-5">
+        <n-button type="primary" @click.prevent="submitInvoice">
           SAVE
-        </button>
+        </n-button>
       </div>
-    </template>
+    </n-form>
+  </n-modal>
+  <n-modal
+    preset="card"
+    class="max-w-screen-sm"
+    :title="(currentExpense ? 'Edit' : 'Add') + ' Expense'"
+    v-model:show="showExpenseModal"
+  >
+    <ExpenseModal
+      :expense="currentExpense"
+      :vendor_id="vendor_id"
+      @save:expense="onSaveExpense"
+    />
   </n-modal>
 </template>
 
 <style lang="scss" scoped>
 .custom-date-picker {
+  :deep(.n-input-wrapper) {
+    --n-padding-left: 0;
+    --n-padding-right: 0;
+  }
   :deep(.n-input__input-el) {
     @apply font-bold;
   }
@@ -279,10 +436,11 @@ const themeOverrides = {
     display: none;
   }
 }
-//.custom-select {
-//  :deep(.n-base-selection .n-base-selection-label) {
-//    background-color: rgb(2 123 255 / 0.1);
-//    @apply border border-primary text-center font-bold uppercase;
-//  }
-//}
+.custom-select {
+  :deep(.n-base-selection .n-base-selection-label) {
+    --n-padding-single: 0 12px;
+    background-color: rgb(2 123 255 / 0.1);
+    @apply border border-primary text-center font-bold uppercase;
+  }
+}
 </style>
