@@ -83,7 +83,7 @@ const scrollToSection = (item, index) => {
       <h1 class="font-bold text-2xl">{{ title }}</h1>
       <n-input
         v-model="query"
-        @change="$emit('searchTextChange', value)"
+        @change="(value) => $emit('searchTextChange', value)"
         placeholder="Search by vin..."
         class="mx-[24px] max-w-[550px] translate-y-[-40px] bordered dark:!border-[#45454C dark:bg-[#191919] bg-[#f6f6f6] p-2"
       />
