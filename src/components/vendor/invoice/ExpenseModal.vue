@@ -83,18 +83,28 @@ const expenseTypeOptions = computed(() => {
       ),
     []
   );
-  if (props.expense?.expense_type)
-    expenseTypeComputed = expenseTypeComputed
-      .concat([
-        {
-          value: props.expense.expense_type.id,
-          label: props.expense.expense_type.name,
-        },
-      ])
-      .filter(
-        (el, index, array) =>
-          index === array.findIndex((arr) => arr.value === el.value)
-      );
+  /**
+   * Concat all the expense types from expense items so that
+   * expense type doesn't show id instead of showing the label
+   */
+  expenseTypeComputed = expenseTypeComputed.concat(
+    expenseItems.value?.map((expense_item) => ({
+      value: expense_item.expense_item_type.id,
+      label: expense_item.expense_item_type.name,
+    })) ?? []
+  );
+  if (props.expense?.expense_type) {
+    expenseTypeComputed = expenseTypeComputed.concat([
+      {
+        value: props.expense.expense_type.id,
+        label: props.expense.expense_type.name,
+      },
+    ]);
+  }
+  expenseTypeComputed = expenseTypeComputed.filter(
+    (el, index, array) =>
+      index === array.findIndex((arr) => arr.value === el.value)
+  );
   return expenseTypeComputed;
 });
 
@@ -125,6 +135,11 @@ const dealOptions = computed(() => {
 const getResultFromArray = (arr, id) => {
   return arr.find((val) => val.value === id);
 };
+
+/**
+ * watching deal_id and type so that we are returning deal and expense_type object
+ * back to the table showing deal and expense type information
+ */
 watch(
   () => form.value.deal_id,
   (newValue) => {
@@ -145,7 +160,8 @@ watch(
     if (newValue) {
       form.value.expense_type = {
         id: form.value.type,
-        name: getResultFromArray(expenseTypeOptions.value, newValue).label,
+        name:
+          getResultFromArray(expenseTypeOptions.value, newValue)?.label ?? "",
       };
     }
   }
@@ -289,6 +305,7 @@ const handleChangeImage = ({ file, fileList, event }) => {
         v-model:file-list="form.files"
         :data="form.id ? { expense_id: form.id } : undefined"
         name="files[]"
+        accept="image/*"
         @change="handleChangeImage"
         list-type="image-card"
         @remove="onRemoveImage"

@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch, h, toRaw } from "vue";
-import { useMessage } from "naive-ui";
+import { typographyDark, useMessage } from "naive-ui";
 import { useMutation, useQueryClient } from "vue-query";
 import { useRoute } from "vue-router";
 import dayjs from "dayjs";
@@ -11,6 +11,7 @@ import { getVendorById } from "@/hooks/vendor.js";
 import { getInvoiceStatus } from "@/hooks/common_query.js";
 import VendorExpenseAction from "@/components/vendor/invoice/VendorExpenseAction.vue";
 import ExpenseModal from "@/components/vendor/invoice/ExpenseModal.vue";
+import ExpenseTableImage from "@/components/vendor/invoice/ExpenseTableImage.vue";
 
 const message = useMessage();
 const queryClient = useQueryClient();
@@ -27,7 +28,6 @@ const initialForm = {
   amount_due: 0,
   amount_paid: 0,
   balance: 0,
-  invoice_number: "",
   status: 1,
   due_date: dayjs().add(30, "day").valueOf(),
   invoice_date: dayjs().valueOf(),
@@ -70,7 +70,7 @@ watch(
   () => form.value?.expenses,
   (newFormValue) => {
     if (newFormValue.length > 0) {
-      form.value.amount_due = newFormValue?.reduce(
+      form.value.amount_due = form.value.balance = newFormValue?.reduce(
         (prev, curr) => prev + curr.amount,
         0
       );
@@ -86,7 +86,7 @@ const rules = {
     required: true,
     validator(rule, value) {
       if (value <= 0.01) {
-        return new Error("Amount should be more than 0.01");
+        return new Error("Invoice Amount can't be less than 0.01");
       }
     },
     trigger: "change",
@@ -110,13 +110,16 @@ const rules = {
   },
 };
 const columns = [
-  // {
-  //   title: "",
-  //   key: "files",
-  //   render(row) {
-  //      return h()
-  //   },
-  // },
+  {
+    title: "",
+    key: "files",
+    width: "80",
+    render(row) {
+      return h(ExpenseTableImage, {
+        files: row.files,
+      });
+    },
+  },
   {
     title: "VIN",
     key: "deal.vin",
@@ -235,21 +238,26 @@ async function submitInvoice() {
     await formRef.value.validate();
     // const modifiedForm = omit(form.value, ['cost'])
     const modifiedForm = { ...form.value };
-    modifiedForm.amount_paid = 0;
     modifiedForm.due_date = convertDate(modifiedForm.due_date);
-    modifiedForm.expenses = modifiedForm.expenses.map((item) => {
-      const obj = objectFilter(
+    modifiedForm.invoice_date = convertDate(modifiedForm.invoice_date);
+    modifiedForm.expenses = modifiedForm.expenses.map((item) =>
+      objectFilter(
         {
-          ...omit(item, ["showSelect", "expense_type_id", "files"]),
-          type: String(item.expense_type_id),
+          ...omit(item, [
+            "showSelect",
+            "expense_type",
+            "deal",
+            "expense_type_id",
+            "files",
+          ]),
+          type: String(item.type),
           expense_date: convertDate(item.expense_date),
           expense_files_ids: item.files.map((exp) => exp.file_id),
         },
         (key, value) => value
-      );
-
-      return obj;
-    });
+      )
+    );
+    console.log(modifiedForm);
     await createExpense(modifiedForm);
     showDrawer.value = false;
 
@@ -257,8 +265,9 @@ async function submitInvoice() {
 
     // onCreateExpense(modifiedForm);
   } catch (e) {
-    console.error(e);
-    message.error("Invalid data");
+    if (Array.isArray(e)) {
+      e.flat().forEach((err) => message.error(err.message));
+    }
   }
 }
 
@@ -303,7 +312,13 @@ const themeOverrides = {
     class="custom-modal relative max-w-screen-md"
     v-model:show="showDrawer"
   >
-    <n-form :model="form" :rules="rules" size="medium" ref="formRef">
+    <n-form
+      :model="form"
+      :rules="rules"
+      :disabled="isLoading"
+      size="medium"
+      ref="formRef"
+    >
       <n-config-provider
         inline-theme-disabled
         :theme-overrides="themeOverrides"
@@ -389,11 +404,16 @@ const themeOverrides = {
             <span class="text-lg font-bold"
               >${{ format(form.amount_due) }}</span
             >
+            <n-form-item class="hidden" path="amount_due">
+              <n-input-number v-model:value="form.amount_due" />
+            </n-form-item>
           </div>
           <div class="space-y-2 px-4 pt-5">
             <div>
               <h5 class="font-medium uppercase">Payments</h5>
-              <span class="text-lg font-bold">${{ form.amount_paid }}</span>
+              <span class="text-lg font-bold"
+                >${{ format(form.amount_paid) }}</span
+              >
             </div>
             <div>
               <h5 class="font-medium uppercase">Balance</h5>
@@ -403,7 +423,11 @@ const themeOverrides = {
         </section>
       </main>
       <div class="sticky bottom-2 flex gap-x-5">
-        <n-button type="primary" @click.prevent="submitInvoice">
+        <n-button
+          type="primary"
+          :loading="isLoading"
+          @click.prevent="submitInvoice"
+        >
           SAVE
         </n-button>
       </div>

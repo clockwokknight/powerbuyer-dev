@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { h, ref, toRaw, watch, toRef, unref, computed } from "vue";
 import VendorExpenseAction from "./VendorExpenseAction.vue";
 import ExpenseModal from "./ExpenseModal.vue";
+import ExpenseTableImage from "@/components/vendor/invoice/ExpenseTableImage.vue";
 import { clone, pick, omit } from "@/lib/helper";
 import { useQueryClient, useMutation } from "vue-query";
 import { useMessage } from "naive-ui";
@@ -119,6 +120,11 @@ watch(
     }
   }
 );
+const onAddExpense = () => {
+  showExpenseModal.value = true;
+  currentExpense.value = null;
+  editExpenseIndex.value = null;
+};
 watch(
   () => form.value?.expenses,
   (newFormValue) => {
@@ -164,18 +170,20 @@ const { mutateAsync: deleteExpense, isLoading: deleteExpenseLoading } =
   });
 const editExpenseIndex = ref();
 const columns = [
-  // {
-  //   title: "",
-  //   key: "files",
-  //   render(row) {
-  //      return h()
-  //   },
-  // },
+  {
+    title: "",
+    key: "files",
+    width: "80",
+    render(row) {
+      return h(ExpenseTableImage, {
+        files: row.files,
+      });
+    },
+  },
   {
     title: "VIN",
     key: "deal.vin",
     width: "200px",
-    fixed: "left",
   },
   {
     title: "Item",
@@ -214,6 +222,8 @@ const columns = [
   {
     title: "Amount",
     key: "amount",
+    width: "150",
+    fixed: "right",
     render(row) {
       return form.value.amount_paid > 0
         ? h("div")
@@ -235,12 +245,7 @@ const columns = [
     width: "140",
     render(row, rowIndex) {
       return h(VendorExpenseAction, {
-        onAdd: () => {
-          showExpenseModal.value = true;
-          vendor_id.value = props.initialData.vendor[0].id;
-          currentExpense.value = null;
-          editExpenseIndex.value = null;
-        },
+        onAdd: onAddExpense,
         onEdit: () => {
           vendor_id.value = props.initialData.vendor[0].id;
           currentExpense.value = toRaw(row);
@@ -270,6 +275,7 @@ const onSaveExpense = (expense) => {
 };
 const formRef = ref(null);
 const submitForm = async () => {
+  const convertDate = (date) => dayjs(date).format("YYYY-MM-DD");
   try {
     await formRef.value.validate();
     let obj = omit(unref(form), ["vendor", "payment_invoices"]);
@@ -285,7 +291,7 @@ const submitForm = async () => {
             "deal",
             "files",
           ]),
-          expense_date: dayjs(expense.expense_date).format("YYYY-MM-DD"),
+          expense_date: convertDate(expense.expense_date),
         };
         if (!modifiedExpense?.id) {
           modifiedExpense.expense_files_ids = toRaw(expense).files.map(
@@ -296,7 +302,8 @@ const submitForm = async () => {
       })
       // Also add deleted Expense array so that it removes from the database as well.
       .concat(unref(deletedExpenses));
-    obj.due_date = dayjs(obj.due_date).format("YYYY-MM-DD");
+    obj.due_date = convertDate(obj.due_date);
+    obj.invoice_date = convertDate(obj.invoice_date);
     obj = omit(obj, ["invoice_number"]);
     console.log(obj);
     updateExpense(obj);
@@ -411,7 +418,13 @@ const themeOverrides = {
           :max-height="500"
           :scroll-x="1300"
           row-class-name="group py-2"
+          v-if="form.expenses.length > 0"
         />
+        <div v-else class="mt-4">
+          <n-button @click="onAddExpense" dashed type="primary" class="w-full">
+            + Create</n-button
+          >
+        </div>
 
         <section
           class="mt-5 ml-auto w-full max-w-xs rounded bg-gray-100 p-4 dark:bg-dark_border"
@@ -437,7 +450,12 @@ const themeOverrides = {
         </section>
       </main>
       <div class="sticky bottom-2 flex gap-x-5" v-if="form.amount_paid === 0">
-        <n-button size="medium" type="primary" @click.prevent="submitForm">
+        <n-button
+          size="medium"
+          type="primary"
+          :loading="updateExpenseLoading"
+          @click.prevent="submitForm"
+        >
           SAVE
         </n-button>
         <n-button
