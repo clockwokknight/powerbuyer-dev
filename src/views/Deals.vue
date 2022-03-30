@@ -7,13 +7,11 @@ import DataTable from "@/components/_refactor/DataTable.vue";
 import Card from "@/components/_refactor/Card.vue";
 import HeaderTabs from "@/components/_refactor/HeaderTabs.vue";
 import { start } from "@popperjs/core";
-import { useDebounce } from "@vueuse/core";
-import { NTag } from "naive-ui";
+import { NTag, NAvatar } from "naive-ui";
 
 const route = useRoute();
 
 const searchText = ref("");
-const debouncedSearchText = useDebounce(searchText, 500);
 
 const data = ref({});
 const isLoading = ref(false);
@@ -30,35 +28,28 @@ watch(
   }
 );
 
-watch(
-  () => debouncedSearchText.value,
-  (newValue, oldValue) => {
-    isLoading.value = true;
-    axios
-      .get(`/deals/search_by_vin/${debouncedSearchText.value}`)
-      .then((res) => {
-        data.value = res.data;
-        console.log("updated:", data.value);
-      })
-      .finally(() => {
-        isLoading.value = false;
-      });
-  }
-);
-
 const deals = computed(() => {
-  return data.value?.data?.map((item) => {
-    return {
-      vin: item.vin,
-      lane_number: item.lane_number,
-      date_purchased: item.date_purchased,
-      status: item.status,
-      make: "Ford",
-      model: "Expedeition",
-      year: "2021",
-      buyer: "Amber Smith",
-    };
-  });
+  return data.value?.data
+    ?.filter((item) => {
+      console.log("filtering");
+      if (item.vin.search(searchText.value) < 0) {
+        return false;
+      } else {
+        return true;
+      }
+    })
+    .map((item) => {
+      return {
+        vin: item.vin,
+        lane_number: item.lane_number,
+        date_purchased: item.date_purchased,
+        status: item.status,
+        make: "Ford",
+        model: "Expedition",
+        year: "2021",
+        buyer: "Amber Smith",
+      };
+    });
 });
 
 const onUpdatePage = (pageNum) => {
@@ -101,6 +92,19 @@ const tabs = ref([
 ]);
 
 const columns = [
+  {
+    title: "",
+    align: "center",
+    render(row) {
+      return h(
+        NAvatar,
+        {
+          size: "large",
+          src: row.image,
+        },
+      );
+    },
+  },
   {
     title: "VIN",
     key: "vin",
@@ -154,7 +158,7 @@ const columns = [
     title: "BUYER",
     key: "buyer",
     align: "center",
-     render(row) {
+    render(row) {
       return h(
         NTag,
         {
@@ -177,63 +181,60 @@ onMounted(() => {
   console.log(route);
 });
 
-const fetchDeals = (pageNum) => {
+const fetchDeals = async (pageNum) => {
+  isLoading.value = true;
+  const startDate = new Date(range.value[0]);
+  const endDate = new Date(range.value[1]);
+  const startDateString =
+    startDate.getFullYear() +
+    "-" +
+    (startDate.getMonth() + 1) +
+    "-" +
+    startDate.getDate();
+  const endDateString =
+    endDate.getFullYear() +
+    "-" +
+    (endDate.getMonth() + 1) +
+    "-" +
+    endDate.getDate();
+
   if (selectedTab.value.title === "All Deals") {
-    isLoading.value = true;
-    const startDate = new Date(range.value[0]);
-    const endDate = new Date(range.value[1]);
-    const startDateString =
-      startDate.getFullYear() +
-      "-" +
-      (startDate.getMonth() + 1) +
-      "-" +
-      startDate.getDate();
-    const endDateString =
-      endDate.getFullYear() +
-      "-" +
-      (endDate.getMonth() + 1) +
-      "-" +
-      endDate.getDate();
-    axios
-      .get(
+    try {
+      const res = await axios.get(
         `/deals/by_date/${startDateString}/${endDateString}/10?page=${pageNum}`
-      )
-      .then((res) => {
-        data.value = res.data;
-        console.log("updated:", data.value);
-      })
-      .finally(() => {
-        isLoading.value = false;
-      });
+      );
+      data.value = res.data;
+
+      for (let i = 0; i < data.value.data.length; i++) {
+        const imgData = await axios.get(`https://gmtvinventory.com/api/images/deal/${data.value.data[i].id}`);
+        data.value.data[i].image = imgData.data[0]?.storage;
+      }
+    } catch (error) {
+      throw error;
+    } finally {
+      isLoading.value = false;
+    }
   } else {
-    isLoading.value = true;
-    const startDate = new Date(range.value[0]);
-    const endDate = new Date(range.value[1]);
-    const startDateString =
-      startDate.getFullYear() +
-      "-" +
-      (startDate.getMonth() + 1) +
-      "-" +
-      startDate.getDate();
-    const endDateString =
-      endDate.getFullYear() +
-      "-" +
-      (endDate.getMonth() + 1) +
-      "-" +
-      endDate.getDate();
-    axios
-      .get(
+    try {
+      const res = await axios.get(
         `/deals/by_status_date/${selectedTab.value.value}/${startDateString}/${endDateString}/10?page=${pageNum}`
-      )
-      .then((res) => {
-        data.value = res.data;
-        console.log("updated:", data.value);
-      })
-      .finally(() => {
-        isLoading.value = false;
-      });
+      );
+      data.value = res.data;
+
+      for (let i = 0; i < data.value.data.length; i++) {
+        const imgData = await axios.get(`https://gmtvinventory.com/api/images/deal/${data.value.data[i].id}`);
+        data.value.data[i].image = imgData.data[0]?.storage;
+      }
+    } catch (error) {
+      throw error;
+    } finally {
+      isLoading.value = false;
+    }
   }
+
+  console.log(data.value);
 };
+
 const onTabSelection = (tab, index) => {
   selectedTab.value = tab;
   console.log(tab, index, range.value);
@@ -246,6 +247,11 @@ const onRangeChange = (value) => {
 };
 
 fetchDeals(1);
+
+const handleSearchTextChange = (value) => {
+  searchText.value = value;
+  console.log(searchText.value);
+};
 </script>
 
 <template>
@@ -256,7 +262,7 @@ fetchDeals(1);
       :title="'Deals'"
       :items="tabs"
       :range="range"
-      @searchTextChange="(value) => (searchText = value)"
+      @searchTextChange="handleSearchTextChange"
       @selected="onTabSelection"
       @dateChanged="onRangeChange"
       class="bg-foreground_light dark:bg-foreground_dark rounded-round bordered sticky z-40 mt-[24px] w-full p-[24px] !pb-0 duration-300"
@@ -287,11 +293,13 @@ fetchDeals(1);
         :loading="isLoading"
       />
     </div>
-    <n-pagination
-      v-model:page="page"
-      :page-count="pageCount"
-      :on-update:page="onUpdatePage"
-    />
+    <div class="mt-[10px]">
+      <n-pagination
+        v-model:page="page"
+        :page-count="pageCount"
+        :on-update:page="onUpdatePage"
+      />
+    </div>
   </div>
 </template>
 
