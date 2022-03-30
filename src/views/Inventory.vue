@@ -1,11 +1,27 @@
 <script setup>
-import { ref, watch } from "vue";
+import {
+  computed,
+  onMounted,
+  defineAsyncComponent,
+  getCurrentInstance,
+  ref,
+  watch,
+  watchEffect,
+  nextTick,
+  unref,
+} from "vue";
+
+import { useRouter, useRoute } from "vue-router";
 import { useQuery } from "vue-query";
 import { useDebounce } from "@vueuse/core";
 import { getVendors } from "@/hooks/vendor";
 import { useGlobalState } from "@/store/global";
+import { useMutation, useQueryClient } from "vue-query";
 import { useTabsViewStore } from "@/store/tabs";
 import { useVendors } from "@/store/vendors";
+import { log, utils } from "@/lib/utils";
+import { useMessage } from "naive-ui";
+
 import axios from "axios";
 
 import AddVendor from "@/components/vendor/AddVendor.vue";
@@ -13,9 +29,17 @@ import PageTabs from "@/components/PageTabs.vue";
 import VendorList from "@/components/vendor/VendorList.vue";
 import Tabs from "@/components/common/Tabs.vue";
 import Card from "@/components/_refactor/Card.vue";
+import CustomInput from "@/components/common/CustomInput.vue";
+
+const instance = getCurrentInstance();
+
+const global = useGlobalState();
+const route = useRoute();
+const router = useRouter();
+const message = useMessage();
+const queryClient = useQueryClient();
 
 const tabStore = useTabsViewStore();
-const global = useGlobalState();
 const vendorStore = useVendors();
 
 const searchText = ref("");
@@ -54,14 +78,73 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
   }
 );
 
+const form = ref({
+  name: null,
+  address_one: null,
+  address_two: null,
+  city: null,
+  state: null,
+  zip: null,
+  email: null,
+  phone: null,
+  fax: null,
+  din: null,
+  tax_id_number: null,
+  vendor_category_id: null,
+  payment_terms: null,
+});
+
 function toggleListSlide() {
   listActive.value = !listActive.value;
+}
+
+function resetValue(key) {
+  nextTick();
+  log.yellow(`resetting value to ${vendorData.value[key]}`);
+  form.value = {
+    ...form.value,
+    [key]: vendorData.value[key],
+  };
+  currentActiveField.value = null;
+}
+
+function submitValue(key) {
+  mutateAsync({
+    [key]: key === "phone" ? utils.parsePhoneNumber(form.value[key]) : form.value[key],
+  })
+    .then((data) => {
+      message.success("Saved");
+      console.clear();
+      console.log(data);
+      currentActiveField.value = null;
+    })
+    .catch((err) => {
+      message.error("An error ocurred");
+      console.log("uh oh...", err);
+    });
+  currentActiveField.value = null;
+}
+
+function handleTabClick(e) {
+  window.location.hash = e;
 }
 
 watch(
   () => listActive.value,
   (val) => {
     global.setListActive(val, "vendor");
+  }
+);
+
+watch(
+  () => route.params?.id,
+  (val) => {
+    if (route.params?.id) {
+      routeParamId.value = route.params?.id;
+    }
+  },
+  {
+    immediate: true,
   }
 );
 </script>
@@ -199,8 +282,256 @@ watch(
       <!-- Main Body Content-->
       <div id="main" class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
         <main id="container" class="min-h-full p-2 md:p-6">
-          <Card class="h-[400px]">Detalis</Card>
-          <Card class="h-[80px] mt-[24px]">Tabs</Card>
+          <Card class="pr-[300px]">
+            <div id="details" class="mt-0 grid grid-cols-12 w-full">
+              <!-- left side -->
+              <div class="__form col-span-12 flex flex-col justify-between">
+                <div class="flex">
+                  <div class="mr-[24px] h-[260px] min-w-[260px] rounded-round">
+                    <div class="relative">
+                      <div
+                        class="__vehicle-logo z-50 absolute m-[12px] h-[24px] w-[48px] bg-blue-700 center-content text-[9px] rounded-round"
+                      >
+                        logo
+                      </div>
+                    </div>
+                    <n-carousel class="max-w-[260px]" show-arrow autoplay>
+                      <img
+                        class="carousel-img object-cover h-full"
+                        src="https://storage.googleapis.com/gmtv-inventory/3C4PDDEG5GT243378/152/20220114235135-940f543b-15c9-41c0-a3aa-7de27296a2a5.jpg"
+                      />
+                      <img
+                        class="carousel-img object-cover h-full"
+                        src="https://storage.googleapis.com/gmtv-inventory/3C4PDDEG5GT243378/152/20220114235134-f52d1048-199d-42e2-ae7e-b147c7348281.jpg"
+                      />
+                      <img
+                        class="carousel-img object-cover h-full"
+                        src="https://storage.googleapis.com/gmtv-inventory/3C4PDDEG5GT243378/152/20220114235134-b2492432-999d-4309-b6ee-4c41f82c696a.jpg"
+                      />
+                      <img
+                        class="carousel-img object-cover h-full"
+                        src="https://storage.googleapis.com/gmtv-inventory/3C4PDDEG5GT243378/152/20220114235135-5800eaf6-bf33-4347-9f90-a08cdf12cec2.jpg"
+                      />
+                      <template #arrow="{ prev, next }">
+                        <div class="custom-arrow">
+                          <button type="button" class="curtom-arrow--left" @click="prev">
+                            <n-icon>◄<ArrowBack /></n-icon>
+                          </button>
+                          <button type="button" class="curtom-arrow--right" @click="next">
+                            <n-icon>►<ArrowForward /></n-icon>
+                          </button>
+                        </div>
+                      </template>
+                      <template #dots="{ total, currentIndex, to }">
+                        <ul class="custom-dots">
+                          <li
+                            v-for="index of total"
+                            :key="index"
+                            :class="{ ['is-active']: currentIndex === index - 1 }"
+                            @click="to(index - 1)"
+                          />
+                        </ul>
+                      </template>
+                    </n-carousel>
+                    <div class="relative">
+                      <div
+                        style="background: linear-gradient(transparent, black)"
+                        class="w-full h-[80px] absolute bottom-0"
+                      ></div>
+                    </div>
+                  </div>
+
+                  <div class="__form grid grid-cols-12 gap-4">
+                    <!-- header info -->
+                    <div class="__labeled-data col-span-12 md:col-span-6">
+                      <span>VIN</span>
+                      <h3>3FADP4AJ2EM100154</h3>
+                    </div>
+                    <div class="__labeled-data col-span-12 md:col-span-3">
+                      <span>Lane</span>
+                      <h3>20</h3>
+                    </div>
+                    <div class="__labeled-data col-span-12 md:col-span-3">
+                      <span>Grade</span>
+                      <h3>4</h3>
+                    </div>
+                    <!-- row 1 -->
+                    <div class="col-span-12 md:col-span-3">
+                      <CustomInput
+                        label="Year"
+                        placeholder=""
+                        :value="form.address_one"
+                        @update:value="(val) => (form.address_one = val)"
+                        @save="submitValue('address_one')"
+                        @cancel="resetValue('address_one')"
+                        @focus="currentActiveField = 'address_one'"
+                      />
+                    </div>
+                    <div class="col-span-12 md:col-span-3">
+                      <CustomInput
+                        label="Make"
+                        placeholder=""
+                        :value="form.address_two"
+                        @update:value="(val) => (form.address_two = val)"
+                        @save="submitValue('address_two')"
+                        @cancel="resetValue('address_two')"
+                        @focus="currentActiveField = 'address_two'"
+                      />
+                    </div>
+                    <!-- row 2 -->
+                    <div class="col-span-12 md:col-span-3">
+                      <CustomInput
+                        label="Model"
+                        placeholder=""
+                        :value="form.city"
+                        @update:value="(val) => (form.city = val)"
+                        @save="submitValue('city')"
+                        @cancel="resetValue('city')"
+                        @focus="currentActiveField = 'city'"
+                      />
+                    </div>
+                    <div class="col-span-12 md:col-span-3">
+                      <CustomInput
+                        type="Trim"
+                        label="State"
+                        placeholder=""
+                        :options="statesList"
+                        :value="form.state"
+                        @update:value="(val) => (form.state = val)"
+                        @save="submitValue('state')"
+                        @cancel="resetValue('state')"
+                        @focus="currentActiveField = 'state'"
+                      />
+                    </div>
+                    <div class="col-span-12 md:col-span-3">
+                      <CustomInput
+                        label="Body"
+                        :value="form.zip"
+                        @update:value="(val) => (form.zip = val)"
+                        @save="submitValue('zip')"
+                        @cancel="resetValue('zip')"
+                        @focus="currentActiveField = 'zip'"
+                      />
+                    </div>
+                    <!-- row 3 -->
+                    <div class="col-span-12 md:col-span-3">
+                      <CustomInput
+                        label="Ext. Color"
+                        placeholder=""
+                        :value="form.email"
+                        @update:value="(val) => (form.email = val)"
+                        @save="submitValue('email')"
+                        @cancel="resetValue('email')"
+                        @focus="currentActiveField = 'email'"
+                      />
+                    </div>
+                    <div class="col-span-12 md:col-span-3">
+                      <CustomInput
+                        label="Int. Color"
+                        :value="form.phone"
+                        @update:value="(val) => (form.phone = val)"
+                        @save="submitValue('phone')"
+                        @cancel="resetValue('phone')"
+                        @focus="currentActiveField = 'phone'"
+                      />
+                    </div>
+                    <div class="col-span-12 md:col-span-3">
+                      <CustomInput
+                        label="Miles"
+                        :value="form.fax"
+                        @update:value="(val) => (form.fax = val)"
+                        @save="submitValue('fax')"
+                        @cancel="resetValue('fax')"
+                        @focus="currentActiveField = 'fax'"
+                      />
+                    </div>
+                    <!-- row 4 -->
+                    <div class="col-span-12 md:col-span-6">
+                      <CustomInput
+                        label="Notes"
+                        placeholder=""
+                        :value="form.tax_id_number"
+                        @update:value="(val) => (form.tax_id_number = val)"
+                        @save="submitValue('tax_id_number')"
+                        @cancel="resetValue('tax_id_number')"
+                        @focus="currentActiveField = 'tax_id_number'"
+                      />
+                    </div>
+                    <div class="col-span-12 md:col-span-6">
+                      <CustomInput
+                        type="Recon"
+                        label="Category"
+                        placeholder=""
+                        :options="vendorCategoryOptions"
+                        :value="form.vendor_category_id"
+                        @update:value="(val) => (form.vendor_category_id = val)"
+                        @save="submitValue('vendor_category_id')"
+                        @cancel="resetValue('vendor_category_id')"
+                        @focus="currentActiveField = 'vendor_category_id'"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- right side -->
+
+              <!--div
+                class="col-span-12 mt-[24px] flex flex-col justify-between md:col-span-4 md:mt-0 md:w-auto md:items-end"
+              >
+                <div class="__invoice-info mb-[24px] md:mb-0">
+                  <div class="flex md:justify-end">
+                    <p class="text-sm font-bold">Open Invoices</p>
+                  </div>
+                  <div class="flex justify-end">
+                    <p class="text-2xl font-bold">{{ getInvoicesTotal }}</p>
+                  </div>
+                </div>
+                <div class="align-end max-w-[220px] flex-col justify-between">
+                  <CustomInput
+                    type="select"
+                    label="Payment Terms"
+                    :validate="['required']"
+                    :options="paymentTermOptions"
+                    :value="form.payment_terms"
+                    placeholder=""
+                    @update:value="(val) => (form.payment_terms = val)"
+                    @save="submitValue('payment_terms')"
+                    @cancel="resetValue('payment_terms')"
+                    @focus="currentActiveField = 'payment_terms'"
+                  />
+                  <div
+                    class="__invoice-buttons mt-4 flex min-w-max max-w-full flex-col items-end justify-center md:mt-20"
+                  >
+                    <n-button class="w-[220px]" @click="global.openDrawer('payments')">
+                      <n-icon>
+                        <svg viewBox="0 0 24 24">
+                          <path
+                            d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"
+                            fill="currentColor"
+                          ></path>
+                        </svg>
+                      </n-icon>
+                      Add Payment
+                    </n-button>
+                    <n-button class="mt-4 w-[220px]" @click="active = true">
+                      <n-icon>
+                        <svg viewBox="0 0 24 24">
+                          <path
+                            d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"
+                            fill="currentColor"
+                          ></path>
+                        </svg>
+                      </n-icon>
+                      Create Expense
+                    </n-button>
+                  </div>
+                </div>
+              </div-->
+            </div>
+          </Card>
+          <Card class="h-[clac(80px-48px)] mt-[24px]">Tabs</Card>
+          <Card class="h-[clac(80px-48px)] mt-[24px]">Steppers</Card>
           <div class="grid grid-cols-2 gap-[24px] w-full mt-[24px]">
             <Card class="h-[420px]"></Card>
             <Card class="h-[420px]"></Card>
@@ -252,5 +583,75 @@ watch(
   100% {
     margin-left: 0;
   }
+}
+.__labeled-data {
+  @apply border-b-[2px] border-background_light dark:border-dark_border p-[6px] pl-[12px];
+  span {
+    @apply text-[9px] uppercase;
+  }
+}
+.carousel-img {
+  height: 260px;
+  object-fit: cover;
+  @apply rounded-round;
+}
+
+.custom-arrow {
+  display: flex;
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+}
+
+.custom-arrow button {
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-right: 12px;
+  color: #fff;
+  background-color: rgba(white, 0.2);
+  border-width: 0;
+  border-radius: 5px;
+  backdrop-filter: blur(24px);
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.custom-arrow button:hover {
+  background-color: rgba(white, 0.4);
+}
+
+.custom-arrow button:active {
+  transform: scale(0.95);
+  transform-origin: center;
+}
+
+.custom-dots {
+  z-index: 50;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+}
+
+.custom-dots li {
+  display: inline-block;
+  width: 12px;
+  height: 4px;
+  margin: 0 3px;
+  border-radius: 4px;
+  background-color: rgba(white, 0.6);
+  transition: width 0.3s, background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.custom-dots li.is-active {
+  width: 40px;
+  background: white;
 }
 </style>

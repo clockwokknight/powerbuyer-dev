@@ -12,6 +12,7 @@ import AddVendor from "@/components/vendor/AddVendor.vue";
 import PageTabs from "@/components/PageTabs.vue";
 import VendorList from "@/components/vendor/VendorList.vue";
 import Tabs from "@/components/common/Tabs.vue";
+import Card from "@/components/_refactor/Card.vue";
 
 const tabStore = useTabsViewStore();
 const global = useGlobalState();
