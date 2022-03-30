@@ -130,14 +130,14 @@ watch(
   (newFormValue) => {
     if (newFormValue && newFormValue?.length > 0) {
       form.value.amount_due = form.value.balance = newFormValue?.reduce(
-        (prev, curr) => prev + parseFloat(curr.amount),
+        (prev, curr) => parseFloat((prev + curr.amount).toFixed(2)),
         0
       );
     } else {
       form.value.amount_due = 0;
     }
   },
-  { deep: true, flush: "post" }
+  { deep: true }
 );
 
 // Mutations
@@ -244,24 +244,26 @@ const columns = [
     fixed: "right",
     width: "140",
     render(row, rowIndex) {
-      return h(VendorExpenseAction, {
-        onAdd: onAddExpense,
-        onEdit: () => {
-          vendor_id.value = props.initialData.vendor[0].id;
-          currentExpense.value = toRaw(row);
-          currentExpense.value.expense_date = dayjs(
-            currentExpense.value.expense_date
-          ).valueOf();
-          showExpenseModal.value = true;
-          editExpenseIndex.value = rowIndex;
-        },
-        onDelete: () => {
-          if (row.id) {
-            deletedExpenses.value.push({ id: row.id, delete_record: 1 });
-          }
-          form.value.expenses.splice(rowIndex, 1);
-        },
-      });
+      return form.value.amount_paid > 0
+        ? h("span")
+        : h(VendorExpenseAction, {
+            onAdd: onAddExpense,
+            onEdit: () => {
+              vendor_id.value = props.initialData.vendor[0].id;
+              currentExpense.value = toRaw(row);
+              currentExpense.value.expense_date = dayjs(
+                currentExpense.value.expense_date
+              ).valueOf();
+              showExpenseModal.value = true;
+              editExpenseIndex.value = rowIndex;
+            },
+            onDelete: () => {
+              if (row.id) {
+                deletedExpenses.value.push({ id: row.id, delete_record: 1 });
+              }
+              form.value.expenses.splice(rowIndex, 1);
+            },
+          });
     },
   },
 ];
@@ -290,6 +292,7 @@ const submitForm = async () => {
             "showSelect",
             "deal",
             "files",
+            "status_detail",
           ]),
           expense_date: convertDate(expense.expense_date),
         };
@@ -321,7 +324,6 @@ const themeOverrides = {
     borderHover: "1px solid transparent",
     borderHoverWarning: "none",
     borderHoverError: "none",
-    clearColorHover: "rgba(255, 255, 255, 0)",
     boxShadowFocus: "none",
     borderFocus: "none",
     colorFocus: "rgba(99, 226, 183, 0)",
@@ -372,11 +374,6 @@ const themeOverrides = {
             </div>
           </section>
           <section class="flex flex-col items-end gap-y-3">
-            <!--            <div-->
-            <!--              class="ml-auto max-w-[80px] border border-primary bg-primary/10 px-4 py-1 font-bold uppercase"-->
-            <!--            >-->
-            <!--              open-->
-            <!--            </div>-->
             <div>
               <n-select
                 :options="invoiceStatusOptions"
@@ -497,6 +494,10 @@ const themeOverrides = {
 .custom-date-picker {
   :deep(.n-input__input-el) {
     @apply font-bold;
+  }
+  :deep(.n-input .n-input-wrapper) {
+    --n-padding-left: 0;
+    --n-padding-right: 0;
   }
   :deep(.n-input__suffix) {
     display: none;

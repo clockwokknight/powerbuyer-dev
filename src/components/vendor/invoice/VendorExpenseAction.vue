@@ -12,7 +12,7 @@ const onDelete = () => {
 <template>
   <div class="flex content-center space-x-3">
     <button
-      class="hover:text-primary invisible text-gray-300 group-hover:visible"
+      class="text-gray-300 hover:text-primary md:invisible md:group-hover:visible"
       @click="$emit('edit')"
     >
       <n-icon>
@@ -52,7 +52,11 @@ const onDelete = () => {
       </n-button>
       <n-button round class="w-4" @click="$emit('add')">
         <n-icon>
-          <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <svg
+            viewBox="0 0 512 512"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
             <path
               d="M256 112V400M400 256H112"
               stroke="currentColor"

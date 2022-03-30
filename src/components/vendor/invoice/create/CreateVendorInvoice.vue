@@ -124,12 +124,11 @@ const columns = [
     title: "VIN",
     key: "deal.vin",
     width: "200px",
-    fixed: "left",
   },
   {
     title: "Item",
     key: "name",
-    width: "100",
+    width: "130",
   },
   {
     title: "Description",
@@ -163,6 +162,8 @@ const columns = [
   {
     title: "Amount",
     key: "amount",
+    width: "150",
+    fixed: "right",
     render(row) {
       return form.value.amount_paid > 0
         ? h("div")
@@ -449,7 +450,7 @@ const themeOverrides = {
 
 <style lang="scss" scoped>
 .custom-date-picker {
-  :deep(.n-input-wrapper) {
+  :deep(.n-input .n-input-wrapper) {
     --n-padding-left: 0;
     --n-padding-right: 0;
   }
