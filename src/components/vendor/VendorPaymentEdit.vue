@@ -183,7 +183,7 @@ watchPostEffect(() => {
       label: inv.invoice_number,
       value: inv.id,
       disabled: form.value.payment_invoices.some(
-        (invoice) => invoice.vendor_invoice_id === inv.id
+        (invoice) => invoice?.vendor_invoice_id === inv?.id
       ),
     }));
   }

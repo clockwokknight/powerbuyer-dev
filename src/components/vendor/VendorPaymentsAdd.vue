@@ -1,24 +1,16 @@
 <script setup>
-import {
-  computed,
-  ref,
-  toRaw,
-  unref,
-  watch,
-  watchPostEffect,
-  watchEffect,
-} from "vue";
-import { useMessage } from "naive-ui";
-import dayjs from "dayjs";
-import { clone, omit, pick } from "@/lib/helper";
-import { useMutation, useQuery, useQueryClient } from "vue-query";
-import axios from "axios";
-import CurrencyInput from "@/components/common/CurrencyInput.vue";
-import CustomInput from "@/components/common/CustomInput.vue";
-import { useRoute } from "vue-router";
-import { vendorInvoices } from "@/hooks/vendor.js";
+import ActionButtonGroup from "@/components/vendor/payment/ActionButtonGroup.vue";
 import { getGmtvLocations } from "@/hooks/location.js";
 import { getPaymentTypes } from "@/hooks/payments";
+import { vendorInvoices } from "@/hooks/vendor.js";
+import { clone, omit } from "@/lib/helper";
+import axios from "axios";
+import dayjs from "dayjs";
+import { useMessage } from "naive-ui";
+import { computed, ref, watch, watchEffect } from "vue";
+import { useMutation, useQuery, useQueryClient } from "vue-query";
+import { useRoute } from "vue-router";
+import PaymentInvoiceFormModal from "./payment/PaymentInvoiceFormModal.vue";
 
 const route = useRoute();
 
@@ -32,17 +24,25 @@ const initialForm = {
   type: null,
   payment_date: dayjs().valueOf(),
   invoice_number: "",
-  account_number: "",
+  account_number: null,
   ach_transfer_number: "",
   notes: "",
   gmtv_location_id: null,
   payment_invoices: [
-    { vendor_invoice_id: null, payment_amount: 0, balance: 0 },
+    // { vendor_invoice_id: null, payment_amount: 0, balance: 0 }
   ],
 };
 const form = ref({ ...initialForm });
 
 const routeParamId = ref(route.params?.id);
+const showPaymentInvoiceModal = ref(false);
+const currentPaymentInvoiceIndex = ref(null);
+const currentPaymentInvoiceData = ref(null);
+const onCreatePaymentInvoice = (index) => {
+  showPaymentInvoiceModal.value = true;
+  currentPaymentInvoiceIndex.value = index ?? 0;
+  currentPaymentInvoiceData.value = null;
+};
 
 const { data: payment_types } = getPaymentTypes();
 const paymentTypeOptions = computed(() =>
@@ -50,6 +50,13 @@ const paymentTypeOptions = computed(() =>
     label: paymentType.name,
     value: paymentType.id,
   }))
+);
+const currentPaymentType = computed(() =>
+  form.value?.type
+    ? payment_types.value
+        ?.find((pmtOption) => pmtOption.id === form.value?.type)
+        .name.toLowerCase()
+    : null
 );
 
 watch(
@@ -73,9 +80,9 @@ const paymentStatusOptions = computed(() =>
   }))
 );
 
-// const { data: paymentRecipientTypes } = useQuery("payment_receipt_types", () =>
-//   axios.get("/payment_receipt_types").then((r) => r.data)
-// );
+const { data: paymentRecipientTypes } = useQuery("payment_receipt_types", () =>
+  axios.get("/payment_receipt_types").then((r) => r.data)
+);
 
 // const paymentRecipientTypesOptions = computed(() =>
 //   paymentRecipientTypes.value?.map((type) => ({
@@ -88,13 +95,13 @@ const rules = {
     required: true,
     type: "number",
     message: "Please select a location",
-    trigger: "blur",
+    trigger: ["blur", "change"],
   },
   payment_status_id: {
     required: true,
     type: "number",
     message: "Payment Status is required",
-    trigger: "blur",
+    trigger: ["blur", "change"],
   },
   check_number: {
     required: true,
@@ -122,34 +129,6 @@ const rules = {
     message: "Please select a valid amount",
     type: "number",
     trigger: ["input", "blur"],
-  },
-  payment_invoices: {
-    vendor_invoice_id: {
-      required: true,
-      type: "number",
-      message: "Please select an invoice",
-      trigger: ["input", "blur"],
-    },
-    payment_amount: {
-      type: "number",
-      required: true,
-      trigger: ["input", "blur", "change"],
-      validator(rule, value) {
-        if (value <= 0.01) {
-          return new Error("Payment Amount is required");
-        }
-        const payment_invoicesIdx = parseInt(
-          /(.*)([\d])(.*)/.exec(rule.field)[2]
-        );
-        const balance =
-          form.value.payment_invoices[payment_invoicesIdx].balance;
-        if (value > balance) {
-          return new Error(
-            "Payment can't exceed current invoice balance $" + balance
-          );
-        }
-      },
-    },
   },
   payment_date: {
     required: true,
@@ -179,7 +158,7 @@ watch(
   (newFormValue) => {
     if (newFormValue.length > 0) {
       form.value.amount = newFormValue?.reduce(
-        (prev, curr) => parseFloat((prev + curr.amount).toFixed(2)),
+        (prev, curr) => parseFloat((prev + curr.payment_amount).toFixed(2)),
         0
       );
     } else {
@@ -195,15 +174,16 @@ const { data: invoicesData, isLoading: expensesDataLoading } =
 const invoiceDataOptions = ref([]);
 
 watchEffect(() => {
-  if (invoicesData.value) invoiceDataOptions.value = invoicesData.value;
-  // ?.filter((inv) => parseFloat(inv.balance) !== 0)
-  // .map((inv) => ({
-  //   label: inv.invoice_number,
-  //   value: inv.id,
-  //   disabled: form.value.payment_invoices.some(
-  //     (invoice) => invoice.vendor_invoice_id === inv.id
-  //   ),
-  // }));
+  if (invoicesData.value)
+    invoiceDataOptions.value = invoicesData.value
+      ?.filter((inv) => parseFloat(inv.balance) !== 0)
+      .map((inv) => ({
+        label: inv.invoice_number,
+        value: inv.id,
+        // disabled: form.value.payment_invoices.some(
+        //   (invoice) => invoice.vendor_invoice_id === inv.id
+        // ),
+      }));
 });
 
 const { data: gmtvLocations } = getGmtvLocations();
@@ -242,23 +222,46 @@ async function submitForm() {
     }
   }
 }
-const onCreatePaymentInvoice = () => {
-  return {
-    vendor_invoice_id: null,
-    payment_amount: 0,
-  };
-};
-const onInvoiceSelect = (val, index) => {
-  const vendor_invoiceIdx = invoicesData.value.findIndex(
-    (inv) => inv.id === val
-  );
-  const vendor_invoice = invoicesData.value[vendor_invoiceIdx];
 
-  form.value.payment_invoices[index] = {
-    vendor_invoice_id: vendor_invoice.id,
-    payment_amount: parseFloat(vendor_invoice.balance),
-    balance: parseFloat(vendor_invoice.balance),
-  };
+const themeOverrides = {
+  Input: {
+    border: "none",
+    groupLabelColor: "rgba(255, 255, 255, 0.1)",
+    color: "rgba(255, 255, 255, 0)",
+    borderHover: "1px solid transparent",
+    borderError: "none",
+    borderHoverWarning: "none",
+    borderHoverError: "none",
+    borderFocusError: "none",
+    boxShadowFocusError: "0 0 0 0 transparent",
+    clearColorHover: "rgba(255, 255, 255, 0)",
+    boxShadowFocus: "none",
+    borderFocus: "none",
+    colorFocus: "rgba(99, 226, 183, 0)",
+    paddingMedium: "0",
+    paddingSmall: "0",
+    colorFocusError: "rgba(232,128,128, 0)",
+  },
+  Form: {
+    labelPaddingVertical: "0 0 0 0",
+    labelFontSizeTopSmall: "10px",
+    feedbackFontSizeSmall: "10px",
+    labelHeightSmall: "15px",
+    feedbackHeightSmall: "12px",
+  },
+};
+const onSavePaymentInvoice = (paymentInvoice) => {
+  console.log("saving", { paymentInvoice });
+  showPaymentInvoiceModal.value = false;
+  if (currentPaymentInvoiceData.value) {
+    form.value.payment_invoices[currentPaymentInvoiceIndex] = paymentInvoice;
+  } else {
+    form.value.payment_invoices.splice(
+      currentPaymentInvoiceIndex + 1,
+      0,
+      paymentInvoice
+    );
+  }
 };
 </script>
 
@@ -267,7 +270,7 @@ const onInvoiceSelect = (val, index) => {
     <n-icon>
       <svg viewBox="0 0 24 24">
         <path
-          d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"
+          d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0itl2 0v5h5a1 1 0 0 1 0 2z"
           fill="currentColor"
         ></path>
       </svg>
@@ -277,8 +280,9 @@ const onInvoiceSelect = (val, index) => {
   <n-modal
     v-model:show="showDrawer"
     preset="card"
+    title="Create a Payment"
     size="huge"
-    class="max-w-screen-md"
+    class="max-w-screen-lg print:shadow-none lg:max-w-[80vw]"
   >
     <n-form
       :model="form"
@@ -287,102 +291,213 @@ const onInvoiceSelect = (val, index) => {
       size="medium"
       ref="formRef"
     >
-      <div class="sm:grid sm:grid-cols-2 sm:gap-x-5">
-        <n-form-item label="GMTV print location" path="gmtv_location_id">
-          <n-select
-            :options="gmtvLocationsOptions"
-            v-model:value="form.gmtv_location_id"
-          />
-        </n-form-item>
-        <n-form-item label="Payment Status" path="payment_status_id">
-          <n-select
-            :options="paymentStatusOptions"
-            v-model:value="form.payment_status_id"
-            filterable
-          />
-        </n-form-item>
-      </div>
-      <div class="sm:grid sm:grid-cols-2 sm:gap-x-5">
-        <n-form-item label="Check Number" path="check_number">
-          <n-input
-            type="text"
-            clearable
-            v-model:value.trim="form.check_number"
-          />
-        </n-form-item>
-        <n-form-item label="Account Number" path="account_number">
-          <n-input v-model:value="form.account_number" clearable />
-        </n-form-item>
-      </div>
-      <div class="sm:grid sm:grid-cols-2 sm:gap-x-5">
-        <n-form-item label="Payment Type" path="type">
-          <n-select
-            filterable
-            :options="paymentTypeOptions"
-            v-model:value="form.type"
-          />
-        </n-form-item>
-        <n-form-item label="ACH transfer Number">
-          <n-input v-model:value="form.ach_transfer_number" />
-        </n-form-item>
-      </div>
-      <div>Payment Invoice</div>
-      <n-dynamic-input
-        v-model:value="form.payment_invoices"
-        class="custom-dynamic-input my-5"
-        @create="onCreatePaymentInvoice"
-        #="{ index, value }"
-        show-sort-button
-        :min="1"
+      <n-config-provider
+        inline-theme-disabled
+        :theme-overrides="themeOverrides"
       >
-        <div class="rounded-round sm:grid sm:grid-cols-2 sm:gap-x-5">
-          <n-form-item
-            label="Vendor Invoice"
-            :path="`payment_invoices[${index}].vendor_invoice_id`"
-            :rule="rules.payment_invoices.vendor_invoice_id"
-          >
-            <n-select
-              :options="invoiceDataOptions"
-              clearable
-              @update:value="(val) => onInvoiceSelect(val, index)"
-              :value="form.payment_invoices[index].vendor_invoice_id"
-            />
-          </n-form-item>
-          <n-form-item
-            :path="`payment_invoices[${index}].payment_amount`"
-            :rule="rules.payment_invoices.payment_amount"
-            label="Payment Amount"
-          >
-            <CurrencyInput
-              v-model="form.payment_invoices[index].payment_amount"
-            />
-          </n-form-item>
-        </div>
-      </n-dynamic-input>
-      <div class="sm:grid sm:grid-cols-2 sm:gap-x-5">
-        <n-form-item label="Payment Date" path="payment_date">
-          <n-date-picker
-            v-model:value="form.payment_date"
-            format="MM/dd/yyyy"
-            class="w-full"
-          />
-        </n-form-item>
-        <n-form-item label="Amount" path="amount">
-          <CurrencyInput
-            placeholder="Enter Amount"
-            clearable
-            disabled
-            v-model="form.amount"
-          />
-        </n-form-item>
-      </div>
-      <n-form-item label="Notes" path="notes">
-        <n-input type="textarea" clearable v-model:value="form.notes" />
-      </n-form-item>
+        <header class="flex content-center justify-between">
+          <section class="flex flex-col">
+            <n-form-item
+              size="small"
+              label="GMTV print location"
+              path="gmtv_location_id"
+            >
+              <n-select
+                :options="gmtvLocationsOptions"
+                class="other-select min-w-md w-full"
+                filterable
+                v-model:value="form.gmtv_location_id"
+              />
+            </n-form-item>
+            <n-form-item size="small" label="Payment Type" path="type">
+              <n-select
+                filterable
+                :options="paymentTypeOptions"
+                v-model:value="form.type"
+                class="other-select"
+              />
+            </n-form-item>
+            <n-form-item
+              label="Check Number"
+              size="small"
+              v-if="currentPaymentType === 'check'"
+              path="check_number"
+            >
+              <n-input
+                type="text"
+                class="custom-input"
+                clearable
+                v-model:value.trim="form.check_number"
+              />
+            </n-form-item>
+            <n-form-item
+              size="small"
+              v-if="currentPaymentType === 'ach'"
+              label="ACH transfer Number"
+            >
+              <n-input
+                class="custom-input"
+                v-model:value="form.ach_transfer_number"
+              />
+            </n-form-item>
+          </section>
 
-      <n-button attr-type="submit" size="large" @click="submitForm"
+          <section class="flex flex-col items-end gap-y-2">
+            <n-form-item size="small" path="payment_status_id">
+              <n-select
+                :options="paymentStatusOptions"
+                v-model:value="form.payment_status_id"
+                class="custom-select max-w-[90px]"
+                filterable
+              />
+            </n-form-item>
+            <n-form-item
+              size="small"
+              label="Payment Date"
+              label-align="right"
+              path="payment_date"
+            >
+              <n-date-picker
+                v-model:value="form.payment_date"
+                format="MM/dd/yyyy"
+                class="custom-date-picker max-w-[130px] text-right"
+              />
+            </n-form-item>
+            <n-form-item
+              label="Account Number"
+              size="small"
+              label-align="right"
+              class="text-right"
+              path="account_number"
+            >
+              <n-select
+                :options="[{ label: '001', value: '001' }]"
+                class="other-select"
+                v-model:value="form.account_number"
+              />
+            </n-form-item>
+          </section>
+        </header>
+      </n-config-provider>
+      <div>Payment Invoice</div>
+      <n-table class="mx-auto max-w-xl" v-if="form.payment_invoices?.length">
+        <thead>
+          <tr>
+            <th>Vendor Invoice</th>
+            <th>Payment Amount</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <template
+            v-for="(form_invoice, index) in form.payment_invoices"
+            :key="`form_invoice_${index}`"
+          >
+            <tr>
+              <td>
+                {{ form_invoice.vendor_invoice_id }}
+              </td>
+              <td>
+                {{ form_invoice.payment_amount }}
+              </td>
+              <td>
+                <action-button-group />
+              </td>
+            </tr>
+          </template>
+        </tbody>
+      </n-table>
+      <n-button
+        v-else
+        dashed
+        type="primary"
+        @click="onCreatePaymentInvoice"
+        class="mt-4 w-full"
+      >
+        + Create
+      </n-button>
+      <n-modal
+        v-model:show="showPaymentInvoiceModal"
+        title="Payment Invoice"
+        preset="card"
+        size="small"
+        class="max-w-xs"
+      >
+        <payment-invoice-form-modal
+          :initial-data="currentPaymentInvoiceData"
+          @save="onSavePaymentInvoice"
+          :invoice-data="invoicesData"
+          :invoice-data-options="invoiceDataOptions"
+        />
+      </n-modal>
+      <section
+        class="mt-5 ml-auto w-full max-w-xs rounded bg-gray-100 p-4 dark:bg-dark_border"
+      >
+        <div class="bg-foreground_light p-4 dark:bg-foreground_dark">
+          <h5 class="font-medium uppercase">Amount</h5>
+          <span class="text-lg font-bold">${{ form.amount }}</span>
+        </div>
+        <n-form-item path="notes">
+          <n-input
+            placeholder="Notes"
+            type="textarea"
+            clearable
+            v-model:value="form.notes"
+          />
+        </n-form-item>
+      </section>
+
+      <n-button
+        attr-type="submit"
+        class="print:hidden"
+        size="large"
+        @click="submitForm"
         >Add</n-button
       >
     </n-form>
   </n-modal>
 </template>
+<style lang="scss" scoped>
+.custom-date-picker {
+  :deep(.n-input .n-input-wrapper) {
+    --n-padding-left: 0;
+    --n-padding-right: 0;
+  }
+  :deep(.n-input__input-el) {
+    @apply font-bold;
+  }
+  :deep(.n-input__suffix) {
+    display: none;
+  }
+}
+
+.custom-input {
+  --n-feedback-font-size: 12px;
+  &:deep(.n-input .n-input-wrapper) {
+    --n-padding-left: 0;
+    --n-padding-right: 0;
+  }
+  :deep(.n-input__input-el) {
+    @apply font-bold;
+  }
+}
+.custom-select {
+  :deep(.n-base-selection .n-base-selection-label) {
+    --n-height: fit-content;
+    --n-padding-single: 6px 12px;
+    background-color: rgb(2 123 255 / 0.1);
+    @apply border border-primary text-center font-bold uppercase;
+  }
+}
+
+.other-select {
+  :deep(.n-base-selection .n-base-selection-label) {
+    --n-padding-single: 0;
+    background-color: transparent;
+    font-weight: 700;
+  }
+  :deep(.n-base-selection-input__content) {
+    @apply font-bold;
+  }
+}
+</style>

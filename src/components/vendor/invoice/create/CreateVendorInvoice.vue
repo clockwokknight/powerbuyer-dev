@@ -71,7 +71,7 @@ watch(
   (newFormValue) => {
     if (newFormValue.length > 0) {
       form.value.amount_due = form.value.balance = newFormValue?.reduce(
-        (prev, curr) => prev + curr.amount,
+        (prev, curr) => parseFloat((prev + curr.amount).toFixed(2)),
         0
       );
     } else {
@@ -258,7 +258,6 @@ async function submitInvoice() {
         (key, value) => value
       )
     );
-    console.log(modifiedForm);
     await createExpense(modifiedForm);
     showDrawer.value = false;
 
@@ -310,7 +309,7 @@ const themeOverrides = {
   <n-modal
     preset="card"
     title="Create an Invoice"
-    class="custom-modal relative max-w-screen-md"
+    class="custom-modal relative max-w-screen-lg lg:max-w-[80vw]"
     v-model:show="showDrawer"
   >
     <n-form
@@ -398,9 +397,9 @@ const themeOverrides = {
           >
         </div>
         <section
-          class="mt-5 ml-auto w-full max-w-xs rounded bg-gray-100 p-4 dark:bg-dark_border"
+          class="dark:bg-dark_border mt-5 ml-auto w-full max-w-xs rounded bg-gray-100 p-4"
         >
-          <div class="bg-foreground_light p-4 dark:bg-foreground_dark">
+          <div class="bg-foreground_light dark:bg-foreground_dark p-4">
             <h5 class="font-medium uppercase">Inv Total</h5>
             <span class="text-lg font-bold"
               >${{ format(form.amount_due) }}</span
@@ -465,7 +464,7 @@ const themeOverrides = {
   :deep(.n-base-selection .n-base-selection-label) {
     --n-padding-single: 0 12px;
     background-color: rgb(2 123 255 / 0.1);
-    @apply border border-primary text-center font-bold uppercase;
+    @apply border-primary border text-center font-bold uppercase;
   }
 }
 </style>

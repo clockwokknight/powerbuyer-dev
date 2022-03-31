@@ -55,7 +55,7 @@ const showEditPaymentForm = (row) => {
     "recipient_name",
     "invoice_number",
   ]);
-  obj.payment_invoices = obj.vendor_invoices.map((invoice) => ({
+  obj.payment_invoices = obj.payment_invoices.map((invoice) => ({
     vendor_invoice_id: invoice.id,
     payment_amount: invoice.amount_paid,
   }));
