@@ -282,7 +282,7 @@ watch(
       <!-- Main Body Content-->
       <div id="main" class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
         <main id="container" class="min-h-full p-2 md:p-6">
-          <Card class="pr-[300px]">
+          <Card class="pr-[100px]">
             <div id="details" class="mt-0 grid grid-cols-12 w-full">
               <!-- left side -->
               <div class="__form col-span-12 flex flex-col justify-between">
@@ -295,7 +295,7 @@ watch(
                         logo
                       </div>
                     </div>
-                    <n-carousel class="max-w-[260px]" show-arrow autoplay>
+                    <n-carousel class="max-w-[260px] rounded-b-round" show-arrow>
                       <img
                         class="carousel-img object-cover h-full"
                         src="https://storage.googleapis.com/gmtv-inventory/3C4PDDEG5GT243378/152/20220114235135-940f543b-15c9-41c0-a3aa-7de27296a2a5.jpg"
@@ -315,10 +315,32 @@ watch(
                       <template #arrow="{ prev, next }">
                         <div class="custom-arrow">
                           <button type="button" class="curtom-arrow--left" @click="prev">
-                            <n-icon>◄<ArrowBack /></n-icon>
+                            <n-icon
+                              ><svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                xmlns:xlink="http://www.w3.org/1999/xlink"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  d="M16.88 2.88a1.25 1.25 0 0 0-1.77 0L6.7 11.29a.996.996 0 0 0 0 1.41l8.41 8.41c.49.49 1.28.49 1.77 0s.49-1.28 0-1.77L9.54 12l7.35-7.35c.48-.49.48-1.28-.01-1.77z"
+                                  fill="currentColor"
+                                ></path></svg
+                              ><ArrowBack
+                            /></n-icon>
                           </button>
                           <button type="button" class="curtom-arrow--right" @click="next">
-                            <n-icon>►<ArrowForward /></n-icon>
+                            <n-icon
+                              ><svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                xmlns:xlink="http://www.w3.org/1999/xlink"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  d="M7.38 21.01c.49.49 1.28.49 1.77 0l8.31-8.31a.996.996 0 0 0 0-1.41L9.15 2.98c-.49-.49-1.28-.49-1.77 0s-.49 1.28 0 1.77L14.62 12l-7.25 7.25c-.48.48-.48 1.28.01 1.76z"
+                                  fill="currentColor"
+                                ></path></svg
+                              ><ArrowForward
+                            /></n-icon>
                           </button>
                         </div>
                       </template>
