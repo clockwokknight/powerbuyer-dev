@@ -280,7 +280,6 @@ const onSavePaymentInvoice = (paymentInvoice) => {
   <n-modal
     v-model:show="showDrawer"
     preset="card"
-    title="Create a Payment"
     size="huge"
     class="max-w-screen-lg print:shadow-none lg:max-w-[80vw]"
   >
@@ -379,57 +378,59 @@ const onSavePaymentInvoice = (paymentInvoice) => {
           </section>
         </header>
       </n-config-provider>
-      <div>Payment Invoice</div>
-      <n-table class="mx-auto max-w-xl" v-if="form.payment_invoices?.length">
-        <thead>
-          <tr>
-            <th>Vendor Invoice</th>
-            <th>Payment Amount</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          <template
-            v-for="(form_invoice, index) in form.payment_invoices"
-            :key="`form_invoice_${index}`"
-          >
+      <main class="mx-auto max-w-xl">
+        <h3 class="mb-4">Payment Invoice</h3>
+        <n-table v-if="form.payment_invoices?.length">
+          <thead>
             <tr>
-              <td>
-                {{ form_invoice.vendor_invoice_id }}
-              </td>
-              <td>
-                {{ form_invoice.payment_amount }}
-              </td>
-              <td>
-                <action-button-group />
-              </td>
+              <th>Vendor Invoice</th>
+              <th>Payment Amount</th>
+              <th class="print:hidden"></th>
             </tr>
-          </template>
-        </tbody>
-      </n-table>
-      <n-button
-        v-else
-        dashed
-        type="primary"
-        @click="onCreatePaymentInvoice"
-        class="mt-4 w-full"
-      >
-        + Create
-      </n-button>
-      <n-modal
-        v-model:show="showPaymentInvoiceModal"
-        title="Payment Invoice"
-        preset="card"
-        size="small"
-        class="max-w-xs"
-      >
-        <payment-invoice-form-modal
-          :initial-data="currentPaymentInvoiceData"
-          @save="onSavePaymentInvoice"
-          :invoice-data="invoicesData"
-          :invoice-data-options="invoiceDataOptions"
-        />
-      </n-modal>
+          </thead>
+          <tbody>
+            <template
+              v-for="(form_invoice, index) in form.payment_invoices"
+              :key="`form_invoice_${index}`"
+            >
+              <tr class="group">
+                <td>
+                  {{ form_invoice.invoices[0].invoice_number }}
+                </td>
+                <td>
+                  {{ form_invoice.payment_amount }}
+                </td>
+                <td>
+                  <action-button-group />
+                </td>
+              </tr>
+            </template>
+          </tbody>
+        </n-table>
+        <n-button
+          v-else
+          dashed
+          type="primary"
+          @click="onCreatePaymentInvoice"
+          class="mt-4 w-full"
+        >
+          + Create
+        </n-button>
+        <n-modal
+          v-model:show="showPaymentInvoiceModal"
+          title="Payment Invoice"
+          preset="card"
+          size="small"
+          class="max-w-xs"
+        >
+          <payment-invoice-form-modal
+            :initial-data="currentPaymentInvoiceData"
+            @save="onSavePaymentInvoice"
+            :invoice-data="invoicesData"
+            :invoice-data-options="invoiceDataOptions"
+          />
+        </n-modal>
+      </main>
       <section
         class="mt-5 ml-auto w-full max-w-xs rounded bg-gray-100 p-4 dark:bg-dark_border"
       >
@@ -447,13 +448,9 @@ const onSavePaymentInvoice = (paymentInvoice) => {
         </n-form-item>
       </section>
 
-      <n-button
-        attr-type="submit"
-        class="print:hidden"
-        size="large"
-        @click="submitForm"
-        >Add</n-button
-      >
+      <n-button class="print:hidden" size="large" @click="submitForm">
+        Add
+      </n-button>
     </n-form>
   </n-modal>
 </template>

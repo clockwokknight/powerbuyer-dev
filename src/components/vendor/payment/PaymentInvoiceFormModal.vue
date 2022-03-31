@@ -10,6 +10,7 @@ const message = useMessage();
 const initialForm = {
   vendor_invoice_id: null,
   payment_amount: 0,
+  invoices: [],
 };
 const form = ref({ ...initialForm, ...props.initialData });
 const selectedInvoiceBalance = ref();
@@ -47,6 +48,12 @@ const onInvoiceSelect = (val) => {
   form.value = {
     vendor_invoice_id: vendor_invoice.id,
     payment_amount: parseFloat(vendor_invoice.balance),
+    invoices: [
+      {
+        id: vendor_invoice.id,
+        invoice_number: vendor_invoice.invoice_number,
+      },
+    ],
   };
 };
 const onSubmit = async () => {

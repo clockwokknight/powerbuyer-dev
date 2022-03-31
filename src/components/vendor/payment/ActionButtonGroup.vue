@@ -10,9 +10,9 @@ const onDelete = () => {
 </script>
 
 <template>
-  <div class="flex content-center space-x-3">
+  <div class="flex content-center justify-center space-x-3">
     <button
-      class="hover:text-primary text-gray-300 md:invisible md:group-hover:visible"
+      class="text-gray-300 hover:text-primary md:invisible md:group-hover:visible"
       @click="$emit('edit')"
     >
       <n-icon>
