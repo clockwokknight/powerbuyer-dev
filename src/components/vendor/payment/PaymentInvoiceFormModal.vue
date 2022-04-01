@@ -1,6 +1,6 @@
 <script setup>
 import CurrencyInput from "@/components/common/CurrencyInput.vue";
-import { ref, toRaw } from "vue";
+import { computed, ref, toRaw, unref, watch } from "vue";
 import { useMessage } from "naive-ui";
 
 const props = defineProps(["initialData", "invoiceData", "invoiceDataOptions"]);
@@ -12,8 +12,14 @@ const initialForm = {
   payment_amount: 0,
   invoices: [],
 };
-const form = ref({ ...initialForm, ...props.initialData });
-const selectedInvoiceBalance = ref();
+const form = ref({ ...initialForm, ...toRaw(props.initialData) });
+const getInvoiceById = (id) =>
+  toRaw(props.invoiceData).find((inv) => inv.id === id);
+const selectedInvoiceBalance = ref(
+  form.value.vendor_invoice_id
+    ? getInvoiceById(form.value.vendor_invoice_id).balance
+    : null
+);
 const formRef = ref(null);
 
 const rules = {
@@ -21,12 +27,12 @@ const rules = {
     required: true,
     type: "number",
     message: "Please select an invoice",
-    trigger: ["input", "blur"],
+    trigger: ["blur", "change"],
   },
   payment_amount: {
     type: "number",
     required: true,
-    trigger: ["input", "blur"],
+    trigger: ["input", "blur", "change"],
     validator(rule, value) {
       if (value <= 0.01) {
         return new Error("Payment Amount is required");
@@ -42,9 +48,10 @@ const rules = {
   },
 };
 const onInvoiceSelect = (val) => {
-  const vendor_invoice = props.invoiceData.find((inv) => inv.id === val);
+  const vendor_invoice = getInvoiceById(val);
   // const vendor_invoice = props.invoiceData[vendor_invoiceIdx];
   selectedInvoiceBalance.value = parseFloat(vendor_invoice.balance);
+  console.log({ vendor_invoice });
   form.value = {
     vendor_invoice_id: vendor_invoice.id,
     payment_amount: parseFloat(vendor_invoice.balance),
@@ -59,7 +66,7 @@ const onInvoiceSelect = (val) => {
 const onSubmit = async () => {
   try {
     await formRef.value.validate();
-    emits("save", form.value);
+    emits("save", { ...unref(form) });
   } catch (e) {
     if (Array.isArray(e)) {
       e.flat().forEach((err) => message.error(err.message));

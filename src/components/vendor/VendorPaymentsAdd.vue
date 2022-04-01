@@ -7,7 +7,7 @@ import { clone, omit } from "@/lib/helper";
 import axios from "axios";
 import dayjs from "dayjs";
 import { useMessage } from "naive-ui";
-import { computed, ref, watch, watchEffect } from "vue";
+import { computed, ref, toRaw, watch, watchEffect } from "vue";
 import { useMutation, useQuery, useQueryClient } from "vue-query";
 import { useRoute } from "vue-router";
 import PaymentInvoiceFormModal from "./payment/PaymentInvoiceFormModal.vue";
@@ -38,10 +38,16 @@ const routeParamId = ref(route.params?.id);
 const showPaymentInvoiceModal = ref(false);
 const currentPaymentInvoiceIndex = ref(null);
 const currentPaymentInvoiceData = ref(null);
+
 const onCreatePaymentInvoice = (index) => {
   showPaymentInvoiceModal.value = true;
   currentPaymentInvoiceIndex.value = index ?? 0;
   currentPaymentInvoiceData.value = null;
+};
+const onEditPaymentInvoice = (index) => {
+  currentPaymentInvoiceIndex.value = index;
+  currentPaymentInvoiceData.value = form.value.payment_invoices[index];
+  showPaymentInvoiceModal.value = true;
 };
 
 const { data: payment_types } = getPaymentTypes();
@@ -104,9 +110,20 @@ const rules = {
     trigger: ["blur", "change"],
   },
   check_number: {
-    required: true,
-    message: "Check Number is required",
     trigger: ["input", "blur"],
+    validator(rule, value) {
+      if (currentPaymentType.value === "check" && !value) {
+        return new Error("Check Number is required");
+      }
+    },
+  },
+  ach_transfer_number: {
+    trigger: ["input", "blur"],
+    validator(rule, value) {
+      if (currentPaymentType.value === "ach" && !value) {
+        return new Error("ACH Number is required");
+      }
+    },
   },
   type: {
     type: "number",
@@ -180,9 +197,9 @@ watchEffect(() => {
       .map((inv) => ({
         label: inv.invoice_number,
         value: inv.id,
-        // disabled: form.value.payment_invoices.some(
-        //   (invoice) => invoice.vendor_invoice_id === inv.id
-        // ),
+        disabled: form.value.payment_invoices.some(
+          (invoice) => invoice.vendor_invoice_id === inv.id
+        ),
       }));
 });
 
@@ -251,17 +268,24 @@ const themeOverrides = {
   },
 };
 const onSavePaymentInvoice = (paymentInvoice) => {
-  console.log("saving", { paymentInvoice });
+  console.log("saving", { paymentInvoice: toRaw(paymentInvoice) });
   showPaymentInvoiceModal.value = false;
   if (currentPaymentInvoiceData.value) {
-    form.value.payment_invoices[currentPaymentInvoiceIndex] = paymentInvoice;
+    form.value.payment_invoices[currentPaymentInvoiceIndex.value] = {
+      ...toRaw(paymentInvoice),
+    };
+    currentPaymentInvoiceData.value = null;
   } else {
     form.value.payment_invoices.splice(
-      currentPaymentInvoiceIndex + 1,
+      currentPaymentInvoiceIndex.value + 1,
       0,
       paymentInvoice
     );
   }
+  currentPaymentInvoiceIndex.value = null;
+};
+const onDeletePaymentInvoice = (index) => {
+  form.value.payment_invoices.splice(index, 1);
 };
 </script>
 
@@ -318,6 +342,7 @@ const onSavePaymentInvoice = (paymentInvoice) => {
             </n-form-item>
             <n-form-item
               label="Check Number"
+              show-require-mark
               size="small"
               v-if="currentPaymentType === 'check'"
               path="check_number"
@@ -331,6 +356,8 @@ const onSavePaymentInvoice = (paymentInvoice) => {
             </n-form-item>
             <n-form-item
               size="small"
+              path="ach_transfer_number"
+              show-require-mark
               v-if="currentPaymentType === 'ach'"
               label="ACH transfer Number"
             >
@@ -401,7 +428,11 @@ const onSavePaymentInvoice = (paymentInvoice) => {
                   {{ form_invoice.payment_amount }}
                 </td>
                 <td>
-                  <action-button-group />
+                  <action-button-group
+                    @add="onCreatePaymentInvoice(index)"
+                    @edit="onEditPaymentInvoice(index)"
+                    @delete="onDeletePaymentInvoice(index)"
+                  />
                 </td>
               </tr>
             </template>
@@ -411,7 +442,7 @@ const onSavePaymentInvoice = (paymentInvoice) => {
           v-else
           dashed
           type="primary"
-          @click="onCreatePaymentInvoice"
+          @click="onCreatePaymentInvoice(0)"
           class="mt-4 w-full"
         >
           + Create
