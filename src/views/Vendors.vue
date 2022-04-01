@@ -1,12 +1,15 @@
 <script setup>
+import axios from "axios";
+import { fetchPaginatedData } from "@/hooks";
+import { getVendors } from "@/hooks/vendor";
+
 import { ref, watch } from "vue";
 import { useQuery } from "vue-query";
 import { useDebounce } from "@vueuse/core";
-import { getVendors } from "@/hooks/vendor";
+
 import { useGlobalState } from "@/store/global";
 import { useTabsViewStore } from "@/store/tabs";
 import { useVendors } from "@/store/vendors";
-import axios from "axios";
 
 import AddVendor from "@/components/vendor/AddVendor.vue";
 import PageTabs from "@/components/PageTabs.vue";
@@ -23,14 +26,12 @@ const debouncedSearchText = useDebounce(searchText, 500);
 
 const listActive = ref(!global.isMobile);
 
-// Showing All Vendors
-
 const {
   data: vendors,
   isLoading: isVendorsLoading,
   hasNextPage: hasVendorNextPage,
   fetchNextPage: vendorFetchNextPage,
-} = getVendors();
+} = fetchPaginatedData("/vendors");
 
 const addTab = (vendor) => {
   vendorStore.setLatest(vendor?.id);
@@ -76,7 +77,7 @@ watch(
     >
       <!-- SearchList.vue / -->
       <aside
-        class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-x-hidden bg-background_light dark:border-r-[1px] dark:border-dark_border dark:bg-background_dark"
+        class="pageItemsList relative h-[calc(100vh-48px)] min-w-[275px] max-w-[275px] overflow-x-hidden bg-background_light dark:border-r-[1px] dark:border-dark_border dark:bg-background_dark"
       >
         <div
           class="sticky top-0 z-50 bg-foreground_light p-3 pb-0 dark:bg-foreground_dark"
@@ -159,7 +160,7 @@ watch(
         id="mobile-slider"
         style="backdrop-filter: blur(36px)"
         :class="listActive ? '!w-[335px] ml-[-60px]' : '!bg-dark_border'"
-        class="absolute w-[276px] duration-[500ms] h-[48px] flex flex-row justify-between bottom-0 left-0 bg-background_light/50 dark:bg-dark_border/50 bg-black items-center shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] px-4 cursor-pointer"
+        class="absolute bottom-[-48px] w-[276px] duration-[500ms] h-[48px] flex flex-row justify-between bottom-0 left-0 bg-background_light/50 dark:bg-dark_border/50 bg-black items-center shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] px-4 cursor-pointer"
         @click="listActive = !listActive"
       >
         <div

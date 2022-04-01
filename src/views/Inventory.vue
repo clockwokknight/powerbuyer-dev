@@ -14,7 +14,7 @@ import {
 import { useRouter, useRoute } from "vue-router";
 import { useQuery } from "vue-query";
 import { useDebounce } from "@vueuse/core";
-import { getVehicles } from "@/hooks/vehicles";
+import { getVendors } from "@/hooks/vendor";
 import { useGlobalState } from "@/store/global";
 import { useMutation, useQueryClient } from "vue-query";
 import { useTabsViewStore } from "@/store/tabs";
@@ -50,14 +50,14 @@ const listActive = ref(!global.isMobile);
 // Showing All Vendors
 
 const {
-  data: vehicles,
-  isLoading: isVehiclesLoading,
-  hasNextPage: hasVehiclesNextPage,
-  fetchNextPage: vehiclesFetchNextPage,
-} = getVehicles();
+  data: vendors,
+  isLoading: isVendorsLoading,
+  hasNextPage: hasVendorNextPage,
+  fetchNextPage: vendorFetchNextPage,
+} = getVendors();
 
 const addTab = (vendor) => {
-  vendorStore.SET_LATEST(vendor?.id);
+  vendorStore.setLatest(vendor?.id);
   listActive.value = global.isMobile ? false : listActive.value;
   tabStore.addTab({ id: vendor?.id, name: vendor?.name });
 };
@@ -68,7 +68,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
     if (queryKey[1] === "") {
       return null;
     } else {
-      return axios.get(`/vehicles/search/${queryKey[1]}`).then((res) => {
+      return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => {
         if (res.data?.debug) return [];
         return res.data;
       });
