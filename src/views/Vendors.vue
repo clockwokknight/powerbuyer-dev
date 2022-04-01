@@ -33,7 +33,7 @@ const {
 } = getVendors();
 
 const addTab = (vendor) => {
-  vendorStore.SET_LATEST(vendor?.id);
+  vendorStore.setLatest(vendor?.id);
   listActive.value = global.isMobile ? false : listActive.value;
   tabStore.addTab({ id: vendor?.id, name: vendor?.name });
 };

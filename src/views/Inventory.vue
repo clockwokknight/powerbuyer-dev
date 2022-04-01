@@ -14,7 +14,7 @@ import {
 import { useRouter, useRoute } from "vue-router";
 import { useQuery } from "vue-query";
 import { useDebounce } from "@vueuse/core";
-import { getVendors } from "@/hooks/vendor";
+import { getVehicles } from "@/hooks/vehicles";
 import { useGlobalState } from "@/store/global";
 import { useMutation, useQueryClient } from "vue-query";
 import { useTabsViewStore } from "@/store/tabs";
@@ -50,11 +50,11 @@ const listActive = ref(!global.isMobile);
 // Showing All Vendors
 
 const {
-  data: vendors,
-  isLoading: isVendorsLoading,
-  hasNextPage: hasVendorNextPage,
-  fetchNextPage: vendorFetchNextPage,
-} = getVendors();
+  data: vehicles,
+  isLoading: isVehiclesLoading,
+  hasNextPage: hasVehiclesNextPage,
+  fetchNextPage: vehiclesFetchNextPage,
+} = getVehicles();
 
 const addTab = (vendor) => {
   vendorStore.SET_LATEST(vendor?.id);
@@ -62,36 +62,34 @@ const addTab = (vendor) => {
   tabStore.addTab({ id: vendor?.id, name: vendor?.name });
 };
 
-// Vendor Search Result
-
 const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
-  ["vendorSearch", debouncedSearchText],
+  ["vehicleSearch", debouncedSearchText],
   ({ queryKey }) => {
-    if (queryKey[1] === "") return null;
-    else
-      return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => {
-        if (res.data?.debug) {
-          return [];
-        }
+    if (queryKey[1] === "") {
+      return null;
+    } else {
+      return axios.get(`/vehicles/search/${queryKey[1]}`).then((res) => {
+        if (res.data?.debug) return [];
         return res.data;
       });
+    }
   }
 );
 
 const form = ref({
-  name: null,
-  address_one: null,
-  address_two: null,
-  city: null,
-  state: null,
-  zip: null,
-  email: null,
-  phone: null,
-  fax: null,
-  din: null,
-  tax_id_number: null,
-  vendor_category_id: null,
-  payment_terms: null,
+  vin: null,
+  lane: null,
+  grade: null,
+  year: null,
+  make: null,
+  model: null,
+  trim: null,
+  body: null,
+  ext_color: null,
+  int_color: null,
+  miles: null,
+  notes: null,
+  recon: null,
 });
 
 function toggleListSlide() {
@@ -129,24 +127,14 @@ function handleTabClick(e) {
   window.location.hash = e;
 }
 
-watch(
-  () => listActive.value,
-  (val) => {
-    global.setListActive(val, "vendor");
+watchEffect(() => {
+  if (route.params?.id) {
+    log.yellow(route.params?.id);
+    routeParamId.value = route.params?.id;
+  } else {
+    log.yellow("no param id - routing to home tab");
   }
-);
-
-watch(
-  () => route.params?.id,
-  (val) => {
-    if (route.params?.id) {
-      routeParamId.value = route.params?.id;
-    }
-  },
-  {
-    immediate: true,
-  }
-);
+});
 </script>
 
 <template>
@@ -245,7 +233,7 @@ watch(
           class="text-[10px] pl-16 duration-[500ms]"
           :class="!listActive ? 'opacity-0' : 'opacity-50'"
         >
-          <b>{{ vendors?.pages[0].data.length }}</b> Active Vendors
+          <b>{{ vendors?.pages[0].data.length }}</b> Vehicles
         </div>
         <div class="!bg-black">
           <div
@@ -290,7 +278,7 @@ watch(
                   <div class="mr-[24px] h-[260px] min-w-[260px] rounded-round">
                     <div class="relative">
                       <div
-                        class="__vehicle-logo z-50 absolute m-[12px] h-[24px] w-[48px] bg-blue-700 center-content text-[9px] rounded-round"
+                        class="__vehicle-logo z-50 absolute m-[12px] h-[48px] w-[48px] bg-blue-700 center-content text-[9px] rounded-round"
                       >
                         logo
                       </div>
@@ -365,39 +353,64 @@ watch(
 
                   <div class="__form grid grid-cols-12 gap-4">
                     <!-- header info -->
-                    <div class="__labeled-data col-span-12 md:col-span-6">
-                      <span>VIN</span>
-                      <h3>3FADP4AJ2EM100154</h3>
+                    <div class="col-span-12 md:col-span-6">
+                      <CustomInput
+                        label="Vin"
+                        placeholder="3FADP4AJ2EM100154"
+                        :value="form.vin"
+                        @update:value="(val) => (form.vin = val)"
+                        @save="submitValue('vin')"
+                        @cancel="resetValue('vin')"
+                        @focus="currentActiveField = 'vin'"
+                      />
                     </div>
-                    <div class="__labeled-data col-span-12 md:col-span-3">
-                      <span>Lane</span>
-                      <h3>20</h3>
+                    <div class="col-span-12 md:col-span-3">
+                      <CustomInput
+                        label="Lane"
+                        placeholder="20"
+                        :value="form.lane"
+                        @update:value="(val) => (form.lane = val)"
+                        @save="submitValue('lane')"
+                        @cancel="resetValue('lane')"
+                        @focus="currentActiveField = 'lane'"
+                      />
                     </div>
-                    <div class="__labeled-data col-span-12 md:col-span-3">
-                      <span>Grade</span>
-                      <h3>4</h3>
+                    <div class="col-span-12 md:col-span-3">
+                      <CustomInput
+                        label="Grade"
+                        placeholder="4"
+                        :value="form.grade"
+                        @update:value="(val) => (form.grade = val)"
+                        @save="submitValue('grade')"
+                        @cancel="resetValue('grade')"
+                        @focus="currentActiveField = 'grade'"
+                      />
                     </div>
+                    <!-- horizontal divider -->
+                    <hr
+                      class="col-span-12 dark:border-dark_border border-background_light"
+                    />
                     <!-- row 1 -->
                     <div class="col-span-12 md:col-span-3">
                       <CustomInput
                         label="Year"
                         placeholder=""
-                        :value="form.address_one"
-                        @update:value="(val) => (form.address_one = val)"
-                        @save="submitValue('address_one')"
-                        @cancel="resetValue('address_one')"
-                        @focus="currentActiveField = 'address_one'"
+                        :value="form.year"
+                        @update:value="(val) => (form.year = val)"
+                        @save="submitValue('year')"
+                        @cancel="resetValue('year')"
+                        @focus="currentActiveField = 'year'"
                       />
                     </div>
                     <div class="col-span-12 md:col-span-3">
                       <CustomInput
                         label="Make"
                         placeholder=""
-                        :value="form.address_two"
-                        @update:value="(val) => (form.address_two = val)"
-                        @save="submitValue('address_two')"
-                        @cancel="resetValue('address_two')"
-                        @focus="currentActiveField = 'address_two'"
+                        :value="form.make"
+                        @update:value="(val) => (form.make = val)"
+                        @save="submitValue('make')"
+                        @cancel="resetValue('make')"
+                        @focus="currentActiveField = 'make'"
                       />
                     </div>
                     <!-- row 2 -->
@@ -405,34 +418,32 @@ watch(
                       <CustomInput
                         label="Model"
                         placeholder=""
-                        :value="form.city"
-                        @update:value="(val) => (form.city = val)"
-                        @save="submitValue('city')"
-                        @cancel="resetValue('city')"
-                        @focus="currentActiveField = 'city'"
+                        :value="form.model"
+                        @update:value="(val) => (form.model = val)"
+                        @save="submitValue('model')"
+                        @cancel="resetValue('model')"
+                        @focus="currentActiveField = 'model'"
                       />
                     </div>
                     <div class="col-span-12 md:col-span-3">
                       <CustomInput
-                        type="Trim"
-                        label="State"
+                        label="Trim"
                         placeholder=""
-                        :options="statesList"
-                        :value="form.state"
-                        @update:value="(val) => (form.state = val)"
-                        @save="submitValue('state')"
-                        @cancel="resetValue('state')"
-                        @focus="currentActiveField = 'state'"
+                        :value="form.trim"
+                        @update:value="(val) => (form.trim = val)"
+                        @save="submitValue('trim')"
+                        @cancel="resetValue('trim')"
+                        @focus="currentActiveField = 'trim'"
                       />
                     </div>
                     <div class="col-span-12 md:col-span-3">
                       <CustomInput
                         label="Body"
-                        :value="form.zip"
-                        @update:value="(val) => (form.zip = val)"
-                        @save="submitValue('zip')"
-                        @cancel="resetValue('zip')"
-                        @focus="currentActiveField = 'zip'"
+                        :value="form.body"
+                        @update:value="(val) => (form.body = val)"
+                        @save="submitValue('body')"
+                        @cancel="resetValue('body')"
+                        @focus="currentActiveField = 'body'"
                       />
                     </div>
                     <!-- row 3 -->
@@ -440,31 +451,33 @@ watch(
                       <CustomInput
                         label="Ext. Color"
                         placeholder=""
-                        :value="form.email"
-                        @update:value="(val) => (form.email = val)"
-                        @save="submitValue('email')"
-                        @cancel="resetValue('email')"
-                        @focus="currentActiveField = 'email'"
+                        :value="form.ext_color"
+                        @update:value="(val) => (form.ext_color = val)"
+                        @save="submitValue('ext_color')"
+                        @cancel="resetValue('ext_color')"
+                        @focus="currentActiveField = 'ext_color'"
                       />
                     </div>
                     <div class="col-span-12 md:col-span-3">
                       <CustomInput
                         label="Int. Color"
-                        :value="form.phone"
-                        @update:value="(val) => (form.phone = val)"
-                        @save="submitValue('phone')"
-                        @cancel="resetValue('phone')"
-                        @focus="currentActiveField = 'phone'"
+                        placeholder=""
+                        :value="form.int_color"
+                        @update:value="(val) => (form.int_color = val)"
+                        @save="submitValue('init_color')"
+                        @cancel="resetValue('int_color')"
+                        @focus="currentActiveField = 'int_color'"
                       />
                     </div>
                     <div class="col-span-12 md:col-span-3">
                       <CustomInput
                         label="Miles"
-                        :value="form.fax"
-                        @update:value="(val) => (form.fax = val)"
-                        @save="submitValue('fax')"
-                        @cancel="resetValue('fax')"
-                        @focus="currentActiveField = 'fax'"
+                        placeholder=""
+                        :value="form.miles"
+                        @update:value="(val) => (form.miles = val)"
+                        @save="submitValue('miles')"
+                        @cancel="resetValue('miles')"
+                        @focus="currentActiveField = 'miles'"
                       />
                     </div>
                     <!-- row 4 -->
@@ -472,24 +485,22 @@ watch(
                       <CustomInput
                         label="Notes"
                         placeholder=""
-                        :value="form.tax_id_number"
-                        @update:value="(val) => (form.tax_id_number = val)"
-                        @save="submitValue('tax_id_number')"
-                        @cancel="resetValue('tax_id_number')"
-                        @focus="currentActiveField = 'tax_id_number'"
+                        :value="form.notes"
+                        @update:value="(val) => (form.notes = val)"
+                        @save="submitValue('notes')"
+                        @cancel="resetValue('notes')"
+                        @focus="currentActiveField = 'notes'"
                       />
                     </div>
                     <div class="col-span-12 md:col-span-6">
                       <CustomInput
-                        type="Recon"
-                        label="Category"
+                        label="Recon"
                         placeholder=""
-                        :options="vendorCategoryOptions"
-                        :value="form.vendor_category_id"
-                        @update:value="(val) => (form.vendor_category_id = val)"
-                        @save="submitValue('vendor_category_id')"
-                        @cancel="resetValue('vendor_category_id')"
-                        @focus="currentActiveField = 'vendor_category_id'"
+                        :value="form.recon"
+                        @update:value="(val) => (form.recon = val)"
+                        @save="submitValue('recon')"
+                        @cancel="resetValue('recon')"
+                        @focus="currentActiveField = 'recon'"
                       />
                     </div>
                   </div>

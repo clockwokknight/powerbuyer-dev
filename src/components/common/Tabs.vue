@@ -32,8 +32,6 @@ const exampleItems = ref([
 const shouldDisableScroll = ref(false);
 
 onMounted(() => {
-  const tabListHeight = document.querySelector(".subTabList").offsetHeight;
-
   props.items.forEach((item, index) => {
     const itemSelector = document.querySelector(item.value);
     ScrollTrigger.create({
