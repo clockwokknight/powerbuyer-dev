@@ -17,7 +17,7 @@ const getInvoiceById = (id) =>
   toRaw(props.invoiceData).find((inv) => inv.id === id);
 const selectedInvoiceBalance = ref(
   form.value.vendor_invoice_id
-    ? getInvoiceById(form.value.vendor_invoice_id).balance
+    ? getInvoiceById(form.value.vendor_invoice_id)?.balance
     : null
 );
 const formRef = ref(null);
@@ -34,15 +34,15 @@ const rules = {
     required: true,
     trigger: ["input", "blur", "change"],
     validator(rule, value) {
-      if (value <= 0.01) {
-        return new Error("Payment Amount is required");
-      } else if (!selectedInvoiceBalance.value) {
+      if (!selectedInvoiceBalance.value) {
         return new Error("Please select an invoice");
       } else if (value > selectedInvoiceBalance.value) {
         return new Error(
           "Payment can't exceed current invoice balance $" +
             selectedInvoiceBalance.value
         );
+      } else if (value <= 0.01) {
+        return new Error("Payment Amount is required");
       }
     },
   },
@@ -50,18 +50,20 @@ const rules = {
 const onInvoiceSelect = (val) => {
   const vendor_invoice = getInvoiceById(val);
   // const vendor_invoice = props.invoiceData[vendor_invoiceIdx];
-  selectedInvoiceBalance.value = parseFloat(vendor_invoice.balance);
-  console.log({ vendor_invoice });
-  form.value = {
-    vendor_invoice_id: vendor_invoice.id,
-    payment_amount: parseFloat(vendor_invoice.balance),
-    invoices: [
-      {
-        id: vendor_invoice.id,
-        invoice_number: vendor_invoice.invoice_number,
-      },
-    ],
-  };
+  if (vendor_invoice) {
+    selectedInvoiceBalance.value = parseFloat(vendor_invoice.balance);
+    console.log({ vendor_invoice });
+    form.value = {
+      vendor_invoice_id: vendor_invoice.id,
+      payment_amount: parseFloat(vendor_invoice.balance),
+      invoices: [
+        {
+          id: vendor_invoice.id,
+          invoice_number: vendor_invoice.invoice_number,
+        },
+      ],
+    };
+  }
 };
 const onSubmit = async () => {
   try {
@@ -75,7 +77,7 @@ const onSubmit = async () => {
 };
 </script>
 <template>
-  <n-form :model="form" :rules="rules" @submit.prevent="onSubmit" ref="formRef">
+  <n-form :model="form" :rules="rules" ref="formRef">
     <n-form-item
       label="Vendor Invoice"
       path="vendor_invoice_id"
@@ -85,13 +87,13 @@ const onSubmit = async () => {
         :options="invoiceDataOptions"
         clearable
         @update:value="onInvoiceSelect"
-        :value="form.vendor_invoice_id"
+        v-model:value="form.vendor_invoice_id"
       />
     </n-form-item>
     <n-form-item path="payment_amount" label="Payment Amount">
       <CurrencyInput v-model="form.payment_amount" />
     </n-form-item>
 
-    <n-button attr-type="submit">Submit</n-button>
+    <n-button attr-type="submit" @click="onSubmit">Submit</n-button>
   </n-form>
 </template>

@@ -1,20 +1,39 @@
 <script setup>
-import ActionButtonGroup from "@/components/vendor/payment/ActionButtonGroup.vue";
-import { getGmtvLocations } from "@/hooks/location.js";
-import { getPaymentTypes } from "@/hooks/payments";
-import { vendorInvoices } from "@/hooks/vendor.js";
-import { clone, omit } from "@/lib/helper";
-import axios from "axios";
-import dayjs from "dayjs";
+import { computed, ref, toRaw, toRef, unref, watch, watchEffect } from "vue";
 import { useMessage } from "naive-ui";
-import { computed, ref, toRaw, watch, watchEffect } from "vue";
+import dayjs from "dayjs";
+import { clone, omit, pick } from "@/lib/helper.js";
 import { useMutation, useQuery, useQueryClient } from "vue-query";
+import axios from "axios";
+import CurrencyInput from "@/components/common/CurrencyInput.vue";
 import { useRoute } from "vue-router";
-import PaymentInvoiceFormModal from "./payment/PaymentInvoiceFormModal.vue";
+import { vendorInvoices } from "@/hooks/vendor.js";
+import { getGmtvLocations } from "@/hooks/location.js";
+import PaymentInvoiceFormModal from "./PaymentInvoiceFormModal.vue";
+import { selectOptions, getPaymentTypes } from "./payment.hook.js";
+import ActionButtonGroup from "./ActionButtonGroup.vue";
+import { themeOverrides } from "./payment.helper.js";
 
+const props = defineProps(["showDrawer", "initialData"]);
+const emits = defineEmits(["update:showDrawer"]);
 const route = useRoute();
+const queryClient = useQueryClient();
+const message = useMessage();
+const formRef = ref(null);
 
-const showDrawer = ref(false);
+const showDrawer = toRef(props, "showDrawer");
+const { paymentStatusOptions, gmtvLocationsOptions, routeParamId } =
+  selectOptions();
+watch(showDrawer, (newValue) => {
+  if (newValue) {
+    form.value = {
+      ...props.initialData,
+      payment_date: dayjs(props.initialData.payment_date).valueOf(),
+    };
+  } else {
+    form.value = clone(initialForm);
+  }
+});
 const initialForm = {
   // recipient_id: null,
   // recipient_type: null,
@@ -24,17 +43,13 @@ const initialForm = {
   type: null,
   payment_date: dayjs().valueOf(),
   invoice_number: "",
-  account_number: null,
-  ach_transfer_number: "",
+  account_number: "",
   notes: "",
   gmtv_location_id: null,
-  payment_invoices: [
-    // { vendor_invoice_id: null, payment_amount: 0, balance: 0 }
-  ],
+  payment_invoices: [{ vendor_invoice_id: null, payment_amount: 0 }],
 };
 const form = ref({ ...initialForm });
 
-const routeParamId = ref(route.params?.id);
 const showPaymentInvoiceModal = ref(false);
 const currentPaymentInvoiceIndex = ref(null);
 const currentPaymentInvoiceData = ref(null);
@@ -48,6 +63,27 @@ const onEditPaymentInvoice = (index) => {
   currentPaymentInvoiceIndex.value = index;
   currentPaymentInvoiceData.value = form.value.payment_invoices[index];
   showPaymentInvoiceModal.value = true;
+};
+const onDeletePaymentInvoice = (index) => {
+  form.value.payment_invoices.splice(index, 1);
+};
+
+const onSavePaymentInvoice = (paymentInvoice) => {
+  console.log("saving", { paymentInvoice: toRaw(paymentInvoice) });
+  showPaymentInvoiceModal.value = false;
+  if (currentPaymentInvoiceData.value) {
+    form.value.payment_invoices[currentPaymentInvoiceIndex.value] = {
+      ...toRaw(paymentInvoice),
+    };
+    currentPaymentInvoiceData.value = null;
+  } else {
+    form.value.payment_invoices.splice(
+      currentPaymentInvoiceIndex.value + 1,
+      0,
+      paymentInvoice
+    );
+  }
+  currentPaymentInvoiceIndex.value = null;
 };
 
 const { data: payment_types } = getPaymentTypes();
@@ -65,30 +101,9 @@ const currentPaymentType = computed(() =>
     : null
 );
 
-watch(
-  () => route.params,
-  (toParam) => {
-    if (toParam?.id) routeParamId.value = toParam?.id;
-  }
-);
-
-const { data: paymentStatus } = useQuery(
-  "payment_status",
-  () => axios.get("payment_status").then((res) => res.data),
-  {
-    refetchOnMount: false,
-  }
-);
-const paymentStatusOptions = computed(() =>
-  paymentStatus.value?.map((pmtStatus) => ({
-    label: pmtStatus.name,
-    value: pmtStatus.id,
-  }))
-);
-
-const { data: paymentRecipientTypes } = useQuery("payment_receipt_types", () =>
-  axios.get("/payment_receipt_types").then((r) => r.data)
-);
+// const { data: paymentRecipientTypes } = useQuery("payment_receipt_types", () =>
+//   axios.get("/payment_receipt_types").then((r) => r.data)
+// );
 
 // const paymentRecipientTypesOptions = computed(() =>
 //   paymentRecipientTypes.value?.map((type) => ({
@@ -155,21 +170,6 @@ const rules = {
   },
 };
 
-const message = useMessage();
-
-const formRef = ref(null);
-
-watch(showDrawer, (newValue) => {
-  if (newValue) {
-    form.value = clone(initialForm);
-    paymentStatusOptions.value.forEach((status) => {
-      if (status.label?.toLowerCase() === "draft") {
-        form.value.payment_status_id = status.value;
-      }
-    });
-  }
-});
-
 watch(
   () => form.value?.payment_invoices,
   (newFormValue) => {
@@ -185,37 +185,29 @@ watch(
   { deep: true }
 );
 
-const { data: invoicesData, isLoading: expensesDataLoading } =
-  vendorInvoices(routeParamId);
-
+// Getting invoice data options
+const { data: invoicesData } = vendorInvoices(routeParamId);
 const invoiceDataOptions = ref([]);
-
 watchEffect(() => {
-  if (invoicesData.value)
+  if (invoicesData.value) {
     invoiceDataOptions.value = invoicesData.value
       ?.filter((inv) => parseFloat(inv.balance) !== 0)
       .map((inv) => ({
         label: inv.invoice_number,
         value: inv.id,
         disabled: form.value.payment_invoices.some(
-          (invoice) => invoice.vendor_invoice_id === inv.id
+          (invoice) => invoice?.vendor_invoice_id === inv?.id
         ),
       }));
+  }
 });
 
-const { data: gmtvLocations } = getGmtvLocations();
-const gmtvLocationsOptions = computed(() =>
-  gmtvLocations.value?.map((location) => ({
-    label: location.name,
-    value: location.id,
-  }))
-);
-const queryClient = useQueryClient();
-const { mutate: createPayment } = useMutation(
-  (data) => axios.post("/payments", data),
+// Payment Update Mutation
+const { mutate: updatePayment } = useMutation(
+  ({ id, ...data }) => axios.put("/payments" + id, data),
   {
     onSuccess() {
-      message.success("Payment has been created");
+      message.success("Payment has been updated");
       queryClient.invalidateQueries(["payments_vendor", routeParamId.value]);
       showDrawer.value = false;
     },
@@ -225,84 +217,31 @@ const { mutate: createPayment } = useMutation(
 async function submitForm() {
   try {
     await formRef.value.validate();
-    const obj = clone(form.value);
-    obj.recipient_type = 1;
-    obj.recipient_id = Number(routeParamId.value);
+    const obj = omit(clone(form.value), [
+      "payment_type",
+      "payment_receipt_type",
+      "payment_status",
+    ]);
+    // obj.recipient_type = 1;
+    // obj.recipient_id = routeParamId.value;
     obj.payment_date = dayjs(form.value.payment_date).format("YYYY-MM-DD");
-    obj.payment_invoices = obj.payment_invoices.map((inv) =>
-      omit(inv, ["balance"])
+    console.log({ obj });
+    obj.payment_invoices = obj.payment_invoices((invoice) =>
+      omit(invoice, ["invoices"])
     );
-    createPayment(obj);
+    updatePayment(obj);
   } catch (e) {
     if (Array.isArray(e)) {
       e.flat().forEach((err) => message.error(err.message));
     }
   }
 }
-
-const themeOverrides = {
-  Input: {
-    border: "none",
-    groupLabelColor: "rgba(255, 255, 255, 0.1)",
-    color: "rgba(255, 255, 255, 0)",
-    borderHover: "1px solid transparent",
-    borderError: "none",
-    borderHoverWarning: "none",
-    borderHoverError: "none",
-    borderFocusError: "none",
-    boxShadowFocusError: "0 0 0 0 transparent",
-    clearColorHover: "rgba(255, 255, 255, 0)",
-    boxShadowFocus: "none",
-    borderFocus: "none",
-    colorFocus: "rgba(99, 226, 183, 0)",
-    paddingMedium: "0",
-    paddingSmall: "0",
-    colorFocusError: "rgba(232,128,128, 0)",
-  },
-  Form: {
-    labelPaddingVertical: "0 0 0 0",
-    labelFontSizeTopSmall: "10px",
-    feedbackFontSizeSmall: "10px",
-    labelHeightSmall: "15px",
-    feedbackHeightSmall: "12px",
-  },
-};
-const onSavePaymentInvoice = (paymentInvoice) => {
-  console.log("saving", { paymentInvoice: toRaw(paymentInvoice) });
-  showPaymentInvoiceModal.value = false;
-  if (currentPaymentInvoiceData.value) {
-    form.value.payment_invoices[currentPaymentInvoiceIndex.value] = {
-      ...toRaw(paymentInvoice),
-    };
-    currentPaymentInvoiceData.value = null;
-  } else {
-    form.value.payment_invoices.splice(
-      currentPaymentInvoiceIndex.value + 1,
-      0,
-      paymentInvoice
-    );
-  }
-  currentPaymentInvoiceIndex.value = null;
-};
-const onDeletePaymentInvoice = (index) => {
-  form.value.payment_invoices.splice(index, 1);
-};
 </script>
 
 <template>
-  <n-button @click="showDrawer = true" v-bind="$attrs">
-    <n-icon>
-      <svg viewBox="0 0 24 24">
-        <path
-          d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0itl2 0v5h5a1 1 0 0 1 0 2z"
-          fill="currentColor"
-        ></path>
-      </svg>
-    </n-icon>
-    Add Payment
-  </n-button>
   <n-modal
-    v-model:show="showDrawer"
+    :show="showDrawer"
+    @update:show="$emit('update:showDrawer', false)"
     preset="card"
     size="huge"
     class="max-w-screen-lg print:shadow-none lg:max-w-[80vw]"
@@ -405,6 +344,7 @@ const onDeletePaymentInvoice = (index) => {
           </section>
         </header>
       </n-config-provider>
+
       <main class="mx-auto max-w-xl">
         <h3 class="mb-4">Payment Invoice</h3>
         <n-table v-if="form.payment_invoices?.length">
@@ -422,13 +362,16 @@ const onDeletePaymentInvoice = (index) => {
             >
               <tr class="group">
                 <td>
-                  {{ form_invoice.invoices[0].invoice_number }}
+                  {{
+                    form_invoice.invoices &&
+                    form_invoice.invoices[0]?.invoice_number
+                  }}
                 </td>
                 <td>
                   {{ form_invoice.payment_amount }}
                 </td>
                 <td>
-                  <action-button-group
+                  <ActionButtonGroup
                     @add="onCreatePaymentInvoice(index)"
                     @edit="onEditPaymentInvoice(index)"
                     @delete="onDeletePaymentInvoice(index)"
@@ -454,7 +397,7 @@ const onDeletePaymentInvoice = (index) => {
           size="small"
           class="max-w-xs"
         >
-          <payment-invoice-form-modal
+          <PaymentInvoiceFormModal
             :initial-data="currentPaymentInvoiceData"
             @save="onSavePaymentInvoice"
             :invoice-data="invoicesData"
@@ -479,12 +422,13 @@ const onDeletePaymentInvoice = (index) => {
         </n-form-item>
       </section>
 
-      <n-button class="print:hidden" size="large" @click="submitForm">
-        Add
+      <n-button attr-type="submit" size="large" @click="submitForm">
+        Update
       </n-button>
     </n-form>
   </n-modal>
 </template>
+
 <style lang="scss" scoped>
 .custom-date-picker {
   :deep(.n-input .n-input-wrapper) {

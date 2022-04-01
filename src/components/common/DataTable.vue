@@ -11,8 +11,6 @@ import axios from "axios";
 import dayjs from "dayjs";
 
 import ActionButtons from "@/components/vendor/ActionButtons.vue";
-import VendorExpenseEdit from "@/components/vendor/VendorExpenseEdit.vue";
-import VendorExpensesAdd from "@/components/vendor/VendorExpensesAdd.vue";
 
 defineProps(["columns", "", ""]);
 
@@ -27,17 +25,10 @@ const formRow = ref(null);
 
 <template>
   <div id="expenses" class="scroll-smooth">
-    <VendorExpenseEdit
-      :show-drawer="visibleEditForm"
-      :initial-data="formRow"
-      @update:show="visibleEditForm = false"
-    />
     <div class="-mt-4 font-sans">
-      <div class="flex justify-end items-center translate-y-[68px] pr-10">
-        <VendorExpensesAdd />
-      </div>
+      <div class="flex translate-y-[68px] items-center justify-end pr-10"></div>
 
-      <div class="rounded-round border-2 py-8 px-8 bg-white">
+      <div class="rounded-round border-2 bg-white py-8 px-8">
         <div><p class="pb-8 text-2xl font-bold">Expenses</p></div>
         <n-data-table
           class="rounded-round"

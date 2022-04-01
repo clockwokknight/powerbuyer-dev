@@ -280,7 +280,14 @@ const submitForm = async () => {
   const convertDate = (date) => dayjs(date).format("YYYY-MM-DD");
   try {
     await formRef.value.validate();
-    let obj = omit(unref(form), ["vendor", "payment_invoices"]);
+    let obj = omit(unref(form), [
+      "vendor",
+      "payment_invoices",
+      "status_detail",
+      "created_at",
+      "updated_at",
+      "deleted_at",
+    ]);
     // remove Proxy from expenses array
     obj.expenses = toRaw(form.value.expenses);
     // remove Proxy each object from array and remove 'showSelect' and 'expense_types'

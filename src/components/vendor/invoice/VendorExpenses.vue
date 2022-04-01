@@ -1,14 +1,12 @@
 <script setup>
 import ActionButtons from "@/components/vendor/ActionButtons.vue";
-import VendorExpenseEdit from "@/components/vendor/VendorExpenseEdit.vue";
-import VendorExpensesAdd from "@/components/vendor/VendorExpensesAdd.vue";
-import { vendorInvoices } from "@/hooks/vendor";
-import { clone, omit, pick } from "@/lib/helper";
+import { vendorInvoices } from "@/hooks/vendor.js";
+import { clone, omit, pick } from "@/lib/helper.js";
 import dayjs from "dayjs";
 import { computed, h, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import InvoiceEdit from "@/components/vendor/invoice/VendorInvoiceEdit.vue";
-import CreateVendorInvoice from "@/components/vendor/invoice/create/CreateVendorInvoice.vue";
+import CreateVendorInvoice from "@/components/vendor/invoice/CreateVendorInvoice.vue";
 
 const route = useRoute();
 

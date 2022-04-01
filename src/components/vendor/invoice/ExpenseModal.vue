@@ -68,10 +68,6 @@ const {
   fetchNextPage: fetchNextExpenseTypePage,
 } = getExpenseTypes();
 
-//TODO: will have to add all the current expense's expense_type to make sure we don't get any error
-// filter(
-//   (el, index, array) => index === array.findIndex((arr) => arr.id === el.id)
-// )
 const expenseTypeOptions = computed(() => {
   let expenseTypeComputed = expense_types.value?.pages.reduce(
     (prev, current) =>

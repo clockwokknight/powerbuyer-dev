@@ -1,5 +1,5 @@
 <script setup>
-import VendorPaymentsAdd from "@/components/vendor/VendorPaymentsAdd.vue";
+import VendorPaymentsAdd from "@/components/vendor/payment/VendorPaymentsAdd.vue";
 import ActionButtons from "@/components/vendor/ActionButtons.vue";
 import axios from "axios";
 import { NButton } from "naive-ui";
@@ -7,7 +7,7 @@ import { h, ref, toRaw, watch } from "vue";
 import { useQuery } from "vue-query";
 import { useRoute } from "vue-router";
 import { omit, pick } from "@/lib/helper.js";
-import VendorPaymentEdit from "@/components/vendor/VendorPaymentEdit.vue";
+import VendorPaymentEdit from "@/components/vendor/payment/VendorPaymentEdit.vue";
 
 const columns = [
   {
@@ -55,14 +55,20 @@ const showEditPaymentForm = (row) => {
     "recipient_name",
     "invoice_number",
   ]);
+  // We are going to need to change if API changes
   obj.payment_invoices = obj.payment_invoices.map((invoice) => ({
-    vendor_invoice_id: invoice.id,
-    payment_amount: invoice.amount_paid,
+    vendor_invoice_id: invoice.vendor_invoice_id,
+    payment_amount: invoice.payment_amount,
+    invoices: [
+      {
+        id: invoice.invoices[0].id,
+        invoice_number: invoice.invoices[0].invoice_number,
+      },
+    ],
   }));
 
   formRow.value = obj;
   visibleEditForm.value = true;
-  console.log({ obj, row: toRaw(row) });
 };
 
 const { data: paymentTable, isLoading } = useQuery(
@@ -83,10 +89,15 @@ watch(
 </script>
 
 <template>
-  <div class="rounded-round bordered mt-[24px] font-sans">
-    <VendorPaymentEdit :initial-data="formRow" v-model:show-drawer="visibleEditForm" />
+  <div class="bordered mt-[24px] rounded-round font-sans">
+    <VendorPaymentEdit
+      :initial-data="formRow"
+      v-model:show-drawer="visibleEditForm"
+    />
 
-    <div class="dark:bg-foreground_dark border-[1px] bg-white p-[24px] dark:border-0">
+    <div
+      class="border-[1px] bg-white p-[24px] dark:border-0 dark:bg-foreground_dark"
+    >
       <div class="flex justify-between">
         <p class="pb-8 text-2xl font-bold">Payments</p>
         <VendorPaymentsAdd />
