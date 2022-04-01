@@ -303,8 +303,8 @@ watchEffect(() => {
                       <template #arrow="{ prev, next }">
                         <div class="custom-arrow">
                           <button type="button" class="curtom-arrow--left" @click="prev">
-                            <n-icon
-                              ><svg
+                            <n-icon>
+                              <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 xmlns:xlink="http://www.w3.org/1999/xlink"
                                 viewBox="0 0 24 24"
@@ -312,13 +312,13 @@ watchEffect(() => {
                                 <path
                                   d="M16.88 2.88a1.25 1.25 0 0 0-1.77 0L6.7 11.29a.996.996 0 0 0 0 1.41l8.41 8.41c.49.49 1.28.49 1.77 0s.49-1.28 0-1.77L9.54 12l7.35-7.35c.48-.49.48-1.28-.01-1.77z"
                                   fill="currentColor"
-                                ></path></svg
-                              ><ArrowBack
-                            /></n-icon>
+                                ></path>
+                              </svg>
+                            </n-icon>
                           </button>
                           <button type="button" class="curtom-arrow--right" @click="next">
-                            <n-icon
-                              ><svg
+                            <n-icon>
+                              <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 xmlns:xlink="http://www.w3.org/1999/xlink"
                                 viewBox="0 0 24 24"
@@ -326,9 +326,9 @@ watchEffect(() => {
                                 <path
                                   d="M7.38 21.01c.49.49 1.28.49 1.77 0l8.31-8.31a.996.996 0 0 0 0-1.41L9.15 2.98c-.49-.49-1.28-.49-1.77 0s-.49 1.28 0 1.77L14.62 12l-7.25 7.25c-.48.48-.48 1.28.01 1.76z"
                                   fill="currentColor"
-                                ></path></svg
-                              ><ArrowForward
-                            /></n-icon>
+                                ></path>
+                              </svg>
+                            </n-icon>
                           </button>
                         </div>
                       </template>
