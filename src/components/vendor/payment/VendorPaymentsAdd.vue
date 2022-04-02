@@ -10,7 +10,11 @@ import { computed, ref, toRaw, watch, watchEffect } from "vue";
 import { useMutation, useQuery, useQueryClient } from "vue-query";
 import { useRoute } from "vue-router";
 import PaymentInvoiceFormModal from "./PaymentInvoiceFormModal.vue";
-import { selectOptions, getPaymentTypes } from "./payment.hook.js";
+import {
+  selectOptions,
+  getPaymentTypes,
+  createPaymentMutation,
+} from "./payment.hook.js";
 import { themeOverrides } from "./payment.helper.js";
 
 const { paymentStatusOptions, gmtvLocationsOptions, routeParamId } =
@@ -193,17 +197,8 @@ watchEffect(() => {
       }));
 });
 
-const queryClient = useQueryClient();
-const { mutate: createPayment } = useMutation(
-  (data) => axios.post("/payments", data),
-  {
-    onSuccess() {
-      message.success("Payment has been created");
-      queryClient.invalidateQueries(["payments_vendor", routeParamId.value]);
-      showDrawer.value = false;
-    },
-  }
-);
+const { mutate: createPayment, isLoading: onCreatePaymentLoading } =
+  createPaymentMutation();
 
 async function submitForm() {
   try {
@@ -215,7 +210,11 @@ async function submitForm() {
     obj.payment_invoices = obj.payment_invoices.map((inv) =>
       omit(inv, ["invoices"])
     );
-    createPayment(obj);
+    createPayment(obj, {
+      onSuccess() {
+        showDrawer.value = false;
+      },
+    });
   } catch (e) {
     if (Array.isArray(e)) {
       e.flat().forEach((err) => message.error(err.message));
@@ -340,12 +339,15 @@ async function submitForm() {
           </section>
         </header>
       </n-config-provider>
-      <main class="mx-auto max-w-xl">
+      <main>
         <h3 class="mb-4">Payment Invoice</h3>
-        <n-table v-if="form.payment_invoices?.length">
+        <n-table
+          v-if="form.payment_invoices?.length"
+          class="dark:border-0 dark:bg-foreground_dark"
+        >
           <thead>
             <tr>
-              <th>Vendor Invoice</th>
+              <th>INv#</th>
               <th>Payment Amount</th>
               <th class="print:hidden"></th>
             </tr>
@@ -414,7 +416,13 @@ async function submitForm() {
         </n-form-item>
       </section>
 
-      <n-button class="print:hidden" size="large" @click="submitForm">
+      <n-button
+        class="print:hidden"
+        size="large"
+        :disabled="onCreatePaymentLoading"
+        :loading="onCreatePaymentLoading"
+        @click="submitForm"
+      >
         Add
       </n-button>
     </n-form>

@@ -53,6 +53,7 @@ const form = ref({ ...initialForm });
 const showPaymentInvoiceModal = ref(false);
 const currentPaymentInvoiceIndex = ref(null);
 const currentPaymentInvoiceData = ref(null);
+const deletePaymentInvoices = ref([]);
 
 const onCreatePaymentInvoice = (index) => {
   showPaymentInvoiceModal.value = true;
@@ -65,11 +66,16 @@ const onEditPaymentInvoice = (index) => {
   showPaymentInvoiceModal.value = true;
 };
 const onDeletePaymentInvoice = (index) => {
+  if (form.value.payment_invoices[index]?.id) {
+    deletePaymentInvoices.value.push({
+      id: form.value.payment_invoices[index].id,
+      delete_record: 1,
+    });
+  }
   form.value.payment_invoices.splice(index, 1);
 };
 
 const onSavePaymentInvoice = (paymentInvoice) => {
-  console.log("saving", { paymentInvoice: toRaw(paymentInvoice) });
   showPaymentInvoiceModal.value = false;
   if (currentPaymentInvoiceData.value) {
     form.value.payment_invoices[currentPaymentInvoiceIndex.value] = {
@@ -209,6 +215,7 @@ const { mutate: updatePayment } = useMutation(
     onSuccess() {
       message.success("Payment has been updated");
       queryClient.invalidateQueries(["payments_vendor", routeParamId.value]);
+      queryClient.invalidateQueries(["vendorInvoices", routeParamId.value]);
       showDrawer.value = false;
     },
   }
@@ -226,9 +233,9 @@ async function submitForm() {
     // obj.recipient_id = routeParamId.value;
     obj.payment_date = dayjs(form.value.payment_date).format("YYYY-MM-DD");
     console.log({ obj });
-    obj.payment_invoices = obj.payment_invoices((invoice) =>
-      omit(invoice, ["invoices"])
-    );
+    obj.payment_invoices = obj.payment_invoices
+      .map((invoice) => omit(invoice, ["invoices"]))
+      .concat(deletePaymentInvoices.value);
     updatePayment(obj);
   } catch (e) {
     if (Array.isArray(e)) {
@@ -252,6 +259,7 @@ async function submitForm() {
       :rules="rules"
       size="medium"
       ref="formRef"
+      class="relative"
     >
       <n-config-provider
         inline-theme-disabled
@@ -345,14 +353,15 @@ async function submitForm() {
         </header>
       </n-config-provider>
 
-      <main class="mx-auto max-w-xl">
+      <main>
         <h3 class="mb-4">Payment Invoice</h3>
         <n-table v-if="form.payment_invoices?.length">
           <thead>
             <tr>
-              <th>Vendor Invoice</th>
+              <th>In#</th>
+              <th>Invoice Date</th>
               <th>Payment Amount</th>
-              <th class="print:hidden"></th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -365,6 +374,12 @@ async function submitForm() {
                   {{
                     form_invoice.invoices &&
                     form_invoice.invoices[0]?.invoice_number
+                  }}
+                </td>
+                <td>
+                  {{
+                    form_invoice.invoices &&
+                    form_invoice.invoices[0]?.invoice_date
                   }}
                 </td>
                 <td>
@@ -406,13 +421,9 @@ async function submitForm() {
         </n-modal>
       </main>
       <section
-        class="mt-5 ml-auto w-full max-w-xs rounded bg-gray-100 p-4 dark:bg-dark_border"
+        class="mt-5 flex w-full flex-col justify-between gap-4 rounded md:flex-row"
       >
-        <div class="bg-foreground_light p-4 dark:bg-foreground_dark">
-          <h5 class="font-medium uppercase">Amount</h5>
-          <span class="text-lg font-bold">${{ form.amount }}</span>
-        </div>
-        <n-form-item path="notes">
+        <n-form-item class="w-full">
           <n-input
             placeholder="Notes"
             type="textarea"
@@ -420,11 +431,20 @@ async function submitForm() {
             v-model:value="form.notes"
           />
         </n-form-item>
+        <div class="w-full max-w-xs bg-gray-100 p-4 dark:bg-dark_border">
+          <div class="bg-foreground_light p-4 dark:bg-foreground_dark">
+            <h5 class="font-medium uppercase">Amount</h5>
+            <span class="text-lg font-bold">${{ form.amount }}</span>
+          </div>
+        </div>
       </section>
-
-      <n-button attr-type="submit" size="large" @click="submitForm">
-        Update
-      </n-button>
+      <footer
+        class="sticky bottom-0 mt-2 bg-white py-2 dark:bg-foreground_dark"
+      >
+        <n-button attr-type="submit" size="large" @click="submitForm">
+          Update
+        </n-button>
+      </footer>
     </n-form>
   </n-modal>
 </template>

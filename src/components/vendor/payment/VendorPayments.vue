@@ -57,14 +57,10 @@ const showEditPaymentForm = (row) => {
   ]);
   // We are going to need to change if API changes
   obj.payment_invoices = obj.payment_invoices.map((invoice) => ({
+    id: invoice.id,
     vendor_invoice_id: invoice.vendor_invoice_id,
     payment_amount: invoice.payment_amount,
-    invoices: [
-      {
-        id: invoice.invoices[0].id,
-        invoice_number: invoice.invoices[0].invoice_number,
-      },
-    ],
+    invoices: [invoice.invoices[0]],
   }));
 
   formRow.value = obj;

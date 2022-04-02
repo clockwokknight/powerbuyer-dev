@@ -225,18 +225,16 @@ const columns = [
     width: "150",
     fixed: "right",
     render(row) {
-      return form.value.amount_paid > 0
-        ? h("div")
-        : h(
-            "span",
-            {
-              class:
-                "font-semibold bg-gray-800/10 border-2 rounded border-gray-500 px-3 py-2",
-            },
-            {
-              default: () => `$${row.amount}`,
-            }
-          );
+      return h(
+        "span",
+        {
+          class:
+            "font-semibold bg-gray-800/10 border-2 rounded border-gray-500 px-3 py-2",
+        },
+        {
+          default: () => `$${row.amount}`,
+        }
+      );
     },
   },
   {

@@ -1,3 +1,7 @@
+/**
+ * Use this for type hints under js file
+ * @type import('naive-ui').GlobalThemeOverrides
+ */
 export const themeOverrides = {
   Input: {
     border: "none",
@@ -23,5 +27,12 @@ export const themeOverrides = {
     feedbackFontSizeSmall: "10px",
     labelHeightSmall: "15px",
     feedbackHeightSmall: "12px",
+  },
+  Select: {
+    peers: {
+      InternalSelection: {
+        border: "none",
+      },
+    },
   },
 };

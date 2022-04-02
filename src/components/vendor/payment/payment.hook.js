@@ -1,9 +1,10 @@
-import { useQuery } from "vue-query";
+import { useMutation, useQuery } from "vue-query";
 import axios from "axios";
 import { computed } from "vue";
 import { getGmtvLocations } from "@/hooks/location.js";
 import { useRoute } from "vue-router";
 import { ref, watch } from "vue";
+import { useMessage } from "naive-ui";
 
 export const selectOptions = () => {
   const route = useRoute();
@@ -56,3 +57,13 @@ export const getPaymentTypes = () =>
   useQuery("payment_type", () =>
     axios.get("/payment_type").then((res) => res.data)
   );
+export const createPaymentMutation = () => {
+  const message = useMessage();
+  return useMutation((data) => axios.post("/payments", data), {
+    onSuccess() {
+      message.success("Payment has been created");
+      queryClient.invalidateQueries(["payments_vendor", routeParamId.value]);
+      queryClient.invalidateQueries(["vendorInvoices", routeParamId.value]);
+    },
+  });
+};

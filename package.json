@@ -19,7 +19,7 @@
     "vue": "^3.2.31",
     "vue-dragscroll": "^3.0.1",
     "vue-observe-visibility": "^1.0.0",
-    "vue-query": "^1.19.1",
+    "vue-query": "^1.20.1",
     "vue-router": "^4.0.12",
     "vue-tippy": "^6.0.0-alpha.44",
     "vue-types": "^4.1.1"

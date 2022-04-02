@@ -15,11 +15,12 @@ const initialForm = {
 const form = ref({ ...initialForm, ...toRaw(props.initialData) });
 const getInvoiceById = (id) =>
   toRaw(props.invoiceData).find((inv) => inv.id === id);
-const selectedInvoiceBalance = ref(
-  form.value.vendor_invoice_id
-    ? getInvoiceById(form.value.vendor_invoice_id)?.balance
-    : null
-);
+
+const selectedInvoice = computed(() => {
+  const vendor_invoice = getInvoiceById(form.value.vendor_invoice_id);
+  form.value.invoices[0] = vendor_invoice;
+  return vendor_invoice;
+});
 const formRef = ref(null);
 
 const rules = {
@@ -34,12 +35,19 @@ const rules = {
     required: true,
     trigger: ["input", "blur", "change"],
     validator(rule, value) {
-      if (!selectedInvoiceBalance.value) {
+      if (!selectedInvoice.value) {
         return new Error("Please select an invoice");
-      } else if (value > selectedInvoiceBalance.value) {
+      } else if (
+        value >
+        parseFloat(selectedInvoice.value.balance) + props.initialData?.id
+          ? parseFloat(props.initialData.payment_amount)
+          : 0
+      ) {
         return new Error(
-          "Payment can't exceed current invoice balance $" +
-            selectedInvoiceBalance.value
+          "Payment can't exceed $" +
+            (parseFloat(selectedInvoice.value.balance) + props.initialData?.id
+              ? parseFloat(props.initialData.payment_amount)
+              : 0)
         );
       } else if (value <= 0.01) {
         return new Error("Payment Amount is required");
@@ -51,17 +59,11 @@ const onInvoiceSelect = (val) => {
   const vendor_invoice = getInvoiceById(val);
   // const vendor_invoice = props.invoiceData[vendor_invoiceIdx];
   if (vendor_invoice) {
-    selectedInvoiceBalance.value = parseFloat(vendor_invoice.balance);
     console.log({ vendor_invoice });
     form.value = {
       vendor_invoice_id: vendor_invoice.id,
       payment_amount: parseFloat(vendor_invoice.balance),
-      invoices: [
-        {
-          id: vendor_invoice.id,
-          invoice_number: vendor_invoice.invoice_number,
-        },
-      ],
+      invoices: [selectedInvoice.value],
     };
   }
 };
@@ -90,6 +92,11 @@ const onSubmit = async () => {
         v-model:value="form.vendor_invoice_id"
       />
     </n-form-item>
+    <div v-if="selectedInvoice" class="flex flex-col pt-1 pb-4">
+      <span class="block">Amount Due: {{ selectedInvoice.amount_due }}</span>
+      <span class="block">Balance: {{ selectedInvoice.balance }}</span>
+      <span class="block">Amount Paid: {{ selectedInvoice.amount_paid }}</span>
+    </div>
     <n-form-item path="payment_amount" label="Payment Amount">
       <CurrencyInput v-model="form.payment_amount" />
     </n-form-item>
