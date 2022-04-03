@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch, h, toRaw } from "vue";
-import { typographyDark, useMessage } from "naive-ui";
+import { useMessage } from "naive-ui";
 import { useMutation, useQueryClient } from "vue-query";
 import { useRoute } from "vue-router";
 import dayjs from "dayjs";

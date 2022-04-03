@@ -10,6 +10,7 @@ import { useMessage } from "naive-ui";
 import axios from "axios";
 import { format } from "v-money3";
 import { getInvoiceStatus } from "@/hooks/common_query.js";
+import { themeOverrides } from "./invoice.helper";
 
 const props = defineProps({
   show: {
@@ -321,22 +322,22 @@ const onInvoiceDelete = () => {
   deleteInvoiceModal.value = true;
 };
 
-const themeOverrides = {
-  Input: {
-    border: "none",
-    groupLabelColor: "rgba(255, 255, 255, 0.1)",
-    color: "rgba(255, 255, 255, 0)",
-    borderHover: "1px solid transparent",
-    borderHoverWarning: "none",
-    borderHoverError: "none",
-    boxShadowFocus: "none",
-    borderFocus: "none",
-    colorFocus: "rgba(99, 226, 183, 0)",
-  },
-  Form: {
-    labelPaddingVertical: "0 0 0 0",
-  },
-};
+// const themeOverrides = {
+//   Input: {
+//     border: "none",
+//     groupLabelColor: "rgba(255, 255, 255, 0.1)",
+//     color: "rgba(255, 255, 255, 0)",
+//     borderHover: "1px solid transparent",
+//     borderHoverWarning: "none",
+//     borderHoverError: "none",
+//     boxShadowFocus: "none",
+//     borderFocus: "none",
+//     colorFocus: "rgba(99, 226, 183, 0)",
+//   },
+//   Form: {
+//     labelPaddingVertical: "0 0 0 0",
+//   },
+// };
 </script>
 <template>
   <n-modal
