@@ -13,6 +13,7 @@ import PaymentInvoiceFormModal from "./PaymentInvoiceFormModal.vue";
 import { selectOptions, getPaymentTypes } from "./payment.hook.js";
 import ActionButtonGroup from "./ActionButtonGroup.vue";
 import { themeOverrides } from "./payment.helper.js";
+import { format } from "v-money3";
 
 const props = defineProps(["showDrawer", "initialData"]);
 const emits = defineEmits(["update:showDrawer"]);
@@ -210,7 +211,7 @@ watchEffect(() => {
 
 // Payment Update Mutation
 const { mutate: updatePayment } = useMutation(
-  ({ id, ...data }) => axios.put("/payments" + id, data),
+  ({ id, ...data }) => axios.put("/payments/" + id, data),
   {
     onSuccess() {
       message.success("Payment has been updated");
@@ -232,10 +233,11 @@ async function submitForm() {
     // obj.recipient_type = 1;
     // obj.recipient_id = routeParamId.value;
     obj.payment_date = dayjs(form.value.payment_date).format("YYYY-MM-DD");
-    console.log({ obj });
+
     obj.payment_invoices = obj.payment_invoices
       .map((invoice) => omit(invoice, ["invoices"]))
-      .concat(deletePaymentInvoices.value);
+      .concat(toRaw(deletePaymentInvoices.value));
+
     updatePayment(obj);
   } catch (e) {
     if (Array.isArray(e)) {
@@ -274,7 +276,7 @@ async function submitForm() {
             >
               <n-select
                 :options="gmtvLocationsOptions"
-                class="other-select min-w-md w-full"
+                class="w-full other-select min-w-md"
                 filterable
                 v-model:value="form.gmtv_location_id"
               />
@@ -360,6 +362,7 @@ async function submitForm() {
             <tr>
               <th>In#</th>
               <th>Invoice Date</th>
+              <th>Invoice Amount</th>
               <th>Payment Amount</th>
               <th></th>
             </tr>
@@ -383,7 +386,14 @@ async function submitForm() {
                   }}
                 </td>
                 <td>
-                  {{ form_invoice.payment_amount }}
+                  <span v-if="form_invoice.invoices">
+                    ${{ format(form_invoice.invoices[0]?.amount_due) }}
+                  </span>
+                </td>
+                <td>
+                  <span v-if="form_invoice.invoices">
+                    ${{ format(form_invoice.payment_amount) }}
+                  </span>
                 </td>
                 <td>
                   <ActionButtonGroup
@@ -401,9 +411,9 @@ async function submitForm() {
           dashed
           type="primary"
           @click="onCreatePaymentInvoice(0)"
-          class="mt-4 w-full"
+          class="w-full mt-4"
         >
-          + Create
+          + Add Invoice
         </n-button>
         <n-modal
           v-model:show="showPaymentInvoiceModal"
@@ -421,7 +431,7 @@ async function submitForm() {
         </n-modal>
       </main>
       <section
-        class="mt-5 flex w-full flex-col justify-between gap-4 rounded md:flex-row"
+        class="flex flex-col justify-between w-full gap-4 mt-5 rounded md:flex-row"
       >
         <n-form-item class="w-full">
           <n-input
@@ -431,15 +441,15 @@ async function submitForm() {
             v-model:value="form.notes"
           />
         </n-form-item>
-        <div class="w-full max-w-xs bg-gray-100 p-4 dark:bg-dark_border">
-          <div class="bg-foreground_light p-4 dark:bg-foreground_dark">
+        <div class="w-full max-w-xs p-4 bg-gray-100 dark:bg-dark_border">
+          <div class="p-4 bg-foreground_light dark:bg-foreground_dark">
             <h5 class="font-medium uppercase">Amount</h5>
-            <span class="text-lg font-bold">${{ form.amount }}</span>
+            <span class="text-lg font-bold">${{ format(form.amount) }}</span>
           </div>
         </div>
       </section>
       <footer
-        class="sticky bottom-0 mt-2 bg-white py-2 dark:bg-foreground_dark"
+        class="sticky bottom-0 py-2 mt-2 bg-white dark:bg-foreground_dark"
       >
         <n-button attr-type="submit" size="large" @click="submitForm">
           Update

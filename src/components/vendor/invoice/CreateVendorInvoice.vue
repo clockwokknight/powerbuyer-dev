@@ -12,6 +12,7 @@ import { getInvoiceStatus } from "@/hooks/common_query.js";
 import VendorExpenseAction from "@/components/vendor/invoice/VendorExpenseAction.vue";
 import ExpenseModal from "@/components/vendor/invoice/ExpenseModal.vue";
 import ExpenseTableImage from "@/components/vendor/invoice/ExpenseTableImage.vue";
+import { themeOverrides } from "./invoice.helper";
 
 const message = useMessage();
 const queryClient = useQueryClient();
@@ -31,6 +32,7 @@ const initialForm = {
   status: 1,
   due_date: dayjs().add(30, "day").valueOf(),
   invoice_date: dayjs().valueOf(),
+  invoice_number: "",
   expenses: [
     // {
     //   expense_date: Date.now(),
@@ -270,24 +272,6 @@ async function submitInvoice() {
     }
   }
 }
-
-const themeOverrides = {
-  Input: {
-    border: "none",
-    groupLabelColor: "rgba(255, 255, 255, 0.1)",
-    color: "rgba(255, 255, 255, 0)",
-    borderHover: "1px solid transparent",
-    borderHoverWarning: "none",
-    borderHoverError: "none",
-    clearColorHover: "rgba(255, 255, 255, 0)",
-    boxShadowFocus: "none",
-    borderFocus: "none",
-    colorFocus: "rgba(99, 226, 183, 0)",
-  },
-  Form: {
-    labelPaddingVertical: "0 0 0 0",
-  },
-};
 </script>
 
 <template>
@@ -325,7 +309,11 @@ const themeOverrides = {
       >
         <header class="flex content-center justify-between">
           <section class="space-y-4">
-            <div class="h-10"></div>
+            <div class="text-left">
+              <n-form-item size="small" label="Vendor Invoice Number">
+                <n-input v-model:value="form.invoice_number" />
+              </n-form-item>
+            </div>
             <div class="text-left">
               <n-form-item
                 size="small"
@@ -393,13 +381,13 @@ const themeOverrides = {
         />
         <div v-else class="mt-4">
           <n-button @click="onAddExpense" dashed type="primary" class="w-full">
-            + Create</n-button
+            + Add Expense</n-button
           >
         </div>
         <section
-          class="mt-5 ml-auto w-full max-w-xs rounded bg-gray-100 p-4 dark:bg-dark_border"
+          class="w-full max-w-xs p-4 mt-5 ml-auto bg-gray-100 rounded dark:bg-dark_border"
         >
-          <div class="bg-foreground_light p-4 dark:bg-foreground_dark">
+          <div class="p-4 bg-foreground_light dark:bg-foreground_dark">
             <h5 class="font-medium uppercase">Inv Total</h5>
             <span class="text-lg font-bold"
               >${{ format(form.amount_due) }}</span
@@ -408,7 +396,7 @@ const themeOverrides = {
               <n-input-number v-model:value="form.amount_due" />
             </n-form-item>
           </div>
-          <div class="space-y-2 px-4 pt-5">
+          <div class="px-4 pt-5 space-y-2">
             <div>
               <h5 class="font-medium uppercase">Payments</h5>
               <span class="text-lg font-bold"
@@ -422,7 +410,7 @@ const themeOverrides = {
           </div>
         </section>
       </main>
-      <div class="sticky bottom-2 flex gap-x-5">
+      <div class="sticky flex bottom-2 gap-x-5">
         <n-button
           type="primary"
           :loading="isLoading"

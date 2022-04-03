@@ -33,6 +33,7 @@ const columns = [
   {
     title: "",
     key: "edit",
+    fixed: "right",
     render(row) {
       return h(ActionButtons, {
         onClick: () => showEditPaymentForm(row),

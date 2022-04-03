@@ -35,20 +35,15 @@ const rules = {
     required: true,
     trigger: ["input", "blur", "change"],
     validator(rule, value) {
+      const calculatedBalance =
+        parseFloat(selectedInvoice.value.balance) +
+        (props.initialData?.id
+          ? parseFloat(props.initialData.payment_amount)
+          : 0);
       if (!selectedInvoice.value) {
         return new Error("Please select an invoice");
-      } else if (
-        value >
-        parseFloat(selectedInvoice.value.balance) + props.initialData?.id
-          ? parseFloat(props.initialData.payment_amount)
-          : 0
-      ) {
-        return new Error(
-          "Payment can't exceed $" +
-            (parseFloat(selectedInvoice.value.balance) + props.initialData?.id
-              ? parseFloat(props.initialData.payment_amount)
-              : 0)
-        );
+      } else if (value > calculatedBalance) {
+        return new Error("Payment can't exceed $" + calculatedBalance);
       } else if (value <= 0.01) {
         return new Error("Payment Amount is required");
       }
@@ -93,9 +88,8 @@ const onSubmit = async () => {
       />
     </n-form-item>
     <div v-if="selectedInvoice" class="flex flex-col pt-1 pb-4">
-      <span class="block">Amount Due: {{ selectedInvoice.amount_due }}</span>
+      <span class="block">Invoice Total: {{ selectedInvoice.amount_due }}</span>
       <span class="block">Balance: {{ selectedInvoice.balance }}</span>
-      <span class="block">Amount Paid: {{ selectedInvoice.amount_paid }}</span>
     </div>
     <n-form-item path="payment_amount" label="Payment Amount">
       <CurrencyInput v-model="form.payment_amount" />
