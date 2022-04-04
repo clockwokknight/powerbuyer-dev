@@ -5,6 +5,8 @@ import ExpenseItemsModal from "@/components/modals/ExpenseItemsModal.vue";
 import GmtvLocationsModal from "@/components/modals/GmtvLocationsModal.vue";
 import PaymentTermsModal from "@/components/modals/PaymentTermsModal.vue";
 import DealStatusModal from "@/components/modals/DealStatusModal.vue";
+import { useDealers } from "../store/dealers";
+const dealerStore = useDealers();
 </script>
 
 <template>
@@ -19,7 +21,10 @@ import DealStatusModal from "@/components/modals/DealStatusModal.vue";
         <router-link class="single-card h-32 pt-5" to="/auctions">
           <span class="px-6 pt-6 pb-8 text-lg font-bold"> Auctions</span>
         </router-link>
-        <router-link class="single-card h-30 pt-5" to="/dealers">
+        <router-link
+          class="single-card h-30 pt-5"
+          :to="`/dealers/${dealerStore.latest}`"
+        >
           <span class="px-6 pt-6 pb-8 text-lg font-bold"> Dealers</span>
         </router-link>
       </div>
@@ -60,6 +65,6 @@ import DealStatusModal from "@/components/modals/DealStatusModal.vue";
 
 <style scoped>
 .single-card {
-  @apply bg-foreground_light dark:border-dark_border dark:bg-foreground_dark cursor-pointer rounded-md border-2 border-gray-200 shadow-sm transition-shadow hover:shadow-lg dark:shadow-gray-900;
+  @apply cursor-pointer rounded-md border-2 border-gray-200 bg-foreground_light shadow-sm transition-shadow hover:shadow-lg dark:border-dark_border dark:bg-foreground_dark dark:shadow-gray-900;
 }
 </style>

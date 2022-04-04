@@ -8,11 +8,12 @@ import DealerList from "@/components/dealer/DealerList.vue";
 import { useTabsViewStore } from "@/store/tabs";
 import { useGlobalState } from "@/store/global";
 import AddDealer from "@/components/dealer/AddDealer.vue";
+import { useDealers } from "@/store/dealers";
 import axios from "axios";
 
-const pageName = "dealers";
 const tabStore = useTabsViewStore();
 const global = useGlobalState();
+const dealerStore = useDealers();
 
 const searchText = ref("");
 const debouncedSearchText = useDebounce(searchText, 500);
@@ -28,14 +29,15 @@ const {
 const listActive = ref(!global.isMobile);
 
 const addTab = (dealer) => {
+  dealerStore.SET_LATEST(dealer?.id);
   listActive.value = global.isMobile ? false : listActive.value;
   tabStore.addTab({ id: dealer.id, name: dealer?.name });
 };
 
 // Dealer Search Result
 
-const { data: dealerSearchResults, isFetching: isDelaerSearchFetching } =
-  useQuery(["delearSearch", debouncedSearchText], ({ queryKey }) => {
+const { data: dealerSearchResults, isFetching: isDealerSearchFetching } =
+  useQuery(["dealerSearch", debouncedSearchText], ({ queryKey }) => {
     if (queryKey[1] === "") return null;
     else
       return axios.get(`/dealers/search/${queryKey[1]}`).then((res) => {
@@ -92,7 +94,7 @@ watch(
         <!-- Main Loop List -->
         <div>
           <div
-            v-if="isDelaerSearchFetching || isDealerLoading"
+            v-if="isDealerSearchFetching || isDealerLoading"
             v-for="index in Array.from({ length: 10 })"
             :key="index"
             class="odd:background_light border-b px-4 py-4 even:bg-foreground_light dark:border-0 dark:odd:bg-background_dark dark:even:bg-foreground_dark"
