@@ -306,16 +306,21 @@ watchEffect(() => {
       <!-- Main Body Content-->
       <div id="main" class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
         <main id="container" class="min-h-full p-2 md:p-6">
-          <Card class="pr-[100px]">
-            <div id="details" class="mt-0 grid grid-cols-12 w-full">
+          <Card class="pr-[0px]">
+            <div class="mt-0 grid grid-cols-12 w-full flex">
               <!-- left side -->
-              <div class="__form col-span-12 flex flex-col justify-between">
+              <div class="__form col-span-12 flex flex-col justify-between w-full">
                 <div class="flex">
                   <div class="mr-[24px] h-[260px] min-w-[260px] rounded-round">
                     <div class="relative">
                       <div
-                        class="__vehicle-logo z-50 absolute m-[12px] h-[48px] w-[48px] bg-blue-700 center-content text-[9px] rounded-round"
-                      ></div>
+                        class="__vehicle-logo z-50 absolute my-[0px] mx-[12px] w-[80px] bg-transparent center-content text-[9px] rounded-round"
+                      >
+                        <img
+                          src="https://gmtvinventory.com/storage/logos/dodge.png"
+                          alt="Dodge Logo"
+                        />
+                      </div>
                     </div>
                     <n-carousel class="max-w-[260px] rounded-b-round" show-arrow>
                       <img
@@ -543,58 +548,26 @@ watchEffect(() => {
 
               <!-- right side -->
 
-              <!--div
-                class="col-span-12 mt-[24px] flex flex-col justify-between md:col-span-4 md:mt-0 md:w-auto md:items-end"
-              >
-                <div class="__invoice-info mb-[24px] md:mb-0">
-                  <div class="flex md:justify-end">
-                    <p class="text-sm font-bold">Open Invoices</p>
-                  </div>
-                  <div class="flex justify-end">
-                    <p class="text-2xl font-bold">{{ getInvoicesTotal }}</p>
-                  </div>
-                </div>
-                <div class="align-end max-w-[220px] flex-col justify-between">
-                  <CustomInput
-                    type="select"
-                    label="Payment Terms"
-                    :validate="['required']"
-                    :options="paymentTermOptions"
-                    :value="form.payment_terms"
-                    placeholder=""
-                    @update:value="(val) => (form.payment_terms = val)"
-                    @save="submitValue('payment_terms')"
-                    @cancel="resetValue('payment_terms')"
-                    @focus="currentActiveField = 'payment_terms'"
-                  />
+              <div class="w-[200px] flex mt-[24px]">
+                <div class="flex items-center mr-[24px]">
                   <div
-                    class="__invoice-buttons mt-4 flex min-w-max max-w-full flex-col items-end justify-center md:mt-20"
-                  >
-                    <n-button class="w-[220px]" @click="global.openDrawer('payments')">
-                      <n-icon>
-                        <svg viewBox="0 0 24 24">
-                          <path
-                            d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"
-                            fill="currentColor"
-                          ></path>
-                        </svg>
-                      </n-icon>
-                      Add Payment
-                    </n-button>
-                    <n-button class="mt-4 w-[220px]" @click="active = true">
-                      <n-icon>
-                        <svg viewBox="0 0 24 24">
-                          <path
-                            d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"
-                            fill="currentColor"
-                          ></path>
-                        </svg>
-                      </n-icon>
-                      Create Expense
-                    </n-button>
-                  </div>
+                    class="rounded-full bg-green-400 h-[10px] w-[10px] border-white border-1 mx-[8px]"
+                  ></div>
+                  <span>Carfax</span>
                 </div>
-              </div-->
+                <div class="flex items-center mr-[24px]">
+                  <div
+                    class="rounded-full bg-green-400 h-[10px] w-[10px] border-white border-1 mx-[8px]"
+                  ></div>
+                  <span>AutoCheck</span>
+                </div>
+                <div class="flex items-center mr-[24px]">
+                  <div
+                    class="rounded-full bg-green-400 h-[10px] w-[10px] border-white border-1 mx-[8px]"
+                  ></div>
+                  <span>Light</span>
+                </div>
+              </div>
             </div>
           </Card>
           <Tabs
@@ -604,7 +577,43 @@ watchEffect(() => {
             class="bg-foreground_light dark:bg-foreground_dark sticky top-[-2px] left-0 z-40 mt-[24px] w-full rounded-round duration-300"
             :items="tabs"
           />
-          <Card class="h-[clac(80px-48px)] mt-[24px]">Steppers</Card>
+          <Card class="h-[clac(80px-48px)] mt-[24px]">
+            <n-timeline horizontal>
+              <n-timeline-item type="success" content="Deal Approved">
+                <template #icon>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    viewBox="0 0 1024 1024"
+                  >
+                    <path
+                      d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448s448-200.6 448-448S759.4 64 512 64zm193.5 301.7l-210.6 292a31.8 31.8 0 0 1-51.7 0L318.5 484.9c-3.8-5.3 0-12.7 6.5-12.7h46.9c10.2 0 19.9 4.9 25.9 13.3l71.2 98.8l157.2-218c6-8.3 15.6-13.3 25.9-13.3H699c6.5 0 10.3 7.4 6.5 12.7z"
+                      fill="currentColor"
+                    ></path>
+                  </svg>
+                </template>
+              </n-timeline-item>
+              <n-timeline-item type="success" content="Deal Punched">
+                <template #icon>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    xmlns:xlink="http://www.w3.org/1999/xlink"
+                    viewBox="0 0 1024 1024"
+                  >
+                    <path
+                      d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448s448-200.6 448-448S759.4 64 512 64zm193.5 301.7l-210.6 292a31.8 31.8 0 0 1-51.7 0L318.5 484.9c-3.8-5.3 0-12.7 6.5-12.7h46.9c10.2 0 19.9 4.9 25.9 13.3l71.2 98.8l157.2-218c6-8.3 15.6-13.3 25.9-13.3H699c6.5 0 10.3 7.4 6.5 12.7z"
+                      fill="currentColor"
+                    ></path>
+                  </svg>
+                </template>
+              </n-timeline-item>
+              <n-timeline-item line-type="dashed" content="Lean Paid" />
+              <n-timeline-item line-type="dashed" content="Owner(s) Paid" />
+              <n-timeline-item line-type="dashed" content="Title in Hand" />
+              <n-timeline-item line-type="dashed" content="Vehicle at Auction" />
+              <n-timeline-item line-type="dashed" content="Vehicle Sold" />
+            </n-timeline>
+          </Card>
           <div class="grid grid-cols-2 gap-[24px] w-full mt-[24px]">
             <Card class="h-[420px]"></Card>
             <Card class="h-[420px]"></Card>
