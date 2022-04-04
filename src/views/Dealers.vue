@@ -1,13 +1,14 @@
 <script setup>
 import { ref, watch } from "vue";
+import { useQuery } from "vue-query";
 import { useDebounce } from "@vueuse/core";
-
 import PageTabs from "@/components/PageTabs.vue";
 import { getDealers } from "@/hooks/dealers";
 import DealerList from "@/components/dealer/DealerList.vue";
 import { useTabsViewStore } from "@/store/tabs";
 import { useGlobalState } from "@/store/global";
 import AddDealer from "@/components/dealer/AddDealer.vue";
+import axios from "axios";
 
 const pageName = "dealers";
 const tabStore = useTabsViewStore();
@@ -31,6 +32,20 @@ const addTab = (dealer) => {
   tabStore.addTab({ id: dealer.id, name: dealer?.name });
 };
 
+// Dealer Search Result
+
+const { data: dealerSearchResults, isFetching: isDelaerSearchFetching } =
+  useQuery(["delearSearch", debouncedSearchText], ({ queryKey }) => {
+    if (queryKey[1] === "") return null;
+    else
+      return axios.get(`/dealers/search/${queryKey[1]}`).then((res) => {
+        if (res.data?.debug) {
+          return [];
+        }
+        return res.data;
+      });
+  });
+
 function toggleListSlide() {
   listActive.value = !listActive.value;
 }
@@ -47,22 +62,52 @@ watch(
   <div class="dealers flex w-full">
     <!-- Don't show PageItemsList on dashboard  | Current Page List -->
     <div
+      id="dealers-list"
       class="absolute z-[41] w-[275px]"
       :class="listActive ? 'open-dealer-list' : 'close-dealer-list'"
     >
       <aside
-        class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-y-auto overflow-x-hidden bg-background_light dark:bg-background_dark"
+        class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-x-hidden bg-background_light dark:border-r-[1px] dark:border-dark_border dark:bg-background_dark"
       >
-        <div class="sticky top-0 border-b dark:border-[0px] bg-foreground_light dark:bg-foreground_dark p-3">
+        <div
+          class="sticky top-0 z-50 bg-foreground_light p-3 pb-0 dark:bg-foreground_dark"
+        >
           <div class="mb-3 flex justify-between">
             <h1 class="text-xl font-bold uppercase">Dealers</h1>
-            <AddDealer />
+            <div>
+              <AddDealer />
+            </div>
           </div>
+          <div class="flex">
+            <n-input
+              style="backdrop-filter: blur(36px)"
+              class="bg-[#f0f0f0] shadow-lg shadow-black/10 dark:bg-dark_border"
+              v-model:value.trim="searchText"
+              clearable
+              placeholder="Search..."
+            />
+          </div>
+          <!-- Filter Component -->
         </div>
         <!-- Main Loop List -->
         <div>
-          <ul>
-            <template v-if="debouncedSearchText"> hi </template>
+          <div
+            v-if="isDelaerSearchFetching || isDealerLoading"
+            v-for="index in Array.from({ length: 10 })"
+            :key="index"
+            class="odd:background_light border-b px-4 py-4 even:bg-foreground_light dark:border-0 dark:odd:bg-background_dark dark:even:bg-foreground_dark"
+          >
+            <n-skeleton text :repeat="2" class="w-full" />
+            <n-skeleton text class="w-[45%]" />
+          </div>
+          <ul class="bg-foreground_light pt-[12px] dark:bg-foreground_dark">
+            <template v-if="debouncedSearchText">
+              <DealerList
+                v-if="dealerSearchResults"
+                :dealers="dealerSearchResults"
+                @click:tab="addTab"
+              />
+            </template>
 
             <template v-else>
               <template
@@ -78,60 +123,34 @@ watch(
                 v-if="hasNextPage"
                 class="grid w-full place-content-center p-4"
               >
-                <svg
-                  class="mr-3 -ml-1 h-6 w-6 animate-spin text-emerald-500"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"
-                  ></circle>
-                  <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
+                <n-spin size="small" />
               </button>
             </template>
           </ul>
-          <div
-            v-if="isDealerLoading"
-            v-for="index in Array.from({ length: 10 })"
-            :key="index"
-            class="border-b  dark:border-[0px] px-4 py-4 even:bg-[#f8f8fa] dark:even:bg-background_dark"
-          >
-            <n-skeleton text class="w-full" />
-            <n-skeleton text class="w-[45%]" />
-          </div>
         </div>
       </aside>
       <div
         id="mobile-slider"
         style="backdrop-filter: blur(36px)"
-        :class="listActive ? '!w-[335px] ml-[-60px]' : '!bg-dark_border'"
-        class="absolute w-[276px] duration-[500ms] h-[48px] flex flex-row justify-between bottom-0 left-0 bg-background_light/50 dark:bg-dark_border/50 bg-black items-center shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] px-4 cursor-pointer"
+        :class="listActive ? 'ml-[-60px] !w-[335px]' : '!bg-dark_border'"
+        class="absolute bottom-0 left-0 flex h-[48px] w-[276px] cursor-pointer flex-row items-center justify-between bg-background_light/50 bg-black px-4 shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] duration-[500ms] dark:bg-dark_border/50"
         @click="listActive = !listActive"
       >
         <div
-          class="text-[10px] pl-16 duration-[500ms]"
+          class="pl-16 text-[10px] duration-[500ms]"
           :class="!listActive ? 'opacity-0' : 'opacity-50'"
         >
           <b>{{ dealers?.pages[0].data.length }}</b> Active Dealers
         </div>
         <div class="!bg-black">
           <div
-            class="h-[48px] w-[60px] absolute left-0 bottom-0 flex center-content bg-[#111111]"
+            class="center-content absolute left-0 bottom-0 flex h-[48px] w-[60px] bg-[#111111]"
           >
             <svg
               class="absolute h-4 w-4 duration-[500ms]"
-              :class="listActive ? 'rotate-0 ml-[0px]' : 'rotate-180 ml-[432px]'"
+              :class="
+                listActive ? 'ml-[0px] rotate-0' : 'ml-[432px] rotate-180'
+              "
               viewBox="0 0 24 24"
             >
               <path
@@ -143,20 +162,25 @@ watch(
         </div>
       </div>
     </div>
+
     <!-- Main Tabs App Content -->
+
     <section
       id="main-content"
       style="height: calc(100vh - 8px)"
       :class="
         listActive
-          ? 'md:w-[calc(100vw-335px)] ml-[275px]'
-          : 'md:w-[calc(100vw-60px)] ml-[0px]'
+          ? 'ml-[275px] md:w-[calc(100vw-335px)]'
+          : 'ml-[0px] md:w-[calc(100vw-60px)]'
       "
-      class="duration-[500ms] w-[calc(100vw-60px)] bg-background_light dark:bg-background_dark"
+      class="w-[calc(100vw-60px)] bg-background_light duration-[500ms] dark:bg-background_dark"
     >
       <PageTabs :class="global.stuck[0] && 'shadow-lg'" page-name="dealers" />
       <!-- Main Body Content-->
-      <div id="main" class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
+      <div
+        id="main"
+        class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden"
+      >
         <main id="container" class="min-h-full p-2 md:p-6">
           <router-view />
         </main>
