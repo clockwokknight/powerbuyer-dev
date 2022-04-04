@@ -173,7 +173,6 @@ router.beforeEach(async (to, from, next) => {
   loading && loading.start();
   next();
   loading && loading.finish();
-  console.clear();
   console.log(to.name);
   document.title = window.innerWidth <= 768 
     ? `${to.name} – PowerBuyer (Mobile)` 

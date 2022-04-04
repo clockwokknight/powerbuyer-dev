@@ -14,11 +14,11 @@ import {
 import { useRouter, useRoute } from "vue-router";
 import { useQuery } from "vue-query";
 import { useDebounce } from "@vueuse/core";
-import { getVendors } from "@/hooks/vendor";
+import { fetchPaginatedData } from "@/hooks";
 import { useGlobalState } from "@/store/global";
 import { useMutation, useQueryClient } from "vue-query";
-import { useTabsViewStore } from "@/store/tabs";
-import { useVendors } from "@/store/vendors";
+import { useTabsViewStore } from "@/store/vehicleTabs";
+import { useVehicles as useVendors } from "@/store/vehicles";
 import { log, utils } from "@/lib/utils";
 import { useMessage } from "naive-ui";
 
@@ -49,12 +49,43 @@ const listActive = ref(!global.isMobile);
 
 // Showing All Vendors
 
+const tabs = ref([
+  {
+    title: "OVERVIEW",
+    value: "#overview",
+  },
+  {
+    title: "FUNDING",
+    value: "#funding",
+  },
+  {
+    title: "LOGISTICS",
+    value: "#logistics",
+  },
+  {
+    title: "TITLING",
+    value: "#titling",
+  },
+  {
+    title: "ACCOUNTING",
+    value: "#accounting",
+  },
+  {
+    title: "HISTORY",
+    value: "#history",
+  },
+  {
+    title: "REPORTS",
+    value: "#reports",
+  },
+]);
+
 const {
   data: vendors,
   isLoading: isVendorsLoading,
   hasNextPage: hasVendorNextPage,
   fetchNextPage: vendorFetchNextPage,
-} = getVendors();
+} = fetchPaginatedData("/vendors");
 
 const addTab = (vendor) => {
   vendorStore.setLatest(vendor?.id);
@@ -63,12 +94,14 @@ const addTab = (vendor) => {
 };
 
 const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
-  ["vehicleSearch", debouncedSearchText],
+  ["vendorSearch", debouncedSearchText],
   ({ queryKey }) => {
     if (queryKey[1] === "") {
       return null;
     } else {
       return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => {
+        console.clear();
+        console.log("fetching data... ", res);
         if (res.data?.debug) return [];
         return res.data;
       });
@@ -266,7 +299,10 @@ watchEffect(() => {
       "
       class="duration-[500ms] w-[calc(100vw-60px)] bg-background_light dark:bg-background_dark"
     >
-      <PageTabs :class="global.stuck[0] && 'shadow-lg'" page-name="inventory" />
+      <PageTabs
+        :class="global?.inventory?.stuck[0] && 'shadow-lg'"
+        page-name="inventory"
+      />
       <!-- Main Body Content-->
       <div id="main" class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
         <main id="container" class="min-h-full p-2 md:p-6">
@@ -279,9 +315,7 @@ watchEffect(() => {
                     <div class="relative">
                       <div
                         class="__vehicle-logo z-50 absolute m-[12px] h-[48px] w-[48px] bg-blue-700 center-content text-[9px] rounded-round"
-                      >
-                        logo
-                      </div>
+                      ></div>
                     </div>
                     <n-carousel class="max-w-[260px] rounded-b-round" show-arrow>
                       <img
@@ -563,7 +597,13 @@ watchEffect(() => {
               </div-->
             </div>
           </Card>
-          <Card class="h-[clac(80px-48px)] mt-[24px]">Tabs</Card>
+          <Tabs
+            id="__subtabs"
+            type="basic"
+            ref="vendorTab"
+            class="bg-foreground_light dark:bg-foreground_dark sticky top-[-2px] left-0 z-40 mt-[24px] w-full rounded-round duration-300"
+            :items="tabs"
+          />
           <Card class="h-[clac(80px-48px)] mt-[24px]">Steppers</Card>
           <div class="grid grid-cols-2 gap-[24px] w-full mt-[24px]">
             <Card class="h-[420px]"></Card>
