@@ -46,6 +46,7 @@ watch(showDrawer, (newValue) => {
 const showInvoiceModal = ref(false);
 const currentInvoice = ref({});
 const onViewInvoice = async (invoice) => {
+  // FIXME: need to replace to vue-query for caching
   let obj = await axios.get("/vendor_invoices/" + invoice.invoices[0].id);
 
   if (obj.data) {
