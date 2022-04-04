@@ -23,8 +23,8 @@ import { useIntersectionObserver } from "@vueuse/core";
 import UpdatableButtonWrapper from "@/components/common/UpdatableButtonWrapper.vue";
 import MaskedInput from "@/components/common/MaskedInput.vue";
 import VendorExpensesItems from "@/components/vendor/VendorExpensesItems.vue";
-import VendorExpenses from "@/components/vendor/VendorExpenses.vue";
-import VendorPayments from "@/components/vendor/VendorPayments.vue";
+import VendorExpenses from "@/components/vendor/invoice/VendorExpenses.vue";
+import VendorPayments from "@/components/vendor/payment/VendorPayments.vue";
 import CustomInput from "@/components/common/CustomInput.vue";
 import Tabs from "@/components/common/Tabs.vue";
 
@@ -102,7 +102,8 @@ const paymentTermOptions = computed(() =>
 
 const { data: statesList } = getStates();
 
-const { data: vendor, isLoading: isVendorLoading } = getVendorById(routeParamId);
+const { data: vendor, isLoading: isVendorLoading } =
+  getVendorById(routeParamId);
 
 const vendorData = ref({});
 
@@ -170,7 +171,10 @@ function resetValue(key) {
 
 function submitValue(key) {
   mutateAsync({
-    [key]: key === "phone" ? utils.parsePhoneNumber(form.value[key]) : form.value[key],
+    [key]:
+      key === "phone"
+        ? utils.parsePhoneNumber(form.value[key])
+        : form.value[key],
   })
     .then((data) => {
       message.success("Saved");
@@ -195,10 +199,10 @@ function handleTabClick(e) {
 <template>
   <div
     id="details"
-    class="__section __vendor-card mt-4 grid grid-cols-12 rounded-round bg-foreground_light dark:bg-foreground_dark p-6"
+    class="__section __vendor-card mt-4 grid grid-cols-12 rounded-round bg-foreground_light p-6 dark:bg-foreground_dark"
   >
     <!-- left side -->
-    <div class="__form col-span-12 md:col-span-8 flex flex-col justify-between">
+    <div class="__form col-span-12 flex flex-col justify-between md:col-span-8">
       <div class="__title">
         <h3 class="mb-2 translate-x-2 font-bold">VENDOR</h3>
         <CustomInput
@@ -360,7 +364,7 @@ function handleTabClick(e) {
     <!-- right side -->
 
     <div
-      class="mt-[24px] md:mt-0 col-span-12 md:col-span-4 flex flex-col md:items-end justify-between"
+      class="col-span-12 mt-[24px] flex flex-col justify-between md:col-span-4 md:mt-0 md:items-end"
     >
       <div class="__invoice-info mb-[24px] md:mb-0">
         <div class="flex md:justify-end">
@@ -386,7 +390,10 @@ function handleTabClick(e) {
         <div
           class="__invoice-buttons mt-[58px] flex min-w-max max-w-full flex-col items-end justify-center"
         >
-          <button class="__invoice-button" @click="global.openDrawer('payments')">
+          <button
+            class="__invoice-button"
+            @click="global.openDrawer('payments')"
+          >
             <span><b>+</b> Add payment</span>
           </button>
           <button class="__invoice-button">
@@ -401,7 +408,7 @@ function handleTabClick(e) {
     id="__subtabs"
     type="basic"
     ref="vendorTab"
-    class="sticky top-[-2px] left-0 z-40 mt-4 w-full rounded-round bg-foreground_light dark:bg-foreground_dark duration-300"
+    class="sticky top-[-2px] left-0 z-40 mt-4 w-full rounded-round bg-foreground_light duration-300 dark:bg-foreground_dark"
     :items="vendorTabs"
     @click="handleTabClick"
   />
@@ -425,7 +432,7 @@ function handleTabClick(e) {
 }
 .__invoice-button {
   transition-timing-function: ease;
-  @apply border-background_light mt-[14px] flex h-10 w-full items-center justify-center rounded-round border-[1px] px-3 text-center duration-[200ms];
+  @apply mt-[14px] flex h-10 w-full items-center justify-center rounded-round border-[1px] border-background_light px-3 text-center duration-[200ms];
   &:hover {
     @apply border-success text-success;
   }

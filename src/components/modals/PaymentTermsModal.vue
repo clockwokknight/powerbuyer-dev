@@ -105,8 +105,13 @@ const onOkEditingModal = async () => {
       <div class="mb-2 h-11 text-lg font-bold">Payment Terms</div>
       <div class="h-10 pb-2 text-sm">Click to add/edit Payment Terms</div>
     </div>
-    <n-modal preset="card" v-model:show="showModal" class="max-w-screen-md">
-      <div class="mb-5 ml-auto w-fit">
+    <n-modal
+      preset="card"
+      title="Payment Terms"
+      v-model:show="showModal"
+      class="max-w-screen-md"
+    >
+      <div class="mb-5">
         <n-tooltip trigger="hover">
           <template #trigger>
             <n-button @click="addRow">+</n-button>

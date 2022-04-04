@@ -1,7 +1,6 @@
 <script setup>
 import axios from "axios";
 import { h, ref, reactive, watch } from "vue";
-import CustomInput from "@/components/common/CustomInput.vue";
 import ActionButtons from "@/components/common/ActionButtons.vue";
 import { NButton } from "naive-ui";
 import { getExpenseTypes } from "@/hooks/expense.js";
@@ -117,7 +116,7 @@ const handlePageChange = (current_page) => {
       title="Expense Types"
       v-model:show="showModal"
     >
-      <div class="mb-5 ml-auto w-fit">
+      <div class="mb-5">
         <n-tooltip trigger="hover">
           <template #trigger>
             <n-button @click="addRow">+</n-button>

@@ -19,3 +19,12 @@ export const getStates = () =>
       refetchOnMount: false,
     }
   );
+
+export const getInvoiceStatus = () =>
+  useQuery(
+    "invoice_status",
+    () => axios.get("/invoice_status").then((res) => res.data),
+    {
+      refetchOnMount: false,
+    }
+  );

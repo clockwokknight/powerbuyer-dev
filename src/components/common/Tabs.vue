@@ -1,10 +1,10 @@
 <script setup>
-import { ref, computed, onMounted, watch, toRef, toRaw, onUpdated } from "vue";
 import { useGlobalState } from "@/store/global";
 import { Tab, TabGroup, TabList } from "@headlessui/vue";
+import { useDebounceFn } from "@vueuse/core";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger.js";
-import { useDebounceFn } from "@vueuse/core";
+import { computed, onMounted, onUpdated, ref, toRaw } from "vue";
 
 const global = useGlobalState();
 const props = defineProps(["items", "type"]);
@@ -32,8 +32,6 @@ const exampleItems = ref([
 const shouldDisableScroll = ref(false);
 
 onMounted(() => {
-  const tabListHeight = document.querySelector(".subTabList").offsetHeight;
-
   props.items.forEach((item, index) => {
     const itemSelector = document.querySelector(item.value);
     ScrollTrigger.create({
@@ -57,7 +55,7 @@ onUpdated(() => {
 });
 
 const tabItems = computed(() => props.items || exampleItems.value);
-const throttleDisableScroll = useDebounceFn(() => {
+const delay = useDebounceFn(() => {
   shouldDisableScroll.value = false;
 }, 1000);
 const scrollToSection = (item, index) => {
@@ -67,7 +65,9 @@ const scrollToSection = (item, index) => {
       y: toRaw(item).value,
       offsetY: 60,
     },
-    onComplete: throttleDisableScroll,
+    onComplete() {
+      delay();
+    },
   });
 };
 </script>

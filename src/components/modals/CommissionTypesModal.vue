@@ -78,8 +78,9 @@ const columns = [
             active: Boolean(row.active),
           };
         },
-        onDelete: () => {
-          console.log("deleting");
+        onDelete: async () => {
+          await axios.delete("/commission_type/" + row.id);
+          await queryClient.invalidateQueries("commission_type");
         },
       });
     },
@@ -137,14 +138,11 @@ const onOkEditingModal = async () => {
     if (!obj.description) delete obj.description;
 
     if (isEditing.value) {
-      await axios.put(
-        `/commission_type/${editingCommissionType.value.id}`,
-        obj
-      );
+      await axios.put(`/commission_type/${editingCommissionType.value.id}`, obj);
     } else {
       await axios.post("/commission_type", obj);
     }
-    await queryClient.invalidateQueries("commission_types");
+    await queryClient.invalidateQueries("commission_type");
     showEditModal.value = false;
   } catch {}
 };
@@ -159,10 +157,11 @@ const onOkEditingModal = async () => {
     <n-modal
       v-model:show="showModal"
       size="huge"
+      title="Commission Types"
       class="max-w-screen-lg"
       preset="card"
     >
-      <div class="mb-5 ml-auto w-fit">
+      <div class="mb-5">
         <n-tooltip trigger="hover">
           <template #trigger>
             <n-button @click="addRow">+</n-button>
