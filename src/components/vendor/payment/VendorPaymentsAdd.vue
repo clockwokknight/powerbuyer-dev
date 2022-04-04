@@ -261,7 +261,7 @@ async function submitForm() {
             >
               <n-select
                 :options="gmtvLocationsOptions"
-                class="w-full other-select min-w-md"
+                class="other-select min-w-md w-full"
                 filterable
                 v-model:value="form.gmtv_location_id"
               />
@@ -380,7 +380,7 @@ async function submitForm() {
           dashed
           type="primary"
           @click="onCreatePaymentInvoice(0)"
-          class="w-full mt-4"
+          class="mt-4 w-full"
         >
           + Add Invoice
         </n-button>
@@ -400,9 +400,9 @@ async function submitForm() {
         </n-modal>
       </main>
       <section
-        class="w-full max-w-xs p-4 mt-5 ml-auto bg-gray-100 rounded dark:bg-dark_border"
+        class="mt-5 ml-auto w-full max-w-xs rounded bg-gray-100 p-4 dark:bg-dark_border"
       >
-        <div class="p-4 bg-foreground_light dark:bg-foreground_dark">
+        <div class="bg-foreground_light p-4 dark:bg-foreground_dark">
           <h5 class="font-medium uppercase">Amount</h5>
           <span class="text-lg font-bold">${{ form.amount }}</span>
         </div>
@@ -423,7 +423,7 @@ async function submitForm() {
         :loading="onCreatePaymentLoading"
         @click="submitForm"
       >
-        Add
+        Create Payment
       </n-button>
     </n-form>
   </n-modal>

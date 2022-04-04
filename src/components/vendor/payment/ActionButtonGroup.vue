@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from "vue";
 
-const emits = defineEmits(["add", "edit", "delete"]);
+const emits = defineEmits(["add", "edit", "delete", "view"]);
 const deleteModal = ref(false);
 const onDelete = () => {
   emits("delete");
@@ -10,11 +10,11 @@ const onDelete = () => {
 </script>
 
 <template>
-  <div class="flex content-center justify-center space-x-3">
+  <div class="flex content-center justify-center gap-x-2">
     <n-tooltip>
       <template #trigger>
         <button
-          class="text-gray-300 hover:text-primary md:invisible md:group-hover:visible"
+          class="hover:text-primary dark:text-gray-300 md:invisible md:group-hover:visible"
           @click="$emit('edit')"
         >
           <n-icon>
@@ -34,6 +34,34 @@ const onDelete = () => {
         </button>
       </template>
       Edit Item
+    </n-tooltip>
+    <n-tooltip trigger="hover">
+      <template #trigger>
+        <button
+          class="hover:text-primary dark:text-gray-300 md:invisible md:group-hover:visible"
+          @click="$emit('view')"
+        >
+          <n-icon>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="304"
+              height="304"
+              viewBox="0 0 304 304"
+              fill="none"
+            >
+              <path
+                d="M140.796 186.946L117.05 163.2L245.848 34.3981L179.993 34.402V0.799988H286.393C290.85 0.799988 295.124 2.56958 298.276 5.71802C301.424 8.87048 303.194 13.144 303.194 17.601L303.198 124.001H269.596V58.146L140.796 186.946Z"
+                fill="currentColor"
+              />
+              <path
+                d="M241.6 303.2H62.3999C46.064 303.2 30.396 296.712 18.8447 285.157C7.29004 273.606 0.801758 257.938 0.801758 241.602V62.4019C0.801758 46.0659 7.28955 30.3979 18.8447 18.8469C30.396 7.29218 46.064 0.803894 62.3999 0.803894H124.002V34.4019H62.3999C54.9736 34.4019 47.8525 37.355 42.6025 42.605C37.3525 47.855 34.3994 54.9762 34.3994 62.402V241.602C34.3994 249.028 37.3525 256.149 42.6025 261.399C47.8525 266.649 54.9741 269.602 62.3999 269.602H241.6C249.026 269.602 256.147 266.649 261.397 261.399C266.647 256.149 269.6 249.028 269.6 241.602V180H303.198V241.602C303.198 257.938 296.71 273.606 285.155 285.157C273.604 296.712 257.936 303.2 241.6 303.2Z"
+                fill="currentColor"
+              />
+            </svg>
+          </n-icon>
+        </button>
+      </template>
+      Open Invoice
     </n-tooltip>
     <n-button-group>
       <n-tooltip trigger="hover">
@@ -64,11 +92,7 @@ const onDelete = () => {
         <template #trigger>
           <n-button round class="w-4" @click="$emit('add')">
             <n-icon>
-              <svg
-                viewBox="0 0 512 512"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
+              <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path
                   d="M256 112V400M400 256H112"
                   stroke="currentColor"

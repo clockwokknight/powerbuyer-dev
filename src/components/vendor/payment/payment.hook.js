@@ -12,7 +12,7 @@ export const selectOptions = () => {
 
   const { data: paymentStatus } = useQuery(
     "payment_status",
-    () => axios.get("payment_status").then((res) => res.data),
+    () => axios.get("/payment_status").then((res) => res.data),
     {
       refetchOnMount: false,
     }

@@ -21,6 +21,10 @@ export const getStates = () =>
   );
 
 export const getInvoiceStatus = () =>
-  useQuery("invoice_status", () =>
-    axios.get("/invoice_status").then((res) => res.data)
+  useQuery(
+    "invoice_status",
+    () => axios.get("/invoice_status").then((res) => res.data),
+    {
+      refetchOnMount: false,
+    }
   );

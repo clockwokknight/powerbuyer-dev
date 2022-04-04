@@ -14,8 +14,16 @@ import { selectOptions, getPaymentTypes } from "./payment.hook.js";
 import ActionButtonGroup from "./ActionButtonGroup.vue";
 import { themeOverrides } from "./payment.helper.js";
 import { format } from "v-money3";
+import InvoiceEdit from "@/components/vendor/invoice/VendorInvoiceEdit.vue";
 
-const props = defineProps(["showDrawer", "initialData"]);
+const props = defineProps({
+  showDrawer: Boolean,
+  initialData: Object,
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
+});
 const emits = defineEmits(["update:showDrawer"]);
 const route = useRoute();
 const queryClient = useQueryClient();
@@ -23,8 +31,7 @@ const message = useMessage();
 const formRef = ref(null);
 
 const showDrawer = toRef(props, "showDrawer");
-const { paymentStatusOptions, gmtvLocationsOptions, routeParamId } =
-  selectOptions();
+const { paymentStatusOptions, gmtvLocationsOptions, routeParamId } = selectOptions();
 watch(showDrawer, (newValue) => {
   if (newValue) {
     form.value = {
@@ -35,6 +42,33 @@ watch(showDrawer, (newValue) => {
     form.value = clone(initialForm);
   }
 });
+
+const showInvoiceModal = ref(false);
+const currentInvoice = ref({});
+const onViewInvoice = async (invoice) => {
+  let obj = await axios.get("/vendor_invoices/" + invoice.invoices[0].id);
+
+  if (obj.data) {
+    currentInvoice.value = obj.data[0];
+    showInvoiceModal.value = true;
+  }
+
+  // obj.expenses = obj.expenses.map((expense) =>
+  //   pick(expense, [
+  //     "id",
+  //     "amount",
+  //     "type",
+  //     "expense_date",
+  //     "deal_id",
+  //     "name",
+  //     "invoice_number",
+  //     "description",
+  //     "expense_types",
+  //   ])
+  // );
+  // obj = omit(obj, ["payments", "balance", "amount_paid", "children", "vendor_name"]);
+};
+
 const initialForm = {
   // recipient_id: null,
   // recipient_type: null,
@@ -230,12 +264,17 @@ async function submitForm() {
       "payment_receipt_type",
       "payment_status",
     ]);
+
     // obj.recipient_type = 1;
     // obj.recipient_id = routeParamId.value;
     obj.payment_date = dayjs(form.value.payment_date).format("YYYY-MM-DD");
 
     obj.payment_invoices = obj.payment_invoices
-      .map((invoice) => omit(invoice, ["invoices"]))
+      .map((invoice) => ({
+        id: invoice?.id,
+        vendor_invoice_id: invoice.vendor_invoice_id,
+        payment_amount: invoice.payment_amount,
+      }))
       .concat(toRaw(deletePaymentInvoices.value));
 
     updatePayment(obj);
@@ -263,20 +302,13 @@ async function submitForm() {
       ref="formRef"
       class="relative"
     >
-      <n-config-provider
-        inline-theme-disabled
-        :theme-overrides="themeOverrides"
-      >
+      <n-config-provider inline-theme-disabled :theme-overrides="themeOverrides">
         <header class="flex content-center justify-between">
           <section class="flex flex-col">
-            <n-form-item
-              size="small"
-              label="GMTV print location"
-              path="gmtv_location_id"
-            >
+            <n-form-item size="small" label="GMTV print location" path="gmtv_location_id">
               <n-select
                 :options="gmtvLocationsOptions"
-                class="w-full other-select min-w-md"
+                class="other-select min-w-md w-full"
                 filterable
                 v-model:value="form.gmtv_location_id"
               />
@@ -310,10 +342,7 @@ async function submitForm() {
               v-if="currentPaymentType === 'ach'"
               label="ACH transfer Number"
             >
-              <n-input
-                class="custom-input"
-                v-model:value="form.ach_transfer_number"
-              />
+              <n-input class="custom-input" v-model:value="form.ach_transfer_number" />
             </n-form-item>
           </section>
 
@@ -374,16 +403,10 @@ async function submitForm() {
             >
               <tr class="group">
                 <td>
-                  {{
-                    form_invoice.invoices &&
-                    form_invoice.invoices[0]?.invoice_number
-                  }}
+                  {{ form_invoice.invoices && form_invoice.invoices[0]?.invoice_number }}
                 </td>
                 <td>
-                  {{
-                    form_invoice.invoices &&
-                    form_invoice.invoices[0]?.invoice_date
-                  }}
+                  {{ form_invoice.invoices && form_invoice.invoices[0]?.invoice_date }}
                 </td>
                 <td>
                   <span v-if="form_invoice.invoices">
@@ -400,6 +423,7 @@ async function submitForm() {
                     @add="onCreatePaymentInvoice(index)"
                     @edit="onEditPaymentInvoice(index)"
                     @delete="onDeletePaymentInvoice(index)"
+                    @view="onViewInvoice(form_invoice)"
                   />
                 </td>
               </tr>
@@ -411,7 +435,7 @@ async function submitForm() {
           dashed
           type="primary"
           @click="onCreatePaymentInvoice(0)"
-          class="w-full mt-4"
+          class="mt-4 w-full"
         >
           + Add Invoice
         </n-button>
@@ -431,7 +455,7 @@ async function submitForm() {
         </n-modal>
       </main>
       <section
-        class="flex flex-col justify-between w-full gap-4 mt-5 rounded md:flex-row"
+        class="mt-5 flex w-full flex-col justify-between gap-4 rounded md:flex-row"
       >
         <n-form-item class="w-full">
           <n-input
@@ -441,21 +465,25 @@ async function submitForm() {
             v-model:value="form.notes"
           />
         </n-form-item>
-        <div class="w-full max-w-xs p-4 bg-gray-100 dark:bg-dark_border">
-          <div class="p-4 bg-foreground_light dark:bg-foreground_dark">
+        <div class="w-full max-w-xs bg-gray-100 p-4 dark:bg-dark_border">
+          <div class="bg-foreground_light p-4 dark:bg-foreground_dark">
             <h5 class="font-medium uppercase">Amount</h5>
             <span class="text-lg font-bold">${{ format(form.amount) }}</span>
           </div>
         </div>
       </section>
-      <footer
-        class="sticky bottom-0 py-2 mt-2 bg-white dark:bg-foreground_dark"
-      >
+      <footer class="sticky bottom-0 mt-2 bg-white py-2 dark:bg-foreground_dark">
         <n-button attr-type="submit" size="large" @click="submitForm">
-          Update
+          Update Payment
         </n-button>
       </footer>
     </n-form>
+
+    <InvoiceEdit
+      v-model:show="showInvoiceModal"
+      :initial-data="currentInvoice"
+      disabled
+    />
   </n-modal>
 </template>
 

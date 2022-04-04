@@ -30,9 +30,9 @@ const initialForm = {
   amount_paid: 0,
   balance: 0,
   status: 1,
+  // TODO: Need to make it dynamic based on current vendor payment_term
   due_date: dayjs().add(30, "day").valueOf(),
   invoice_date: dayjs().valueOf(),
-  invoice_number: "",
   expenses: [
     // {
     //   expense_date: Date.now(),
@@ -93,11 +93,6 @@ const rules = {
     },
     trigger: "change",
   },
-  // invoice_number: {
-  //   required: true,
-  //   message: "Invoice Number is required",
-  //   trigger: "input",
-  // },
   due_date: {
     required: true,
     type: "number",
@@ -309,11 +304,7 @@ async function submitInvoice() {
       >
         <header class="flex content-center justify-between">
           <section class="space-y-4">
-            <div class="text-left">
-              <n-form-item size="small" label="Vendor Invoice Number">
-                <n-input v-model:value="form.invoice_number" />
-              </n-form-item>
-            </div>
+            <div class="h-10"></div>
             <div class="text-left">
               <n-form-item
                 size="small"
@@ -416,7 +407,7 @@ async function submitInvoice() {
           :loading="isLoading"
           @click.prevent="submitInvoice"
         >
-          SAVE
+          CREATE INVOICE
         </n-button>
       </div>
     </n-form>

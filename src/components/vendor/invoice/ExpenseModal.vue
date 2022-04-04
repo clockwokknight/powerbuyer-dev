@@ -49,6 +49,7 @@ const expenseItemsOptions = computed(() =>
 
 const initialForm = {
   expense_date: Date.now(),
+  invoice_number: "",
   deal_id: null,
   name: "",
   description: "",
@@ -307,16 +308,21 @@ const handleChangeImage = ({ file, fileList, event }) => {
         @remove="onRemoveImage"
       />
     </n-form-item>
-    <n-form-item path="name" label="Name">
-      <n-select
-        :options="expenseItemsOptions"
-        filterable
-        @update-value="onExpenseSelect"
-        :loading="isLoading"
-        v-if="form.showSelect"
-      />
-      <n-input v-else v-model:value="form.name" :loading="isLoading" />
-    </n-form-item>
+    <div class="sm:grid sm:grid-cols-2 sm:justify-between sm:gap-x-5">
+      <n-form-item path="name" label="Name">
+        <n-select
+          :options="expenseItemsOptions"
+          filterable
+          @update-value="onExpenseSelect"
+          :loading="isLoading"
+          v-if="form.showSelect"
+        />
+        <n-input v-else v-model:value="form.name" :loading="isLoading" />
+      </n-form-item>
+      <n-form-item label="Vendor Invoice Number">
+        <n-input v-model:value="form.invoice_number" />
+      </n-form-item>
+    </div>
     <n-form-item label="Description">
       <n-input type="textarea" v-model:value="form.description" />
     </n-form-item>

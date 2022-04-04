@@ -1,13 +1,12 @@
 <script setup>
-import VendorPaymentsAdd from "@/components/vendor/payment/VendorPaymentsAdd.vue";
 import ActionButtons from "@/components/vendor/ActionButtons.vue";
+import VendorPaymentEdit from "@/components/vendor/payment/VendorPaymentEdit.vue";
+import VendorPaymentsAdd from "@/components/vendor/payment/VendorPaymentsAdd.vue";
+import { omit } from "@/lib/helper.js";
 import axios from "axios";
-import { NButton } from "naive-ui";
 import { h, ref, toRaw, watch } from "vue";
 import { useQuery } from "vue-query";
 import { useRoute } from "vue-router";
-import { omit, pick } from "@/lib/helper.js";
-import VendorPaymentEdit from "@/components/vendor/payment/VendorPaymentEdit.vue";
 
 const columns = [
   {
@@ -87,14 +86,9 @@ watch(
 
 <template>
   <div class="bordered mt-[24px] rounded-round font-sans">
-    <VendorPaymentEdit
-      :initial-data="formRow"
-      v-model:show-drawer="visibleEditForm"
-    />
+    <VendorPaymentEdit :initial-data="formRow" v-model:show-drawer="visibleEditForm" />
 
-    <div
-      class="border-[1px] bg-white p-[24px] dark:border-0 dark:bg-foreground_dark"
-    >
+    <div class="border-[1px] bg-white p-[24px] dark:border-0 dark:bg-foreground_dark">
       <div class="flex justify-between">
         <p class="pb-8 text-2xl font-bold">Payments</p>
         <VendorPaymentsAdd />

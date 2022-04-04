@@ -1,16 +1,16 @@
 <script setup>
-import dayjs from "dayjs";
-import { h, ref, toRaw, watch, toRef, unref, computed } from "vue";
-import VendorExpenseAction from "./VendorExpenseAction.vue";
-import ExpenseModal from "./ExpenseModal.vue";
 import ExpenseTableImage from "@/components/vendor/invoice/ExpenseTableImage.vue";
-import { clone, pick, omit } from "@/lib/helper";
-import { useQueryClient, useMutation } from "vue-query";
-import { useMessage } from "naive-ui";
-import axios from "axios";
-import { format } from "v-money3";
 import { getInvoiceStatus } from "@/hooks/common_query.js";
+import { clone, omit, pick } from "@/lib/helper";
+import axios from "axios";
+import dayjs from "dayjs";
+import { useMessage } from "naive-ui";
+import { format } from "v-money3";
+import { computed, h, ref, toRaw, unref, watch } from "vue";
+import { useMutation, useQueryClient } from "vue-query";
+import ExpenseModal from "./ExpenseModal.vue";
 import { themeOverrides } from "./invoice.helper";
+import VendorExpenseAction from "./VendorExpenseAction.vue";
 
 const props = defineProps({
   show: {
@@ -19,6 +19,10 @@ const props = defineProps({
   },
   initialData: {
     type: Object,
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
   },
 });
 const emits = defineEmits(["update:show"]);
@@ -129,7 +133,7 @@ const onAddExpense = () => {
 watch(
   () => form.value?.expenses,
   (newFormValue) => {
-    if (newFormValue && newFormValue?.length > 0) {
+    if (!props.disabled && newFormValue && newFormValue?.length > 0) {
       form.value.amount_due = form.value.balance = newFormValue?.reduce(
         (prev, curr) => parseFloat((prev + curr.amount).toFixed(2)),
         0
@@ -148,27 +152,23 @@ const { mutate: updateExpense, isLoading: updateExpenseLoading } = useMutation(
   ({ id, ...data }) => axios.put(`/vendor_invoices/${id}`, data),
   {
     onSuccess() {
-      queryClient.invalidateQueries([
-        "vendorInvoices",
-        String(vendor_id.value),
-      ]);
+      queryClient.invalidateQueries(["vendorInvoices", String(vendor_id.value)]);
       emits("update:show", false);
       message.success("Expense updated successfully.");
     },
   }
 );
 
-const { mutateAsync: deleteExpense, isLoading: deleteExpenseLoading } =
-  useMutation((id) => axios.delete("/vendor_invoices/" + id), {
+const { mutateAsync: deleteExpense, isLoading: deleteExpenseLoading } = useMutation(
+  (id) => axios.delete("/vendor_invoices/" + id),
+  {
     onSuccess() {
       emits("update:show", false);
-      queryClient.invalidateQueries([
-        "vendorInvoices",
-        String(vendor_id.value),
-      ]);
+      queryClient.invalidateQueries(["vendorInvoices", String(vendor_id.value)]);
       message.success("Expense deleted successfully.");
     },
-  });
+  }
+);
 const editExpenseIndex = ref();
 const columns = [
   {
@@ -243,7 +243,7 @@ const columns = [
     fixed: "right",
     width: "140",
     render(row, rowIndex) {
-      return form.value.amount_paid > 0
+      return props.disabled || form.value.amount_paid > 0
         ? h("span")
         : h(VendorExpenseAction, {
             onAdd: onAddExpense,
@@ -377,57 +377,57 @@ const onInvoiceDelete = () => {
               <span class="text-sm font-bold">
                 {{ initialData?.vendor[0]?.name }}
               </span>
-            </div>
-          </section>
-          <section class="flex flex-col items-end gap-y-3">
-            <div>
-              <n-select
-                :options="invoiceStatusOptions"
-                class="custom-select max-w-[90px]"
-                v-model:value="form.status"
-                filterable
+          </div>
+        </section>
+        <section class="flex flex-col items-end gap-y-3">
+          <div>
+            <n-select
+              :options="invoiceStatusOptions"
+              class="custom-select max-w-[90px]"
+              v-model:value="form.status"
+              filterable
+            />
+          </div>
+          <div class="text-right">
+            <!-- <span class="block text-xs uppercase">Due Date</span>
+          <span class="text-sm font-bold">{{ initialData.due_date }}</span> -->
+            <n-form-item
+              size="small"
+              label-align="right"
+              label="Due Date"
+              path="due_date"
+            >
+              <n-date-picker
+                format="MM/dd/yyyy"
+                class="custom-date-picker max-w-[130px]"
+                v-model:value="form.due_date"
               />
-            </div>
-            <div class="text-right">
-              <!-- <span class="block text-xs uppercase">Due Date</span>
-            <span class="text-sm font-bold">{{ initialData.due_date }}</span> -->
-              <n-form-item
-                size="small"
-                label-align="right"
-                label="Due Date"
-                path="due_date"
-              >
-                <n-date-picker
-                  format="MM/dd/yyyy"
-                  class="custom-date-picker max-w-[130px]"
-                  v-model:value="form.due_date"
-                />
-              </n-form-item>
-            </div>
-            <div class="text-right">
-              <span class="block text-xs uppercase">Terms</span>
-              <span class="text-sm font-bold">Net 30</span>
-            </div>
-          </section>
-        </header>
-      </n-config-provider>
-      <main class="mt-4">
-        <h3 class="text-sm font-bold">Expenses</h3>
-        <n-data-table
-          :data="form.expenses"
-          :columns="columns"
-          striped
-          class="pt-2"
-          :max-height="500"
-          :scroll-x="1300"
-          row-class-name="group py-2"
-          v-if="form.expenses.length > 0"
-        />
-        <div v-else class="mt-4">
-          <n-button @click="onAddExpense" dashed type="primary" class="w-full">
-            + Create</n-button
-          >
-        </div>
+            </n-form-item>
+          </div>
+          <div class="text-right">
+            <span class="block text-xs uppercase">Terms</span>
+            <span class="text-sm font-bold">Net 30</span>
+          </div>
+        </section>
+      </header>
+    </n-config-provider>
+    <main class="mt-4">
+      <h3 class="text-sm font-bold">Expenses</h3>
+      <n-data-table
+        :data="form.expenses"
+        :columns="columns"
+        striped
+        class="pt-2"
+        :max-height="500"
+        :scroll-x="1300"
+        row-class-name="group py-2"
+        v-if="form.expenses.length > 0"
+      />
+      <div v-else class="mt-4">
+        <n-button @click="onAddExpense" dashed type="primary" class="w-full">
+          + Create</n-button
+        >
+      </div>
 
         <section
           class="mt-5 ml-auto w-full max-w-xs rounded bg-gray-100 p-4 dark:bg-dark_border"
@@ -452,7 +452,7 @@ const onInvoiceDelete = () => {
           </div>
         </section>
       </main>
-      <div class="sticky bottom-2 flex gap-x-5" v-if="form.amount_paid === 0">
+      <div class="sticky bottom-2 flex gap-x-5" v-if="!disabled && form.amount_paid === 0">
         <n-button
           size="medium"
           type="primary"

@@ -73,6 +73,7 @@ function showEditExpenseForm(row) {
       "expense_date",
       "deal_id",
       "name",
+      "invoice_number",
       "description",
       "expense_types",
     ])
@@ -108,7 +109,6 @@ function showEditExpenseForm(row) {
       >
         <div class="flex justify-between">
           <p class="pb-8 text-2xl font-bold">Invoices & Expenses</p>
-          <!--          <VendorExpensesAdd />-->
           <CreateVendorInvoice />
         </div>
         <n-data-table
