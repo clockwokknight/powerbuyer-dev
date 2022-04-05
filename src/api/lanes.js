@@ -1,12 +1,8 @@
-import { api } from '@/api/config';
+import { api } from "@/api/config";
 
 export default {
-    all()
-    {
-        return api.get( '/lanes' );
-    },
-    update()
-    {
-        
-    },
+  all() {
+    return api.get();
+  },
+  update() {},
 };

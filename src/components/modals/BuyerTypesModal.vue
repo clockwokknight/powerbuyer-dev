@@ -31,13 +31,13 @@ const columns = [
   {
     title: "Description",
     key: "description",
-    width: 300,
     //fixed: 'left'
   },
   {
     title: "Action",
     key: "actions",
-    width: 150,
+    fixed: "right",
+    width: 100,
     render(row) {
       return h(ActionButtons, {
         showDeleteButton: true,
@@ -74,10 +74,10 @@ const onOkEditingModal = async () => {
     const obj = objectFilter(editingBuyerType.value, (key, value) => value);
     if (isEditing.value) {
       await axios.put(`/buyer_type/${obj.id}`, obj);
-      await queryClient.invalidateQueries("buyer_types");
     } else {
       await axios.post("/buyer_type", obj);
     }
+    await queryClient.invalidateQueries("buyer_types");
     showEditModal.value = false;
   } catch (error) {
     console.log(error);
@@ -97,7 +97,7 @@ const onOkEditingModal = async () => {
       title="Buyer Types"
       v-model:show="showModal"
     >
-      <div class="mb-5 ml-auto w-fit">
+      <div class="mb-5">
         <n-tooltip trigger="hover">
           <template #trigger>
             <n-button @click="addRow">+</n-button>

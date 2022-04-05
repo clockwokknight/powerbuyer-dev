@@ -25,11 +25,9 @@ import compare from "just-compare";
 import axios from "axios";
 import { log, utils } from "@/lib/utils";
 import { useIntersectionObserver } from "@vueuse/core";
-import UpdatableButtonWrapper from "@/components/common/UpdatableButtonWrapper.vue";
-import MaskedInput from "@/components/common/MaskedInput.vue";
 import VendorExpensesItems from "@/components/vendor/VendorExpensesItems.vue";
-import VendorExpenses from "@/components/vendor/VendorExpenses.vue";
-import VendorPayments from "@/components/vendor/VendorPayments.vue";
+import VendorExpenses from "@/components/vendor/invoice/VendorExpenses.vue";
+import VendorPayments from "@/components/vendor/payment/VendorPayments.vue";
 import CustomInput from "@/components/common/CustomInput.vue";
 import Tabs from "@/components/common/Tabs.vue";
 import { useTabsViewStore } from "@/store/tabs";
@@ -106,7 +104,8 @@ const paymentTermOptions = computed(() =>
 const { data: getInvoicesTotal } = getInvoiceTotalByVendor(routeParamId);
 const { data: statesList } = getStates();
 
-const { data: vendor, isLoading: isVendorLoading } = getVendorById(routeParamId);
+const { data: vendor, isLoading: isVendorLoading } =
+  getVendorById(routeParamId);
 
 const vendorData = ref({});
 
@@ -174,7 +173,10 @@ function resetValue(key) {
 
 function submitValue(key) {
   mutateAsync({
-    [key]: key === "phone" ? utils.parsePhoneNumber(form.value[key]) : form.value[key],
+    [key]:
+      key === "phone"
+        ? utils.parsePhoneNumber(form.value[key])
+        : form.value[key],
   })
     .then((data) => {
       message.success("Saved");
@@ -199,12 +201,14 @@ function handleTabClick(e) {
 <template>
   <div
     id="details"
-    class="__section __vendor-card __details bg-foreground_light dark:bg-foreground_dark mt-0 grid grid-cols-12 rounded-round p-6"
+    class="__section __vendor-card __details mt-0 grid grid-cols-12 rounded-round bg-foreground_light p-6 dark:bg-foreground_dark"
   >
     <!-- left side -->
     <div class="__form col-span-12 flex flex-col justify-between md:col-span-8">
       <div class="__title">
-        <h3 class="mb-2 translate-x-2 font-bold uppercase opacity-[0.44]">Vendor</h3>
+        <h3 class="mb-2 translate-x-2 font-bold uppercase opacity-[0.44]">
+          Vendor
+        </h3>
         <CustomInput
           type="header"
           placeholder="Company Name"
@@ -421,11 +425,11 @@ function handleTabClick(e) {
     id="__subtabs"
     type="basic"
     ref="vendorTab"
-    class="bg-foreground_light dark:bg-foreground_dark sticky top-[-2px] left-0 z-40 mt-[24px] w-full rounded-round duration-300"
+    class="sticky top-[-2px] left-0 z-40 mt-[24px] w-full rounded-round bg-foreground_light duration-300 dark:bg-foreground_dark"
     :items="vendorTabs"
   />
 
-  <VendorExpenses class="__section" />
+  <VendorExpenses class="__section" id="expenses" />
   <VendorPayments class="__section" id="payments" />
   <VendorExpensesItems class="__section" id="expense-items" />
   <VendorContacts class="__section" />
@@ -434,7 +438,7 @@ function handleTabClick(e) {
 <style lang="scss">
 #__subtabs[stuck],
 .__tabs[stuck] {
-  @apply dark:bg-dark_border rounded-none bg-[#F4F6F8] shadow-lg shadow-[#00000011];
+  @apply rounded-none bg-[#F4F6F8] shadow-lg shadow-[#00000011] dark:bg-dark_border;
 }
 .__veil {
   width: calc(100vw - 370px);

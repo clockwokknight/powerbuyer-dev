@@ -1,12 +1,7 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue';
-
+import { ref, onMounted, watch } from "vue";
 </script>
 
-<template>
-  
-</template>
+<template></template>
 
-<style lang='scss' scoped>
-
-</style>
+<style lang="scss" scoped></style>
