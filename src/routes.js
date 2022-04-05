@@ -7,8 +7,9 @@ const Auction = () => import("@/views/Auction.vue");
 const AuctionHome = () => import("@/components/auction/AuctionHome.vue");
 const Buyers = () => import("@/views/Buyers.vue");
 const Buyer = () => import("@/views/Buyer.vue");
-import Lenders from "@/views/Lenders.vue";
-import Lender from "@/views/Lender.vue";
+const Lenders = () => import("@/views/Lenders.vue");
+const Lender = () => import("@/views/Lender.vue");
+const LenderHome = () => import("@/components/lender/LenderHome.vue");
 import Vehicles from "@/views/Vehicles.vue";
 const VehiclesHome = () => import("@/views/VehiclesHome.vue");
 import Vehicle from "@/views/Vehicle.vue";
@@ -80,11 +81,18 @@ export const router = createRouter({
       path: "/lenders",
       name: "Lenders",
       component: Lenders,
-    },
-    {
-      path: "/lender",
-      name: "Lender",
-      component: Lender,
+      children: [
+        {
+          path: "",
+          name: "LenderHome",
+          components: LenderHome,
+        },
+        {
+          path: ":id",
+          name: "Lender",
+          component: Lender,
+        },
+      ],
     },
     {
       path: "/inventory",

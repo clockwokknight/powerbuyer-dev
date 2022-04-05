@@ -4,20 +4,20 @@ import { useGlobalState } from "@/store/global";
 import { utils, log } from "@/lib/utils";
 const global = useGlobalState();
 
-defineProps(["dealers"]);
+defineProps(["lenders"]);
 defineEmits(["click:tab"]);
 const route = useRoute();
 </script>
 
 <template>
   <li
-    v-for="dealer in dealers"
-    :key="dealer?.id"
+    v-for="lender in lenders"
+    :key="lender?.id"
     class="relative mb-[12px] ml-[13px] mr-[13px] rounded-round border-b-[1px] border-b-transparent px-3 py-2 duration-100 odd:bg-[#ffffff] hover:bg-background_light dark:border-b-transparent dark:odd:bg-foreground_dark dark:even:bg-foreground_dark dark:hover:bg-background_dark"
-    @click="$emit('click:tab', dealer)"
+    @click="$emit('click:tab', lender)"
   >
     <router-link
-      :to="{ name: 'SingleDealer', params: { id: dealer?.id } }"
+      :to="{ name: 'Lender', params: { id: lender?.id } }"
       active-class="text-primary dark:text-white"
       class="block"
     >
@@ -25,12 +25,12 @@ const route = useRoute();
         <h2
           class="mb-1 max-w-[250px] truncate whitespace-nowrap text-sm font-bold"
           :class="
-            dealer.id == route.params.id
+            lender.id == route.params.id
               ? '!font-bold text-primary'
               : 'text-black dark:text-white'
           "
         >
-          {{ dealer?.name }}
+          {{ lender?.company }}
         </h2>
       </div>
       <div class="__subtext mb-1 flex text-[10px]">
@@ -46,11 +46,11 @@ const route = useRoute();
         </svg>
         <span class="uppercase">
           {{
-            dealer.city &&
-            dealer.state &&
-            dealer.city.length > 0 &&
-            dealer.state.length > 0
-              ? `${dealer.city}, ${dealer.state}`
+            lender.city &&
+            lender.state &&
+            lender.city.length > 0 &&
+            lender.state.length > 0
+              ? `${lender.city}, ${lender.state}`
               : "No address provided"
           }}
         </span>
@@ -68,8 +68,8 @@ const route = useRoute();
         </svg>
         <span class="tracking-wider">
           {{
-            dealer.phone && dealer.phone.length > 0
-              ? utils.formatPhoneNumber(dealer.phone)
+            lender.phone && lender.phone.length > 0
+              ? utils.formatPhoneNumber(lender.phone)
               : "No contact provided"
           }}
         </span>
@@ -79,7 +79,7 @@ const route = useRoute();
       id="mask"
       class="absolute inset-0 cursor-pointer rounded-round"
       :class="
-        dealer.id == route.params.id
+        lender.id == route.params.id
           ? 'bg-accent dark:border-[0px] dark:border-primary'
           : 'bg-transparent'
       "
