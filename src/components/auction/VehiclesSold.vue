@@ -1,8 +1,7 @@
 <script setup>
 import { computed, h, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { useGlobalState } from "@/store/global";
-import { NTag, NButton, useMessage } from "naive-ui";
+import { auctionSoldVehicles } from "@/hooks/auctions";
 
 const route = useRoute();
 
@@ -10,16 +9,15 @@ const routeParamId = ref(route.params?.id);
 
 watch(
   () => route.params?.id,
-  () => {
-    if (route.params?.id) routeParamId.value = route.params?.id;
+  (toParams) => {
+    if (toParams?.id) routeParamId.value = toParams?.id;
   }
 );
 
 // Need API endpoints
-const { data: expensesData, isLoading: expensesDataLoading } = {
-  data: { pages: [] },
-  isLoading: false,
-};
+const { data: expensesData, isLoading: expensesDataLoading } = auctionSoldVehicles(
+  routeParamId
+);
 
 const columns = [
   {
@@ -58,20 +56,27 @@ const columns = [
     //fixed: 'left'
   },
 ];
+
+const rowKey = (row) => row?.id;
+const pagination = { pageSize: 10 };
 </script>
 
 <template>
-  <div id="vehicles-sold" class="scroll-smooth">
-    <div class="-mt-4 font-sans">
+  <div id="vehicles-sold"
+    class="scroll-smooth border-[1px] mt-[24px] border-transparent dark:border-dark_border"
+  >
+    <div class="font-sans">
       <div
-        class="rounded-roundborder-2 bg-white py-8 px-8 dark:border-0 dark:bg-[#25272A]"
+        class="rounded-round border-[1px] bg-white p-[24px] dark:border-0 dark:bg-foreground_dark"
       >
-        <div><p class="pb-8 text-2xl font-bold">Vehicles Sold</p></div>
+        <div class="flex justify-between">
+          <p class="pb-8 text-2xl font-bold">Vehicles Sold</p>
+        </div>
         <n-data-table
           class="rounded-round"
           striped
           :columns="columns"
-          :data="expensesData?.pages[0]"
+          :data="expensesData"
           :pagination="pagination"
           :bordered="false"
           :loading="expensesDataLoading"
