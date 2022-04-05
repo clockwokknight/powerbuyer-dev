@@ -14,7 +14,7 @@ import {
 import { useRouter, useRoute } from "vue-router";
 import { useQuery } from "vue-query";
 import { useDebounce } from "@vueuse/core";
-import { fetchPaginatedData } from "@/hooks";
+import { fetchPaginatedData, fetchById } from "@/hooks";
 import { useGlobalState } from "@/store/global";
 import { useMutation, useQueryClient } from "vue-query";
 import { useTabsViewStore } from "@/store/vehicleTabs";
@@ -39,13 +39,7 @@ const router = useRouter();
 const message = useMessage();
 const queryClient = useQueryClient();
 
-const tabStore = useTabsViewStore();
-const vendorStore = useVendors();
-
-const searchText = ref("");
-const debouncedSearchText = useDebounce(searchText, 500);
-
-const listActive = ref(!global.isMobile);
+const routeParamId = ref(route.params?.id);
 
 const tabs = ref([
   {
@@ -78,34 +72,12 @@ const tabs = ref([
   },
 ]);
 
-const {
-  data: vendors,
-  isLoading: isVendorsLoading,
-  hasNextPage: hasVendorNextPage,
-  fetchNextPage: vendorFetchNextPage,
-} = fetchPaginatedData("/deals");
-
-const addTab = (vendor) => {
-  vendorStore.setLatest(vendor?.id);
-  listActive.value = global.isMobile ? false : listActive.value;
-  tabStore.addTab({ id: vendor?.id, name: vendor?.name });
-};
-
-const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
-  ["vendorSearch", debouncedSearchText],
-  ({ queryKey }) => {
-    if (queryKey[1] === "") {
-      return null;
-    } else {
-      return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => {
-        console.clear();
-        console.log("fetching data... ", res);
-        if (res.data?.debug) return [];
-        return res.data;
-      });
-    }
-  }
+const { data: vendor, isLoading: isVendorLoading } = fetchById(
+  "/deals/search_by_vin",
+  routeParamId
 );
+
+const vendorData = ref({});
 
 const form = ref({
   vin: null,
@@ -122,6 +94,31 @@ const form = ref({
   notes: null,
   recon: null,
 });
+
+watchEffect(() => {
+  console.clear();
+  if (route.params?.id) {
+    log.yellow(route.params?.id);
+    routeParamId.value = route.params?.id;
+  } else {
+    log.yellow("no param id - routing to home tab");
+  }
+});
+
+watch(
+  () => vendor.value,
+  (newValue) => {
+    if (newValue) {
+      form.value = { ...newValue };
+      vendorData.value = { ...newValue };
+      Object.entries(newValue).forEach((kv) => {
+        // sterilizing vendor data to fix non-update on cancel
+        if (kv[1] === "") vendorData.value[kv[0]] = null;
+      });
+    }
+  },
+  { immediate: true }
+);
 
 function toggleListSlide() {
   listActive.value = !listActive.value;
@@ -157,15 +154,6 @@ function submitValue(key) {
 function handleTabClick(e) {
   window.location.hash = e;
 }
-
-watchEffect(() => {
-  if (route.params?.id) {
-    log.yellow(route.params?.id);
-    routeParamId.value = route.params?.id;
-  } else {
-    log.yellow("no param id - routing to home tab");
-  }
-});
 </script>
 
 <template>
@@ -180,14 +168,14 @@ watchEffect(() => {
                 <div
                   class="__vehicle-logo z-50 absolute my-[0px] mx-[12px] w-[80px] bg-transparent center-content text-[9px] rounded-round"
                 >
-                  <img
+                  <!--img
                     src="https://gmtvinventory.com/storage/logos/dodge.png"
                     alt="Dodge Logo"
-                  />
+                  /-->
                 </div>
               </div>
               <n-carousel class="max-w-[260px] rounded-b-round" show-arrow>
-                <img
+                <!--img
                   class="carousel-img object-cover h-full"
                   src="https://storage.googleapis.com/gmtv-inventory/3C4PDDEG5GT243378/152/20220114235135-940f543b-15c9-41c0-a3aa-7de27296a2a5.jpg"
                 />
@@ -202,7 +190,7 @@ watchEffect(() => {
                 <img
                   class="carousel-img object-cover h-full"
                   src="https://storage.googleapis.com/gmtv-inventory/3C4PDDEG5GT243378/152/20220114235135-5800eaf6-bf33-4347-9f90-a08cdf12cec2.jpg"
-                />
+                /-->
                 <template #arrow="{ prev, next }">
                   <div class="custom-arrow">
                     <button type="button" class="curtom-arrow--left" @click="prev">

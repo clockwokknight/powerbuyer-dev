@@ -28,7 +28,7 @@ body {
 }
 
 .page-container {
-  @apply h-screen w-full flex-col overflow-auto p-[24px];
+  @apply h-full w-full flex-col overflow-auto p-[24px];
 }
 
 .__section .bg-foreground_light, .__details, .__tabs {

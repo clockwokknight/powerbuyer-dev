@@ -47,43 +47,12 @@ const debouncedSearchText = useDebounce(searchText, 500);
 
 const listActive = ref(!global.isMobile);
 
-const tabs = ref([
-  {
-    title: "OVERVIEW",
-    value: "#overview",
-  },
-  {
-    title: "FUNDING",
-    value: "#funding",
-  },
-  {
-    title: "LOGISTICS",
-    value: "#logistics",
-  },
-  {
-    title: "TITLING",
-    value: "#titling",
-  },
-  {
-    title: "ACCOUNTING",
-    value: "#accounting",
-  },
-  {
-    title: "HISTORY",
-    value: "#history",
-  },
-  {
-    title: "REPORTS",
-    value: "#reports",
-  },
-]);
-
 const {
   data: vendors,
   isLoading: isVendorsLoading,
   hasNextPage: hasVendorNextPage,
   fetchNextPage: vendorFetchNextPage,
-} = fetchPaginatedData("/vendors");
+} = fetchPaginatedData("/deals");
 
 const addTab = (vendor) => {
   vendorStore.setLatest(vendor?.id);
@@ -97,7 +66,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
     if (queryKey[1] === "") {
       return null;
     } else {
-      return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => {
+      return axios.get(`/deals/search_by_vin/${queryKey[1]}`).then((res) => {
         console.clear();
         console.log("fetching data... ", res);
         if (res.data?.debug) return [];
@@ -127,43 +96,13 @@ function toggleListSlide() {
   listActive.value = !listActive.value;
 }
 
-function resetValue(key) {
-  nextTick();
-  log.yellow(`resetting value to ${vendorData.value[key]}`);
-  form.value = {
-    ...form.value,
-    [key]: vendorData.value[key],
-  };
-  currentActiveField.value = null;
-}
-
-function submitValue(key) {
-  mutateAsync({
-    [key]: key === "phone" ? utils.parsePhoneNumber(form.value[key]) : form.value[key],
-  })
-    .then((data) => {
-      message.success("Saved");
-      console.clear();
-      console.log(data);
-      currentActiveField.value = null;
-    })
-    .catch((err) => {
-      message.error("An error ocurred");
-      console.log("uh oh...", err);
-    });
-  currentActiveField.value = null;
-}
-
 function handleTabClick(e) {
   window.location.hash = e;
 }
 
 watchEffect(() => {
-  if (route.params?.id) {
-    log.yellow(route.params?.id);
-    routeParamId.value = route.params?.id;
-  } else {
-    log.yellow("no param id - routing to home tab");
+  if (vendors.value) {
+    console.log(vendors.value);
   }
 });
 </script>
