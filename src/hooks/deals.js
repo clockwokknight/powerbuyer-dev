@@ -5,7 +5,7 @@ export const getAllDeals = () =>
   useInfiniteQuery(
     "allDeals",
     ({ pageParam = 1 }) =>
-      axios.get("/deals?per_page=10&page" + pageParam).then((res) => res.data),
+      axios.get("/deals?per_page=10&page=" + pageParam).then((res) => res.data),
     {
       getNextPageParam: (lastPage, pages) =>
         lastPage.current_page < lastPage.last_page

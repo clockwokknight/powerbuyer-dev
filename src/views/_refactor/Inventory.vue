@@ -2,6 +2,10 @@
 import { ref, onMounted, watch } from "vue";
 </script>
 
-<template></template>
+<template>
+  <div>
+    <h1>Vehicle</h1>
+  </div>
+</template>
 
 <style lang="scss" scoped></style>

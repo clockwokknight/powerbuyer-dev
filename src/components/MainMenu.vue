@@ -15,6 +15,7 @@ const hasList = [
   "SingleDealer",
   "LenderHome",
   "Lender",
+  "Inventory"
 ];
 
 const userMenu = [

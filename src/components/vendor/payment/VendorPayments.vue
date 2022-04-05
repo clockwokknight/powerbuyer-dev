@@ -1,13 +1,12 @@
 <script setup>
-import VendorPaymentsAdd from "@/components/vendor/VendorPaymentsAdd.vue";
 import ActionButtons from "@/components/vendor/ActionButtons.vue";
+import VendorPaymentEdit from "@/components/vendor/payment/VendorPaymentEdit.vue";
+import VendorPaymentsAdd from "@/components/vendor/payment/VendorPaymentsAdd.vue";
+import { omit } from "@/lib/helper.js";
 import axios from "axios";
-import { NButton } from "naive-ui";
 import { h, ref, toRaw, watch } from "vue";
 import { useQuery } from "vue-query";
 import { useRoute } from "vue-router";
-import { omit, pick } from "@/lib/helper.js";
-import VendorPaymentEdit from "@/components/vendor/VendorPaymentEdit.vue";
 
 const columns = [
   {
@@ -33,6 +32,7 @@ const columns = [
   {
     title: "",
     key: "edit",
+    fixed: "right",
     render(row) {
       return h(ActionButtons, {
         onClick: () => showEditPaymentForm(row),
@@ -55,20 +55,24 @@ const showEditPaymentForm = (row) => {
     "recipient_name",
     "invoice_number",
   ]);
-  obj.payment_invoices = obj.vendor_invoices.map((invoice) => ({
-    vendor_invoice_id: invoice.id,
-    payment_amount: invoice.amount_paid,
+  // We are going to need to change if API changes
+  obj.payment_invoices = obj.payment_invoices.map((invoice) => ({
+    id: invoice.id,
+    vendor_invoice_id: invoice.vendor_invoice_id,
+    payment_amount: invoice.payment_amount,
+    invoices: [invoice.invoices[0]],
   }));
 
   formRow.value = obj;
   visibleEditForm.value = true;
-  console.log({ obj, row: toRaw(row) });
 };
 
 const { data: paymentTable, isLoading } = useQuery(
   ["payments_vendor", routeParamId],
   ({ queryKey }) =>
-    axios.get("/payments/vendor/" + queryKey[1]).then((res) => (res.data ? res.data : []))
+    axios
+      .get("/payments/vendor/" + queryKey[1])
+      .then((res) => (res.data ? res.data.data : []))
 );
 
 watch(
@@ -81,7 +85,7 @@ watch(
 </script>
 
 <template>
-  <div id="payments" class="mt-[24px] font-sans rounded-round bordered">
+  <div class="bordered mt-[24px] rounded-round font-sans">
     <VendorPaymentEdit :initial-data="formRow" v-model:show-drawer="visibleEditForm" />
 
     <div class="border-[1px] bg-white p-[24px] dark:border-0 dark:bg-foreground_dark">

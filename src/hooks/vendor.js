@@ -1,12 +1,8 @@
-
-  
 import { useInfiniteQuery, useQuery } from "vue-query";
 import axios from "axios";
 
 export const useVendorCategories = () =>
-  useInfiniteQuery(
-    "vendorCategory",
-    ({ pageParam = 1 }) =>
+  useInfiniteQuery("vendorCategory", ({ pageParam = 1 }) =>
       axios.get("/vendor_categories?page=" + pageParam).then((res) => res.data),
     {
       refetchOnMount: false,
@@ -46,4 +42,9 @@ export const vendorInvoices = (vendorId) =>
     axios
       .get("/vendor_invoices/search_by_vendor/" + queryKey[1])
       .then((res) => res.data)
+  );
+
+export const singleVendorInvoice = (invoiceId) =>
+  useQuery(["singleInvoice", invoiceId], ({ queryKey }) =>
+    axios.get("/vendor_invoices/" + queryKey[1]).then((res) => res.data)
   );

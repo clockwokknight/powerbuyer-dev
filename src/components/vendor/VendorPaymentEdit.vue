@@ -15,11 +15,13 @@ const emits = defineEmits(["update:showDrawer"]);
 const route = useRoute();
 
 const showDrawer = toRef(props, "showDrawer");
+
 watch(showDrawer, (newValue) => {
   if (newValue) {
     form.value = { ...props.initialData };
   }
 });
+
 const initialForm = {
   // recipient_id: null,
   // recipient_type: null,
@@ -33,6 +35,7 @@ const initialForm = {
   gmtv_location_id: null,
   payment_invoices: [{ vendor_invoice_id: null, payment_amount: 0 }],
 };
+
 const form = ref({ ...initialForm });
 
 const routeParamId = ref(route.params?.id);
@@ -156,7 +159,9 @@ watch(
 );
 
 const { data: invoicesData } = vendorInvoices(routeParamId);
+
 const invoiceDataOptions = ref([]);
+
 watchPostEffect(() => {
   if (invoicesData.value && !invoicesData.debug && invoicesData.length > 0) {
     console.log("invoicesData.value: ", invoicesData.value);
@@ -169,18 +174,21 @@ watchPostEffect(() => {
     }));
   } else {
     console.warn("fetched debug data");
-    console.log(invoicesData);
+    //console.log(invoicesData);
   }
 });
 
 const { data: gmtvLocations } = getGmtvLocations();
+
 const gmtvLocationsOptions = computed(() =>
   gmtvLocations.value?.map((location) => ({
     label: location.name,
     value: location.id,
   }))
 );
+
 const queryClient = useQueryClient();
+
 const { mutate: createPayment } = useMutation((data) => axios.post("/update", data), {
   onSuccess() {
     message.success("Payment has been created");
@@ -203,12 +211,14 @@ async function submitForm() {
     }
   }
 }
+
 const onCreatePaymentInvoice = () => {
   return {
     vendor_invoice_id: null,
     payment_amount: 0,
   };
 };
+
 const onInvoiceSelect = (val, index) => {
   const vendor_invoiceIdx = invoicesData.value.findIndex((inv) => inv.id === val);
   const vendor_invoice = invoicesData.value[vendor_invoiceIdx];

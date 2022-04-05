@@ -1,7 +1,7 @@
 <script setup>
 import CommissionTypesModal from "@/components/modals/CommissionTypesModal.vue";
 import BuyerTypesModal from "@/components/modals/BuyerTypesModal.vue";
-import ExpenseItemsModal from "@/components/modals/ExpenseItemsModal.vue";
+import ExpenseTypesModal from "@/components/modals/ExpenseTypesModal.vue";
 import GmtvLocationsModal from "@/components/modals/GmtvLocationsModal.vue";
 import PaymentTermsModal from "@/components/modals/PaymentTermsModal.vue";
 import DealStatusModal from "@/components/modals/DealStatusModal.vue";
@@ -43,7 +43,7 @@ const dealerStore = useDealers();
 
         <BuyerTypesModal class="single-card" />
         <!-- Expense Items -->
-        <ExpenseItemsModal class="single-card" />
+        <ExpenseTypesModal class="single-card" />
         <!-- GMTV Locations -->
         <GmtvLocationsModal class="single-card" />
         <!-- Payment Terms -->
