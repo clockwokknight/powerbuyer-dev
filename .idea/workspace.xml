@@ -3,17 +3,15 @@
   <component name="ChangeListManager">
     <list default="true" id="ec7ae08f-ea07-4b72-9101-046c7c94cb6f" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/vendor/invoice/CreateVendorInvoice.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/vendor/invoice/CreateVendorInvoice.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/vendor/invoice/ExpenseModal.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/vendor/invoice/ExpenseModal.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/vendor/invoice/VendorExpenses.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/vendor/invoice/VendorExpenses.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/vendor/invoice/VendorInvoiceEdit.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/vendor/invoice/VendorInvoiceEdit.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/vendor/payment/ActionButtonGroup.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/vendor/payment/ActionButtonGroup.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/vendor/payment/VendorPaymentEdit.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/vendor/payment/VendorPaymentEdit.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/vendor/payment/VendorPayments.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/vendor/payment/VendorPayments.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/vendor/payment/VendorPaymentsAdd.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/vendor/payment/VendorPaymentsAdd.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/vendor/payment/payment.hook.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/vendor/payment/payment.hook.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/hooks/common_query.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/common_query.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hooks/vendor.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/vendor.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

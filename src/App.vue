@@ -1,6 +1,5 @@
 <script setup>
 import { onMounted, watchEffect } from "vue";
-import { VueQueryDevTools } from "vue-query/devtools";
 import { darkTheme } from "naive-ui";
 import MainMenu from "@/components/MainMenu.vue";
 import CommandPalette from "@/components/global_search/CommandPalette.vue";
@@ -67,7 +66,6 @@ onMounted(() => {
               <CommandPalette />
               <MainMenu />
               <router-view />
-              <VueQueryDevTools />
             </section>
           </n-dialog-provider>
         </n-notification-provider>
