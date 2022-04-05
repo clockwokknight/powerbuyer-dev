@@ -3,11 +3,20 @@ import { ref, computed, onMounted, watch, toRef, toRaw, onUpdated } from "vue";
 import { useGlobalState } from "@/store/global";
 import { ScrollTrigger } from "gsap/ScrollTrigger.js";
 import { Tab, TabGroup, TabList } from "@headlessui/vue";
+import Card from "@/components/_refactor/Card.vue";
 import { gsap } from "gsap";
 
 const global = useGlobalState();
-const props = defineProps(["title", "items", "range"]);
+
+const props = defineProps({
+  title: String,
+  items: Array,
+  range: Array,
+  search: Boolean,
+});
+
 defineEmits(["selected", "dateChanged", "searchTextChange"]);
+
 const active = ref(0);
 
 const exampleItems = ref([
@@ -74,14 +83,14 @@ const scrollToSection = (item, index) => {
     },
   });
 };
-
 </script>
 
 <template>
-  <div class="flex-col">
-    <div class="flex justify-between">
+  <Card class="pb-0">
+    <div class="flex w-full justify-between">
       <h1 class="font-bold text-2xl">{{ title }}</h1>
       <n-input
+        v-if="search"
         v-model="query"
         @change="(value) => $emit('searchTextChange', value)"
         placeholder="Search by vin..."
@@ -123,7 +132,7 @@ const scrollToSection = (item, index) => {
         </Tab>
       </TabList>
     </TabGroup>
-  </div>
+  </Card>
 </template>
 
 <style lang="scss">

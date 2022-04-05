@@ -29,8 +29,9 @@ const {
 } = getAuctions();
 
 // Vendor Search Result
-const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
-  useQuery([`${pageName}_search`, debouncedSearchText], ({ queryKey }) => {
+const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
+  [`${pageName}_search`, debouncedSearchText],
+  ({ queryKey }) => {
     if (queryKey[1] === "") return null;
     else
       return axios
@@ -41,7 +42,8 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
           }
           return res.data;
         });
-  });
+  }
+);
 const addTab = (auction) => {
   tabStore.addTab({ id: auction.id, name: auction.auction_company });
 };

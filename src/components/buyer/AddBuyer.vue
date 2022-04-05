@@ -2,12 +2,7 @@
 import { computed, reactive, ref, watch } from "vue";
 import { useMessage } from "naive-ui";
 import MaskedInput from "@/components/common/MaskedInput.vue";
-import {
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "vue-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "vue-query";
 import axios from "axios";
 import { useVendorCategories } from "@/hooks/vendor";
 import { getBuyerManagers, getBuyerTypes } from "@/hooks/buyer";
@@ -308,9 +303,7 @@ const errors = ref({});
           />
         </n-form-item>
         <div class="sticky bottom-0 z-20 mt-auto border-t bg-white py-3">
-          <n-button attr-type="submit" class="ml-auto grid w-fit">
-            Add
-          </n-button>
+          <n-button attr-type="submit" class="ml-auto grid w-fit"> Add </n-button>
         </div>
       </n-form>
     </n-drawer-content>

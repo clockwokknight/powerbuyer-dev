@@ -96,13 +96,10 @@ const columns = [
     title: "",
     align: "center",
     render(row) {
-      return h(
-        NAvatar,
-        {
-          size: "large",
-          src: row.image,
-        },
-      );
+      return h(NAvatar, {
+        size: "large",
+        src: row.image,
+      });
     },
   },
   {
@@ -192,11 +189,7 @@ const fetchDeals = async (pageNum) => {
     "-" +
     startDate.getDate();
   const endDateString =
-    endDate.getFullYear() +
-    "-" +
-    (endDate.getMonth() + 1) +
-    "-" +
-    endDate.getDate();
+    endDate.getFullYear() + "-" + (endDate.getMonth() + 1) + "-" + endDate.getDate();
 
   if (selectedTab.value.title === "All Deals") {
     try {
@@ -206,7 +199,9 @@ const fetchDeals = async (pageNum) => {
       data.value = res.data;
 
       for (let i = 0; i < data.value.data.length; i++) {
-        const imgData = await axios.get(`https://gmtvinventory.com/api/images/deal/${data.value.data[i].id}`);
+        const imgData = await axios.get(
+          `https://gmtvinventory.com/api/images/deal/${data.value.data[i].id}`
+        );
         data.value.data[i].image = imgData.data[0]?.storage;
       }
     } catch (error) {
@@ -222,7 +217,9 @@ const fetchDeals = async (pageNum) => {
       data.value = res.data;
 
       for (let i = 0; i < data.value.data.length; i++) {
-        const imgData = await axios.get(`https://gmtvinventory.com/api/images/deal/${data.value.data[i].id}`);
+        const imgData = await axios.get(
+          `https://gmtvinventory.com/api/images/deal/${data.value.data[i].id}`
+        );
         data.value.data[i].image = imgData.data[0]?.storage;
       }
     } catch (error) {
@@ -255,17 +252,16 @@ const handleSearchTextChange = (value) => {
 </script>
 
 <template>
-  <div
-    class="__deals h-screen w-[calc(100vw-60px)] flex-col overflow-auto p-[36px]"
-  >
+  <div class="__deals h-screen w-[calc(100vw-60px)] flex-col overflow-auto p-[36px]">
     <HeaderTabs
+      search
       :title="'Deals'"
       :items="tabs"
       :range="range"
       @searchTextChange="handleSearchTextChange"
       @selected="onTabSelection"
       @dateChanged="onRangeChange"
-      class="bg-foreground_light dark:bg-foreground_dark rounded-round bordered sticky z-40 mt-[24px] w-full p-[24px] !pb-0 duration-300"
+      class="z-40 mt-[24px] w-full"
     />
     <div class="mt-[36px] flex">
       <Card class="mr-[6px] h-[100px] w-full">

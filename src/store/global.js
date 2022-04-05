@@ -8,6 +8,9 @@ export const useGlobalState = defineStore("global", {
       isMobile: true,
       isDark: true,
       stuck: [false, false],
+      inventory: {
+        stuck: [false, false]
+      },
       list: {
         active: false,
         context: null,
