@@ -128,7 +128,7 @@ const onOkEditingModal = async () => {
       title="GMTV Locations"
       v-model:show="showModal"
     >
-      <div class="mb-5 ml-auto w-fit">
+      <div class="mb-5">
         <n-tooltip trigger="hover">
           <template #trigger>
             <n-button @click="addRow">+</n-button>

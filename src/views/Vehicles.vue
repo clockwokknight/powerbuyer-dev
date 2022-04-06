@@ -1,11 +1,27 @@
 <script setup>
-import { ref, watch } from "vue";
+import {
+  computed,
+  onMounted,
+  defineAsyncComponent,
+  getCurrentInstance,
+  ref,
+  watch,
+  watchEffect,
+  nextTick,
+  unref,
+} from "vue";
+
+import { useRouter, useRoute } from "vue-router";
 import { useQuery } from "vue-query";
 import { useDebounce } from "@vueuse/core";
-import { getVendors } from "@/hooks/vendor";
+import { fetchPaginatedData } from "@/hooks";
 import { useGlobalState } from "@/store/global";
-import { useTabsViewStore } from "@/store/tabs";
-import { useVendors } from "@/store/vendors";
+import { useMutation, useQueryClient } from "vue-query";
+import { useTabsViewStore } from "@/store/vehicleTabs";
+import { useVehicles as useVendors } from "@/store/vehicles";
+import { log, utils } from "@/lib/utils";
+import { useMessage } from "naive-ui";
+
 import axios from "axios";
 
 import AddVendor from "@/components/vendor/AddVendor.vue";
@@ -13,9 +29,17 @@ import PageTabs from "@/components/PageTabs.vue";
 import VendorList from "@/components/vendor/VendorList.vue";
 import Tabs from "@/components/common/Tabs.vue";
 import Card from "@/components/_refactor/Card.vue";
+import CustomInput from "@/components/common/CustomInput.vue";
+
+const instance = getCurrentInstance();
+
+const global = useGlobalState();
+const route = useRoute();
+const router = useRouter();
+const message = useMessage();
+const queryClient = useQueryClient();
 
 const tabStore = useTabsViewStore();
-const global = useGlobalState();
 const vendorStore = useVendors();
 
 const searchText = ref("");
@@ -23,47 +47,64 @@ const debouncedSearchText = useDebounce(searchText, 500);
 
 const listActive = ref(!global.isMobile);
 
-// Showing All Vendors
-
 const {
   data: vendors,
   isLoading: isVendorsLoading,
   hasNextPage: hasVendorNextPage,
   fetchNextPage: vendorFetchNextPage,
-} = getVendors();
+} = fetchPaginatedData("/deals");
 
 const addTab = (vendor) => {
-  vendorStore.SET_LATEST(vendor?.id);
+  vendorStore.setLatest(vendor?.id);
   listActive.value = global.isMobile ? false : listActive.value;
   tabStore.addTab({ id: vendor?.id, name: vendor?.name });
 };
 
-// Vendor Search Result
-
 const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
   ["vendorSearch", debouncedSearchText],
   ({ queryKey }) => {
-    if (queryKey[1] === "") return null;
-    else
-      return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => {
-        if (res.data?.debug) {
-          return [];
-        }
+    if (queryKey[1] === "") {
+      return null;
+    } else {
+      return axios.get(`/deals/search_by_vin/${queryKey[1]}`).then((res) => {
+        console.clear();
+        console.log("fetching data... ", res);
+        if (res.data?.debug) return [];
         return res.data;
       });
+    }
   }
 );
+
+const form = ref({
+  vin: null,
+  lane: null,
+  grade: null,
+  year: null,
+  make: null,
+  model: null,
+  trim: null,
+  body: null,
+  ext_color: null,
+  int_color: null,
+  miles: null,
+  notes: null,
+  recon: null,
+});
 
 function toggleListSlide() {
   listActive.value = !listActive.value;
 }
 
-watch(
-  () => listActive.value,
-  (val) => {
-    global.setListActive(val, "vendor");
+function handleTabClick(e) {
+  window.location.hash = e;
+}
+
+watchEffect(() => {
+  if (vendors.value) {
+    console.log(vendors.value);
   }
-);
+});
 </script>
 
 <template>
@@ -162,7 +203,7 @@ watch(
           class="text-[10px] pl-16 duration-[500ms]"
           :class="!listActive ? 'opacity-0' : 'opacity-50'"
         >
-          <b>{{ vendors?.pages[0].data.length }}</b> Active Vendors
+          <b>{{ vendors?.pages[0].data.length }}</b> Vehicles
         </div>
         <div class="!bg-black">
           <div
@@ -195,22 +236,13 @@ watch(
       "
       class="duration-[500ms] w-[calc(100vw-60px)] bg-background_light dark:bg-background_dark"
     >
-      <PageTabs :class="global.stuck[0] && 'shadow-lg'" page-name="inventory" />
+      <PageTabs
+        :class="global?.inventory?.stuck[0] && 'shadow-lg'"
+        page-name="inventory"
+      />
       <!-- Main Body Content-->
       <div id="main" class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
-        <main id="container" class="min-h-full p-2 md:p-6">
-          <Card class="h-[400px]">Detalis</Card>
-          <Card class="h-[80px] mt-[24px]">Tabs</Card>
-          <div class="grid grid-cols-2 gap-[24px] w-full mt-[24px]">
-            <Card class="h-[420px]"></Card>
-            <Card class="h-[420px]"></Card>
-          </div>
-          <Card class="mt-[24px] h-[400px]">Manheim Details</Card>
-          <div class="grid grid-cols-2 gap-[24px] w-full mt-[24px]">
-            <Card class="h-[420px]"></Card>
-            <Card class="h-[420px]"></Card>
-          </div>
-        </main>
+        <router-view />
       </div>
     </section>
   </div>
@@ -252,5 +284,75 @@ watch(
   100% {
     margin-left: 0;
   }
+}
+.__labeled-data {
+  @apply border-b-[2px] border-background_light dark:border-dark_border p-[6px] pl-[12px];
+  span {
+    @apply text-[9px] uppercase;
+  }
+}
+.carousel-img {
+  height: 260px;
+  object-fit: cover;
+  @apply rounded-round;
+}
+
+.custom-arrow {
+  display: flex;
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+}
+
+.custom-arrow button {
+  z-index: 50;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-right: 12px;
+  color: #fff;
+  background-color: rgba(white, 0.2);
+  border-width: 0;
+  border-radius: 5px;
+  backdrop-filter: blur(24px);
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.custom-arrow button:hover {
+  background-color: rgba(white, 0.4);
+}
+
+.custom-arrow button:active {
+  transform: scale(0.95);
+  transform-origin: center;
+}
+
+.custom-dots {
+  z-index: 50;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+}
+
+.custom-dots li {
+  display: inline-block;
+  width: 12px;
+  height: 4px;
+  margin: 0 3px;
+  border-radius: 4px;
+  background-color: rgba(white, 0.6);
+  transition: width 0.3s, background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.custom-dots li.is-active {
+  width: 40px;
+  background: white;
 }
 </style>

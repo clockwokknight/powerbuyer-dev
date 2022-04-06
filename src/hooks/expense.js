@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useQuery } from "vue-query";
 import axios from "axios";
 import { format } from "v-money3";
+import { unref } from "vue";
 
 export const getVendorExpenseItems = (
   vendor_id,
@@ -13,6 +14,7 @@ export const getVendorExpenseItems = (
     {
       retry: 0,
       enabled,
+      refetchOnMount: false,
     }
   );
 

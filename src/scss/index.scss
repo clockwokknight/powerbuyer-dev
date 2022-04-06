@@ -27,6 +27,10 @@ body {
   @apply border-[1px] border-transparent dark:border-dark_border rounded-round;
 }
 
+.page-container {
+  @apply h-full w-full flex-col overflow-auto p-[24px];
+}
+
 .__section .bg-foreground_light, .__details, .__tabs {
   @apply rounded-round box-border border-[1px] border-transparent dark:border-dark_border;
 }

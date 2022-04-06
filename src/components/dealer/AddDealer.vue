@@ -49,7 +49,7 @@ const { mutateAsync: createDealer, isLoading } = useMutation(
     },
   }
 );
-async function addVendor() {
+async function addDealer() {
   try {
     await formRef.value.validate();
     await createDealer(objectFilter(form.value, (key, value) => value));
@@ -252,6 +252,7 @@ const rules = {
         <n-form-item label="Phone Number" path="phone">
           <masked-input
             mask="(###) ###-####"
+            masked
             placeholder="Enter Phone Number"
             clearable
             v-model:value="form.phone"
@@ -282,7 +283,7 @@ const rules = {
           size="large"
           :disabled="isLoading"
           :loading="isLoading"
-          @click="addVendor"
+          @click="addDealer"
           >Add</n-button
         >
       </template>

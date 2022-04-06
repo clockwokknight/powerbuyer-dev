@@ -46,7 +46,8 @@ const { data: auctionSearchResults, isFetching: isAuctionSearchFetching } =
           }
           return res.data;
         });
-  });
+  }
+);
 const addTab = (auction) => {
   listActive.value = global.isMobile ? false : listActive.value;
   tabStore.addTab({ id: auction.id, name: auction.auction_company });
