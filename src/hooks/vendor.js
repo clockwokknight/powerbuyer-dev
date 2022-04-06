@@ -1,5 +1,6 @@
 import { useInfiniteQuery, useQuery } from "vue-query";
 import axios from "axios";
+import { computed, unref } from "vue";
 
 export const useVendorCategories = () =>
   useInfiniteQuery(
@@ -28,10 +29,12 @@ export const getVendors = () =>
     }
   );
 
-export const getVendorById = (paramId) =>
-  useQuery(["vendor", paramId], () =>
-    axios.get(`/vendors/${paramId.value}`).then((res) => res.data)
-  );
+export const getVendorById = (paramId) => {
+  const id = computed(() => parseInt(unref(paramId)))
+  return useQuery(["vendor", id], ({queryKey}) =>
+    axios.get(`/vendors/${queryKey[1]}`).then((res) => res.data)
+  )
+}
 
 export const getInvoiceTotalByVendor = (vendorId) =>
   useQuery(["totalInvoiceAmount", vendorId], ({ queryKey }) =>

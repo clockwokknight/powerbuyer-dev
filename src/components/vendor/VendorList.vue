@@ -13,7 +13,7 @@ const route = useRoute();
   <li
     v-for="vendor in vendors"
     :key="vendor?.id"
-    class="relative px-3 py-2 mb-[12px] ml-[13px] mr-[13px] rounded-round duration-100 border-b-[1px] border-b-transparent odd:bg-[#ffffff] hover:bg-background_light dark:border-b-transparent dark:odd:bg-foreground_dark dark:even:bg-foreground_dark dark:hover:bg-background_dark"
+    class="relative px-3 py-2 mb-[12px] ml-[13px] mr-[13px] rounded-round duration-100 border-b-[1px] border-b-transparent odd:bg-white hover:bg-background_light dark:border-b-transparent dark:odd:bg-foreground_dark dark:even:bg-foreground_dark dark:hover:bg-background_dark"
     @click="$emit('click:tab', vendor)"
   >
     <!-- Company Name -->
@@ -26,7 +26,7 @@ const route = useRoute();
         <h2
           class="max-w-[250px] truncate whitespace-nowrap mb-1 text-sm font-bold"
           :class="
-            vendor.id == route.params.id
+            vendor.id === route.params.id
               ? 'text-primary !font-bold'
               : 'text-black dark:text-white'
           "
@@ -80,7 +80,7 @@ const route = useRoute();
       id="mask"
       class="absolute inset-0 rounded-round cursor-pointer"
       :class="
-        vendor.id == route.params.id
+        vendor.id === route.params.id
           ? 'bg-accent dark:border-[0px] dark:border-primary'
           : 'bg-transparent'
       "

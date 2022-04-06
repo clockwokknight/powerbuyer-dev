@@ -3,10 +3,14 @@ import { getAllLanes } from "@/hooks/lanes";
 import { NTag } from "naive-ui";
 import { computed, h, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
+import { useQuery } from "vue-query";
+import axios from "axios";
+import Filter from "@/components/lanes/Filter.vue";
 const route = useRoute();
 const filter = reactive({
   page: 1,
   per_page: 20,
+  make: "chevrolet"
 });
 const { data: lanes, isFetching } = getAllLanes(filter);
 const pagination = computed(() => ({
@@ -15,6 +19,9 @@ const pagination = computed(() => ({
   itemCount: lanes.value?.total ?? 1,
   pageCount: lanes.value?.last_page ?? 1,
 }));
+
+
+
 const sortStatesRef = ref([]);
 const sortKeyMapOrderRef = computed(() =>
   sortStatesRef.value.reduce((result, { columnKey, order }) => {
@@ -22,6 +29,9 @@ const sortKeyMapOrderRef = computed(() =>
     return result;
   }, {})
 );
+
+
+
 const columns = computed(() => [
   {
     title: "Lane #",
@@ -58,11 +68,11 @@ const columns = computed(() => [
   },
   {
     title: "Make",
-    key: "deal.vehicle.vehicle_make.name",
+    key: "vehicle_make.name",
   },
   {
     title: "Model",
-    key: "deal.vehicle.vehicle_model.name",
+    key: "vehicle_model.name",
     width: "max-content",
   },
   {
@@ -91,28 +101,12 @@ const columns = computed(() => [
     key: "age",
   },
   {
-    title: "Color",
-    key: "deal.vehicle.interior_color",
-    render(row) {
-      const vehicleColor = (color, type) =>
-        color
-          ? h(
-              NTag,
-              {
-                type: "info",
-                style: {
-                  marginRight: "6px",
-                },
-              },
-              { default: () => `${type}: ${color.color}` }
-            )
-          : h("div");
-
-      return [
-        vehicleColor(row.deal.vehicle.interior_color, "interior"),
-        vehicleColor(row.deal.vehicle.exterior_color, "exterior"),
-      ];
-    },
+    title: "Interior Color",
+    key: "interior_color.color"
+  },
+  {
+    title: "Exterior Color",
+    key: "exterior_color.color"
   },
   {
     title: "Purchased Date",
@@ -179,31 +173,22 @@ const handlePageChange = (current_page) => {
 
 <template>
   <!-- Main Tabs App Content -->
-  <div class="h-screen w-[calc(100%-60px)]">
+  <div class="h-screen w-[calc(100vw-60px)] ">
     <!-- Main Body Content-->
-    <div class="h-screen overflow-auto bg-white px-5 py-5">
+    <div class="h-screen w-full overflow-auto bg-white dark:bg-foreground_dark flex gap-x-5">
       <!-- Body Content -->
+      <aside class=" max-w-[300px] w-full pt-5 pl-5">
+        <h3 class="text-lg font-bold mb-3">
+        Lane Filters
+        </h3>
+          <Filter />
+      </aside>
+      <main class="w-[calc(100%-360px)] pr-5 pt-5">
       <div class="mb-3">
         <h1 class="text-xl font-bold uppercase">Lane Numberings</h1>
       </div>
-      <n-space vertical :size="12">
-        <n-space>
-          <n-popover placement="bottom" trigger="click">
-            <template #trigger>
-              <n-button>Sort By # </n-button>
-            </template>
-            <n-checkbox-group>
-              <div class="flex flex-col gap-y-4">
-                <n-checkbox value="No" label="No" />
-                <n-checkbox value="lane_number" label="Lane Number" />
-                <n-checkbox value="year" label="Year" />
-              </div>
-            </n-checkbox-group>
-          </n-popover>
-          <n-button>Filter Location (Dallas)</n-button>
-          <n-button>Clear Filters</n-button>
-          <n-button>Clear Sorters</n-button>
-        </n-space>
+      <div>
+
         <n-data-table
           remote
           ref="table"
@@ -216,7 +201,10 @@ const handlePageChange = (current_page) => {
           @update:page="handlePageChange"
           @update:sorter="handleSortChange"
         />
-      </n-space>
+        <pre>
+        </pre>
+      </div>
+      </main>
     </div>
   </div>
 </template>

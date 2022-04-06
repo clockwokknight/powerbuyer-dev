@@ -1,6 +1,6 @@
 <script setup>
 import ExpenseTableImage from "@/components/vendor/invoice/ExpenseTableImage.vue";
-import { getInvoiceStatus } from "@/hooks/common_query.js";
+import { getInvoiceStatus, getPaymentTerms } from "@/hooks/common_query.js";
 import { clone, omit, pick } from "@/lib/helper";
 import axios from "axios";
 import dayjs from "dayjs";
@@ -11,6 +11,7 @@ import { useMutation, useQueryClient } from "vue-query";
 import ExpenseModal from "./ExpenseModal.vue";
 import { themeOverrides } from "./invoice.helper";
 import VendorExpenseAction from "./VendorExpenseAction.vue";
+import { getVendorById } from "@/hooks/vendor";
 
 const props = defineProps({
   show: {
@@ -29,11 +30,13 @@ const emits = defineEmits(["update:show"]);
 
 const showExpenseModal = ref(false);
 const currentExpense = ref(null);
-const vendor_id = ref();
+const vendor_id = ref(0);
 const deletedExpenses = ref([]);
 const deleteInvoiceModal = ref(false);
 
 const { data: invoice_status } = getInvoiceStatus();
+const { data: current_vendor } = getVendorById(vendor_id);
+
 const invoiceStatusOptions = computed(() =>
   invoice_status.value
     ?.filter((status) => status.name.toLowerCase() !== "paid")
@@ -98,7 +101,7 @@ watch(
       form.value.amount_due = parseFloat(props.initialData.amount_due);
       form.value.amount_paid = parseFloat(props.initialData.amount_paid);
       form.value.balance = parseFloat(props.initialData.balance);
-      form.value.expenses = form.value.expenses.map((expense) => ({
+      form.value.expenses = form.value.vendor_expenses.map((expense) => ({
         ...pick(expense, [
           "deal",
           "deal_id",
@@ -106,9 +109,9 @@ watch(
           "expense_type",
           "type",
           "name",
-          "expense_date",
           "id",
         ]),
+        expense_date: dayjs(expense.expense_date).valueOf(),
         files: expense.files.map((file) => ({
           id: file.id,
           name: file.filename,
@@ -406,7 +409,7 @@ const onInvoiceDelete = () => {
           </div>
           <div class="text-right">
             <span class="block text-xs uppercase">Terms</span>
-            <span class="text-sm font-bold">Net 30</span>
+            <span class="text-sm font-bold">{{ current_vendor?.payment_terms.name }}</span>
           </div>
         </section>
       </header>
