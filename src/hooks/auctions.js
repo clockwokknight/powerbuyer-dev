@@ -18,3 +18,21 @@ export const getAuctionById = (id) =>
   useQuery(["auction", id], ({ queryKey }) => {
     return axios.get(`/auctions/${queryKey[1]}`).then((res) => res.data);
   });
+
+export const auctionVehicles = (auctionId) =>
+  useQuery(["auctionVehicles", auctionId], ({ queryKey }) => {
+    return axios
+      .get("/deals/auction_not_sold/" + queryKey[1])
+      .then((res) => {
+        return res.data.data.length > 0 ? res.data : []
+      })
+  });
+
+export const auctionSoldVehicles = (auctionId) =>
+  useQuery(["auctionSoldVehicles", auctionId], ({ queryKey }) =>
+    axios
+      .get("/deals/auction_sold/" + queryKey[1])
+      .then((res) => {
+        return res.data.data.length > 0 ? res.data : []
+      })
+  );

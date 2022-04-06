@@ -34,7 +34,7 @@ const shouldDisableScroll = ref(false);
 onMounted(() => {
   props.items.forEach((item, index) => {
     const itemSelector = document.querySelector(item.value);
-    ScrollTrigger.create({
+    ScrollTrigger?.create({
       scroller: "#main",
       trigger: itemSelector,
       start: () => "top 60px",

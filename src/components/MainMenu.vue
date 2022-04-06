@@ -11,6 +11,7 @@ const route = useRoute();
 const hasList = [
   "Vendor",
   "Buyers Overview",
+  "SingleAuction",
   "DealerHome",
   "SingleDealer",
   "LenderHome",
