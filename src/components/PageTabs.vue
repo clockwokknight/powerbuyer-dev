@@ -141,9 +141,9 @@ watch(
     if (
       newValue !== -1 &&
       route.path !== props.pageName &&
-      parseInt(route.params?.id) !== tabStore.tabs[newValue].id
+      parseInt(route.params?.id) !== tabStore.tabs[newValue]?.id
     ) {
-      router.push(`/${props.pageName}/${tabStore.tabs[newValue].id}`);
+      router.push(`/${props.pageName}/${tabStore.tabs[newValue - 1]?.id}`);
     }
   }
 );
