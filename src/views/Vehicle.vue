@@ -95,15 +95,17 @@ const form = ref({
   recon: null,
 });
 
-watchEffect(() => {
-  console.clear();
-  if (route.params?.id) {
-    log.yellow(route.params?.id);
-    routeParamId.value = route.params?.id;
-  } else {
-    log.yellow("no param id - routing to home tab");
+watch(
+  () => route.params?.id,
+  (val) => {
+    if (route.params?.id) {
+      routeParamId.value = route.params?.id;
+    }
+  },
+  {
+    immediate: true,
   }
-});
+);
 
 watch(
   () => vendor.value,

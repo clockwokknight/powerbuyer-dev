@@ -17,8 +17,7 @@ const route = useRoute();
     @click="$emit('click:tab', vendor)"
   >
     <router-link
-      v-if="vendor?.vin"
-      :to="{ name: 'Vehicle', params: { id: vendor?.vin } }"
+      :to="{ name: 'Vehicle', params: { id: vendor.vin } }"
       active-class="text-primary dark:text-white"
       class="block"
     >
@@ -26,12 +25,12 @@ const route = useRoute();
         <h2
           class="max-w-[250px] truncate whitespace-nowrap mb-1 text-sm font-bold"
           :class="
-            vendor?.vin == route.params.id
+            vendor.id == route.params.id
               ? 'text-primary !font-bold'
               : 'text-black dark:text-white'
           "
         >
-          {{ vendor?.vin }}
+          {{ vendor.vin }}
         </h2>
       </div>
       <div class="__subtext text-[10px] mb-1 flex">

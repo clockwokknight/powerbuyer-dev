@@ -33,12 +33,11 @@ const {
 } = fetchPaginatedData("/vendors");
 
 const addTab = (vendor) => {
+  console.log('adding vendor tab... , ', vendor);
   vendorStore.setLatest(vendor?.id);
   listActive.value = global.isMobile ? false : listActive.value;
   tabStore.addTab({ id: vendor?.id, name: vendor?.name });
 };
-
-// Vendor Search Result
 
 const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
   ["vendorSearch", debouncedSearchText],

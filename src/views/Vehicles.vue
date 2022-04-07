@@ -1,15 +1,14 @@
 <script setup>
 import axios from "axios";
 import { fetchPaginatedData } from "@/hooks";
-import { getCurrentInstance, ref, watchEffect } from "vue";
+
+import { ref, watch } from "vue";
 import { useQuery } from "vue-query";
 import { useDebounce } from "@vueuse/core";
+
 import { useGlobalState } from "@/store/global";
-import { useMutation, useQueryClient } from "vue-query";
-import { useTabsViewStore } from "@/store/vehicleTabs";
+import { useTabsViewStore } from "@/store/tabs";
 import { useVehicles } from "@/store/vehicles";
-import { log, utils } from "@/lib/utils";
-import { useMessage } from "naive-ui";
 
 import AddVendor from "@/components/vendor/AddVendor.vue";
 import PageTabs from "@/components/PageTabs.vue";
@@ -18,13 +17,8 @@ import Tabs from "@/components/common/Tabs.vue";
 import Card from "@/components/_refactor/Card.vue";
 import CustomInput from "@/components/common/CustomInput.vue";
 
-const instance = getCurrentInstance();
-
-const global = useGlobalState();
-const message = useMessage();
-const queryClient = useQueryClient();
-
 const tabStore = useTabsViewStore();
+const global = useGlobalState();
 const vendorStore = useVehicles();
 
 const searchText = ref("");
@@ -40,9 +34,10 @@ const {
 } = fetchPaginatedData("/deals");
 
 const addTab = (vendor) => {
-  vendorStore.setLatest(vendor?.id);
+  console.log("adding vehicle tab... ", vendor);
+  vendorStore.setLatest(vendor.id);
   listActive.value = global.isMobile ? false : listActive.value;
-  tabStore.addTab({ id: vendor?.id, name: vendor?.name });
+  tabStore.addTab({ id: vendor?.vin, name: vendor?.vin });
 };
 
 const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
@@ -54,35 +49,14 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
       return axios.get(`/deals/search_by_vin/${queryKey[1]}`).then((res) => {
         console.clear();
         console.log("fetching data... ", res.data);
-        if (res.data?.debug) return [];
         return res.data;
       });
     }
   }
 );
 
-const form = ref({
-  vin: null,
-  lane: null,
-  grade: null,
-  year: null,
-  make: null,
-  model: null,
-  trim: null,
-  body: null,
-  ext_color: null,
-  int_color: null,
-  miles: null,
-  notes: null,
-  recon: null,
-});
-
 function toggleListSlide() {
   listActive.value = !listActive.value;
-}
-
-function handleTabClick(e) {
-  window.location.hash = e;
 }
 
 function filterVehicles(data) {
@@ -94,11 +68,12 @@ function filterVehicles(data) {
   );
 }
 
-watchEffect(() => {
-  if (vendors.value) {
-    console.log(vendors.value);
+watch(
+  () => listActive.value,
+  (val) => {
+    global.setListActive(val, "vehicle");
   }
-});
+);
 </script>
 
 <template>
@@ -238,7 +213,8 @@ watchEffect(() => {
     >
       <PageTabs
         :class="global?.inventory?.stuck[0] && 'shadow-lg'"
-        page-name="inventory"
+        :hasHome="true"
+        pageName="inventory"
       />
       <!-- Main Body Content-->
       <div id="main" class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">

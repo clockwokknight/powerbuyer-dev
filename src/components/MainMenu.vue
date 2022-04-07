@@ -16,7 +16,9 @@ const hasList = [
   "SingleDealer",
   "LenderHome",
   "Lender",
-  "Inventory"
+  "Inventory",
+  "InventoryHome",
+  "Vehicle",
 ];
 
 const userMenu = [
@@ -50,9 +52,7 @@ watchEffect(() => {
 <template>
   <aside
     class="sticky top-0 left-0 z-50 flex w-[60px] flex-col bg-black"
-    :class="
-      hasList.includes(route.name) ? 'h-[calc(100vh-48px)]' : 'h-[calc(100vh)]'
-    "
+    :class="hasList.includes(route.name) ? 'h-[calc(100vh-48px)]' : 'h-[calc(100vh)]'"
   >
     <div class="w-full text-white">
       <nav>
@@ -64,10 +64,7 @@ watchEffect(() => {
             PB
           </li>
           <router-link to="/">
-            <li
-              content="Dashbaord"
-              v-tippy="{ placement: 'right', duration: 50 }"
-            >
+            <li content="Dashbaord" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
                 width="17"
                 height="13"
@@ -107,10 +104,7 @@ watchEffect(() => {
             </li>
           </router-link>
           <router-link to="/inventory">
-            <li
-              content="Inventory"
-              v-tippy="{ placement: 'right', duration: 50 }"
-            >
+            <li content="Inventory" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
                 width="19"
                 height="12"
@@ -258,10 +252,7 @@ watchEffect(() => {
             </li>
           </router-link>
           <router-link :to="`/vendors/${vendorStore.latest}`">
-            <li
-              content="Vendors"
-              v-tippy="{ placement: 'right', duration: 50 }"
-            >
+            <li content="Vendors" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
                 width="19"
                 height="17"
@@ -279,10 +270,7 @@ watchEffect(() => {
             </li>
           </router-link>
           <router-link :to="`/#reports`">
-            <li
-              content="Reports"
-              v-tippy="{ placement: 'right', duration: 50 }"
-            >
+            <li content="Reports" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
                 width="18"
                 height="16"
@@ -321,10 +309,7 @@ watchEffect(() => {
             </li>
           </router-link>
           <router-link to="/system">
-            <li
-              content="More Items"
-              v-tippy="{ placement: 'right', duration: 50 }"
-            >
+            <li content="More Items" v-tippy="{ placement: 'right', duration: 50 }">
               <img src="/icons/OverflowMenuVertical.svg" />
             </li>
           </router-link>
@@ -334,9 +319,7 @@ watchEffect(() => {
     <div class="mt-auto mb-[6px] flex w-[60px] justify-center">
       <div class="menu-footer center-content">
         <button
-          :content="
-            global.isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'
-          "
+          :content="global.isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'"
           v-tippy="{ placement: 'right', duration: 50 }"
           class="theme-toggle theme-toggle-js h-[55px] w-[55px] cursor-pointer p-[8px]"
           @click="toggleDark"
