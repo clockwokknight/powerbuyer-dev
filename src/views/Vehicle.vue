@@ -112,7 +112,7 @@ watch(
       form.value = { ...newValue };
       vendorData.value = { ...newValue };
       Object.entries(newValue).forEach((kv) => {
-        // sterilizing vendor data to fix non-update on cancel
+        // sterilizing vehicle data to fix non-update on cancel
         if (kv[1] === "") vendorData.value[kv[0]] = null;
       });
     }

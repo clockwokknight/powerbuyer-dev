@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 
-export const useVehicles = defineStore('vendors', {
-    state: () => ( {
+export const useVehicles = defineStore('vehicles', {
+    state: () => ({
         latest: '1'
     }),
     actions: {

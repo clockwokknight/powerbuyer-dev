@@ -1,7 +1,6 @@
 <script setup>
 import axios from "axios";
 import { fetchPaginatedData } from "@/hooks";
-import { getVendors } from "@/hooks/vendor";
 
 import { ref, watch } from "vue";
 import { useQuery } from "vue-query";
@@ -41,8 +40,9 @@ const addTab = (vendor) => {
 
 // Vendor Search Result
 
-const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
-  useQuery(["vendorSearch", debouncedSearchText], ({ queryKey }) => {
+const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
+  ["vendorSearch", debouncedSearchText],
+  ({ queryKey }) => {
     if (queryKey[1] === "") return null;
     else
       return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => {
@@ -51,7 +51,8 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
         }
         return res.data;
       });
-  });
+  }
+);
 
 function toggleListSlide() {
   listActive.value = !listActive.value;
@@ -173,9 +174,7 @@ watch(
           >
             <svg
               class="absolute h-4 w-4 duration-[500ms]"
-              :class="
-                listActive ? 'ml-[0px] rotate-0' : 'ml-[432px] rotate-180'
-              "
+              :class="listActive ? 'ml-[0px] rotate-0' : 'ml-[432px] rotate-180'"
               viewBox="0 0 24 24"
             >
               <path
@@ -202,10 +201,7 @@ watch(
     >
       <PageTabs :class="global.stuck[0] && 'shadow-lg'" page-name="vendors" />
       <!-- Main Body Content-->
-      <div
-        id="main"
-        class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden"
-      >
+      <div id="main" class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
         <main id="container" class="min-h-full p-2 md:p-6">
           <router-view />
         </main>

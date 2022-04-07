@@ -31,7 +31,6 @@ import Components from "@/views/_refactor/Components.vue";
 
 export const router = createRouter({
   history: createWebHistory(),
-
   routes: [
     {
       path: "/",

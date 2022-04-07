@@ -1,6 +1,10 @@
 import axios from "axios";
 import { useInfiniteQuery, useQuery } from "vue-query";
 
+function queryName(path, context) {
+  return path.substring(1, path.length) + context;
+}
+
 // ------------ generic getters ------------
 
 export function fetchPaginatedData(path) {
@@ -15,6 +19,24 @@ export function fetchById(path, paramId) {
   return useQuery([queryName(path, 'ById'), paramId], () => axios.get(`${path}/${paramId.value}`).then((res) => res.data));
 }
 
+export function search(path, query) {
+  return useQuery(
+    [queryName(path, 'Search'), debouncedSearchText],
+    ({ queryKey }) => {
+      if (queryKey[1] === "") {
+        return null;
+      } else {
+        return axios.get(`${path}/${queryKey[1]}`).then((res) => {
+          console.clear();
+          console.log("fetching data... ", res);
+          if (res.data?.debug) return [];
+          return res.data;
+        });
+      }
+    }
+  );
+}
+
 // ------------ Vendor hooks ------------
 
 export function fetchInvoiceTotalByVendor(vendorId) {
@@ -27,10 +49,4 @@ export function fetchInvoicesByVendor(vendorId) {
   return useQuery(["vendorInvoices", vendorId], ({ queryKey }) =>
     axios.get("/vendor_invoices/search_by_vendor/" + queryKey[1]).then((res) => res.data)
   )
-}
-
-// ------------ helpers ------------
-
-function queryName(path, context) {
-    return path.substring(1, path.length) + context;
 }
