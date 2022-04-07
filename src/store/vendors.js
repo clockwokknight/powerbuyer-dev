@@ -13,7 +13,7 @@ export const useVendors = defineStore('vendors', {
             selected: {}
         },
         searchText: '',
-        latest: '1'
+        latest: ''
     } ),
     getters: {
         GET_VENDORS(state) {

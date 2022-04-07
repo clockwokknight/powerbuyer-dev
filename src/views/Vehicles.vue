@@ -1,46 +1,25 @@
 <script setup>
-import {
-  computed,
-  onMounted,
-  defineAsyncComponent,
-  getCurrentInstance,
-  ref,
-  watch,
-  watchEffect,
-  nextTick,
-  unref,
-} from "vue";
+import axios from "axios";
+import { fetchPaginatedData } from "@/hooks";
 
-import { useRouter, useRoute } from "vue-router";
+import { ref, watch } from "vue";
 import { useQuery } from "vue-query";
 import { useDebounce } from "@vueuse/core";
-import { fetchPaginatedData } from "@/hooks";
-import { useGlobalState } from "@/store/global";
-import { useMutation, useQueryClient } from "vue-query";
-import { useTabsViewStore } from "@/store/vehicleTabs";
-import { useVehicles as useVendors } from "@/store/vehicles";
-import { log, utils } from "@/lib/utils";
-import { useMessage } from "naive-ui";
 
-import axios from "axios";
+import { useGlobalState } from "@/store/global";
+import { useTabsViewStore } from "@/store/tabs";
+import { useVehicles } from "@/store/vehicles";
 
 import AddVendor from "@/components/vendor/AddVendor.vue";
 import PageTabs from "@/components/PageTabs.vue";
-import VendorList from "@/components/vendor/VendorList.vue";
+import VendorList from "@/components/vehicle/VehicleList.vue";
 import Tabs from "@/components/common/Tabs.vue";
 import Card from "@/components/_refactor/Card.vue";
 import CustomInput from "@/components/common/CustomInput.vue";
 
-const instance = getCurrentInstance();
-
-const global = useGlobalState();
-const route = useRoute();
-const router = useRouter();
-const message = useMessage();
-const queryClient = useQueryClient();
-
 const tabStore = useTabsViewStore();
-const vendorStore = useVendors();
+const global = useGlobalState();
+const vendorStore = useVehicles();
 
 const searchText = ref("");
 const debouncedSearchText = useDebounce(searchText, 500);
@@ -55,56 +34,46 @@ const {
 } = fetchPaginatedData("/deals");
 
 const addTab = (vendor) => {
-  vendorStore.setLatest(vendor?.id);
+  console.log("adding vehicle tab... ", vendor);
+  vendorStore.setLatest(vendor.id);
   listActive.value = global.isMobile ? false : listActive.value;
-  tabStore.addTab({ id: vendor?.id, name: vendor?.name });
+  tabStore.addTab({ id: vendor?.vin, name: vendor?.vin });
 };
 
 const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
-  ["vendorSearch", debouncedSearchText],
+  ["vehicleSearch", debouncedSearchText],
   ({ queryKey }) => {
     if (queryKey[1] === "") {
       return null;
     } else {
       return axios.get(`/deals/search_by_vin/${queryKey[1]}`).then((res) => {
         console.clear();
-        console.log("fetching data... ", res);
-        if (res.data?.debug) return [];
+        console.log("fetching data... ", res.data);
         return res.data;
       });
     }
   }
 );
 
-const form = ref({
-  vin: null,
-  lane: null,
-  grade: null,
-  year: null,
-  make: null,
-  model: null,
-  trim: null,
-  body: null,
-  ext_color: null,
-  int_color: null,
-  miles: null,
-  notes: null,
-  recon: null,
-});
-
 function toggleListSlide() {
   listActive.value = !listActive.value;
 }
 
-function handleTabClick(e) {
-  window.location.hash = e;
+function filterVehicles(data) {
+  return data.filter(
+    (v) =>
+      v.vehicle?.vehicle_make?.vehicle_make_year &&
+      v.vehicle?.vehicle_make?.description &&
+      v.vehicle?.exterior_color?.color
+  );
 }
 
-watchEffect(() => {
-  if (vendors.value) {
-    console.log(vendors.value);
+watch(
+  () => listActive.value,
+  (val) => {
+    global.setListActive(val, "vehicle");
   }
-});
+);
 </script>
 
 <template>
@@ -117,7 +86,7 @@ watchEffect(() => {
     >
       <!-- SearchList.vue / -->
       <aside
-        class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-x-hidden bg-background_light dark:border-r-[1px] dark:border-dark_border dark:bg-background_dark"
+        class="pageItemsList relative h-[calc(100vh-48px)] min-w-[275px] max-w-[275px] overflow-x-hidden bg-background_light dark:border-r-[1px] dark:border-dark_border dark:bg-background_dark"
       >
         <div
           class="sticky top-0 z-50 bg-foreground_light p-3 pb-0 dark:bg-foreground_dark"
@@ -136,7 +105,6 @@ watchEffect(() => {
               clearable
               placeholder="Search..."
             />
-
             <!--div content="Filter" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
                 class="w-6 h-6 mt-1 text-gray-400 cursor-pointer dark:text-white hover:text-primary"
@@ -169,7 +137,11 @@ watchEffect(() => {
           </div>
           <ul class="bg-foreground_light dark:bg-foreground_dark pt-[12px]">
             <template v-if="debouncedSearchText">
-              <VendorList v-if="vendorSearchResults" :vendors="[]" @click:tab="addTab" />
+              <VendorList
+                v-if="vendorSearchResults"
+                :vendors="filterVehicles(vendorSearchResults)"
+                @click:tab="addTab"
+              />
             </template>
 
             <template v-else>
@@ -177,7 +149,10 @@ watchEffect(() => {
                 v-for="(vendorPage, vendorPageIdx) in vendors?.pages"
                 :key="vendorPageIdx"
               >
-                <VendorList :vendors="[]" @click:tab="addTab" />
+                <VendorList
+                  :vendors="filterVehicles(vendorPage.data)"
+                  @click:tab="addTab"
+                />
               </template>
               <button
                 v-observe-visibility="
@@ -196,7 +171,7 @@ watchEffect(() => {
         id="mobile-slider"
         style="backdrop-filter: blur(36px)"
         :class="listActive ? '!w-[335px] ml-[-60px]' : '!bg-dark_border'"
-        class="absolute w-[276px] duration-[500ms] h-[48px] flex flex-row justify-between bottom-0 left-0 bg-background_light/50 dark:bg-dark_border/50 bg-black items-center shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] px-4 cursor-pointer"
+        class="absolute bottom-[-48px] w-[276px] duration-[500ms] h-[48px] flex flex-row justify-between bottom-0 left-0 bg-background_light/50 dark:bg-dark_border/50 bg-black items-center shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] px-4 cursor-pointer"
         @click="listActive = !listActive"
       >
         <div
@@ -238,7 +213,8 @@ watchEffect(() => {
     >
       <PageTabs
         :class="global?.inventory?.stuck[0] && 'shadow-lg'"
-        page-name="inventory"
+        :hasHome="true"
+        pageName="inventory"
       />
       <!-- Main Body Content-->
       <div id="main" class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">

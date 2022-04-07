@@ -1,15 +1,20 @@
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 
-export const useTabsViewStore = defineStore("tabs-view", () => {
+export const useTabsViewStore = defineStore("vehicles-tabs-view", () => {
   const tabs = ref([]);
-  const findTabIndex = (id) => tabs.value.findIndex((tab) => tab.id === id);
+  
+  const findTabIndex = (vin) => tabs.value.findIndex((tab) => tab.id === vin);
+  
   const selectedIndex = computed(() =>
     tabs.value.findIndex((tab) => tab.active)
   );
+  
   const initTabs = (payload) => (tabs.value = payload);
+  
   const addTab = (payload) => {
-    const index = findTabIndex(payload.id);
+    console.log('adding tab inside of store');
+    const index = findTabIndex(payload.vin);
     if (index === -1) {
       tabs.value = tabs.value
         .map(({ active, ...rest }) => rest)
@@ -22,8 +27,9 @@ export const useTabsViewStore = defineStore("tabs-view", () => {
       });
     }
   };
-  const closeTab = (id) => {
-    const index = findTabIndex(id);
+
+  const closeTab = (vin) => {
+    const index = findTabIndex(vin);
     if (tabs.value.length > 0 && selectedIndex.value === index) {
       const activeIndex = index === 0 ? index + 1 : index - 1;
       tabs.value = tabs.value.map(({ active, ...rest }, i) => {
@@ -34,5 +40,6 @@ export const useTabsViewStore = defineStore("tabs-view", () => {
     }
     tabs.value.splice(index, 1);
   };
+
   return { tabs, addTab, selectedIndex, closeTab, findTabIndex, initTabs };
 });

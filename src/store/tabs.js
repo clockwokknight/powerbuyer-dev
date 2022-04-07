@@ -3,11 +3,15 @@ import { computed, ref } from "vue";
 
 export const useTabsViewStore = defineStore("tabs-view", () => {
   const tabs = ref([]);
+
   const findTabIndex = (id) => tabs.value.findIndex((tab) => tab.id === id);
+
   const selectedIndex = computed(() =>
     tabs.value.findIndex((tab) => tab.active)
   );
+
   const initTabs = (payload) => (tabs.value = payload);
+
   const addTab = (payload) => {
     const index = findTabIndex(payload.id);
     if (index === -1) {
@@ -22,6 +26,7 @@ export const useTabsViewStore = defineStore("tabs-view", () => {
       });
     }
   };
+
   const closeTab = (id) => {
     const index = findTabIndex(id);
     if (tabs.value.length > 0 && selectedIndex.value === index) {
@@ -34,5 +39,6 @@ export const useTabsViewStore = defineStore("tabs-view", () => {
     }
     tabs.value.splice(index, 1);
   };
+  
   return { tabs, addTab, selectedIndex, closeTab, findTabIndex, initTabs };
 });

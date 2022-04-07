@@ -95,15 +95,17 @@ const form = ref({
   recon: null,
 });
 
-watchEffect(() => {
-  console.clear();
-  if (route.params?.id) {
-    log.yellow(route.params?.id);
-    routeParamId.value = route.params?.id;
-  } else {
-    log.yellow("no param id - routing to home tab");
+watch(
+  () => route.params?.id,
+  (val) => {
+    if (route.params?.id) {
+      routeParamId.value = route.params?.id;
+    }
+  },
+  {
+    immediate: true,
   }
-});
+);
 
 watch(
   () => vendor.value,
@@ -112,7 +114,7 @@ watch(
       form.value = { ...newValue };
       vendorData.value = { ...newValue };
       Object.entries(newValue).forEach((kv) => {
-        // sterilizing vendor data to fix non-update on cancel
+        // sterilizing vehicle data to fix non-update on cancel
         if (kv[1] === "") vendorData.value[kv[0]] = null;
       });
     }
