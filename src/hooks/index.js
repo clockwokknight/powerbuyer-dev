@@ -16,7 +16,9 @@ export function fetchPaginatedData(path) {
 }
 
 export function fetchById(path, paramId) {
-  return useQuery([queryName(path, 'ById'), paramId], () => axios.get(`${path}/${paramId.value}`).then((res) => res.data));
+  return useQuery([queryName(path, 'ById'), paramId], () => axios.get(`${path}/${paramId.value}`).then((res) => {
+    return res.data;
+  }));
 }
 
 export function search(path, query) {

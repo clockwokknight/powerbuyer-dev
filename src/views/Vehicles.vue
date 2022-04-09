@@ -59,19 +59,18 @@ function toggleListSlide() {
   listActive.value = !listActive.value;
 }
 
-function filterVehicles(data) {
-  return data.filter(
-    (v) =>
-      v.vehicle?.vehicle_make?.vehicle_make_year &&
-      v.vehicle?.vehicle_make?.description &&
-      v.vehicle?.exterior_color?.color
-  );
-}
-
 watch(
   () => listActive.value,
   (val) => {
     global.setListActive(val, "vehicle");
+  }
+);
+
+watch(
+  () => vendorSearchResults.value,
+  (val) => {
+    console.clear();
+    console.log(val);
   }
 );
 </script>
@@ -137,11 +136,7 @@ watch(
           </div>
           <ul class="bg-foreground_light dark:bg-foreground_dark pt-[12px]">
             <template v-if="debouncedSearchText">
-              <VendorList
-                v-if="vendorSearchResults"
-                :vendors="filterVehicles(vendorSearchResults)"
-                @click:tab="addTab"
-              />
+              <VendorList :vendors="vendorSearchResults" @click:tab="addTab" />
             </template>
 
             <template v-else>
@@ -149,10 +144,7 @@ watch(
                 v-for="(vendorPage, vendorPageIdx) in vendors?.pages"
                 :key="vendorPageIdx"
               >
-                <VendorList
-                  :vendors="filterVehicles(vendorPage.data)"
-                  @click:tab="addTab"
-                />
+                <VendorList :vendors="vendorPage.data" @click:tab="addTab" />
               </template>
               <button
                 v-observe-visibility="
@@ -276,7 +268,7 @@ watch(
 .custom-arrow {
   display: flex;
   position: absolute;
-  bottom: 12px;
+  bottom: 60px;
   right: 12px;
 }
 
@@ -312,7 +304,7 @@ watch(
   margin: 0;
   padding: 0;
   position: absolute;
-  bottom: 24px;
+  bottom: 60px;
   left: 24px;
 }
 

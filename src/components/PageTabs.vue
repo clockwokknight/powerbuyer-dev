@@ -152,6 +152,8 @@ watch(
   () => route.params?.id,
   (val) => {
     if (utils.getKeys(global.latest).includes(props.pageName)) {
+      console.log(val);
+      console.log(route.path, "===", props.pageName, route.path === props.pageName);
       console.log(`setting latest for ${props.pageName}: ${val}`);
       global.setLatest(val, props.pageName);
       tabChanged(tabStore.selectedIndex);
@@ -195,7 +197,8 @@ const afterAnimated = () => {
         <router-link
           v-if="hasHome"
           :to="`/${props.pageName}`"
-          class="px-[24px] active:scale-[0.9]"
+          class="px-[24px] active:scale-[0.8] duration-[250ms]"
+          :style="route.path == `/${props.pageName}` ? 'color: #007AFF' : 'color: white'"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -203,7 +206,7 @@ const afterAnimated = () => {
             viewBox="0 0 24 24"
             class="h-[18px] w-[18px]"
           >
-            <g :fill="route.path === props.pageName ? '#007AFF' : 'white'">
+            <g>
               <path
                 d="M10.55 2.533a2.25 2.25 0 0 1 2.9 0l6.75 5.695c.508.427.8 1.056.8 1.72v9.802a1.75 1.75 0 0 1-1.75 1.75h-3a1.75 1.75 0 0 1-1.75-1.75v-5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0-.75.75v5a1.75 1.75 0 0 1-1.75 1.75h-3A1.75 1.75 0 0 1 3 19.75V9.947c0-.663.292-1.292.8-1.72l6.75-5.694z"
                 fill="currentColor"
@@ -213,7 +216,7 @@ const afterAnimated = () => {
         </router-link>
         <div
           v-if="hasHome"
-          class="w-[2px] h-[24px] bg-background_light dark:bg-dark_border"
+          class="w-[2px] h-[36px] bg-background_light dark:bg-dark_border"
         ></div>
         <div
           ref="scrollWrapper"
@@ -247,7 +250,7 @@ const afterAnimated = () => {
                     <tab
                       class="relative max-w-xs scroll-mr-3 focus:outline-none"
                       :class="[
-                        tabIdx === selectedIndex || route.path === props.pageName
+                        tabIdx === selectedIndex && route.params?.id
                           ? 'bg-accent text-primary before:bg-primary font-medium before:absolute before:inset-y-0 before:left-0 before:h-full before:w-1 focus:outline-none'
                           : 'font-medium text-black/75 dark:text-white',
                       ]"
@@ -269,7 +272,7 @@ const afterAnimated = () => {
                     <svg
                       class="cubic-timing-tab h-2 w-2 text-red-500 transition-transform duration-300 group-hover:scale-100"
                       :class="[
-                        tabIdx === selectedIndex || route.path === props.pageName
+                        tabIdx === selectedIndex && route.params?.id
                           ? 'scale-100'
                           : 'scale-0',
                       ]"

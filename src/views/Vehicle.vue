@@ -37,6 +37,7 @@ const router = useRouter();
 const message = useMessage();
 const queryClient = useQueryClient();
 
+const currentActiveField = ref(null);
 const routeParamId = ref(route.params?.id);
 
 const tabs = ref([
@@ -70,10 +71,11 @@ const tabs = ref([
   },
 ]);
 
-const { data: vendor, isLoading: isVendorLoading } = fetchById(
-  "/deals/search_by_vin",
-  routeParamId
-);
+const { data: vendor } = fetchById("/deals/search_by_vin", routeParamId);
+
+const { data: images } = fetchById("/images/deal", routeParamId);
+
+//const { data: logo } = fetchById("/images/deal/logo", vendor?.value?.id);
 
 const vendorData = ref({});
 
@@ -94,6 +96,23 @@ const form = ref({
 });
 
 watch(
+  () => vendor?.value,
+  (newValue) => {
+    if (newValue) {
+      form.value = { ...newValue };
+      vendorData.value = { ...newValue };
+      console.log(newValue[0]);
+      Object.entries(newValue[0]).forEach((kv) => {
+        // sterilizing data to fix non-update on cancel
+        if (kv[1] === "") vendorData.value[kv[0]] = null;
+      });
+      console.log(form.value);
+    }
+  },
+  { immediate: true }
+);
+
+watch(
   () => route.params?.id,
   (val) => {
     if (route.params?.id) {
@@ -105,20 +124,13 @@ watch(
   }
 );
 
-watch(
-  () => vendor.value,
-  (newValue) => {
-    if (newValue) {
-      form.value = { ...newValue };
-      vendorData.value = { ...newValue };
-      Object.entries(newValue).forEach((kv) => {
-        // sterilizing vehicle data to fix non-update on cancel
-        if (kv[1] === "") vendorData.value[kv[0]] = null;
-      });
-    }
-  },
-  { immediate: true }
-);
+/*watch(
+  () => logo?.value,
+  (val) => {
+    console.clear();
+    console.log("LOGO; ", val);
+  }
+);*/
 
 function toggleListSlide() {
   listActive.value = !listActive.value;
@@ -159,7 +171,7 @@ function handleTabClick(e) {
 <template>
   <main id="container" class="min-h-full p-2 md:p-6">
     <Card class="p-[0px]">
-      <div class="mt-0 grid grid-cols-12 w-full flex">
+      <div class="mt-0 grid grid-cols-12 w-full">
         <!-- left side -->
         <div class="__form col-span-12 flex flex-col justify-between w-full">
           <div class="flex">
@@ -175,22 +187,17 @@ function handleTabClick(e) {
                 </div>
               </div>
               <n-carousel class="max-w-[260px] rounded-b-round" show-arrow>
-                <!--img
+                <img
+                  v-if="!images || images.length === 0"
                   class="carousel-img object-cover h-full"
-                  src="https://storage.googleapis.com/gmtv-inventory/3C4PDDEG5GT243378/152/20220114235135-940f543b-15c9-41c0-a3aa-7de27296a2a5.jpg"
+                  src="../assets/broken_image.svg"
                 />
                 <img
                   class="carousel-img object-cover h-full"
-                  src="https://storage.googleapis.com/gmtv-inventory/3C4PDDEG5GT243378/152/20220114235134-f52d1048-199d-42e2-ae7e-b147c7348281.jpg"
+                  v-for="(image, index) in images"
+                  :key="index"
+                  :src="image.storage"
                 />
-                <img
-                  class="carousel-img object-cover h-full"
-                  src="https://storage.googleapis.com/gmtv-inventory/3C4PDDEG5GT243378/152/20220114235134-b2492432-999d-4309-b6ee-4c41f82c696a.jpg"
-                />
-                <img
-                  class="carousel-img object-cover h-full"
-                  src="https://storage.googleapis.com/gmtv-inventory/3C4PDDEG5GT243378/152/20220114235135-5800eaf6-bf33-4347-9f90-a08cdf12cec2.jpg"
-                /-->
                 <template #arrow="{ prev, next }">
                   <div class="custom-arrow">
                     <button type="button" class="curtom-arrow--left" @click="prev">
@@ -223,7 +230,7 @@ function handleTabClick(e) {
                     </button>
                   </div>
                 </template>
-                <template #dots="{ total, currentIndex, to }">
+                <template #dots="{ total, currentIndex, to }" class="z-[9999] bg-red-400">
                   <ul class="custom-dots">
                     <li
                       v-for="index of total"
@@ -234,7 +241,7 @@ function handleTabClick(e) {
                   </ul>
                 </template>
               </n-carousel>
-              <div class="relative">
+              <div v-if="images && images.length > 0" class="relative">
                 <div
                   style="background: linear-gradient(transparent, black)"
                   class="w-full h-[80px] absolute bottom-0"
@@ -429,8 +436,8 @@ function handleTabClick(e) {
     />
     <Card class="h-[clac(80px-48px)] mt-[24px]">
       <n-timeline horizontal>
-        <n-timeline-item type="success" content="Deal Approved">
-          <template #icon>
+        <n-timeline-item content="Deal Approved">
+          <!--template #icon>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -441,10 +448,10 @@ function handleTabClick(e) {
                 fill="currentColor"
               ></path>
             </svg>
-          </template>
+          </template-->
         </n-timeline-item>
-        <n-timeline-item type="success" content="Deal Punched">
-          <template #icon>
+        <n-timeline-item content="Deal Punched">
+          <!--template #icon>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -455,7 +462,7 @@ function handleTabClick(e) {
                 fill="currentColor"
               ></path>
             </svg>
-          </template>
+          </template-->
         </n-timeline-item>
         <n-timeline-item line-type="dashed" content="Lean Paid" />
         <n-timeline-item line-type="dashed" content="Owner(s) Paid" />
