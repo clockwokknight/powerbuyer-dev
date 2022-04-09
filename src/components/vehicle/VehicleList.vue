@@ -7,17 +7,33 @@ const global = useGlobalState();
 defineProps(["vendors"]);
 defineEmits(["click:tab"]);
 const route = useRoute();
+
+function filterVehicles(data) {
+  console.log("filtering ", data);
+  return data.filter(
+    (v) =>
+      v.vehicle?.vehicle_make?.vehicle_make_year &&
+      v.vehicle?.vehicle_make?.description &&
+      v.vehicle?.exterior_color?.color
+  );
+}
 </script>
 
 <template>
   <li
-    v-for="(vendor, index) in vendors"
+    v-for="(vendor, index) in vendors?.filter(
+      (v) =>
+        v.id &&
+        v.vehicle?.vehicle_make?.vehicle_make_year &&
+        v.vehicle?.vehicle_make?.description &&
+        v.vehicle?.exterior_color?.color
+    )"
     :key="index"
     class="relative px-3 py-2 mb-[12px] ml-[13px] mr-[13px] rounded-round duration-100 border-b-[1px] border-b-transparent odd:bg-[#ffffff] hover:bg-background_light dark:border-b-transparent dark:odd:bg-foreground_dark dark:even:bg-foreground_dark dark:hover:bg-background_dark"
     @click="$emit('click:tab', vendor)"
   >
     <router-link
-      :to="{ name: 'Vehicle', params: { id: vendor.vin } }"
+      :to="{ name: 'Vehicle', params: { id: vendor?.vin } }"
       active-class="text-primary dark:text-white"
       class="block"
     >
@@ -25,7 +41,7 @@ const route = useRoute();
         <h2
           class="max-w-[250px] truncate whitespace-nowrap mb-1 text-sm font-bold"
           :class="
-            vendor.id == route.params.id
+            vendor?.id == route.params.id
               ? 'text-primary !font-bold'
               : 'text-black dark:text-white'
           "
@@ -36,7 +52,7 @@ const route = useRoute();
       <div class="__subtext text-[10px] mb-1 flex">
         <span>
           {{
-            `${vendor.vehicle.vehicle_make?.vehicle_make_year} - ${vendor.vehicle.vehicle_make?.description} (${vendor.vehicle.exterior_color?.color})`
+            `${vendor?.vehicle.vehicle_make?.vehicle_make_year} - ${vendor?.vehicle.vehicle_make?.description} (${vendor?.vehicle.exterior_color?.color})`
           }}
         </span>
       </div>

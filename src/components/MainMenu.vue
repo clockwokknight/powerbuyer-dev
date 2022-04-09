@@ -4,7 +4,6 @@ import { useDark, useToggle } from "@vueuse/core";
 import { watchEffect, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useGlobalState } from "../store/global";
-import { useVendors } from "../store/vendors";
 
 const route = useRoute();
 
@@ -36,7 +35,6 @@ const userMenu = [
   },
 ];
 
-const vendorStore = useVendors();
 const global = useGlobalState();
 const commandPallet = useCommandPalletStore();
 
@@ -45,7 +43,6 @@ const toggleDark = useToggle(isDark);
 
 watchEffect(() => {
   global.setDark(isDark.value);
-  console.log(route);
 });
 </script>
 
@@ -103,7 +100,7 @@ watchEffect(() => {
               </svg>
             </li>
           </router-link>
-          <router-link to="/inventory">
+          <router-link :to="`/inventory/${global.latest?.inventory ?? ''}`">
             <li content="Inventory" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
                 width="19"
@@ -251,7 +248,7 @@ watchEffect(() => {
               </svg>
             </li>
           </router-link>
-          <router-link :to="`/vendors/${vendorStore.latest}`">
+          <router-link :to="`/vendors/${global.latest?.vendor || 1}`">
             <li content="Vendors" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
                 width="19"
@@ -269,7 +266,7 @@ watchEffect(() => {
               </svg>
             </li>
           </router-link>
-          <router-link :to="`/#reports`">
+          <router-link :to="`reports`">
             <li content="Reports" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
                 width="18"

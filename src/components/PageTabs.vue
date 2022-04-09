@@ -1,5 +1,6 @@
 <script setup>
 import axios from "axios";
+import { utils, log } from "@/lib/utils";
 import { nextTick, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useMutation, useQueryClient } from "vue-query";
@@ -62,7 +63,7 @@ const { mutate: createPageTab } = useMutation(
 );
 
 const { mutate: updatePageTab } = useMutation(
-  (data) => axios.post("/user_ui_tabs/update", data).then((res) => res.data),
+  (data) => axios.post("/user_ui_tabs/update", data).then((res) => res.data), // TODO : save tabs in local storage
   {
     onSuccess(data) {
       queryClient.setQueryData(["pageTabs", props.pageName], () => data);
@@ -135,15 +136,27 @@ const tabChanged = (index) => {
 watch(
   () => tabStore.selectedIndex,
   (newValue) => {
-    console.clear();
-    console.log(route.path);
     scrollTabToView();
     if (
       newValue !== -1 &&
       route.path !== props.pageName &&
-      parseInt(route.params?.id) !== tabStore.tabs[newValue]?.id
+      route.params?.id != tabStore.tabs[newValue]?.id
     ) {
-      router.push(`/${props.pageName}/${tabStore.tabs[newValue - 1]?.id}`);
+      console.log(newValue);
+      router.push(`/${props.pageName}/${tabStore.tabs[newValue]?.id}`);
+    }
+  }
+);
+
+watch(
+  () => route.params?.id,
+  (val) => {
+    if (utils.getKeys(global.latest).includes(props.pageName)) {
+      console.log(val);
+      console.log(route.path, "===", props.pageName, route.path === props.pageName);
+      console.log(`setting latest for ${props.pageName}: ${val}`);
+      global.setLatest(val, props.pageName);
+      tabChanged(tabStore.selectedIndex);
     }
   }
 );
@@ -180,10 +193,35 @@ const afterAnimated = () => {
         :class="global.stuck[0] && 'shadow-lg'"
         ref="tabListButtonWrapper"
       >
+        <!-- home tab -->
+        <router-link
+          v-if="hasHome"
+          :to="`/${props.pageName}`"
+          class="px-[24px] active:scale-[0.8] duration-[250ms]"
+          :style="route.path == `/${props.pageName}` ? 'color: #007AFF' : 'color: white'"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            viewBox="0 0 24 24"
+            class="h-[18px] w-[18px]"
+          >
+            <g>
+              <path
+                d="M10.55 2.533a2.25 2.25 0 0 1 2.9 0l6.75 5.695c.508.427.8 1.056.8 1.72v9.802a1.75 1.75 0 0 1-1.75 1.75h-3a1.75 1.75 0 0 1-1.75-1.75v-5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0-.75.75v5a1.75 1.75 0 0 1-1.75 1.75h-3A1.75 1.75 0 0 1 3 19.75V9.947c0-.663.292-1.292.8-1.72l6.75-5.694z"
+                fill="currentColor"
+              ></path>
+            </g>
+          </svg>
+        </router-link>
         <div
-          class="scrollbar:h-0 scrollbar:w-0 flex items-center overflow-x-auto"
+          v-if="hasHome"
+          class="w-[2px] h-[36px] bg-background_light dark:bg-dark_border"
+        ></div>
+        <div
           ref="scrollWrapper"
           style="scrollbar-width: none"
+          class="scrollbar:h-0 scrollbar:w-0 flex items-center overflow-x-auto"
         >
           <TabList v-slot="{ selectedIndex }">
             <nav
@@ -191,45 +229,6 @@ const afterAnimated = () => {
               class="flex min-w-max flex-nowrap"
               :class="!hasHome && 'pl-6'"
             >
-              <div
-                v-if="hasHome"
-                class="group rounded-round relative grid select-none place-content-center overflow-hidden pl-[12px]"
-              >
-                <router-link
-                  :to="`/${props.pageName}`"
-                  custom
-                  v-slot="{ href, route, navigate }"
-                >
-                  <tab
-                    class="relative scroll-mr-3 focus:outline-none"
-                    :class="[
-                      route.path === props.pageName
-                        ? 'bg-accent text-primary before:bg-primary font-medium before:absolute before:inset-y-0 before:left-0 before:h-full before:w-1 focus:outline-none'
-                        : 'font-medium text-black/75 dark:text-white',
-                    ]"
-                  >
-                    <a
-                      :href="href"
-                      @click="navigate"
-                      class="block max-w-[250px] overflow-hidden truncate whitespace-nowrap py-2 px-4 text-xs transition-all focus:outline-none center-content"
-                    >
-                      <svg
-                        class="h-[18px] w-[18px]"
-                        xmlns="http://www.w3.org/2000/svg"
-                        xmlns:xlink="http://www.w3.org/1999/xlink"
-                        viewBox="0 0 24 24"
-                      >
-                        <g fill="none">
-                          <path
-                            d="M10.55 2.533a2.25 2.25 0 0 1 2.9 0l6.75 5.695c.508.427.8 1.056.8 1.72v9.802a1.75 1.75 0 0 1-1.75 1.75h-3a1.75 1.75 0 0 1-1.75-1.75v-5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0-.75.75v5a1.75 1.75 0 0 1-1.75 1.75h-3A1.75 1.75 0 0 1 3 19.75V9.947c0-.663.292-1.292.8-1.72l6.75-5.694z"
-                            fill="white"
-                          ></path>
-                        </g>
-                      </svg>
-                    </a>
-                  </tab>
-                </router-link>
-              </div>
               <TransitionGroup
                 name="fade"
                 @before-leave="beforeLeaveTab"
@@ -237,20 +236,21 @@ const afterAnimated = () => {
                 @after-enter="afterAnimated"
               >
                 <div
+                  class="group rounded-round relative grid select-none place-content-center overflow-hidden duration-[100ms] active:scale-[0.95]"
                   v-show="tabStore.tabs.length >= 1"
                   v-for="(tab, tabIdx) in tabStore.tabs"
                   :key="tab?.id"
-                  class="group rounded-round relative grid select-none place-content-center overflow-hidden"
                 >
                   <router-link
+                    class="flex"
                     :to="`/${props.pageName}/${tab?.id}`"
                     custom
-                    v-slot="{ href, route, navigate, isActive }"
+                    v-slot="{ href, navigate, isActive }"
                   >
                     <tab
                       class="relative max-w-xs scroll-mr-3 focus:outline-none"
                       :class="[
-                        isActive
+                        tabIdx === selectedIndex && route.params?.id
                           ? 'bg-accent text-primary before:bg-primary font-medium before:absolute before:inset-y-0 before:left-0 before:h-full before:w-1 focus:outline-none'
                           : 'font-medium text-black/75 dark:text-white',
                       ]"
@@ -271,7 +271,11 @@ const afterAnimated = () => {
                   >
                     <svg
                       class="cubic-timing-tab h-2 w-2 text-red-500 transition-transform duration-300 group-hover:scale-100"
-                      :class="[tabIdx === selectedIndex ? 'scale-100' : 'scale-0']"
+                      :class="[
+                        tabIdx === selectedIndex && route.params?.id
+                          ? 'scale-100'
+                          : 'scale-0',
+                      ]"
                       viewBox="0 0 11 11"
                       fill="none"
                       stroke="currentColor"

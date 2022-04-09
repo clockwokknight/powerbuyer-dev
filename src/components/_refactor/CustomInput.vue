@@ -12,7 +12,6 @@ export default {
 import { ref, watch, toRefs, reactive, computed, onMounted } from "vue";
 import { NInput, NSelect, NConfigProvider } from "naive-ui";
 import { useGlobalState } from "@/store/global";
-import { useVendors } from "@/store/vendors";
 import { useClipboard } from "@vueuse/core";
 import { utils, log } from "@/lib/utils";
 import { useMessage } from "naive-ui";
@@ -41,7 +40,6 @@ const maskRef = computed(() => props.mask);
 
 const { text, copy } = useClipboard();
 const global = useGlobalState();
-const vendors = useVendors();
 const message = useMessage();
 
 const inputEl = ref(null);
