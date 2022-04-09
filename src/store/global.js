@@ -3,7 +3,7 @@ import { useLocalStorage } from "@vueuse/core";
 
 export const useGlobalState = defineStore("global", {
   state: () => {
-    return useLocalStorage("state", {
+    return { // TODO : find out why local storage is broken (adblock?)
       documentTitle: "PowerBuyer",
       isMobile: true,
       isDark: true,
@@ -11,6 +11,7 @@ export const useGlobalState = defineStore("global", {
       inventory: {
         stuck: [false, false]
       },
+      whattheheck: 'test',
       list: {
         active: false,
         context: null,
@@ -19,18 +20,19 @@ export const useGlobalState = defineStore("global", {
         active: false,
         context: null,
       },
-    });
+      latest: {
+        inventory: '',
+        vendors: ''
+      }
+    }
   },
   actions: {
-    // mobile
     setMobile(val) {
       this.isMobile = val;
     },
-    // dark mode
     setDark(val) {
       this.isDark = val;
     },
-    // hidden drawer
     toggleDrawer() {
       this.drawer.active = !this.drawer.active;
     },
@@ -40,19 +42,20 @@ export const useGlobalState = defineStore("global", {
     closeDrawer(context) {
       this.drawer = { active: false, context: context };
     },
-    // list
     toggleList() {
       this.list.active = !this.list.active;
     },
-    setListActive(val, context) {
+    setListActive(val, context) { // TODO : refactor arg swap
       this.list = { active: val, context: context };
     },
-    // sticky nav
     stick(val) {
       this.stuck = val;
     },
     setDocumentTitle(title) {
       this.documentTitle = title;
+    },
+    setLatest(id, context) {
+      this.latest[context] = id;
     }
   },
 });

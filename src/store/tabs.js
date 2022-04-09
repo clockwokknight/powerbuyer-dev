@@ -6,9 +6,9 @@ export const useTabsViewStore = defineStore("tabs-view", () => {
 
   const findTabIndex = (id) => tabs.value.findIndex((tab) => tab.id === id);
 
-  const selectedIndex = computed(() =>
-    tabs.value.findIndex((tab) => tab.active)
-  );
+  const selectedIndex = computed(() => {
+    return tabs.value.findIndex((tab) => tab.active)
+  });
 
   const initTabs = (payload) => (tabs.value = payload);
 

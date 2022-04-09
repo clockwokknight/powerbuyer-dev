@@ -1,14 +1,15 @@
 <script setup>
 import axios from "axios";
 import { fetchPaginatedData } from "@/hooks";
+import { utils, log } from "@/lib/utils";
 
 import { ref, watch } from "vue";
 import { useQuery } from "vue-query";
 import { useDebounce } from "@vueuse/core";
+import { useRoute } from "vue-router";
 
 import { useGlobalState } from "@/store/global";
 import { useTabsViewStore } from "@/store/tabs";
-import { useVehicles } from "@/store/vehicles";
 
 import AddVendor from "@/components/vendor/AddVendor.vue";
 import PageTabs from "@/components/PageTabs.vue";
@@ -19,7 +20,8 @@ import CustomInput from "@/components/common/CustomInput.vue";
 
 const tabStore = useTabsViewStore();
 const global = useGlobalState();
-const vendorStore = useVehicles();
+
+const route = useRoute();
 
 const searchText = ref("");
 const debouncedSearchText = useDebounce(searchText, 500);
@@ -34,8 +36,6 @@ const {
 } = fetchPaginatedData("/deals");
 
 const addTab = (vendor) => {
-  console.log("adding vehicle tab... ", vendor);
-  vendorStore.setLatest(vendor.id);
   listActive.value = global.isMobile ? false : listActive.value;
   tabStore.addTab({ id: vendor?.vin, name: vendor?.vin });
 };

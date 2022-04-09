@@ -1,5 +1,6 @@
 <script setup>
 import axios from "axios";
+import { utils, log } from "@/lib/utils";
 import { nextTick, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useMutation, useQueryClient } from "vue-query";
@@ -62,7 +63,7 @@ const { mutate: createPageTab } = useMutation(
 );
 
 const { mutate: updatePageTab } = useMutation(
-  (data) => axios.post("/user_ui_tabs/update", data).then((res) => res.data),
+  (data) => axios.post("/user_ui_tabs/update", data).then((res) => res.data), // TODO : save tabs in local storage
   {
     onSuccess(data) {
       queryClient.setQueryData(["pageTabs", props.pageName], () => data);
@@ -135,15 +136,25 @@ const tabChanged = (index) => {
 watch(
   () => tabStore.selectedIndex,
   (newValue) => {
-    console.clear(); // TODO: Remove
-    console.log(route.path);
     scrollTabToView();
     if (
       newValue !== -1 &&
       route.path !== props.pageName &&
-      parseInt(route.params?.id) !== tabStore.tabs[newValue]?.id
+      route.params?.id != tabStore.tabs[newValue]?.id
     ) {
+      console.log(newValue);
       router.push(`/${props.pageName}/${tabStore.tabs[newValue]?.id}`);
+    }
+  }
+);
+
+watch(
+  () => route.params?.id,
+  (val) => {
+    if (utils.getKeys(global.latest).includes(props.pageName)) {
+      console.log(`setting latest for ${props.pageName}: ${val}`);
+      global.setLatest(val, props.pageName);
+      tabChanged(tabStore.selectedIndex);
     }
   }
 );
@@ -181,25 +192,33 @@ const afterAnimated = () => {
         ref="tabListButtonWrapper"
       >
         <!-- home tab -->
-        <div v-if="hasHome">
+        <router-link
+          v-if="hasHome"
+          :to="`/${props.pageName}`"
+          class="px-[24px] active:scale-[0.9]"
+        >
           <svg
-            class="h-[18px] w-[18px]"
             xmlns="http://www.w3.org/2000/svg"
             xmlns:xlink="http://www.w3.org/1999/xlink"
             viewBox="0 0 24 24"
+            class="h-[18px] w-[18px]"
           >
-            <g fill="none">
+            <g :fill="route.path === props.pageName ? '#007AFF' : 'white'">
               <path
                 d="M10.55 2.533a2.25 2.25 0 0 1 2.9 0l6.75 5.695c.508.427.8 1.056.8 1.72v9.802a1.75 1.75 0 0 1-1.75 1.75h-3a1.75 1.75 0 0 1-1.75-1.75v-5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0-.75.75v5a1.75 1.75 0 0 1-1.75 1.75h-3A1.75 1.75 0 0 1 3 19.75V9.947c0-.663.292-1.292.8-1.72l6.75-5.694z"
-                fill="white"
+                fill="currentColor"
               ></path>
             </g>
           </svg>
-        </div>
+        </router-link>
         <div
-          class="scrollbar:h-0 scrollbar:w-0 flex items-center overflow-x-auto"
+          v-if="hasHome"
+          class="w-[2px] h-[24px] bg-background_light dark:bg-dark_border"
+        ></div>
+        <div
           ref="scrollWrapper"
           style="scrollbar-width: none"
+          class="scrollbar:h-0 scrollbar:w-0 flex items-center overflow-x-auto"
         >
           <TabList v-slot="{ selectedIndex }">
             <nav
@@ -220,6 +239,7 @@ const afterAnimated = () => {
                   :key="tab?.id"
                 >
                   <router-link
+                    class="flex"
                     :to="`/${props.pageName}/${tab?.id}`"
                     custom
                     v-slot="{ href, navigate, isActive }"
@@ -227,7 +247,7 @@ const afterAnimated = () => {
                     <tab
                       class="relative max-w-xs scroll-mr-3 focus:outline-none"
                       :class="[
-                        isActive
+                        tabIdx === selectedIndex || route.path === props.pageName
                           ? 'bg-accent text-primary before:bg-primary font-medium before:absolute before:inset-y-0 before:left-0 before:h-full before:w-1 focus:outline-none'
                           : 'font-medium text-black/75 dark:text-white',
                       ]"
@@ -249,7 +269,7 @@ const afterAnimated = () => {
                     <svg
                       class="cubic-timing-tab h-2 w-2 text-red-500 transition-transform duration-300 group-hover:scale-100"
                       :class="[
-                        tabIdx === selectedIndex && route.path === props.pageName
+                        tabIdx === selectedIndex || route.path === props.pageName
                           ? 'scale-100'
                           : 'scale-0',
                       ]"

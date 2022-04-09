@@ -17,8 +17,6 @@ import { useDebounce } from "@vueuse/core";
 import { fetchPaginatedData, fetchById } from "@/hooks";
 import { useGlobalState } from "@/store/global";
 import { useMutation, useQueryClient } from "vue-query";
-import { useTabsViewStore } from "@/store/vehicleTabs";
-import { useVehicles as useVendors } from "@/store/vehicles";
 import { log, utils } from "@/lib/utils";
 import { useMessage } from "naive-ui";
 
