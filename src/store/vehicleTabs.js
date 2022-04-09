@@ -4,7 +4,7 @@ import { computed, ref } from "vue";
 export const useTabsViewStore = defineStore("vehicles-tabs-view", () => {
   const tabs = ref([]);
   
-  const findTabIndex = (vin) => tabs.value.findIndex((tab) => tab.id === vin);
+  const findTabIndex = (vin) => tabs.value.findIndex((tab) => tab.vin === vin);
   
   const selectedIndex = computed(() =>
     tabs.value.findIndex((tab) => tab.active)
@@ -13,7 +13,6 @@ export const useTabsViewStore = defineStore("vehicles-tabs-view", () => {
   const initTabs = (payload) => (tabs.value = payload);
   
   const addTab = (payload) => {
-    console.log('adding tab inside of store');
     const index = findTabIndex(payload.vin);
     if (index === -1) {
       tabs.value = tabs.value
