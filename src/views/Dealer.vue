@@ -82,12 +82,16 @@ function handleTabClick(e) {
 <template>
   <div
     id="details"
-    class="__section __vendor-card mt-4 grid grid-cols-12 rounded border-2 bg-white p-6 dark:border-0 dark:bg-foreground_dark"
+    class="__section __dealer-card __details mt-0 grid grid-cols-12 rounded-round bg-foreground_light p-6 dark:bg-foreground_dark"
   >
     <!-- left side -->
-    <div class="__form col-span-12 flex flex-col justify-between md:col-span-12">
+    <div
+      class="__form col-span-12 flex flex-col justify-between md:col-span-12"
+    >
       <div class="__title col-span-6">
-        <h3 class="mb-2 translate-x-2 font-bold">Dealer</h3>
+        <h3 class="mb-2 translate-x-2 font-bold uppercase opacity-[0.44]">
+          Dealer
+        </h3>
         <CustomInput
           type="header"
           placeholder="Name"
@@ -322,16 +326,22 @@ function handleTabClick(e) {
     id="__subtabs"
     type="basic"
     ref="dealerTab"
-    class="bg-foreground_light dark:bg-foreground_dark sticky top-[-2px] left-0 z-40 mt-[24px] w-full rounded-round duration-300"
+    class="sticky top-[-2px] left-0 z-40 mt-[24px] w-full rounded-round bg-foreground_light duration-300 dark:bg-foreground_dark"
     :items="dealerTabs"
   />
 
-  <DealerContacts id="dealer-contacnts" />
+  <DealerContacts id="dealer-contacnts" class="__section" />
 </template>
 
 <style lang="scss">
-#__subtabs[stuck] {
-  @apply bg-[#f9fafb] dark:bg-[#25272A];
-  @apply rounded-none border-2 border-none border-transparent shadow-lg shadow-[#00000011];
+#__subtabs[stuck],
+.__tabs[stuck] {
+  @apply rounded-none bg-[#F4F6F8] shadow-lg shadow-[#00000011] dark:bg-dark_border;
+}
+.__veil {
+  width: calc(100vw - 370px);
+}
+.__section {
+  @apply scroll-mt-[100px] rounded-md;
 }
 </style>

@@ -1,4 +1,4 @@
-<script setup>
+<!--script setup>
 import { computed, h, ref, watch } from "vue";
 import ActionButtons from "@/components/vendor/ActionButtons.vue";
 import { vendorInvoices } from "@/hooks/vendor";
@@ -66,9 +66,9 @@ function showEditExpenseForm(row) {
   formRow.value = obj;
   visibleEditForm.value = true;
 }
-</script>
+</script-->
 
-<template>
+<!--template>
   <div
     id="expenses"
     class="mt-[24px] scroll-smooth border-[1px] border-transparent dark:border-dark_border"
@@ -93,4 +93,4 @@ function showEditExpenseForm(row) {
       </div>
     </div>
   </div>
-</template>
+</template-->

@@ -4,11 +4,21 @@ import { useDark, useToggle } from "@vueuse/core";
 import { watchEffect, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useGlobalState } from "../store/global";
-import { useVendors } from "../store/vendors";
 
 const route = useRoute();
 
-const hasList = ["Vendor", "Buyers Overview"];
+const hasList = [
+  "Vendor",
+  "Buyers Overview",
+  "SingleAuction",
+  "DealerHome",
+  "SingleDealer",
+  "LenderHome",
+  "Lender",
+  "Inventory",
+  "InventoryHome",
+  "Vehicle",
+];
 
 const userMenu = [
   {
@@ -25,7 +35,6 @@ const userMenu = [
   },
 ];
 
-const vendorStore = useVendors();
 const global = useGlobalState();
 const commandPallet = useCommandPalletStore();
 
@@ -34,7 +43,6 @@ const toggleDark = useToggle(isDark);
 
 watchEffect(() => {
   global.setDark(isDark.value);
-  console.log(route);
 });
 </script>
 
@@ -48,7 +56,7 @@ watchEffect(() => {
         <ul class="menu-items flex w-[60px] flex-col items-center">
           <li
             @click="commandPallet.toggleCommandPallet"
-            class="rounded-round !bg-primary hover:!bg-primary/[0.44] !mt-5 !mb-5 h-[40px] w-[40px] !border-transparent text-lg font-bold"
+            class="!mt-5 !mb-5 h-[40px] w-[40px] rounded-round !border-transparent !bg-primary text-lg font-bold hover:!bg-primary/[0.44]"
           >
             PB
           </li>
@@ -92,7 +100,7 @@ watchEffect(() => {
               </svg>
             </li>
           </router-link>
-          <router-link to="/inventory">
+          <router-link :to="`/inventory/${global.latest?.inventory ?? ''}`">
             <li content="Inventory" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
                 width="19"
@@ -240,7 +248,7 @@ watchEffect(() => {
               </svg>
             </li>
           </router-link>
-          <router-link :to="`/vendors/${vendorStore.latest}`">
+          <router-link :to="`/vendors/${global.latest?.vendor || 1}`">
             <li content="Vendors" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
                 width="19"
@@ -258,7 +266,7 @@ watchEffect(() => {
               </svg>
             </li>
           </router-link>
-          <router-link :to="`/#reports`">
+          <router-link :to="`reports`">
             <li content="Reports" v-tippy="{ placement: 'right', duration: 50 }">
               <svg
                 width="18"
@@ -352,7 +360,7 @@ li svg {
 }
 .menu-items li,
 .menu-footer {
-  @apply hover:bg-primary/[0.44] rounded-round my-[3px] flex h-[45px] w-[45px] cursor-pointer items-center justify-center border-[2px] border-transparent duration-200;
+  @apply my-[3px] flex h-[45px] w-[45px] cursor-pointer items-center justify-center rounded-round border-[2px] border-transparent duration-200 hover:bg-primary/[0.44];
 }
 .menu-items li img,
 .menu-footer img {
@@ -374,7 +382,7 @@ li svg {
 }
 
 .menu-items .router-link-active > li {
-  @apply bg-primary/[0.44] border-primary bg-opacity-30;
+  @apply border-primary bg-primary/[0.44] bg-opacity-30;
   position: relative;
 }
 </style>

@@ -11,8 +11,7 @@ import { objectFilter } from "@/lib/helper";
 // States
 const showDrawer = ref(false);
 const initialForm = {
-  name: "",
-  din: "",
+  company: "",
   address_one: "",
   address_two: "",
   phone: "",
@@ -20,8 +19,6 @@ const initialForm = {
   state: null,
   city: "",
   zip: "",
-  fax: "",
-  notes: "",
 };
 
 const formRef = ref(null);
@@ -32,11 +29,11 @@ const form = ref({ ...initialForm });
 const { data: statesList } = getStates();
 
 // Mutations
-const { mutateAsync: createDealer, isLoading } = useMutation(
-  (data) => axios.post("/dealers/store", data),
+const { mutateAsync: createLender, isLoading } = useMutation(
+  (data) => axios.post("/lenders", data),
   {
     onSuccess() {
-      message.success("Dealer created Successfully");
+      message.success("Lender created Successfully");
       form.value = { ...initialForm };
       showDrawer.value = false;
     },
@@ -49,44 +46,17 @@ const { mutateAsync: createDealer, isLoading } = useMutation(
     },
   }
 );
-async function addDealer() {
+async function addLender() {
   try {
     await formRef.value.validate();
-    await createDealer(objectFilter(form.value, (key, value) => value));
+    await createLender(objectFilter(form.value, (key, value) => value));
   } catch {}
 }
 
-/**
- *
- * @param {} e Event
- */
-const handleVendorCategorySelectScroll = (e) => {
-  const currentTarget = e.currentTarget;
-
-  if (
-    currentTarget.scrollTop + currentTarget.offsetHeight >=
-    currentTarget.scrollHeight
-  ) {
-    if (hasMoreVendorCategory.value) {
-      fetchNextVendorCategory.value();
-    }
-  }
-};
-
 const rules = {
-  name: {
+  company: {
     required: true,
-    message: "Name is required",
-    trigger: ["input"],
-  },
-  din: {
-    required: true,
-    message: "Please enter a valid DIN",
-    trigger: ["input"],
-  },
-  tax_id_number: {
-    required: true,
-    message: "Please enter a valid Tax ID #",
+    message: "Company is required",
     trigger: ["input"],
   },
   address_one: {
@@ -122,15 +92,6 @@ const rules = {
         return new Error("Please enter a valid phone number");
     },
   },
-  fax: {
-    required: true,
-    trigger: ["input", "blur"],
-    validator(rules, value) {
-      if (value === "") return true;
-      if (!/^[(]\d{3}[)][\s]?\d{3}[-\s]?\d{4}$/.test(value))
-        return new Error("Please enter a valid phone number");
-    },
-  },
   zip: {
     required: true,
     message: "Please enter a Zip Code",
@@ -145,7 +106,7 @@ const rules = {
 </script>
 <template>
   <n-tooltip trigger="hover">
-    Add Dealer
+    Add Lender
     <template #trigger>
       <n-button @click="showDrawer = true">
         <n-icon>
@@ -164,7 +125,7 @@ const rules = {
     </template>
   </n-tooltip>
   <n-drawer v-model:show="showDrawer" :width="500">
-    <n-drawer-content title="Add Dealer">
+    <n-drawer-content title="Add Lender">
       <n-form
         :model="form"
         :label-width="90"
@@ -173,21 +134,13 @@ const rules = {
         :disabled="isLoading"
         ref="formRef"
       >
-        <n-form-item label="Name" path="name">
+        <n-form-item label="Company" path="company">
           <n-input
             type="text"
-            placeholder="Enter Name"
+            placeholder="Enter Company"
             clearable
-            v-model:value.trim="form.name"
+            v-model:value.trim="form.company"
             :loading="isLoading"
-          />
-        </n-form-item>
-        <n-form-item label="DIN" path="din">
-          <n-input
-            type="text"
-            placeholder="Enter DIN"
-            clearable
-            v-model:value.trim="form.din"
           />
         </n-form-item>
         <n-form-item label="Address" path="address_one">
@@ -259,23 +212,6 @@ const rules = {
             :loading="isLoading"
           />
         </n-form-item>
-        <n-form-item label="Fax">
-          <masked-input
-            mask="(###) ###-####"
-            placeholder="Enter Fax #"
-            clearable
-            v-model:value.trim="form.fax"
-          />
-        </n-form-item>
-        <n-form-item label="Comments">
-          <n-input
-            type="textarea"
-            show-count
-            placeholder="Enter Comments"
-            clearable
-            v-model:value.trim="form.comments"
-          />
-        </n-form-item>
       </n-form>
 
       <template #footer>
@@ -283,7 +219,7 @@ const rules = {
           size="large"
           :disabled="isLoading"
           :loading="isLoading"
-          @click="addDealer"
+          @click="addLender"
           >Add</n-button
         >
       </template>

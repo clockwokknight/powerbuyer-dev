@@ -16,9 +16,8 @@ const route = useRoute();
     class="relative px-3 py-2 mb-[12px] ml-[13px] mr-[13px] rounded-round duration-100 border-b-[1px] border-b-transparent odd:bg-white hover:bg-background_light dark:border-b-transparent dark:odd:bg-foreground_dark dark:even:bg-foreground_dark dark:hover:bg-background_dark"
     @click="$emit('click:tab', vendor)"
   >
-    <!-- Company Name -->
     <router-link
-      :to="{ name: 'Vendor', params: { id: vendor?.id } }"
+      :to="{ name: 'Vendor', params: { id: vendor.id } }"
       active-class="text-primary dark:text-white"
       class="block"
     >
@@ -31,7 +30,7 @@ const route = useRoute();
               : 'text-black dark:text-white'
           "
         >
-          {{ vendor?.name }}
+          {{ vendor.name }}
         </h2>
       </div>
       <div class="__subtext text-[10px] mb-1 flex">

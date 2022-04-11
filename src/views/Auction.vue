@@ -9,8 +9,6 @@ import { useIntersectionObserver } from "@vueuse/core";
 import Tabs from "@/components/common/Tabs.vue";
 import VehiclesAtAuction from "@/components/auction/VehiclesAtAuction.vue";
 import VehiclesSold from "@/components/auction/VehiclesSold.vue";
-import PaymentsMade from "@/components/auction/PaymentsMade.vue";
-import PaymentsReceived from "@/components/auction/PaymentsReceived.vue";
 
 const route = useRoute();
 
@@ -51,14 +49,6 @@ const auctionTabs = ref([
   {
     title: "VEHICLES SOLD",
     value: "#vehicles-sold",
-  },
-  {
-    title: "PAYMENTS MADE",
-    value: "#payments-made",
-  },
-  {
-    title: "PAYMENTS RECEIVED",
-    value: "#payments-received",
   },
 ]);
 
@@ -110,12 +100,12 @@ function handleTabClick(e) {
 <template>
   <div
     id="details"
-    class="__section __vendor-card mt-4 grid grid-cols-12 rounded-roundborder-2 bg-white p-6 dark:border-0 dark:bg-[#25272A]"
+    class="__section __vendor-card __details bg-foreground_light dark:bg-foreground_dark mt-0 grid grid-cols-12 rounded-round p-6"
   >
     <!-- left side -->
-    <div class="__form col-span-12 flex flex-col justify-between md:col-span-8">
+    <div class="__form col-span-12 flex flex-col justify-between md:col-span-12">
       <div class="__title">
-        <h3 class="mb-2 translate-x-2 font-bold">Auction</h3>
+        <h3 class="mb-2 translate-x-2 font-bold uppercase opacity-[0.44]">Auction</h3>
         <CustomInput
           type="header"
           placeholder="Company Name"
@@ -250,23 +240,27 @@ function handleTabClick(e) {
     id="__subtabs"
     type="basic"
     ref="auctionTab"
-    class="sticky top-[-2px] left-0 z-40 mt-4 w-full rounded-roundborder-2 border-gray-200 bg-white duration-300 dark:border-0 dark:bg-[#25272A]"
+    class="bg-foreground_light dark:bg-foreground_dark sticky top-[-2px] left-0 z-40 mt-[24px] w-full rounded-round duration-300"
     :items="auctionTabs"
     @click="handleTabClick"
   />
 
   <VehiclesAtAuction class="__section" />
   <VehiclesSold class="__section" />
-  <PaymentsMade class="__section" />
-  <PaymentsReceived class="__section" />
   <Suspense>
     <template #default><VendorContacts class="__section" /></template>
     <template #fallback> Loading... </template>
   </Suspense>
 </template>
 <style lang="scss">
-#__subtabs[stuck] {
-  @apply bg-[#f9fafb] dark:bg-[#25272A];
-  @apply rounded-none border-2 border-none border-transparent shadow-lg shadow-[#00000011];
+#__subtabs[stuck],
+.__tabs[stuck] {
+  @apply dark:bg-dark_border rounded-none bg-[#F4F6F8] shadow-lg shadow-[#00000011];
+}
+.__veil {
+  width: calc(100vw - 370px);
+}
+.__section {
+  @apply scroll-mt-[100px] rounded-md;
 }
 </style>

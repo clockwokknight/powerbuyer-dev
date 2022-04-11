@@ -1,45 +1,47 @@
 <script setup>
+import axios from "axios";
+import { fetchPaginatedData } from "@/hooks";
+import { utils, log } from "@/lib/utils";
+
 import { ref, watch } from "vue";
 import { useQuery } from "vue-query";
 import { useDebounce } from "@vueuse/core";
-import { getVendors } from "@/hooks/vendor";
+import { useRoute } from "vue-router";
+
 import { useGlobalState } from "@/store/global";
 import { useTabsViewStore } from "@/store/tabs";
-import { useVendors } from "@/store/vendors";
-import axios from "axios";
 
 import AddVendor from "@/components/vendor/AddVendor.vue";
 import PageTabs from "@/components/PageTabs.vue";
 import VendorList from "@/components/vendor/VendorList.vue";
+import Tabs from "@/components/common/Tabs.vue";
+import Card from "@/components/_refactor/Card.vue";
 
 const tabStore = useTabsViewStore();
 const global = useGlobalState();
-const vendorStore = useVendors();
+
+const route = useRoute();
 
 const searchText = ref("");
 const debouncedSearchText = useDebounce(searchText, 500);
 
 const listActive = ref(!global.isMobile);
 
-// Showing All Vendors
-
 const {
   data: vendors,
   isLoading: isVendorsLoading,
   hasNextPage: hasVendorNextPage,
   fetchNextPage: vendorFetchNextPage,
-} = getVendors();
+} = fetchPaginatedData("/vendors");
 
 const addTab = (vendor) => {
-  vendorStore.SET_LATEST(vendor?.id);
   listActive.value = global.isMobile ? false : listActive.value;
   tabStore.addTab({ id: vendor?.id, name: vendor?.name });
 };
 
-// Vendor Search Result
-
-const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
-  useQuery(["vendorSearch", debouncedSearchText], ({ queryKey }) => {
+const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQuery(
+  ["vendorSearch", debouncedSearchText],
+  ({ queryKey }) => {
     if (queryKey[1] === "") return null;
     else
       return axios.get(`/vendors/search/${queryKey[1]}`).then((res) => {
@@ -48,7 +50,8 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
         }
         return res.data;
       });
-  });
+  }
+);
 
 function toggleListSlide() {
   listActive.value = !listActive.value;
@@ -72,7 +75,7 @@ watch(
     >
       <!-- SearchList.vue / -->
       <aside
-        class="pageItemsList bg-background_light dark:border-dark_border dark:bg-background_dark relative h-screen min-w-[275px] max-w-[275px] overflow-x-hidden dark:border-r-[1px]"
+        class="pageItemsList relative h-[calc(100vh-48px)] min-w-[275px] max-w-[275px] overflow-x-hidden bg-background_light dark:border-r-[1px] dark:border-dark_border dark:bg-background_dark"
       >
         <div
           class="bg-foreground_light dark:bg-foreground_dark sticky top-0 z-50 p-3 pb-0"
@@ -154,8 +157,8 @@ watch(
       <div
         id="mobile-slider"
         style="backdrop-filter: blur(36px)"
-        :class="listActive ? 'ml-[-60px] !w-[335px]' : '!bg-dark_border'"
-        class="bg-background_light/50 dark:bg-dark_border/50 absolute bottom-0 left-0 flex h-[48px] w-[276px] cursor-pointer flex-row items-center justify-between bg-black px-4 shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] duration-[500ms]"
+        :class="listActive ? '!w-[335px] ml-[-60px]' : '!bg-dark_border'"
+        class="absolute bottom-[-48px] w-[276px] duration-[500ms] h-[48px] flex flex-row justify-between bottom-0 left-0 bg-background_light/50 dark:bg-dark_border/50 bg-black items-center shadow-[0_-3px_11px_-5px_rgba(0,0,0,0.25)] px-4 cursor-pointer"
         @click="listActive = !listActive"
       >
         <div
@@ -170,9 +173,7 @@ watch(
           >
             <svg
               class="absolute h-4 w-4 duration-[500ms]"
-              :class="
-                listActive ? 'ml-[0px] rotate-0' : 'ml-[432px] rotate-180'
-              "
+              :class="listActive ? 'ml-[0px] rotate-0' : 'ml-[432px] rotate-180'"
               viewBox="0 0 24 24"
             >
               <path
@@ -199,10 +200,7 @@ watch(
     >
       <PageTabs :class="global.stuck[0] && 'shadow-lg'" page-name="vendors" />
       <!-- Main Body Content-->
-      <div
-        id="main"
-        class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden"
-      >
+      <div id="main" class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden">
         <main id="container" class="min-h-full p-2 md:p-6">
           <router-view />
         </main>

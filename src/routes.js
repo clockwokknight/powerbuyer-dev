@@ -7,9 +7,11 @@ const Auction = () => import("@/views/Auction.vue");
 const AuctionHome = () => import("@/components/auction/AuctionHome.vue");
 const Buyers = () => import("@/views/Buyers.vue");
 const Buyer = () => import("@/views/Buyer.vue");
-import Lenders from "@/views/Lenders.vue";
-import Lender from "@/views/Lender.vue";
-import Inventory from "@/views/Inventory.vue";
+const Lenders = () => import("@/views/Lenders.vue");
+const Lender = () => import("@/views/Lender.vue");
+const LenderHome = () => import("@/components/lender/LenderHome.vue");
+import Vehicles from "@/views/Vehicles.vue";
+const VehiclesHome = () => import("@/views/VehiclesHome.vue");
 import Vehicle from "@/views/Vehicle.vue";
 const Vendors = () => import("@/views/Vendors.vue");
 const Vendor = () => import("@/views/Vendor.vue");
@@ -29,7 +31,6 @@ import Components from "@/views/_refactor/Components.vue";
 
 export const router = createRouter({
   history: createWebHistory(),
-
   routes: [
     {
       path: "/",
@@ -79,16 +80,35 @@ export const router = createRouter({
       path: "/lenders",
       name: "Lenders",
       component: Lenders,
-    },
-    {
-      path: "/lender",
-      name: "Lender",
-      component: Lender,
+      children: [
+        {
+          path: "",
+          name: "LenderHome",
+          components: LenderHome,
+        },
+        {
+          path: ":id",
+          name: "Lender",
+          component: Lender,
+        },
+      ],
     },
     {
       path: "/inventory",
-      name: "Inventory",
-      component: Inventory,
+      name: "Vehicles",
+      component: Vehicles,
+      children: [
+        {
+          path: "",
+          name: "Inventory",
+          component: VehiclesHome,
+        },
+        {
+          path: ":id",
+          name: "Vehicle",
+          component: Vehicle,
+        },
+      ],
     },
     {
       path: "/vendors",
@@ -150,11 +170,6 @@ export const router = createRouter({
       component: Deal,
     },
     {
-      path: "/vehicle",
-      name: "Vehicle",
-      component: Vehicle,
-    },
-    {
       path: "/system",
       name: "System",
       component: OtherSystemMenus,
@@ -173,8 +188,6 @@ router.beforeEach(async (to, from, next) => {
   loading && loading.start();
   next();
   loading && loading.finish();
-  console.clear();
-  console.log(to.name);
   document.title = window.innerWidth <= 768 
     ? `${to.name} – PowerBuyer (Mobile)` 
     : `${to.name} – PowerBuyer`;

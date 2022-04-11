@@ -12,7 +12,6 @@ export default {
   },
   add(data) {
     console.log(data);
-    //console.log(api.post( '/vendors/store', data ))
     return api.post("/vehicles/store", data);
   },
 };

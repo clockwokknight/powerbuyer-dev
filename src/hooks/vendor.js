@@ -3,9 +3,7 @@ import axios from "axios";
 import { computed, unref } from "vue";
 
 export const useVendorCategories = () =>
-  useInfiniteQuery(
-    "vendorCategory",
-    ({ pageParam = 1 }) =>
+  useInfiniteQuery("vendorCategory", ({ pageParam = 1 }) =>
       axios.get("/vendor_categories?page=" + pageParam).then((res) => res.data),
     {
       refetchOnMount: false,
