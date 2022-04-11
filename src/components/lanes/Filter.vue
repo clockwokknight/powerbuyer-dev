@@ -1,51 +1,54 @@
 <script setup>
-import { reactive, computed, ref } from "vue";
+import { reactive, computed, ref, unref, watchEffect, toRaw } from "vue";
 import { useInfiniteQuery, useQuery } from "vue-query";
 import axios from "axios";
+import { getGmtvLocations } from "@/hooks/location";
+import { getVehicleMakes, laneFilter } from "./lanes.hook";
+import { clone } from "@/lib/helper";
+import { allFilterPossibleOptions } from "@/components/lanes/lanes.helper";
+import CustomInput from "@/components/common/CustomInput.vue";
+import dayjs from "dayjs";
 
-// Vehicle Make
-const selectedVehicleMake = ref(null);
-const isVehicleMakeSelected = computed(() => !!selectedVehicleMake.value);
+const emits = defineEmits(["filter"]);
+const {
+  vehicleColorOptions,
+  gmtvLocationOptions,
+  vehicleMakeOptions,
+  vehicle_makes,
+} = laneFilter();
 
-const { data: vehicle_makes, isLoading: isVehicleMakeLoading } = useQuery(
-  ["vehicle", "makes"],
-  () => axios.get("/vehicle_makes").then((res) => res.data)
-);
-const vehicleMakeOptions = computed(() =>
-  vehicle_makes.value?.map((make) => ({
-    label: make.name,
-    value: make.name.toLowerCase(),
-  }))
-);
-
-// Vehicle Year
-const selectedVehicleMakeId = ref(null);
-const isVehicleMakeIdSelected = computed(() => !!selectedVehicleMakeId.value);
-
-const { data: vehicle_years, isLoading: vehicleYearLoading } = useQuery(
-  ["vehicle", "year", selectedVehicleMake],
-  ({ queryKey }) =>
-    axios
-      .get("/vehicle_makes/year_make?make=" + queryKey[2])
-      .then((res) => res.data),
+const filters = ref([
   {
-    enabled: isVehicleMakeSelected,
-  }
-);
-const vehicleYearOptions = computed(() =>
-  vehicle_years.value?.map((vehicle_make) => ({
-    label: vehicle_make.year,
-    value: vehicle_make.id,
-  }))
-);
+    type: null,
+  },
+]);
 
-// Vehicle Model
-const selectedVehicleModelId = ref(null);
-const isVehicleModelIdSelected = computed(() => !!selectedVehicleModelId.value);
+const filterOptions = ref([]);
 
+watchEffect(() => {
+  filterOptions.value = allFilterPossibleOptions.map(
+    (filterPossibleOption) => ({
+      label: filterPossibleOption.label,
+      value: filterPossibleOption.value,
+      disabled:
+        (filterPossibleOption?.depends &&
+          !filters.value.some((filter) =>
+            filterPossibleOption?.depends?.includes(filter.id)
+          )) ||
+        filters.value.some((filter) => filter?.id === filterPossibleOption.id),
+    })
+  );
+});
+
+const vehicleMakeId = computed(
+  () => filters?.value.find((filter) => filter?.id === "make")?.field
+);
+const isVehicleMakeIdSelected = computed(() =>
+  filters?.value.some((filter) => filter?.id === "make")
+);
 const { data: vehicleModels, isLoading: vehicleModelLoading } =
   useInfiniteQuery(
-    ["vehicle", "model", selectedVehicleMakeId],
+    ["vehicle", "model", vehicleMakeId],
     ({ queryKey, pageParam = 1 }) =>
       axios
         .get(
@@ -76,72 +79,134 @@ const vehicleModelOptions = computed(() =>
     []
   )
 );
-
-// Vehicle Trim
-const selectedVehicleTrim = ref(null);
-const isSelectedVehicleTrim = computed(() => !!isSelectedVehicleTrim.value);
-
-const { data: vehicleTrims, isLoading: vehicleTrimLoading } = useQuery(
-  ["vehicle", "trim", selectedVehicleModelId],
-  ({ queryKey }) =>
-    axios
-      .get("/vehicle_model_trim?vehicle_model_id=" + queryKey[2])
-      .then((res) => res.data),
-  {
-    enabled: isVehicleModelIdSelected,
+const onFilter = () => {
+  // const getYearFromMakeId = vehicleYearOptions.value?.find(
+  //   (option) => option.value === selectedVehicleMakeId.value
+  // )?.label;
+  // const filterObj = {
+  //   make: unref(selectedVehicleMake),
+  //   gmtv_location_id: unref(gmtv_location_id),
+  //   year: getYearFromMakeId,
+  // };
+  let filterObj = {};
+  filters.value?.forEach((filter) => {
+    if (filter?.fields) {
+      if (filter.filter_type === "date_picker_range") {
+        const fieldsToObj = filter.id
+          .split(",")
+          .map((field, index) => [
+            field,
+            dayjs(filter.fields[index]).format("YYYY-MM-DD"),
+          ]);
+        filterObj = { ...filterObj, ...Object.fromEntries(fieldsToObj) };
+      } else if (filter.filter_type === "input_range") {
+        filterObj[filter.id] = filter.fields.join("-");
+      }
+    } else if (filter?.field) {
+      filterObj[filter.id] = filter.field;
+    }
+  });
+  // TODO: will remove that once it's fixed
+  if (filterObj.make) {
+    filterObj.make = vehicle_makes.value
+      ?.find((make) => make.id === filterObj.make)
+      .name.toLowerCase();
   }
-);
-const vehicleTrimOptions = computed(() =>
-  vehicleTrims.value?.map((trim) => ({
-    label: trim.name,
-    value: trim.id,
-  }))
-);
+  console.log(filterObj);
+  emits("filter", Object.assign({}, filterObj));
+};
 
-// Vehicle Color
-const selectedVehicleColor = ref(null);
-// const isVehicleColorSelected = computed(() => !!isVehicleColorSelected);
-
-const { data: vehicleColors } = useQuery(
-  ["vehicle", "colors", selectedVehicleTrim],
-  () => axios.get("/vehicle_colors").then((res) => res.data)
-);
+const onFilterSelect = (value, index) => {
+  // console.log({ value, index });
+  const parsedValue = JSON.parse(value);
+  let obj = { filter_type: parsedValue.filter_type, id: parsedValue.fields };
+  if (parsedValue.filter_type.includes("range")) {
+    obj.fields = null;
+  } else {
+    obj.field = null;
+  }
+  if (parsedValue.filter_type === "select") {
+    if (parsedValue.fields === "color") {
+      obj.options = vehicleColorOptions;
+    } else if (parsedValue.fields === "gmtv_location_id") {
+      obj.options = gmtvLocationOptions;
+    } else if (parsedValue.fields === "make") {
+      obj.options = vehicleMakeOptions;
+    } else if (parsedValue.fields === "model") {
+      obj.options = vehicleModelOptions;
+    }
+  }
+  filters.value[index] = { type: value, ...obj };
+};
 </script>
 
 <template>
-  <n-form-item label="Vehicle Make">
-    <n-select
-      :options="vehicleMakeOptions"
-      v-model:value="selectedVehicleMake"
-    />
-  </n-form-item>
-  <n-form-item label="Vehicle Year" v-if="isVehicleMakeSelected">
-    <n-skeleton v-if="vehicleYearLoading" :width="300" size="medium" />
-    <n-select
-      v-else
-      :loading="vehicleYearLoading"
-      :options="vehicleYearOptions"
-      v-model:value="selectedVehicleMakeId"
-    />
-  </n-form-item>
-  <n-form-item label="Vehicle Model" v-if="isVehicleMakeIdSelected">
-    <n-skeleton size="medium" :width="300" v-if="vehicleModelLoading" />
-    <n-select
-      v-else
-      :options="vehicleModelOptions"
-      v-model:value="selectedVehicleModelId"
-    />
-  </n-form-item>
-  <n-form-item label="Vehicle Trim" v-if="isVehicleModelIdSelected">
-    <n-skeleton size="medium" :width="300" v-if="vehicleTrimLoading" />
-    <n-select
-      v-else
-      :options="vehicleTrimOptions"
-      v-model:value="selectedVehicleTrim"
-    />
-  </n-form-item>
-  <!--  <n-form-item label="Vehicle Color" v-if="isSelectedVehicleTrim">-->
-  <!--    <n-select :options="" />-->
+  <!--  <n-form-item label="Select GMTV location">-->
+  <!--    <n-select-->
+  <!--      :options="gmtvLocationOptions"-->
+  <!--      filterable-->
+  <!--      clearable-->
+  <!--      v-model:value="gmtv_location_id"-->
+  <!--      :loading="gmtvLocationLoading"-->
+  <!--    />-->
   <!--  </n-form-item>-->
-  <n-button type="primary" :disabled="isVehicleMakeLoading">Filter</n-button>
+  <n-dynamic-input
+    class="custom-dynamic-input"
+    v-model:value="filters"
+    @create="() => ({ type: null })"
+    #="{ value, index }"
+  >
+    <div style="grid-area: a">
+      <CustomInput
+        basic
+        type="select"
+        label="Filter By"
+        @update:value="(value) => onFilterSelect(value, index)"
+        :options="filterOptions"
+        :value="value.type"
+      />
+    </div>
+    <div style="grid-area: c" class="flex flex-col gap-y-3">
+      <n-date-picker
+        type="daterange"
+        :value="value?.fields"
+        format="MM/dd/yyyy"
+        @update:value="(val) => (value.fields = val)"
+        v-if="value?.filter_type === 'date_picker_range'"
+      />
+      <n-input
+        pair
+        separator="-"
+        :value="value?.fields"
+        @update:value="(val) => (value.fields = val)"
+        v-if="value?.filter_type === 'input_range'"
+      />
+      <n-select
+        :value="value?.field"
+        :options="value?.options"
+        @update:value="(val) => (value.field = val)"
+        v-if="value?.filter_type === 'select'"
+      />
+    </div>
+  </n-dynamic-input>
+  <n-button type="primary" @click="onFilter" class="mt-6"> Filter </n-button>
 </template>
+
+<style lang="scss" scoped>
+.custom-dynamic-input {
+  :deep(.n-dynamic-input-item) {
+    @apply grid gap-y-3 gap-x-4 bg-gray-50 p-5 dark:bg-background_dark;
+    grid-template-areas:
+      "a a b"
+      "c c c";
+    grid-template-rows: 40px 1fr;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  :deep(.n-dynamic-input-item__action) {
+    margin: initial;
+    place-self: self-end;
+    align-self: center;
+    grid-area: b;
+  }
+}
+</style>

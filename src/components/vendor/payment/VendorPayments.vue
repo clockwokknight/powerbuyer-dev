@@ -55,11 +55,12 @@ const showEditPaymentForm = (row) => {
     "recipient_name",
     "invoice_number",
   ]);
-  // We are going to need to change if API changes
+  // INFO: We are going to need to change if API changes
   obj.payment_invoices = obj.payment_invoices.map((invoice) => ({
     id: invoice.id,
     vendor_invoice_id: invoice.vendor_invoice_id,
     payment_amount: invoice.payment_amount,
+    type: invoice.type,
     invoices: [invoice.invoices[0]],
   }));
 
@@ -86,9 +87,14 @@ watch(
 
 <template>
   <div class="bordered mt-[24px] rounded-round font-sans">
-    <VendorPaymentEdit :initial-data="formRow" v-model:show-drawer="visibleEditForm" />
+    <VendorPaymentEdit
+      :initial-data="formRow"
+      v-model:show-drawer="visibleEditForm"
+    />
 
-    <div class="border-[1px] bg-white p-[24px] dark:border-0 dark:bg-foreground_dark">
+    <div
+      class="border-[1px] bg-white p-[24px] dark:border-0 dark:bg-foreground_dark"
+    >
       <div class="flex justify-between">
         <p class="pb-8 text-2xl font-bold">Payments</p>
         <VendorPaymentsAdd />

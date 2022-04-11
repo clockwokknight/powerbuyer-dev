@@ -1,19 +1,26 @@
 import axios from "axios";
 import { computed, toRaw } from "vue";
 import { useQuery } from "vue-query";
+import { objectFilter } from "@/lib/helper";
 
 export const getAllLanes = (filter = { page: 1 }) => {
-  const stringifyFilter = computed(() => JSON.stringify(filter))
   return useQuery(
-    ["lanes"],
+    ["lanes", filter],
     ({ queryKey }) => {
       return axios
-        .get("/lanes?" + new URLSearchParams(JSON.parse(stringifyFilter.value)).toString())
+        .get(
+          "/lanes?" +
+            new URLSearchParams(
+              objectFilter(queryKey[1], (key, value) =>
+                typeof value === "number" ? true : value
+              )
+            ).toString()
+        )
         .then((res) => res.data);
     },
     {
       keepPreviousData: true,
       refetchOnMount: false,
     }
-  )
-}
+  );
+};
