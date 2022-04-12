@@ -101,10 +101,12 @@ watch(
     if (newValue) {
       form.value = { ...newValue };
       vendorData.value = { ...newValue };
+      console.log(newValue[0]);
       Object.entries(newValue[0]).forEach((kv) => {
         // sterilizing data to fix non-update on cancel
         if (kv[1] === "") vendorData.value[kv[0]] = null;
       });
+      console.log(form.value);
     }
   },
   { immediate: true }
@@ -186,11 +188,12 @@ function handleTabClick(e) {
               </div>
               <n-carousel class="max-w-[260px] rounded-b-round" show-arrow>
                 <img
-                  v-if="!images || images.length === 0"
+                  v-if="!images || images.length == 0"
                   class="carousel-img object-cover h-full"
                   src="../assets/broken_image.svg"
                 />
                 <img
+                  v-else
                   class="carousel-img object-cover h-full"
                   v-for="(image, index) in images"
                   :key="index"

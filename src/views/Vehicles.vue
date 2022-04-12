@@ -56,16 +56,6 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
   }
 );
 
-function filterVehicles(data) {
-  console.log("filtering ", data);
-  return data.filter(
-    (v) =>
-      v.vehicle?.vehicle_make?.vehicle_make_year &&
-      v.vehicle?.vehicle_make?.description &&
-      v.vehicle?.exterior_color?.color
-  );
-}
-
 function toggleListSlide() {
   listActive.value = !listActive.value;
 }
