@@ -47,8 +47,9 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
       return null;
     } else {
       return axios.get(`/deals/search_by_vin/${queryKey[1]}`).then((res) => {
-        console.clear();
-        console.log("fetching data... ", res.data);
+        if (res.data?.debug) {
+          return [];
+        }
         return res.data;
       });
     }
@@ -69,7 +70,6 @@ watch(
 watch(
   () => vendorSearchResults.value,
   (val) => {
-    console.clear();
     console.log(val);
   }
 );
@@ -135,16 +135,23 @@ watch(
             </div>
           </div>
           <ul class="bg-foreground_light dark:bg-foreground_dark pt-[12px]">
-            <template v-if="debouncedSearchText">
+            <template v-if="vendorSearchResults">
               <VendorList :vendors="vendorSearchResults" @click:tab="addTab" />
             </template>
 
-            <template v-else>
+            <template
+              v-if="
+                vendors &&
+                !isVendorSearchFetching &&
+                !isVendorsLoading &&
+                !vendorSearchResults
+              "
+            >
               <template
                 v-for="(vendorPage, vendorPageIdx) in vendors?.pages"
                 :key="vendorPageIdx"
               >
-                <VendorList :vendors="vendorPage.data" @click:tab="addTab" />
+                <VendorList :vendors="vendorPage?.data" @click:tab="addTab" />
               </template>
               <button
                 v-observe-visibility="

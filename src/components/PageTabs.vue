@@ -121,7 +121,7 @@ const closeTab = (id) => {
 };
 
 const tabChanged = (index) => {
-  tabStore.tabs = tabStore.tabs.map(({ active, ...rest }, i) => {
+  tabStore.tabs = tabStore?.tabs.map(({ active, ...rest }, i) => {
     if (i === index) {
       return { ...rest, active: true };
     } else return rest;
@@ -129,7 +129,7 @@ const tabChanged = (index) => {
   syncTabs({
     user_id: 1,
     page: props.pageName,
-    tabs: JSON.stringify(tabStore.tabs),
+    tabs: JSON.stringify(tabStore?.tabs),
   });
 };
 
@@ -156,7 +156,7 @@ watch(
       console.log(route.path, "===", props.pageName, route.path === props.pageName);
       console.log(`setting latest for ${props.pageName}: ${val}`);
       global.setLatest(val, props.pageName);
-      tabChanged(tabStore.selectedIndex);
+      tabChanged(tabStore?.selectedIndex);
     }
   }
 );
@@ -214,9 +214,10 @@ const afterAnimated = () => {
             </g>
           </svg>
         </router-link>
+        <!-- vertical divider -->
         <div
-          v-if="hasHome"
-          class="w-[2px] h-[36px] bg-background_light dark:bg-dark_border"
+          v-if="hasHome && tabStore.selectedIndex !== 0"
+          class="w-[1px] h-[36px] bg-background_light dark:bg-dark_border"
         ></div>
         <div
           ref="scrollWrapper"
@@ -237,9 +238,9 @@ const afterAnimated = () => {
               >
                 <div
                   class="group rounded-round relative grid select-none place-content-center overflow-hidden duration-[100ms] active:scale-[0.95]"
-                  v-show="tabStore.tabs.length >= 1"
-                  v-for="(tab, tabIdx) in tabStore.tabs"
-                  :key="tab?.id"
+                  v-show="tabStore.tabs?.length >= 1"
+                  v-for="(tab, tabIdx) in tabStore?.tabs"
+                  :key="tabIdx"
                 >
                   <router-link
                     class="flex"
@@ -298,7 +299,6 @@ const afterAnimated = () => {
             </nav>
           </TabList>
         </div>
-
         <div class="flex h-[48px]">
           <button
             class="grid w-8 place-content-center px-2 hover:text-[#027bff]"
@@ -354,7 +354,7 @@ const afterAnimated = () => {
 /* 2. declare enter from and leave to state */
 .fade-enter-from {
   opacity: 0;
-  transform: scaleX(0.01) translateX(-30px);
+  transform: scaleX(0.5) translateX(-30px);
 }
 .fade-leave-from {
   opacity: 1;

@@ -1,12 +1,16 @@
 <script setup>
+import axios from "axios";
+import { ref, computed, watch, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import { useGlobalState } from "@/store/global";
 import { utils, log } from "@/lib/utils";
-const global = useGlobalState();
+import { useGlobalState } from "@/store/global";
 
-defineProps(["vendors"]);
-defineEmits(["click:tab"]);
+const global = useGlobalState();
 const route = useRoute();
+
+const props = defineProps(["vendors"]);
+
+defineEmits(["click:tab"]);
 
 function filterVehicles(data) {
   console.log("filtering ", data);
@@ -21,18 +25,14 @@ function filterVehicles(data) {
 
 <template>
   <li
-    v-for="(vendor, index) in vendors?.filter(
-      (v) =>
-        v.id &&
-        v.vehicle?.vehicle_make?.vehicle_make_year &&
-        v.vehicle?.vehicle_make?.description &&
-        v.vehicle?.exterior_color?.color
-    )"
+    v-for="(vendor, index) in filterVehicles(vendors)"
     :key="index"
     class="relative px-3 py-2 mb-[12px] ml-[13px] mr-[13px] rounded-round duration-100 border-b-[1px] border-b-transparent odd:bg-[#ffffff] hover:bg-background_light dark:border-b-transparent dark:odd:bg-foreground_dark dark:even:bg-foreground_dark dark:hover:bg-background_dark"
     @click="$emit('click:tab', vendor)"
   >
+    <!-- v-if router-links with param options -->
     <router-link
+      v-if="vendor?.vin"
       :to="{ name: 'Vehicle', params: { id: vendor?.vin } }"
       active-class="text-primary dark:text-white"
       class="block"
@@ -41,12 +41,12 @@ function filterVehicles(data) {
         <h2
           class="max-w-[250px] truncate whitespace-nowrap mb-1 text-sm font-bold"
           :class="
-            vendor?.id == route.params.id
+            vendor?.vin == route.params?.id
               ? 'text-primary !font-bold'
               : 'text-black dark:text-white'
           "
         >
-          {{ vendor.vin }}
+          {{ vendor?.vin }}
         </h2>
       </div>
       <div class="__subtext text-[10px] mb-1 flex">
