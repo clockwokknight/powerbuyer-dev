@@ -41,10 +41,10 @@ watchEffect(() => {
 });
 
 const vehicleMakeId = computed(
-  () => filters?.value.find((filter) => filter?.id === "make")?.field
+  () => filters?.value.find((filter) => filter?.id === "make_id")?.field
 );
 const isVehicleMakeIdSelected = computed(() =>
-  filters?.value.some((filter) => filter?.id === "make")
+  filters?.value.some((filter) => filter?.id === "make_id")
 );
 const { data: vehicleModels, isLoading: vehicleModelLoading } =
   useInfiniteQuery(
@@ -106,12 +106,7 @@ const onFilter = () => {
       filterObj[filter.id] = filter.field;
     }
   });
-  // TODO: will remove that once it's fixed
-  if (filterObj.make) {
-    filterObj.make = vehicle_makes.value
-      ?.find((make) => make.id === filterObj.make)
-      .name.toLowerCase();
-  }
+
   console.log(filterObj);
   emits("filter", Object.assign({}, filterObj));
 };
@@ -130,7 +125,7 @@ const onFilterSelect = (value, index) => {
       obj.options = vehicleColorOptions;
     } else if (parsedValue.fields === "gmtv_location_id") {
       obj.options = gmtvLocationOptions;
-    } else if (parsedValue.fields === "make") {
+    } else if (parsedValue.fields === "make_id") {
       obj.options = vehicleMakeOptions;
     } else if (parsedValue.fields === "model") {
       obj.options = vehicleModelOptions;
@@ -141,15 +136,6 @@ const onFilterSelect = (value, index) => {
 </script>
 
 <template>
-  <!--  <n-form-item label="Select GMTV location">-->
-  <!--    <n-select-->
-  <!--      :options="gmtvLocationOptions"-->
-  <!--      filterable-->
-  <!--      clearable-->
-  <!--      v-model:value="gmtv_location_id"-->
-  <!--      :loading="gmtvLocationLoading"-->
-  <!--    />-->
-  <!--  </n-form-item>-->
   <n-dynamic-input
     class="custom-dynamic-input"
     v-model:value="filters"

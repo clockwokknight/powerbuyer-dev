@@ -12,10 +12,34 @@ export const allFilterPossibleOptions = [
     }),
   },
   {
-    id: "pp",
+    id: "purchase_price",
     label: "Purchase Price",
     value: JSON.stringify({
-      fields: "pp",
+      fields: "purchase_price",
+      filter_type: "input_range",
+    }),
+  },
+  {
+    id: "sale_price",
+    label: "Sale Price",
+    value: JSON.stringify({
+      fields: "sale_price",
+      filter_type: "input_range",
+    }),
+  },
+  {
+    id: "trade_in_price",
+    label: "Trade In Price",
+    value: JSON.stringify({
+      fields: "trade_in_price",
+      filter_type: "input_range",
+    }),
+  },
+  {
+    id: "market_ready",
+    label: "Market Ready",
+    value: JSON.stringify({
+      fields: "market_ready",
       filter_type: "input_range",
     }),
   },
@@ -36,17 +60,17 @@ export const allFilterPossibleOptions = [
     }),
   },
   {
-    id: "make",
+    id: "make_id",
     label: "Vehicle Make",
     value: JSON.stringify({
-      fields: "make",
+      fields: "make_id",
       filter_type: "select",
     }),
   },
   {
     id: "model",
     label: "Vehicle Model",
-    depends: ["make"],
+    depends: ["make_id"],
     value: JSON.stringify({
       fields: "model",
       filter_type: "select",

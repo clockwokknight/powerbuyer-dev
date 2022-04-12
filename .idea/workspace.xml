@@ -2,18 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ec7ae08f-ea07-4b72-9101-046c7c94cb6f" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/components/lanes/VehicleFilter.vue" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/components/lanes/lanes.helper.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/App.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/lanes/Filter.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/lanes/Filter.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/lanes/lanes.hook.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/lanes/lanes.hook.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/vendor/payment/VendorPayments.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/vendor/payment/VendorPayments.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/vendor/payment/VendorPaymentsAdd.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/vendor/payment/VendorPaymentsAdd.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hooks/lanes.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/lanes.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/scss/index.scss" beforeDir="false" afterPath="$PROJECT_DIR$/src/scss/index.scss" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/views/Lanes.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/Lanes.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/lanes/lanes.helper.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/lanes/lanes.helper.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -92,7 +83,7 @@
       <workItem from="1649393379450" duration="10327000" />
       <workItem from="1649620125626" duration="72000" />
       <workItem from="1649620207802" duration="4915000" />
-      <workItem from="1649647009211" duration="7777000" />
+      <workItem from="1649647009211" duration="9367000" />
     </task>
     <servers />
   </component>
