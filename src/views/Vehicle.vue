@@ -101,12 +101,10 @@ watch(
     if (newValue) {
       form.value = { ...newValue };
       vendorData.value = { ...newValue };
-      console.log(newValue[0]);
       Object.entries(newValue[0]).forEach((kv) => {
         // sterilizing data to fix non-update on cancel
         if (kv[1] === "") vendorData.value[kv[0]] = null;
       });
-      console.log(form.value);
     }
   },
   { immediate: true }

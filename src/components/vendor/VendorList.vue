@@ -1,7 +1,8 @@
 <script setup>
 import { useRoute } from "vue-router";
-import { useGlobalState } from "@/store/global";
 import { utils, log } from "@/lib/utils";
+import { useGlobalState } from "@/store/global";
+
 const global = useGlobalState();
 
 defineProps(["vendors"]);
