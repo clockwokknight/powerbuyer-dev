@@ -1,17 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="ec7ae08f-ea07-4b72-9101-046c7c94cb6f" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/buyer/CommissionsPayed.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/buyer/CommissionsPayed.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/buyer/CommissionsPending.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/buyer/CommissionsPending.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/buyer/VehiclesPendingSale.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/buyer/VehiclesPendingSale.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/buyer/VehiclesSold.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/buyer/VehiclesSold.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hooks/commission.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/hooks/commission.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/views/Buyer.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/Buyer.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/views/Buyers.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/Buyers.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/views/Vendors.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/Vendors.vue" afterDir="false" />
-    </list>
+    <list default="true" id="ec7ae08f-ea07-4b72-9101-046c7c94cb6f" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -91,7 +81,7 @@
       <workItem from="1649620207802" duration="4915000" />
       <workItem from="1649647009211" duration="10748000" />
       <workItem from="1649743435051" duration="96000" />
-      <workItem from="1649743540452" duration="7288000" />
+      <workItem from="1649743540452" duration="7810000" />
     </task>
     <servers />
   </component>
