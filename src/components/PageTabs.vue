@@ -198,7 +198,11 @@ const afterAnimated = () => {
           v-if="hasHome"
           :to="`/${props.pageName}`"
           class="px-[24px] active:scale-[0.8] duration-[250ms]"
-          :style="route.path == `/${props.pageName}` ? 'color: #007AFF' : 'color: white'"
+          :class="
+            route.path == `/${props.pageName}`
+              ? 'color-primary'
+              : 'color-black dark:color-white'
+          "
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
