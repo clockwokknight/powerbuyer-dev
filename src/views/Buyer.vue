@@ -10,6 +10,7 @@ import CommissionsPayed from "@/components/buyer/CommissionsPayed.vue";
 import CommissionsPending from "@/components/buyer/CommissionsPending.vue";
 import VehiclesSold from "@/components/buyer/VehiclesSold.vue";
 import VehiclesPendingSale from "@/components/buyer/VehiclesPendingSale.vue";
+import { getStates } from "@/hooks/common_query";
 
 const route = useRoute();
 
@@ -24,7 +25,7 @@ watch(
 const { data: buyer, isLoading } = useQuery(["buyer", routeParamId], () =>
   axios.get(`/buyers/${routeParamId.value ?? 1}`).then((res) => res.data)
 );
-
+const { data: statesList } = getStates();
 const currentActiveField = ref(null);
 
 const form = ref({
@@ -119,7 +120,7 @@ function handleTabClick(e) {
 <template>
   <div
     id="details"
-    class="__section __vendor-card mt-4 grid grid-cols-12 rounded-roundborder-2 bg-white p-6 dark:border-0 dark:bg-foreground_dark"
+    class="__section __vendor-card rounded-roundborder-2 mt-4 grid grid-cols-12 bg-white p-6 dark:border-0 dark:bg-foreground_dark"
   >
     <!-- left side -->
     <div class="__form col-span-12 flex flex-col justify-between md:col-span-8">
@@ -359,9 +360,8 @@ function handleTabClick(e) {
     id="__subtabs"
     type="basic"
     ref="buyerTab"
-    class="sticky top-[-2px] left-0 z-40 mt-4 w-full rounded-roundborder-2 border-gray-200 bg-white duration-300 dark:border-0 dark:bg-[#25272A]"
+    class="rounded-roundborder-2 sticky top-[-2px] left-0 z-40 mt-4 w-full border-gray-200 bg-white duration-300 dark:border-0 dark:bg-[#25272A]"
     :items="buyerTabs"
-    @click="handleTabClick"
   />
 
   <CommissionsPayed class="__section" />

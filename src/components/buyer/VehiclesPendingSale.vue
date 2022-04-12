@@ -56,6 +56,7 @@ const columns = [
     //fixed: 'left'
   },
 ];
+const pagination = { pageSize: 10 };
 </script>
 
 <template>
@@ -73,7 +74,6 @@ const columns = [
           :pagination="pagination"
           :bordered="false"
           :loading="vehicleDataLoading"
-          :row-key="rowKey"
         />
       </div>
     </div>
