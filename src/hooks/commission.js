@@ -15,7 +15,7 @@ export const COMMISSION_STATUS = {
 export const getCommissions = (status_id, buyer_type) =>
   useQuery("commission", () =>
     axios
-      .get(`/commission/lookup/status/${status_id}/${buyer_type}`)
+      .get(`/commission/lookup/${status_id}/${buyer_type}`)
       .then((res) => res.data)
   );
 // useQuery(

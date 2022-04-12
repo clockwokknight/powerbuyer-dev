@@ -45,10 +45,12 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
   <div class="vendors flex w-full">
     <!-- Don't show PageItemsList on dashboard  | Current Page List -->
     <div
-      class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-y-auto overflow-x-hidden bg-white"
+      class="pageItemsList relative h-screen min-w-[275px] max-w-[275px] overflow-y-auto overflow-x-hidden bg-background_light dark:border-r-[1px] dark:border-dark_border dark:bg-background_dark"
     >
       <!-- List search & filters -->
-      <div class="sticky top-0 border-b bg-white p-3">
+      <div
+        class="sticky top-0 z-50 bg-foreground_light p-3 pb-0 dark:bg-foreground_dark"
+      >
         <div class="mb-3 flex justify-between">
           <h1 class="text-xl font-bold uppercase">Buyers</h1>
           <div>
@@ -86,7 +88,7 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
       </div>
       <!-- Main Loop List -->
       <div class="">
-        <ul class="">
+        <ul class="pt-3">
           <template v-if="debouncedSearchText">
             <BuyerList
               v-if="vendorSearchResults"
@@ -135,10 +137,13 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } =
       </div>
     </div>
     <!-- Main Tabs App Content -->
-    <div class="h-screen w-[calc(100vw-335px)]">
+    <div class="w-[calc(100vw-335px)]">
       <page-tabs page-name="buyers" />
       <!-- Main Body Content-->
-      <div class="h-[calc(100%-62px)] overflow-y-auto overflow-x-hidden">
+      <div
+        id="main"
+        class="h-[calc(100%-80px)] overflow-y-auto overflow-x-hidden"
+      >
         <main class="min-h-full p-2 md:p-6">
           <router-view />
         </main>

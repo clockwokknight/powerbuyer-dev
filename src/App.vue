@@ -1,6 +1,5 @@
 <script setup>
 import { onMounted, watchEffect } from "vue";
-import { VueQueryDevTools } from "vue-query/devtools";
 import { darkTheme } from "naive-ui";
 import MainMenu from "@/components/MainMenu.vue";
 import CommandPalette from "@/components/global_search/CommandPalette.vue";
@@ -36,6 +35,21 @@ const darkThemeOverride = {
     textColorGhostFocus: "#027BFF",
     borderColorPressed: "#027BFF",
     textColorPressed: "#027BFF",
+    colorPrimary: "rgba(0, 122, 235, 0.44)",
+    textColorPrimary: "#FFFFFFFF",
+    textColorHoverPrimary: "#FBFBFBFF",
+    textColorPressedPrimary: "#FFFFFFFF",
+    textColorFocusPrimary: "#FCFCFCFF",
+    textColorDisabledPrimary: "rgba(176, 168, 168, 1)",
+    colorPressedPrimary: "rgba(0, 122, 255, 1)",
+    colorFocusPrimary: "rgba(0, 122, 255, 1)",
+    colorDisabledPrimary: "rgba(54, 145, 244, .5)",
+    colorHoverPrimary: "rgba(0, 122, 255, 0.68)",
+    borderPrimary: "1.5px solid rgb(0 122 255)",
+    borderHoverPrimary: "1.5px solid rgb(0 122 255)",
+    borderPressedPrimary: "1.5px solid rgb(0 122 255)",
+    borderFocusPrimary: "1.5px solid rgb(0 122 255)",
+    borderDisabledPrimary: "1.5px solid rgb(0 122 255/0.3)",
   },
   Card: {
     colorModal: "rgb(24 24 28)",
@@ -67,7 +81,6 @@ onMounted(() => {
               <CommandPalette />
               <MainMenu />
               <router-view />
-              <!--VueQueryDevTools /-->
             </section>
           </n-dialog-provider>
         </n-notification-provider>

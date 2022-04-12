@@ -22,7 +22,7 @@ const { data: commissionData } = getCommissions(
 
 const columns = [
   {
-    title: "Buyer's First Name",
+    title: "First Name",
     key: "buyer_first_name",
     //fixed: 'left'
   },
@@ -72,11 +72,12 @@ const columns = [
     //fixed: 'left'
   },
 ];
+const pagination = { pageSize: 10 };
 </script>
 
 <template>
-  <div id="commissions-payed" class="scroll-smooth">
-    <div class="-mt-4 font-sans">
+  <div id="commissions-payed">
+    <div class="font-sans">
       <div
         class="rounded-roundborder-2 bg-white py-8 px-8 dark:border-0 dark:bg-[#25272A]"
       >
@@ -89,7 +90,8 @@ const columns = [
           :pagination="pagination"
           :bordered="false"
           :loading="false"
-          :row-key="rowKey"
+          :scroll-x="1500"
+          :max-height="800"
         />
       </div>
     </div>

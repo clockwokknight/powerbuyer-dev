@@ -1,14 +1,14 @@
 <script setup>
-import axios from "axios";
-import { utils, log } from "@/lib/utils";
-import { nextTick, ref, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { useMutation, useQueryClient } from "vue-query";
-import { useDebounceFn } from "@vueuse/core";
 import { getPageTabs } from "@/hooks/pageTabs";
-import { useTabsViewStore } from "@/store/tabs";
+import { utils } from "@/lib/utils";
 import { useGlobalState } from "@/store/global";
+import { useTabsViewStore } from "@/store/tabs";
 import { Tab, TabGroup, TabList } from "@headlessui/vue";
+import { useDebounceFn } from "@vueuse/core";
+import axios from "axios";
+import { nextTick, ref, watch } from "vue";
+import { useMutation, useQueryClient } from "vue-query";
+import { useRoute, useRouter } from "vue-router";
 
 const props = defineProps({
   pageName: String,
@@ -140,7 +140,7 @@ watch(
     if (
       newValue !== -1 &&
       route.path !== props.pageName &&
-      route.params?.id != tabStore.tabs[newValue]?.id
+      route.params?.id !== tabStore.tabs[newValue]?.id
     ) {
       console.log(newValue);
       router.push(`/${props.pageName}/${tabStore.tabs[newValue]?.id}`);
@@ -189,7 +189,7 @@ const afterAnimated = () => {
       class="z-80 relative h-[88px] pl-2 pr-[calc(0.5rem+5px)] pt-2 md:pl-6 md:pr-[calc(1.5rem+5px)] md:pt-6"
     >
       <div
-        class="__tabs bg-foreground_light dark:bg-foreground_dark relative flex h-[64px] items-center rounded"
+        class="__tabs relative flex h-[64px] items-center rounded bg-foreground_light dark:bg-foreground_dark"
         :class="global.stuck[0] && 'shadow-lg'"
         ref="tabListButtonWrapper"
       >
@@ -197,7 +197,7 @@ const afterAnimated = () => {
         <router-link
           v-if="hasHome"
           :to="`/${props.pageName}`"
-          class="px-[24px] active:scale-[0.8] duration-[250ms]"
+          class="px-[24px] duration-[250ms] active:scale-[0.8]"
           :style="route.path == `/${props.pageName}` ? 'color: #007AFF' : 'color: white'"
         >
           <svg
@@ -217,12 +217,12 @@ const afterAnimated = () => {
         <!-- vertical divider -->
         <div
           v-if="hasHome && tabStore.selectedIndex !== 0"
-          class="w-[1px] h-[36px] bg-background_light dark:bg-dark_border"
+          class="h-[36px] w-[1px] bg-background_light dark:bg-dark_border"
         ></div>
         <div
           ref="scrollWrapper"
           style="scrollbar-width: none"
-          class="scrollbar:h-0 scrollbar:w-0 flex items-center overflow-x-auto"
+          class="flex items-center overflow-x-auto scrollbar:h-0 scrollbar:w-0"
         >
           <TabList v-slot="{ selectedIndex }">
             <nav
@@ -237,13 +237,12 @@ const afterAnimated = () => {
                 @after-enter="afterAnimated"
               >
                 <div
-                  class="group rounded-round relative grid select-none place-content-center overflow-hidden duration-[100ms] active:scale-[0.95]"
+                  class="group relative grid select-none place-content-center overflow-hidden rounded-round duration-[100ms] active:scale-[0.95]"
                   v-show="tabStore.tabs?.length >= 1"
                   v-for="(tab, tabIdx) in tabStore?.tabs"
                   :key="tabIdx"
                 >
                   <router-link
-                    class="flex"
                     :to="`/${props.pageName}/${tab?.id}`"
                     custom
                     v-slot="{ href, navigate, isActive }"
@@ -252,7 +251,7 @@ const afterAnimated = () => {
                       class="relative max-w-xs scroll-mr-3 focus:outline-none"
                       :class="[
                         tabIdx === selectedIndex && route.params?.id
-                          ? 'bg-accent text-primary before:bg-primary font-medium before:absolute before:inset-y-0 before:left-0 before:h-full before:w-1 focus:outline-none'
+                          ? 'bg-accent font-medium text-primary before:absolute before:inset-y-0 before:left-0 before:h-full before:w-1 before:bg-primary focus:outline-none'
                           : 'font-medium text-black/75 dark:text-white',
                       ]"
                     >

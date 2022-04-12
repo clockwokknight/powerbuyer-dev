@@ -3,18 +3,24 @@ import { getAllLanes } from "@/hooks/lanes";
 import { NTag } from "naive-ui";
 import { computed, h, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
+import { useQueryClient } from "vue-query";
+import axios from "axios";
+import Filter from "@/components/lanes/Filter.vue";
+
 const route = useRoute();
-const filter = reactive({
+const queryClient = useQueryClient();
+const filter = ref({
   page: 1,
   per_page: 20,
 });
 const { data: lanes, isFetching } = getAllLanes(filter);
 const pagination = computed(() => ({
-  pageSize: filter.per_page,
-  page: filter.page,
+  pageSize: filter.value.per_page,
+  page: filter.value.page,
   itemCount: lanes.value?.total ?? 1,
   pageCount: lanes.value?.last_page ?? 1,
 }));
+
 const sortStatesRef = ref([]);
 const sortKeyMapOrderRef = computed(() =>
   sortStatesRef.value.reduce((result, { columnKey, order }) => {
@@ -22,28 +28,29 @@ const sortKeyMapOrderRef = computed(() =>
     return result;
   }, {})
 );
+
 const columns = computed(() => [
   {
     title: "Lane #",
     key: "lane_number",
     fixed: "left",
     width: 100,
-    sortOrder: sortKeyMapOrderRef.value.lane_number || false,
-    sorter: {
-      compare: (a, b) => a.lane_number - b.lane_number,
-      multiple: 1,
-    },
+    // sortOrder: sortKeyMapOrderRef.value.lane_number || false,
+    // sorter: {
+    //   compare: (a, b) => a.lane_number - b.lane_number,
+    //   multiple: 1,
+    // },
   },
   {
     title: "Sale Number",
     key: "sale_number",
     fixed: "left",
     width: 150,
-    sortOrder: sortKeyMapOrderRef.value.sale_number || false,
-    sorter: {
-      compare: (a, b) => a.sale_number - b.sale_number,
-      multiple: 2,
-    },
+    // sortOrder: sortKeyMapOrderRef.value.sale_number || false,
+    // sorter: {
+    //   compare: (a, b) => a.sale_number - b.sale_number,
+    //   multiple: 2,
+    // },
   },
   {
     title: "VHR",
@@ -52,22 +59,22 @@ const columns = computed(() => [
   },
   {
     title: "Year",
-    key: "sale_year",
+    key: "vehicle_make.vehicle_make_year",
     // sorter: "default",
     // fixed: "left",
   },
   {
     title: "Make",
-    key: "deal.vehicle.vehicle_make.name",
+    key: "vehicle_make.name",
   },
   {
     title: "Model",
-    key: "deal.vehicle.vehicle_model.name",
+    key: "vehicle_model.name",
     width: "max-content",
   },
   {
     title: "Body",
-    key: "deal.body",
+    key: "vehicle.body",
   },
   {
     title: "Mileage",
@@ -79,40 +86,28 @@ const columns = computed(() => [
     key: "floor_price",
   },
   {
-    title: "Trade In",
-    key: "address",
+    title: "Trade In Price",
+    key: "deal.trade_in_price",
   },
   {
     title: "M. Ready",
-    key: "name",
+    key: "deal.market_ready",
   },
   {
     title: "M. Price",
-    key: "age",
+    key: "deal.market_price",
   },
   {
-    title: "Color",
-    key: "deal.vehicle.interior_color",
-    render(row) {
-      const vehicleColor = (color, type) =>
-        color
-          ? h(
-              NTag,
-              {
-                type: "info",
-                style: {
-                  marginRight: "6px",
-                },
-              },
-              { default: () => `${type}: ${color.color}` }
-            )
-          : h("div");
-
-      return [
-        vehicleColor(row.deal.vehicle.interior_color, "interior"),
-        vehicleColor(row.deal.vehicle.exterior_color, "exterior"),
-      ];
-    },
+    title: "P. Price",
+    key: "deal.purchase_price",
+  },
+  {
+    title: "Interior Color",
+    key: "interior_color.color",
+  },
+  {
+    title: "Exterior Color",
+    key: "exterior_color.color",
   },
   {
     title: "Purchased Date",
@@ -173,50 +168,53 @@ const handleSortChange = (sorters) => {
   sortStatesRef.value = [].concat(sorters);
 };
 const handlePageChange = (current_page) => {
-  filter.page = current_page;
+  filter.value.page = current_page;
+};
+const OnFilterTrigger = (obj) => {
+  queryClient.cancelQueries(["lanes"]);
+  filter.value = {
+    ...filter.value,
+    ...obj,
+  };
 };
 </script>
 
 <template>
   <!-- Main Tabs App Content -->
-  <div class="h-screen w-[calc(100%-60px)]">
+  <div class="h-screen w-[calc(100vw-60px)]">
     <!-- Main Body Content-->
-    <div class="h-screen overflow-auto bg-white px-5 py-5">
+    <div
+      class="flex h-screen w-full gap-x-5 overflow-auto bg-white dark:bg-background_dark"
+    >
       <!-- Body Content -->
-      <div class="mb-3">
-        <h1 class="text-xl font-bold uppercase">Lane Numberings</h1>
-      </div>
-      <n-space vertical :size="12">
-        <n-space>
-          <n-popover placement="bottom" trigger="click">
-            <template #trigger>
-              <n-button>Sort By # </n-button>
-            </template>
-            <n-checkbox-group>
-              <div class="flex flex-col gap-y-4">
-                <n-checkbox value="No" label="No" />
-                <n-checkbox value="lane_number" label="Lane Number" />
-                <n-checkbox value="year" label="Year" />
-              </div>
-            </n-checkbox-group>
-          </n-popover>
-          <n-button>Filter Location (Dallas)</n-button>
-          <n-button>Clear Filters</n-button>
-          <n-button>Clear Sorters</n-button>
-        </n-space>
-        <n-data-table
-          remote
-          ref="table"
-          :columns="columns"
-          :data="lanes?.data"
-          :pagination="pagination"
-          :max-height="1000"
-          :scroll-x="3000"
-          :loading="isFetching"
-          @update:page="handlePageChange"
-          @update:sorter="handleSortChange"
-        />
-      </n-space>
+      <aside
+        class="h-full w-full max-w-[350px] pt-5 pl-5 pr-5 dark:bg-foreground_dark"
+      >
+        <h3 class="mb-3 text-lg font-bold">Lane Filters</h3>
+        <Filter @filter="OnFilterTrigger" />
+      </aside>
+      <main
+        class="h-full w-[calc(100%-410px)] overflow-y-auto overscroll-contain pr-5 pt-5"
+      >
+        <div class="mb-3">
+          <h1 class="text-xl font-bold uppercase">Lane Numberings</h1>
+        </div>
+        <div>
+          <n-data-table
+            remote
+            ref="table"
+            :columns="columns"
+            :data="lanes?.data"
+            :pagination="pagination"
+            :max-height="600"
+            :scroll-x="3000"
+            :loading="isFetching"
+            @update:page="handlePageChange"
+            @update:sorter="handleSortChange"
+          />
+          <pre></pre>
+        </div>
+      </main>
     </div>
   </div>
 </template>

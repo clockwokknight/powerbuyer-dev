@@ -98,7 +98,7 @@ const { data: paymentTerms } = getPaymentTerms();
 const paymentTermOptions = computed(() =>
   paymentTerms.value?.map((payment) => ({
     label: payment.name,
-    value: payment.name,
+    value: payment.id,
   }))
 );
 const { data: getInvoicesTotal } = getInvoiceTotalByVendor(routeParamId);
@@ -122,7 +122,7 @@ const form = ref({
   din: null,
   tax_id_number: null,
   vendor_category_id: null,
-  payment_terms: null,
+  payment_terms_id: null,
 });
 
 const { isLoading, mutateAsync } = useMutation(
@@ -384,12 +384,12 @@ function handleTabClick(e) {
           label="Payment Terms"
           :validate="['required']"
           :options="paymentTermOptions"
-          :value="form.payment_terms"
+          :value="form.payment_terms_id"
           placeholder=""
-          @update:value="(val) => (form.payment_terms = val)"
-          @save="submitValue('payment_terms')"
-          @cancel="resetValue('payment_terms')"
-          @focus="currentActiveField = 'payment_terms'"
+          @update:value="(val) => (form.payment_terms_id = val)"
+          @save="submitValue('payment_terms_id')"
+          @cancel="resetValue('payment_terms_id')"
+          @focus="currentActiveField = 'payment_terms_id'"
         />
         <div
           class="__invoice-buttons mt-4 flex min-w-max max-w-full flex-col items-end justify-center md:mt-20"

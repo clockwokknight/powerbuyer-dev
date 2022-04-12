@@ -34,7 +34,7 @@ const initialForm = {
   notes: "",
   gmtv_location_id: null,
   payment_invoices: [
-    // { vendor_invoice_id: null, payment_amount: 0, balance: 0 }
+    // { vendor_invoice_id: null, payment_amount: 0, balance: 0, type: 1 }
   ],
 };
 const form = ref({ ...initialForm });
@@ -59,10 +59,12 @@ const onDeletePaymentInvoice = (index) => {
 };
 
 const onSavePaymentInvoice = (paymentInvoice) => {
-  console.log("saving", { paymentInvoice: toRaw(paymentInvoice) });
   showPaymentInvoiceModal.value = false;
   if (currentPaymentInvoiceData.value) {
     form.value.payment_invoices[currentPaymentInvoiceIndex.value] = {
+      // INFO: The type for now is 1, 2 and 3.
+      // 1 = vendor invoice; 2 = vehicle invoice; 3 = commission invoice
+      type: 1,
       ...toRaw(paymentInvoice),
     };
     currentPaymentInvoiceData.value = null;
@@ -70,7 +72,7 @@ const onSavePaymentInvoice = (paymentInvoice) => {
     form.value.payment_invoices.splice(
       currentPaymentInvoiceIndex.value + 1,
       0,
-      paymentInvoice
+      { type: 1, ...paymentInvoice }
     );
   }
   currentPaymentInvoiceIndex.value = null;

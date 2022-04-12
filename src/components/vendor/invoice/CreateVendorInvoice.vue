@@ -8,7 +8,7 @@ import { clone, objectFilter, omit } from "@/lib/helper.js";
 import axios from "axios";
 import { format } from "v-money3";
 import { getVendorById } from "@/hooks/vendor.js";
-import { getInvoiceStatus } from "@/hooks/common_query.js";
+import { getInvoiceStatus, getPaymentTerms } from "@/hooks/common_query.js";
 import VendorExpenseAction from "@/components/vendor/invoice/VendorExpenseAction.vue";
 import ExpenseModal from "@/components/vendor/invoice/ExpenseModal.vue";
 import ExpenseTableImage from "@/components/vendor/invoice/ExpenseTableImage.vue";
@@ -50,6 +50,7 @@ const form = ref({ ...initialForm });
 
 const vendor_id = ref(route.params?.id);
 const { data: current_vendor } = getVendorById(vendor_id);
+
 watch(
   () => route.params,
   (toParams) => {
@@ -64,6 +65,8 @@ watch(
   (newValue) => {
     if (newValue) {
       form.value.vendor_id = parseInt(route.params?.id);
+      form.value.due_date = current_vendor.value ? dayjs().add(current_vendor.value?.payment_terms.days, 'day').valueOf(): dayjs().valueOf()
+      console.log(current_vendor.value)
     } else form.value = clone(initialForm);
   },
   { immediate: true }
@@ -347,13 +350,12 @@ async function submitInvoice() {
                   class="custom-date-picker max-w-[130px]"
                   v-model:value="form.due_date"
                   :clearable="false"
-                  :is-date-disabled="(ts) => ts <= Date.now()"
                 />
               </n-form-item>
             </div>
             <div class="text-right">
               <span class="block text-xs uppercase">Terms</span>
-              <span class="text-sm font-bold">Net 30</span>
+              <span class="text-sm font-bold">{{current_vendor?.payment_terms.name}}</span>
             </div>
           </section>
         </header>

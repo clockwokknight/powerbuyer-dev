@@ -35,6 +35,7 @@ onMounted(() => {
   props.items.forEach((item, index) => {
     const itemSelector = document.querySelector(item.value);
     ScrollTrigger?.create({
+      // INFO: please make sure there is a wrapper with ID 'main'
       scroller: "#main",
       trigger: itemSelector,
       start: () => "top 60px",
@@ -94,7 +95,9 @@ const scrollToSection = (item, index) => {
         </span>
         <span
           class="__indicator h-1 translate-y-[19px] duration-200"
-          :class="`${selected ? 'bg-primary w-12' : 'dark:bg-primary w-0 bg-gray-300'}`"
+          :class="`${
+            selected ? 'w-12 bg-primary' : 'w-0 bg-gray-300 dark:bg-primary'
+          }`"
         ></span>
       </Tab>
     </TabList>
