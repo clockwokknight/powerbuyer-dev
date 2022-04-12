@@ -60,8 +60,8 @@ const pagination = { pageSize: 10 };
 </script>
 
 <template>
-  <div id="vehicles-pending-sale" class="scroll-smooth">
-    <div class="-mt-4 font-sans">
+  <div id="vehicles-pending-sale">
+    <div class="font-sans">
       <div
         class="rounded-roundborder-2 bg-white py-8 px-8 dark:border-0 dark:bg-[#25272A]"
       >

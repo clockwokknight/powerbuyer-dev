@@ -360,12 +360,19 @@ function handleTabClick(e) {
     id="__subtabs"
     type="basic"
     ref="buyerTab"
-    class="rounded-roundborder-2 sticky top-[-2px] left-0 z-40 mt-4 w-full border-gray-200 bg-white duration-300 dark:border-0 dark:bg-[#25272A]"
+    class="sticky top-[-2px] left-0 z-40 mt-[24px] w-full rounded-round bg-foreground_light duration-300 dark:bg-foreground_dark"
     :items="buyerTabs"
   />
-
-  <CommissionsPayed class="__section" />
-  <CommissionsPending class="__section" />
-  <VehiclesSold class="__section" />
-  <VehiclesPendingSale class="__section" />
+  <div class="mt-3 flex flex-col gap-y-3">
+    <CommissionsPayed class="__section" />
+    <CommissionsPending class="__section" />
+    <VehiclesSold class="__section" />
+    <VehiclesPendingSale class="__section" />
+  </div>
 </template>
+<style lang="scss">
+#__subtabs[stuck],
+.__tabs[stuck] {
+  @apply rounded-none bg-[#F4F6F8] shadow-lg shadow-[#00000011] dark:bg-dark_border;
+}
+</style>
