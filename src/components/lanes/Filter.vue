@@ -1,11 +1,14 @@
 <script setup>
-import { reactive, computed, ref, unref, watchEffect, toRaw } from "vue";
+import { reactive, computed, ref, unref, watchEffect, toRaw, watch } from "vue";
 import { useInfiniteQuery, useQuery } from "vue-query";
 import axios from "axios";
 import { getGmtvLocations } from "@/hooks/location";
 import { getVehicleMakes, laneFilter } from "./lanes.hook";
 import { clone } from "@/lib/helper";
-import { allFilterPossibleOptions } from "@/components/lanes/lanes.helper";
+import {
+  allFilterPossibleOptions,
+  sortOptions,
+} from "@/components/lanes/lanes.helper";
 import CustomInput from "@/components/common/CustomInput.vue";
 import dayjs from "dayjs";
 
@@ -44,7 +47,7 @@ const vehicleMakeId = computed(
   () => filters?.value.find((filter) => filter?.id === "make_id")?.field
 );
 const isVehicleMakeIdSelected = computed(() =>
-  filters?.value.some((filter) => filter?.id === "make_id")
+  filters?.value.some((filter) => filter?.id === "make_id" && filter?.field)
 );
 const { data: vehicleModels, isLoading: vehicleModelLoading } =
   useInfiniteQuery(
@@ -79,15 +82,30 @@ const vehicleModelOptions = computed(() =>
     []
   )
 );
+
+watch(
+  filters,
+  (newValue) => {
+    newValue.forEach((field, fieldIdx) => {
+      if (field.filter_type === "select") {
+        if (field.id === "color") {
+          filters.value[fieldIdx].options = vehicleColorOptions;
+        } else if (field.id === "gmtv_location_id") {
+          filters.value[fieldIdx].options = gmtvLocationOptions;
+        } else if (field.id === "make_id") {
+          filters.value[fieldIdx].options = vehicleMakeOptions;
+        } else if (field.id === "model") {
+          filters.value[fieldIdx].options = vehicleModelOptions;
+        } else if (field.id === "order_by") {
+          filters.value[fieldIdx].options = sortOptions;
+        }
+      }
+    });
+  },
+  { deep: true }
+);
+const order_dir = ref("asc");
 const onFilter = () => {
-  // const getYearFromMakeId = vehicleYearOptions.value?.find(
-  //   (option) => option.value === selectedVehicleMakeId.value
-  // )?.label;
-  // const filterObj = {
-  //   make: unref(selectedVehicleMake),
-  //   gmtv_location_id: unref(gmtv_location_id),
-  //   year: getYearFromMakeId,
-  // };
   let filterObj = {};
   filters.value?.forEach((filter) => {
     if (filter?.fields) {
@@ -100,13 +118,15 @@ const onFilter = () => {
           ]);
         filterObj = { ...filterObj, ...Object.fromEntries(fieldsToObj) };
       } else if (filter.filter_type === "input_range") {
-        filterObj[filter.id] = filter.fields.join("-");
+        filterObj[filter.id] = filter.fields.filter((field) => field).join("-");
       }
     } else if (filter?.field) {
       filterObj[filter.id] = filter.field;
     }
   });
-
+  if (filterObj.hasOwnProperty("order_by")) {
+    filterObj.order_dir = order_dir.value;
+  }
   console.log(filterObj);
   emits("filter", Object.assign({}, filterObj));
 };
@@ -114,22 +134,17 @@ const onFilter = () => {
 const onFilterSelect = (value, index) => {
   // console.log({ value, index });
   const parsedValue = JSON.parse(value);
-  let obj = { filter_type: parsedValue.filter_type, id: parsedValue.fields };
+  let obj = {
+    filter_type: parsedValue.filter_type,
+    id: parsedValue.fields,
+  };
+  if (parsedValue?.options) {
+    obj.options = parsedValue?.options;
+  }
   if (parsedValue.filter_type.includes("range")) {
     obj.fields = null;
   } else {
     obj.field = null;
-  }
-  if (parsedValue.filter_type === "select") {
-    if (parsedValue.fields === "color") {
-      obj.options = vehicleColorOptions;
-    } else if (parsedValue.fields === "gmtv_location_id") {
-      obj.options = gmtvLocationOptions;
-    } else if (parsedValue.fields === "make_id") {
-      obj.options = vehicleMakeOptions;
-    } else if (parsedValue.fields === "model") {
-      obj.options = vehicleModelOptions;
-    }
   }
   filters.value[index] = { type: value, ...obj };
 };
@@ -171,8 +186,25 @@ const onFilterSelect = (value, index) => {
         :value="value?.field"
         :options="value?.options"
         @update:value="(val) => (value.field = val)"
-        v-if="value?.filter_type === 'select'"
+        v-if="value?.filter_type === 'select' && value?.id !== 'order_by'"
       />
+      <div
+        v-if="value?.filter_type === 'select' && value?.id === 'order_by'"
+        class="flex gap-x-1"
+      >
+        <n-select
+          :value="value?.field"
+          @update:value="(val) => (value.field = val)"
+          :options="value?.options"
+        />
+        <n-select
+          v-model:value="order_dir"
+          :options="[
+            { label: 'Ascending', value: 'asc' },
+            { label: 'Descending', value: 'desc' },
+          ]"
+        />
+      </div>
     </div>
   </n-dynamic-input>
   <n-button type="primary" @click="onFilter" class="mt-6"> Filter </n-button>

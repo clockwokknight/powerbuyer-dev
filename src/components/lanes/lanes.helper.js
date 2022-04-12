@@ -84,4 +84,31 @@ export const allFilterPossibleOptions = [
       filter_type: "input_range",
     }),
   },
+  {
+    id: "order_by",
+    label: "Sort By",
+    value: JSON.stringify({
+      fields: "order_by",
+      filter_type: "select",
+    }),
+  },
+];
+
+export const sortOptions = [
+  {
+    label: "Mileage",
+    value: "deal.mileage",
+  },
+  {
+    label: "Vehicle Model",
+    value: "vehicle_model.name",
+  },
+  {
+    label: "Vehicle Make",
+    value: "vehicle_make.name",
+  },
+  {
+    label: "Purchase Price",
+    value: "deal.purchase_price",
+  },
 ];
