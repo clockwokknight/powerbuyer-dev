@@ -60,6 +60,46 @@ export const allFilterPossibleOptions = [
     }),
   },
   {
+    id: "auction_id",
+    label: "Auction Location",
+    value: JSON.stringify({
+      fields: "auction_id",
+      filter_type: "select",
+    }),
+  },
+  {
+    id: "mileage",
+    label: "Vehicle Mileage",
+    value: JSON.stringify({
+      fields: "mileage",
+      filter_type: "input_range",
+    }),
+  },
+  {
+    id: "grade",
+    label: "Grade",
+    value: JSON.stringify({
+      fields: "grade",
+      filter_type: "input",
+    }),
+  },
+  {
+    id: "auto_check",
+    label: "Auto Check",
+    value: JSON.stringify({
+      fields: "auto_check",
+      filter_type: "input",
+    }),
+  },
+  {
+    id: "carfax",
+    label: "Carfax",
+    value: JSON.stringify({
+      fields: "carfax",
+      filter_type: "input",
+    }),
+  },
+  {
     id: "make_id",
     label: "Vehicle Make",
     value: JSON.stringify({

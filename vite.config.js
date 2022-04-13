@@ -14,12 +14,12 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
     },
   },
-  css: {
-    preprocessorOptions: {
-      scss: { 
-        additionalData: `@import "@/scss/_variables.scss";` 
-      },
-    },
-  },
+  // css: {
+  //   preprocessorOptions: {
+  //     scss: {
+  //       additionalData: `@import "@/scss/_variables.scss";`
+  //     },
+  //   },
+  // },
   plugins: [vue(), vueJsx()],
 });

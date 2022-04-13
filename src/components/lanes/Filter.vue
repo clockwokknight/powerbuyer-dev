@@ -1,23 +1,37 @@
 <script setup>
-import { reactive, computed, ref, unref, watchEffect, toRaw, watch } from "vue";
+import {
+  reactive,
+  computed,
+  ref,
+  unref,
+  watchEffect,
+  toRaw,
+  watch,
+  h,
+} from "vue";
 import { useInfiniteQuery, useQuery } from "vue-query";
 import axios from "axios";
 import { getGmtvLocations } from "@/hooks/location";
 import { getVehicleMakes, laneFilter } from "./lanes.hook";
-import { clone } from "@/lib/helper";
+import { clone, omit } from "@/lib/helper";
 import {
   allFilterPossibleOptions,
   sortOptions,
 } from "@/components/lanes/lanes.helper";
 import CustomInput from "@/components/common/CustomInput.vue";
 import dayjs from "dayjs";
+import { NFormItem, NInput, useDialog, useMessage } from "naive-ui";
 
 const emits = defineEmits(["filter"]);
+const dialog = useDialog();
+const message = useMessage();
+
 const {
   vehicleColorOptions,
   gmtvLocationOptions,
   vehicleMakeOptions,
   vehicle_makes,
+  auctionOptions,
 } = laneFilter();
 
 const filters = ref([
@@ -92,6 +106,8 @@ watch(
           filters.value[fieldIdx].options = vehicleColorOptions;
         } else if (field.id === "gmtv_location_id") {
           filters.value[fieldIdx].options = gmtvLocationOptions;
+        } else if (field.id === "auction_id") {
+          filters.value[fieldIdx].options = auctionOptions;
         } else if (field.id === "make_id") {
           filters.value[fieldIdx].options = vehicleMakeOptions;
         } else if (field.id === "model") {
@@ -148,6 +164,58 @@ const onFilterSelect = (value, index) => {
   }
   filters.value[index] = { type: value, ...obj };
 };
+
+const filter_name = ref("");
+const onFilterSave = () => {
+  if (filters.value[0].type === null) {
+    message.error("You need at least one filter to save");
+    return;
+  }
+  const currentDialog = dialog.create({
+    title: "Please enter a name",
+    positiveText: "Submit",
+    positiveButtonProps: {
+      disabled: computed(() => !filter_name.value),
+    },
+    content: () =>
+      h(
+        NFormItem,
+        {
+          rule: {
+            trigger: ["input", "blur"],
+            validator() {
+              if (!filter_name.value) {
+                return new Error("Name is required");
+              }
+            },
+          },
+        },
+        {
+          default: () =>
+            h(NInput, {
+              value: filter_name.value,
+              "onUpdate:value": (val) => (filter_name.value = val),
+            }),
+        }
+      ),
+    onPositiveClick: () => {
+      let filter = unref(filters).map((filter) => omit(filter, ["options"]));
+      currentDialog.loading = true;
+      return new Promise((resolve) => {
+        axios
+          .post("/lanes_reports", {
+            name: filter_name.value,
+            data: JSON.stringify(filter),
+          })
+          .then(resolve)
+          .catch((e) => {
+            message.error("Error");
+            currentDialog.loading = false;
+          });
+      });
+    },
+  });
+};
 </script>
 
 <template>
@@ -156,6 +224,7 @@ const onFilterSelect = (value, index) => {
     v-model:value="filters"
     @create="() => ({ type: null })"
     #="{ value, index }"
+    :min="1"
   >
     <div style="grid-area: a">
       <CustomInput
@@ -168,6 +237,11 @@ const onFilterSelect = (value, index) => {
       />
     </div>
     <div style="grid-area: c" class="flex flex-col gap-y-3">
+      <n-input
+        :value="value?.field"
+        v-if="value?.filter_type === 'input'"
+        @update:value="(val) => (value.field = val)"
+      />
       <n-date-picker
         type="daterange"
         :value="value?.fields"
@@ -185,6 +259,7 @@ const onFilterSelect = (value, index) => {
       <n-select
         :value="value?.field"
         :options="value?.options"
+        filterable
         @update:value="(val) => (value.field = val)"
         v-if="value?.filter_type === 'select' && value?.id !== 'order_by'"
       />
@@ -194,6 +269,7 @@ const onFilterSelect = (value, index) => {
       >
         <n-select
           :value="value?.field"
+          filterable
           @update:value="(val) => (value.field = val)"
           :options="value?.options"
         />
@@ -207,7 +283,10 @@ const onFilterSelect = (value, index) => {
       </div>
     </div>
   </n-dynamic-input>
-  <n-button type="primary" @click="onFilter" class="mt-6"> Filter </n-button>
+  <div class="mt-6 flex gap-x-5">
+    <n-button type="primary" @click="onFilter"> Filter </n-button>
+    <n-button @click="onFilterSave"> Save</n-button>
+  </div>
 </template>
 
 <style lang="scss" scoped>

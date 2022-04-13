@@ -10,15 +10,10 @@ import { computed, ref, toRaw, watch, watchEffect } from "vue";
 import { useMutation, useQuery, useQueryClient } from "vue-query";
 import { useRoute } from "vue-router";
 import PaymentInvoiceFormModal from "./PaymentInvoiceFormModal.vue";
-import {
-  selectOptions,
-  getPaymentTypes,
-  createPaymentMutation,
-} from "./payment.hook.js";
+import { selectOptions, getPaymentTypes, createPaymentMutation } from "./payment.hook.js";
 import { themeOverrides } from "./payment.helper.js";
 
-const { paymentStatusOptions, gmtvLocationsOptions, routeParamId } =
-  selectOptions();
+const { paymentStatusOptions, gmtvLocationsOptions, routeParamId } = selectOptions();
 const showDrawer = ref(false);
 const initialForm = {
   // recipient_id: null,
@@ -69,11 +64,10 @@ const onSavePaymentInvoice = (paymentInvoice) => {
     };
     currentPaymentInvoiceData.value = null;
   } else {
-    form.value.payment_invoices.splice(
-      currentPaymentInvoiceIndex.value + 1,
-      0,
-      { type: 1, ...paymentInvoice }
-    );
+    form.value.payment_invoices.splice(currentPaymentInvoiceIndex.value + 1, 0, {
+      type: 1,
+      ...paymentInvoice,
+    });
   }
   currentPaymentInvoiceIndex.value = null;
 };
@@ -182,8 +176,9 @@ watch(
   { deep: true }
 );
 
-const { data: invoicesData, isLoading: expensesDataLoading } =
-  vendorInvoices(routeParamId);
+const { data: invoicesData, isLoading: expensesDataLoading } = vendorInvoices(
+  routeParamId
+);
 const invoiceDataOptions = ref([]);
 
 watchEffect(() => {
@@ -199,8 +194,10 @@ watchEffect(() => {
       }));
 });
 
-const { mutate: createPayment, isLoading: onCreatePaymentLoading } =
-  createPaymentMutation();
+const {
+  mutate: createPayment,
+  isLoading: onCreatePaymentLoading,
+} = createPaymentMutation();
 
 async function submitForm() {
   try {
@@ -209,9 +206,7 @@ async function submitForm() {
     obj.recipient_type = 1;
     obj.recipient_id = Number(routeParamId.value);
     obj.payment_date = dayjs(form.value.payment_date).format("YYYY-MM-DD");
-    obj.payment_invoices = obj.payment_invoices.map((inv) =>
-      omit(inv, ["invoices"])
-    );
+    obj.payment_invoices = obj.payment_invoices.map((inv) => omit(inv, ["invoices"]));
     createPayment(obj, {
       onSuccess() {
         showDrawer.value = false;
@@ -228,9 +223,13 @@ async function submitForm() {
 <template>
   <n-button @click="showDrawer = true" v-bind="$attrs">
     <n-icon>
-      <svg viewBox="0 0 24 24">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink"
+        viewBox="0 0 24 24"
+      >
         <path
-          d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0itl2 0v5h5a1 1 0 0 1 0 2z"
+          d="M18 12.998h-5v5a1 1 0 0 1-2 0v-5H6a1 1 0 0 1 0-2h5v-5a1 1 0 0 1 2 0v5h5a1 1 0 0 1 0 2z"
           fill="currentColor"
         ></path>
       </svg>
@@ -243,24 +242,11 @@ async function submitForm() {
     size="huge"
     class="max-w-screen-lg print:shadow-none lg:max-w-[80vw]"
   >
-    <n-form
-      :model="form"
-      :label-width="90"
-      :rules="rules"
-      size="medium"
-      ref="formRef"
-    >
-      <n-config-provider
-        inline-theme-disabled
-        :theme-overrides="themeOverrides"
-      >
+    <n-form :model="form" :label-width="90" :rules="rules" size="medium" ref="formRef">
+      <n-config-provider inline-theme-disabled :theme-overrides="themeOverrides">
         <header class="flex content-center justify-between">
           <section class="flex flex-col">
-            <n-form-item
-              size="small"
-              label="GMTV print location"
-              path="gmtv_location_id"
-            >
+            <n-form-item size="small" label="GMTV print location" path="gmtv_location_id">
               <n-select
                 :options="gmtvLocationsOptions"
                 class="other-select min-w-md w-full"
@@ -297,10 +283,7 @@ async function submitForm() {
               v-if="currentPaymentType === 'ach'"
               label="ACH transfer Number"
             >
-              <n-input
-                class="custom-input"
-                v-model:value="form.ach_transfer_number"
-              />
+              <n-input class="custom-input" v-model:value="form.ach_transfer_number" />
             </n-form-item>
           </section>
 
