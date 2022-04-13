@@ -9,7 +9,7 @@ import {
   watch,
   h,
 } from "vue";
-import { useInfiniteQuery, useQuery } from "vue-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "vue-query";
 import axios from "axios";
 import { getGmtvLocations } from "@/hooks/location";
 import { getVehicleMakes, laneFilter } from "./lanes.hook";
@@ -25,6 +25,7 @@ import { NFormItem, NInput, useDialog, useMessage } from "naive-ui";
 const emits = defineEmits(["filter"]);
 const dialog = useDialog();
 const message = useMessage();
+const queryClient = useQueryClient();
 
 const {
   vehicleColorOptions,
@@ -33,7 +34,16 @@ const {
   vehicle_makes,
   auctionOptions,
 } = laneFilter();
-
+const selectedLaneReport = ref(null);
+const { data: lanes_reports } = useQuery("lanes_reports", () =>
+  axios.get("/lanes_reports").then((res) => res.data)
+);
+const lanes_report_options = computed(() =>
+  lanes_reports.value?.map((report) => ({
+    label: report.name,
+    value: report.data,
+  }))
+);
 const filters = ref([
   {
     type: null,
@@ -207,7 +217,10 @@ const onFilterSave = () => {
             name: filter_name.value,
             data: JSON.stringify(filter),
           })
-          .then(resolve)
+          .then(() => {
+            resolve();
+            queryClient.invalidateQueries("lanes_reports");
+          })
           .catch((e) => {
             message.error("Error");
             currentDialog.loading = false;
@@ -216,9 +229,23 @@ const onFilterSave = () => {
     },
   });
 };
+const onLaneReportSelect = (val) => {
+  selectedLaneReport.value = val;
+  filters.value = JSON.parse(val);
+};
 </script>
 
 <template>
+  <div class="py-2">
+    <CustomInput
+      type="select"
+      label="Select Filter"
+      basic
+      :options="lanes_report_options"
+      @update:value="onLaneReportSelect"
+      :value="selectedLaneReport"
+    />
+  </div>
   <n-dynamic-input
     class="custom-dynamic-input"
     v-model:value="filters"
