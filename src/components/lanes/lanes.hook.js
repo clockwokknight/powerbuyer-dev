@@ -2,6 +2,7 @@ import { useInfiniteQuery, useQuery } from "vue-query";
 import axios from "axios";
 import { computed } from "vue";
 import { getGmtvLocations } from "@/hooks/location";
+import { getAuctions } from "@/hooks/auctions";
 
 export const getVehicleMakes = () =>
   useQuery(["vehicle", "makes"], () =>
@@ -50,12 +51,25 @@ export const laneFilter = () => {
       value: make.id,
     }))
   );
-  // Vehicle Models
-
+  // Auction
+  const { data: auctions } = getAuctions();
+  const auctionOptions = computed(() =>
+    auctions.value?.pages.reduce(
+      (prev, current) =>
+        prev.concat(
+          current?.data.map((auction) => ({
+            label: auction.code,
+            value: auction.id,
+          })) ?? []
+        ),
+      []
+    )
+  );
   return {
     vehicleColorOptions,
     gmtvLocationOptions,
     vehicleMakeOptions,
     vehicle_makes,
+    auctionOptions,
   };
 };

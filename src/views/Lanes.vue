@@ -1,7 +1,7 @@
 <script setup>
 import { getAllLanes } from "@/hooks/lanes";
 import { NTag } from "naive-ui";
-import { computed, h, reactive, ref } from "vue";
+import { computed, defineComponent, h, nextTick, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
 import { useQueryClient } from "vue-query";
 import axios from "axios";
@@ -28,6 +28,46 @@ const sortKeyMapOrderRef = computed(() =>
     return result;
   }, {})
 );
+
+// const ShowOrEdit = defineComponent({
+//   props: {
+//     value: [String, Number],
+//     onUpdateValue: [Function, Array],
+//   },
+//   setup(props) {
+//     const isEdit = ref(false);
+//     const inputRef = ref(null);
+//     const inputValue = ref(props.value);
+//     function handleOnClick() {
+//       isEdit.value = true;
+//       nextTick(() => {
+//         inputRef.value.focus();
+//       });
+//     }
+//     function handleChange() {
+//       props.onUpdateValue(inputValue.value);
+//       isEdit.value = false;
+//     }
+//     return () =>
+//       h(
+//         "div",
+//         {
+//           onClick: handleOnClick,
+//         },
+//         isEdit.value
+//           ? h(NInput, {
+//               ref: inputRef,
+//               value: inputValue.value,
+//               onUpdateValue: (v) => {
+//                 inputValue.value = v;
+//               },
+//               onChange: handleChange,
+//               onBlur: handleChange,
+//             })
+//           : props.value
+//       );
+//   },
+// });
 
 const columns = computed(() => [
   {
@@ -181,40 +221,37 @@ const OnFilterTrigger = (obj) => {
 
 <template>
   <!-- Main Tabs App Content -->
-  <div class="h-screen w-[calc(100vw-60px)]">
+  <div
+    class="flex h-screen w-[calc(100vw-60px)] gap-x-5 overflow-auto bg-white dark:bg-background_dark"
+  >
     <!-- Main Body Content-->
-    <div
-      class="flex h-screen w-full gap-x-5 overflow-auto bg-white dark:bg-background_dark"
+
+    <!-- Body Content -->
+    <aside class="h-full w-full max-w-[350px] pt-5 pl-5 pr-5 dark:bg-foreground_dark">
+      <h3 class="mb-3 text-lg font-bold">Lane Filters</h3>
+      <Filter @filter="OnFilterTrigger" />
+    </aside>
+    <main
+      class="h-full w-[calc(100vw-410px)] overflow-y-auto overflow-x-hidden overscroll-contain pr-5 pt-5"
     >
-      <!-- Body Content -->
-      <aside
-        class="h-full w-full max-w-[350px] pt-5 pl-5 pr-5 dark:bg-foreground_dark"
-      >
-        <h3 class="mb-3 text-lg font-bold">Lane Filters</h3>
-        <Filter @filter="OnFilterTrigger" />
-      </aside>
-      <main
-        class="h-full w-[calc(100%-410px)] overflow-y-auto overscroll-contain pr-5 pt-5"
-      >
-        <div class="mb-3">
-          <h1 class="text-xl font-bold uppercase">Lane Numberings</h1>
-        </div>
-        <div>
-          <n-data-table
-            remote
-            ref="table"
-            :columns="columns"
-            :data="lanes?.data"
-            :pagination="pagination"
-            :max-height="600"
-            :scroll-x="3000"
-            :loading="isFetching"
-            @update:page="handlePageChange"
-            @update:sorter="handleSortChange"
-          />
-          <pre></pre>
-        </div>
-      </main>
-    </div>
+      <div class="mb-3">
+        <h1 class="text-xl font-bold uppercase">Lane Numberings</h1>
+      </div>
+      <div>
+        <n-data-table
+          remote
+          ref="table"
+          :columns="columns"
+          :data="lanes?.data"
+          :pagination="pagination"
+          :max-height="900"
+          :scroll-x="3000"
+          :loading="isFetching"
+          @update:page="handlePageChange"
+          @update:sorter="handleSortChange"
+        />
+        <pre></pre>
+      </div>
+    </main>
   </div>
 </template>
