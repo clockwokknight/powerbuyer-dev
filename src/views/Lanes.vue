@@ -1,6 +1,6 @@
 <script setup>
 import { getAllLanes } from "@/hooks/lanes";
-import { NTag } from "naive-ui";
+import { NInput } from "naive-ui";
 import { computed, defineComponent, h, nextTick, reactive, ref } from "vue";
 import { useRoute } from "vue-router";
 import { useQueryClient } from "vue-query";
@@ -29,45 +29,45 @@ const sortKeyMapOrderRef = computed(() =>
   }, {})
 );
 
-// const ShowOrEdit = defineComponent({
-//   props: {
-//     value: [String, Number],
-//     onUpdateValue: [Function, Array],
-//   },
-//   setup(props) {
-//     const isEdit = ref(false);
-//     const inputRef = ref(null);
-//     const inputValue = ref(props.value);
-//     function handleOnClick() {
-//       isEdit.value = true;
-//       nextTick(() => {
-//         inputRef.value.focus();
-//       });
-//     }
-//     function handleChange() {
-//       props.onUpdateValue(inputValue.value);
-//       isEdit.value = false;
-//     }
-//     return () =>
-//       h(
-//         "div",
-//         {
-//           onClick: handleOnClick,
-//         },
-//         isEdit.value
-//           ? h(NInput, {
-//               ref: inputRef,
-//               value: inputValue.value,
-//               onUpdateValue: (v) => {
-//                 inputValue.value = v;
-//               },
-//               onChange: handleChange,
-//               onBlur: handleChange,
-//             })
-//           : props.value
-//       );
-//   },
-// });
+const ShowOrEdit = defineComponent({
+  props: {
+    value: [String, Number],
+    onUpdateValue: [Function, Array],
+  },
+  setup(props) {
+    const isEdit = ref(false);
+    const inputRef = ref(null);
+    const inputValue = ref(props.value);
+    function handleOnClick() {
+      isEdit.value = true;
+      nextTick(() => {
+        inputRef.value.focus();
+      });
+    }
+    function handleChange() {
+      props.onUpdateValue(inputValue.value);
+      isEdit.value = false;
+    }
+    return () =>
+      h(
+        "div",
+        {
+          onClick: handleOnClick,
+        },
+        isEdit.value
+          ? h(NInput, {
+              ref: inputRef,
+              value: String(inputValue.value),
+              onUpdateValue: (v) => {
+                inputValue.value = v;
+              },
+              onChange: handleChange,
+              onBlur: handleChange,
+            })
+          : props.value
+      );
+  },
+});
 
 const columns = computed(() => [
   {
@@ -75,6 +75,14 @@ const columns = computed(() => [
     key: "lane_number",
     fixed: "left",
     width: 100,
+    render(row) {
+      return h(ShowOrEdit, {
+        value: row.lane_number,
+        onUpdateValue: (val) => {
+          console.log(val);
+        },
+      });
+    },
     // sortOrder: sortKeyMapOrderRef.value.lane_number || false,
     // sorter: {
     //   compare: (a, b) => a.lane_number - b.lane_number,
@@ -161,6 +169,10 @@ const columns = computed(() => [
     title: "Dealer",
     key: "deal.dealer.name",
   },
+  {
+    title: "Auction Company",
+    key: "auction.auction_company",
+  },
   // {
   //   title: "Designation Code",
   //   key: "age",
@@ -169,10 +181,10 @@ const columns = computed(() => [
   //   title: "Buyer Code",
   //   key: "address",
   // },
-  // {
-  //   title: "Grade",
-  //   key: "age",
-  // },
+  {
+    title: "Grade",
+    key: "deal.grade",
+  },
   // {
   //   title: "BCF",
   //   key: "address",
@@ -227,7 +239,9 @@ const OnFilterTrigger = (obj) => {
     <!-- Main Body Content-->
 
     <!-- Body Content -->
-    <aside class="h-full w-full max-w-[350px] pt-5 pl-5 pr-5 dark:bg-foreground_dark">
+    <aside
+      class="h-full w-full max-w-[350px] pt-5 pl-5 pr-5 dark:bg-foreground_dark"
+    >
       <h3 class="mb-3 text-lg font-bold">Lane Filters</h3>
       <Filter @filter="OnFilterTrigger" />
     </aside>
@@ -250,7 +264,6 @@ const OnFilterTrigger = (obj) => {
           @update:page="handlePageChange"
           @update:sorter="handleSortChange"
         />
-        <pre></pre>
       </div>
     </main>
   </div>
