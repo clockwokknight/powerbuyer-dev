@@ -29,45 +29,45 @@ const sortKeyMapOrderRef = computed(() =>
   }, {})
 );
 
-const ShowOrEdit = defineComponent({
-  props: {
-    value: [String, Number],
-    onUpdateValue: [Function, Array],
-  },
-  setup(props) {
-    const isEdit = ref(false);
-    const inputRef = ref(null);
-    const inputValue = ref(props.value);
-    function handleOnClick() {
-      isEdit.value = true;
-      nextTick(() => {
-        inputRef.value.focus();
-      });
-    }
-    function handleChange() {
-      props.onUpdateValue(inputValue.value);
-      isEdit.value = false;
-    }
-    return () =>
-      h(
-        "div",
-        {
-          onClick: handleOnClick,
-        },
-        isEdit.value
-          ? h(NInput, {
-              ref: inputRef,
-              value: inputValue.value,
-              onUpdateValue: (v) => {
-                inputValue.value = v;
-              },
-              onChange: handleChange,
-              onBlur: handleChange,
-            })
-          : props.value
-      );
-  },
-});
+// const ShowOrEdit = defineComponent({
+//   props: {
+//     value: [String, Number],
+//     onUpdateValue: [Function, Array],
+//   },
+//   setup(props) {
+//     const isEdit = ref(false);
+//     const inputRef = ref(null);
+//     const inputValue = ref(props.value);
+//     function handleOnClick() {
+//       isEdit.value = true;
+//       nextTick(() => {
+//         inputRef.value.focus();
+//       });
+//     }
+//     function handleChange() {
+//       props.onUpdateValue(inputValue.value);
+//       isEdit.value = false;
+//     }
+//     return () =>
+//       h(
+//         "div",
+//         {
+//           onClick: handleOnClick,
+//         },
+//         isEdit.value
+//           ? h(NInput, {
+//               ref: inputRef,
+//               value: inputValue.value,
+//               onUpdateValue: (v) => {
+//                 inputValue.value = v;
+//               },
+//               onChange: handleChange,
+//               onBlur: handleChange,
+//             })
+//           : props.value
+//       );
+//   },
+// });
 
 const columns = computed(() => [
   {
@@ -227,9 +227,7 @@ const OnFilterTrigger = (obj) => {
     <!-- Main Body Content-->
 
     <!-- Body Content -->
-    <aside
-      class="h-full w-full max-w-[350px] pt-5 pl-5 pr-5 dark:bg-foreground_dark"
-    >
+    <aside class="h-full w-full max-w-[350px] pt-5 pl-5 pr-5 dark:bg-foreground_dark">
       <h3 class="mb-3 text-lg font-bold">Lane Filters</h3>
       <Filter @filter="OnFilterTrigger" />
     </aside>
