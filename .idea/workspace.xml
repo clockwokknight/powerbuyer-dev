@@ -5,6 +5,8 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/lanes/Filter.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/lanes/Filter.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/lanes/lanes.helper.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/lanes/lanes.helper.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/lanes/lanes.hook.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/lanes/lanes.hook.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/views/Lanes.vue" beforeDir="false" afterPath="$PROJECT_DIR$/src/views/Lanes.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,7 +89,8 @@
       <workItem from="1649743435051" duration="96000" />
       <workItem from="1649743540452" duration="7810000" />
       <workItem from="1649787176927" duration="1557000" />
-      <workItem from="1649796318226" duration="3837000" />
+      <workItem from="1649796318226" duration="10953000" />
+      <workItem from="1649871596525" duration="508000" />
     </task>
     <servers />
   </component>
