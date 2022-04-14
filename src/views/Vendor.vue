@@ -101,6 +101,7 @@ const paymentTermOptions = computed(() =>
     value: payment.id,
   }))
 );
+
 const { data: getInvoicesTotal } = getInvoiceTotalByVendor(routeParamId);
 const { data: statesList } = getStates();
 
