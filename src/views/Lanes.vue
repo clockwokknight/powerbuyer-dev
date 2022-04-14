@@ -13,7 +13,7 @@ const filter = ref({
   page: 1,
   per_page: 20,
 });
-const { data: lanes, isFetching } = getAllLanes(filter);
+const { data: lanes, isLoading: isLanesLoading } = getAllLanes(filter);
 const pagination = computed(() => ({
   pageSize: filter.value.per_page,
   page: filter.value.page,
@@ -33,12 +33,17 @@ const ShowOrEdit = defineComponent({
   props: {
     value: [String, Number],
     onUpdateValue: [Function, Array],
+    inputType: {
+      type: String,
+      default: "text",
+    },
   },
   setup(props) {
     const isEdit = ref(false);
     const inputRef = ref(null);
     const inputValue = ref(props.value);
     function handleOnClick() {
+      console.log("clicking");
       isEdit.value = true;
       nextTick(() => {
         inputRef.value.focus();
@@ -56,8 +61,9 @@ const ShowOrEdit = defineComponent({
         },
         isEdit.value
           ? h(NInput, {
+              type: props.inputType,
               ref: inputRef,
-              value: String(inputValue.value),
+              value: inputValue.value,
               onUpdateValue: (v) => {
                 inputValue.value = v;
               },
@@ -65,6 +71,8 @@ const ShowOrEdit = defineComponent({
               onBlur: handleChange,
             })
           : props.value
+          ? props.value
+          : h("span", { style: "padding: 10px 20px" })
       );
   },
 });
@@ -77,9 +85,12 @@ const columns = computed(() => [
     width: 100,
     render(row) {
       return h(ShowOrEdit, {
-        value: row.lane_number,
-        onUpdateValue: (val) => {
-          console.log(val);
+        value: String(row.lane_number),
+        onUpdateValue: async (val) => {
+          if (parseInt(val) !== row.lane_number) {
+            await axios.put("/lanes/" + row.id, { lane_number: val });
+            await queryClient.invalidateQueries(["lanes"]);
+          }
         },
       });
     },
@@ -90,9 +101,29 @@ const columns = computed(() => [
     // },
   },
   {
+    title: "Notes",
+    key: "deal.notes",
+    ellipsis: {
+      tooltip: true,
+    },
+    width: 300,
+    render(row) {
+      return h(ShowOrEdit, {
+        value: row["deal.notes"] ?? "",
+        inputType: "textarea",
+        onUpdateValue: async (val) => {
+          if (row["deal.notes"] !== val) {
+            await axios.put("/deals/" + row["deal.id"], { notes: val });
+            await queryClient.invalidateQueries(["lanes"]);
+          }
+        },
+      });
+    },
+  },
+  {
     title: "Sale Number",
     key: "sale_number",
-    fixed: "left",
+    // fixed: "left",
     width: 150,
     // sortOrder: sortKeyMapOrderRef.value.sale_number || false,
     // sorter: {
@@ -185,6 +216,7 @@ const columns = computed(() => [
     title: "Grade",
     key: "deal.grade",
   },
+
   // {
   //   title: "BCF",
   //   key: "address",
@@ -260,7 +292,7 @@ const OnFilterTrigger = (obj) => {
           :pagination="pagination"
           :max-height="900"
           :scroll-x="3000"
-          :loading="isFetching"
+          :loading="isLanesLoading"
           @update:page="handlePageChange"
           @update:sorter="handleSortChange"
         />
