@@ -8,11 +8,6 @@ import Card from "@/components/_refactor/Card.vue";
 const form = ref({
   basic: "",
 });
-
-watchEffect(() => {
-  console.clear();
-  log.cyan(" basic input: ", form.value.basic);
-});
 </script>
 
 <template>
@@ -23,6 +18,8 @@ watchEffect(() => {
         :label="'Notes'"
         placeholder="my placeholder"
         v-model:value="form.basic"
+        :debounce="500"
+        @debounced="log('debounced')"
       />
     </Card>
   </main>
