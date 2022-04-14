@@ -71,9 +71,9 @@ const tabs = ref([
   },
 ]);
 
-const { data: vendor } = fetchById("/deals/search_by_vin", routeParamId);
+const { data: vendor } = fetchById("/deals", routeParamId);
 
-const { data: images } = fetchById("/images/deal", routeParamId);
+//const { data: images } = fetchById("/images/deal", routeParamId);
 
 //const { data: logo } = fetchById("/images/deal/logo", vendor?.value?.id);
 
@@ -85,9 +85,9 @@ const form = ref({
   grade: null,
   year: null,
   make: null,
-  model: null,
-  trim: null,
-  body: null,
+  model: null, // Numerical ID?
+  trim: null, // Numerical ID?
+  body: null, //
   ext_color: null,
   int_color: null,
   miles: null,
@@ -96,17 +96,30 @@ const form = ref({
 });
 
 watch(
-  () => vendor?.value,
-  (newValue) => {
-    if (newValue) {
-      form.value = { ...newValue };
-      vendorData.value = { ...newValue };
-      console.log(newValue[0]);
-      Object.entries(newValue[0]).forEach((kv) => {
-        // sterilizing data to fix non-update on cancel
-        if (kv[1] === "") vendorData.value[kv[0]] = null;
+  () => vendor.value,
+  (val) => {
+    if (val) {
+      const incomingData = {
+        ...val,
+        lane: val.lane_number, // Number
+        year: val.vehicle?.vehicle_year, // Number
+        make: val.vehicle?.vehicle_make.name, // String
+        model: val.vehicle?.vehicle_model_id, // Number <fetch model name string>
+        trim: val.vehicle?.vehicle_model_trim_id, // Number <fetch trim string>
+        body: val.vehicle?.body, // String
+        ext_color: val.vehicle?.exterior_color?.color, // String
+        int_color: val.vehicle?.interior_color?.color, // String
+        miles: val.mileage, // Number
+        recon: val.recon_notes, // String
+      };
+      form.value = incomingData;
+      vendorData.value = incomingData;
+      //log.green("vehicle.value: ", val);
+      Object.entries(val).forEach((kv) => {
+        if (kv[1] === "") vendorData.value[kv[0]] = null; // setting blanks as null
       });
-      console.log(form.value);
+      log.cyan("vendorData.value: ", vendorData.value);
+      //log.blue("form.value: ", form.value);
     }
   },
   { immediate: true }
@@ -123,6 +136,13 @@ watch(
     immediate: true,
   }
 );
+
+/*watch(
+  () => images.value,
+  (val) => {
+    log.blue("images.value: ", val);
+  }
+);*/
 
 /*watch(
   () => logo?.value,
@@ -169,32 +189,48 @@ function handleTabClick(e) {
 </script>
 
 <template>
-  <main id="container" class="min-h-full p-2 md:p-6">
-    <Card class="p-[0px]">
+  <main id="container" class="p-2 md:p-6">
+    <Card class="p-[0px] pb-[24px]">
       <div class="mt-0 grid grid-cols-12 w-full">
         <!-- left side -->
         <div class="__form col-span-12 flex flex-col justify-between w-full">
           <div class="flex">
-            <div class="mr-[24px] h-[260px] min-w-[260px] rounded-round">
+            <!-- image carousel container -->
+            <div class="mr-[24px] h-[160px] min-w-[160px]">
               <div class="relative">
                 <div
                   class="__vehicle-logo z-50 absolute my-[0px] mx-[12px] w-[80px] bg-transparent center-content text-[9px] rounded-round"
                 >
-                  <!--img
+                  <img
                     src="https://gmtvinventory.com/storage/logos/dodge.png"
                     alt="Dodge Logo"
-                  /-->
+                  />
                 </div>
               </div>
-              <n-carousel class="max-w-[260px] rounded-b-round" show-arrow>
+              <n-carousel class="max-w-[160px] rounded-round" show-arrow>
                 <img
                   v-if="!images || images.length == 0"
-                  class="carousel-img object-cover h-full"
+                  class="carousel-img object-cover rounded-round h-full z-[-1]"
                   src="../assets/broken_image.svg"
                 />
                 <img
-                  v-else
-                  class="carousel-img object-cover h-full"
+                  v-if="!images || images.length == 0"
+                  class="carousel-img object-cover rounded-round h-full z-[-1]"
+                  src="../assets/broken_image.svg"
+                />
+                <img
+                  v-if="!images || images.length == 0"
+                  class="carousel-img object-cover rounded-round h-full z-[-1]"
+                  src="../assets/broken_image.svg"
+                />
+                <img
+                  v-if="!images || images.length == 0"
+                  class="carousel-img object-cover rounded-round h-full z-[-1]"
+                  src="../assets/broken_image.svg"
+                />
+                <img
+                  v-show="images && images.length > 0"
+                  class="carousel-img object-cover rounded-round h-full z-[-1]"
                   v-for="(image, index) in images"
                   :key="index"
                   :src="image.storage"
@@ -248,12 +284,28 @@ function handleTabClick(e) {
                   class="w-full h-[80px] absolute bottom-0"
                 ></div>
               </div>
+              <!-- lights -->
+              <div class="__lights">
+                <div class="__lights-item">
+                  <div class="__lights-icon"></div>
+                  <span>Carfax</span>
+                </div>
+                <div class="__lights-item">
+                  <div class="__lights-icon"></div>
+                  <span>AutoCheck</span>
+                </div>
+                <div class="__lights-item">
+                  <div class="__lights-icon"></div>
+                  <span>Light</span>
+                </div>
+              </div>
             </div>
-
+            <!-- vehicle information -->
             <div class="__form grid grid-cols-12 gap-4">
               <!-- header info -->
               <div class="col-span-12 md:col-span-6">
                 <CustomInput
+                  class="pointer-events-none"
                   label="Vin"
                   placeholder="3FADP4AJ2EM100154"
                   :value="form.vin"
@@ -265,6 +317,7 @@ function handleTabClick(e) {
               </div>
               <div class="col-span-12 md:col-span-3">
                 <CustomInput
+                  class="pointer-events-none"
                   label="Lane"
                   placeholder="20"
                   :value="form.lane"
@@ -276,6 +329,7 @@ function handleTabClick(e) {
               </div>
               <div class="col-span-12 md:col-span-3">
                 <CustomInput
+                  class="pointer-events-none"
                   label="Grade"
                   placeholder="4"
                   :value="form.grade"
@@ -290,6 +344,7 @@ function handleTabClick(e) {
               <!-- row 1 -->
               <div class="col-span-12 md:col-span-3">
                 <CustomInput
+                  class="pointer-events-none"
                   label="Year"
                   placeholder=""
                   :value="form.year"
@@ -301,6 +356,7 @@ function handleTabClick(e) {
               </div>
               <div class="col-span-12 md:col-span-3">
                 <CustomInput
+                  class="pointer-events-none"
                   label="Make"
                   placeholder=""
                   :value="form.make"
@@ -313,6 +369,7 @@ function handleTabClick(e) {
               <!-- row 2 -->
               <div class="col-span-12 md:col-span-3">
                 <CustomInput
+                  class="pointer-events-none"
                   label="Model"
                   placeholder=""
                   :value="form.model"
@@ -324,6 +381,7 @@ function handleTabClick(e) {
               </div>
               <div class="col-span-12 md:col-span-3">
                 <CustomInput
+                  class="pointer-events-none"
                   label="Trim"
                   placeholder=""
                   :value="form.trim"
@@ -335,6 +393,7 @@ function handleTabClick(e) {
               </div>
               <div class="col-span-12 md:col-span-3">
                 <CustomInput
+                  class="pointer-events-none"
                   label="Body"
                   :value="form.body"
                   @update:value="(val) => (form.body = val)"
@@ -346,6 +405,7 @@ function handleTabClick(e) {
               <!-- row 3 -->
               <div class="col-span-12 md:col-span-3">
                 <CustomInput
+                  class="pointer-events-none"
                   label="Ext. Color"
                   placeholder=""
                   :value="form.ext_color"
@@ -357,6 +417,7 @@ function handleTabClick(e) {
               </div>
               <div class="col-span-12 md:col-span-3">
                 <CustomInput
+                  class="pointer-events-none"
                   label="Int. Color"
                   placeholder=""
                   :value="form.int_color"
@@ -368,6 +429,7 @@ function handleTabClick(e) {
               </div>
               <div class="col-span-12 md:col-span-3">
                 <CustomInput
+                  class="pointer-events-none"
                   label="Miles"
                   placeholder=""
                   :value="form.miles"
@@ -380,6 +442,7 @@ function handleTabClick(e) {
               <!-- row 4 -->
               <div class="col-span-12 md:col-span-6">
                 <CustomInput
+                  class="pointer-events-none"
                   label="Notes"
                   placeholder=""
                   :value="form.notes"
@@ -391,6 +454,7 @@ function handleTabClick(e) {
               </div>
               <div class="col-span-12 md:col-span-6">
                 <CustomInput
+                  class="pointer-events-none"
                   label="Recon"
                   placeholder=""
                   :value="form.recon"
@@ -402,29 +466,7 @@ function handleTabClick(e) {
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- right side -->
-
-        <div class="w-[200px] flex mt-[24px]">
-          <div class="flex items-center mr-[24px]">
-            <div
-              class="rounded-full bg-green-400 h-[10px] w-[10px] border-white border-1 mx-[8px]"
-            ></div>
-            <span>Carfax</span>
-          </div>
-          <div class="flex items-center mr-[24px]">
-            <div
-              class="rounded-full bg-green-400 h-[10px] w-[10px] border-white border-1 mx-[8px]"
-            ></div>
-            <span>AutoCheck</span>
-          </div>
-          <div class="flex items-center mr-[24px]">
-            <div
-              class="rounded-full bg-green-400 h-[10px] w-[10px] border-white border-1 mx-[8px]"
-            ></div>
-            <span>Light</span>
-          </div>
+          <!-- right side -->
         </div>
       </div>
     </Card>
@@ -484,4 +526,20 @@ function handleTabClick(e) {
   </main>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.__lights {
+  margin-top: 12px;
+  padding-bottom: 24px;
+  width: 100%;
+}
+.__lights-item {
+  width: 100%;
+  margin-top: 4px;
+  @apply flex items-center w-full;
+}
+.__lights-icon {
+  width: 10px !important;
+  height: 10px !important;
+  @apply rounded-full bg-green-400 border-[#ffffff21] border-[1px] mr-[8px];
+}
+</style>

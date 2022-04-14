@@ -3,6 +3,7 @@ import axios from "axios";
 import { ref, computed, watch, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { utils, log } from "@/lib/utils";
+import { fetchById } from "@/hooks";
 import { useGlobalState } from "@/store/global";
 
 const global = useGlobalState();
@@ -13,13 +14,13 @@ const props = defineProps(["vendors"]);
 defineEmits(["click:tab"]);
 
 function filterVehicles(data) {
-  console.log("filtering ", data);
-  return data.filter(
-    (v) =>
+  return data.filter((v) => {
+    return (
       v.vehicle?.vehicle_make?.vehicle_make_year &&
       v.vehicle?.vehicle_make?.description &&
       v.vehicle?.exterior_color?.color
-  );
+    );
+  });
 }
 </script>
 

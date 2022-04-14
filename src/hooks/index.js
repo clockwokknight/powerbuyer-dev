@@ -1,11 +1,14 @@
 import axios from "axios";
 import { useInfiniteQuery, useQuery } from "vue-query";
+import { useMessage } from "naive-ui";
+import { log } from "@/lib/utils";
+
 
 function queryName(path, context) {
   return path.substring(1, path.length) + context;
 }
 
-// ------------ generic getters ------------
+// --- GET ---
 
 export function fetchPaginatedData(path) {
   return useInfiniteQuery(queryName(path, 'Paginated'), ({ pageParam = 1 }) => 
@@ -39,16 +42,24 @@ export function search(path, query) {
   );
 }
 
-// ------------ Vendor hooks ------------
+// --- POST ---
 
-export function fetchInvoiceTotalByVendor(vendorId) {
-  return useQuery(["totalInvoiceAmount", vendorId], ({ queryKey }) =>
-    axios.get("vendor_invoices/open_total/" + queryKey[1]).then((res) => res.data[0] ?? "0.00")
-  )
-}
-
-export function fetchInvoicesByVendor(vendorId) {
-  return useQuery(["vendorInvoices", vendorId], ({ queryKey }) =>
-    axios.get("/vendor_invoices/search_by_vendor/" + queryKey[1]).then((res) => res.data)
-  )
+function submitValue(key, form) {
+  mutateAsync({
+    [key]:
+      key === "phone"
+        ? utils.parsePhoneNumber(form?.value[key])
+        : form?.value[key],
+  })
+    .then((data) => {
+      message.success("Saved");
+      console.clear();
+      log.green('data submitted from @/hooks/index.js', data);
+      currentActiveField.value = null; // TODO : 👇
+    })
+    .catch((err) => {
+      message.error("An error ocurred");
+      console.log("uh oh...", err);
+    });
+  currentActiveField.value = null; // TODO : Send promise back to calling component
 }

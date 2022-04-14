@@ -4,14 +4,45 @@ import { useLocalStorage } from "@vueuse/core";
 export const useGlobalState = defineStore("global", {
   state: () => {
     return { // TODO : find out why local storage is broken (adblock?)
+      
       documentTitle: "PowerBuyer",
       isMobile: true,
       isDark: true,
-      stuck: [false, false],
+      
+      stuck: [false, false], // find & refactor
+
       inventory: {
-        stuck: [false, false]
+        stuck: [false, false] // find & refactor
       },
-      whattheheck: 'test',
+
+      pages: {
+        dashboard: {
+
+        },
+        inventory: {
+
+        },
+        buyers: {
+
+        },
+        lanes: {
+
+        },
+        auctions: {
+
+        },
+        deals: {
+
+        },
+        vendors: {
+
+        },
+        lenders: {
+
+        },
+      },
+
+
       list: {
         active: false,
         context: null,
@@ -23,7 +54,8 @@ export const useGlobalState = defineStore("global", {
       latest: {
         inventory: '',
         vendors: ''
-      }
+      },
+
     }
   },
   actions: {
