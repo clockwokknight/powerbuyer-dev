@@ -64,7 +64,7 @@ const statusColor = computed(() => {
 });
 
 watchEffect((onInvalidate) => {
-  if (props.value.length > 0) {
+  if (props.value?.length > 0) {
     inputState.typing = true;
     emit("typing");
     const updateTypingStatus = setTimeout(() => {
@@ -127,7 +127,7 @@ function onMouseEnter() {
       </label>
     </div>
     <n-input
-      class="py-[8px] pr-[8px] pl-[8px] w-full"
+      class="py-[4px] pr-[4px] pl-[4px] w-full"
       :autofocus="autofocus"
       :autosize="autosize"
       :clearable="clearable"
@@ -139,7 +139,7 @@ function onMouseEnter() {
       :minlength="minlength"
       :pair="pair"
       :passively-activated="passivelyActivated"
-      :placeholder="placeholder"
+      :placeholder="placeholder || ''"
       :readonly="readonly"
       :round="round"
       :rows="rows"
