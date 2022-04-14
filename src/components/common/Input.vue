@@ -41,6 +41,7 @@ const emit = defineEmits([
   "input",
   "enter",
   "debounced",
+  "typing",
   "update:value",
 ]);
 
@@ -65,6 +66,7 @@ const statusColor = computed(() => {
 watchEffect((onInvalidate) => {
   if (props.value.length > 0) {
     inputState.typing = true;
+    emit("typing");
     const updateTypingStatus = setTimeout(() => {
       inputState.typing = false;
       emit("debounced");
@@ -74,6 +76,10 @@ watchEffect((onInvalidate) => {
     });
   }
 });
+
+function hasProp(prop) {
+  return props[prop] ?? props[prop]?.length > 0;
+}
 
 function onBlur(e) {
   inputState.focused = false;
@@ -87,6 +93,7 @@ function onFocus(e) {
 
 function onKeyUp(e) {
   if (e.keyCode === 13) {
+    log.green("pressed enter key: ", e.target.value);
     emit("enter", e);
   }
 }
@@ -96,7 +103,7 @@ function onMouseLeave() {
 }
 
 function onMouseEnter() {
-  if (!props.disabled ?? props.disabled.length === 0) inputState.hovering = true;
+  if (!hasProp("disabled")) inputState.hovering = true;
 }
 </script>
 
@@ -111,7 +118,7 @@ function onMouseEnter() {
           style="z-index: -2; width: calc(100% + 2px)"
           class="absolute h-[2px] translate-x-[-9px] translate-y-[-10px] dark:translate-y-[-8px]"
           :class="
-            inputState.focused || inputState.hovering
+            hasProp('status') || inputState.focused || inputState.hovering
               ? 'opacity-1 duration-[200ms]'
               : 'opacity-0 duration-[0ms] delay-[200ms]'
           "
