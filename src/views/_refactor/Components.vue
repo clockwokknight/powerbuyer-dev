@@ -1,28 +1,26 @@
 <script setup>
-import { ref, watchEffect } from "vue";
+import { reactive, watchEffect } from "vue";
 import { utils, log } from "@/lib/utils";
 
-import LabeledInput from "@/components/common/LabeledInput.vue";
+import Input from "@/components/common/Input.vue";
 import Card from "@/components/_refactor/Card.vue";
 
-const form = ref({
-  basic: "",
+const form = reactive({
+  note: "",
 });
 </script>
 
 <template>
   <main class="fill-screen center-content p-[120px]">
     <Card class="p-[180px]">
-      <LabeledInput
+      <Input
         class="w-[400px]"
-        :label="'Notes'"
+        label="Notes"
         placeholder="my placeholder"
-        v-model:value="form.basic"
+        v-model:value="form.note"
         :debounce="500"
         @debounced="log('debounced')"
       />
     </Card>
   </main>
 </template>
-
-<style scoped></style>
