@@ -20,6 +20,31 @@ const form = reactive({
         v-model:value="form.note"
         :debounce="500"
         @debounced="log('debounced')"
+        disabled
+      />
+      <Input
+        class="w-[400px]"
+        label="Notes"
+        placeholder="my placeholder"
+        v-model:value="form.note"
+        :debounce="500"
+        @debounced="log('debounced')"
+      />
+      <Input
+        class="w-[400px]"
+        label="Notes"
+        placeholder="my placeholder"
+        v-model:value="form.note"
+        :debounce="500"
+        @debounced="log('debounced')"
+      />
+      <Input
+        class="w-[400px]"
+        label="Notes"
+        placeholder="my placeholder"
+        v-model:value="form.note"
+        :debounce="500"
+        @debounced="log('debounced')"
       />
     </Card>
   </main>

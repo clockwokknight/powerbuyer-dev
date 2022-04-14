@@ -6,32 +6,32 @@ import { log } from "@/lib/utils";
 
 const global = useGlobalState();
 
-const props = defineProps([
-  "label",
-  "autofocus",
-  "autosize",
-  "clearable",
-  "default-value",
-  "debounce",
-  "disabled",
-  "input-props",
-  "loading",
-  "maxlength",
-  "minlength",
-  "pair",
-  "passively-activated",
-  "placeholder",
-  "readonly",
-  "round",
-  "rows",
-  "separator",
-  "show-count",
-  "show-password-on",
-  "size",
-  "status",
-  "type",
-  "value",
-]);
+const props = defineProps({
+  label: String,
+  autofocus: Boolean,
+  autosize: Boolean,
+  clearable: Boolean,
+  defaultValue: [Number, String],
+  debounce: Number,
+  disabled: Boolean,
+  inputProps: Object,
+  loading: Boolean,
+  maxlength: Number,
+  minlength: Number,
+  pair: Boolean,
+  passivelyActivated: Boolean,
+  placeholder: String,
+  readonly: Boolean,
+  round: Boolean,
+  rows: Number,
+  separator: String,
+  showCount: Boolean,
+  showPasswordOn: String,
+  size: String,
+  status: String,
+  type: String,
+  value: [Number, String],
+});
 
 const emit = defineEmits([
   "blur",
@@ -75,10 +75,6 @@ watchEffect((onInvalidate) => {
   }
 });
 
-watchEffect(() => {
-  log.cyan("hovering input: ", inputState.hovering);
-});
-
 function onBlur(e) {
   inputState.focused = false;
   emit("blur", e);
@@ -90,7 +86,6 @@ function onFocus(e) {
 }
 
 function onKeyUp(e) {
-  // emit only on enter
   if (e.keyCode === 13) {
     emit("enter", e);
   }
@@ -101,7 +96,7 @@ function onMouseLeave() {
 }
 
 function onMouseEnter() {
-  inputState.hovering = true;
+  if (!props.disabled ?? props.disabled.length === 0) inputState.hovering = true;
 }
 </script>
 
