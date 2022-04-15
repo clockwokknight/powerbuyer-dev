@@ -142,7 +142,6 @@ watch(
       route.path !== props.pageName &&
       route.params?.id !== tabStore.tabs[newValue]?.id
     ) {
-      console.log(newValue);
       router.push(`/${props.pageName}/${tabStore.tabs[newValue]?.id}`);
     }
   }

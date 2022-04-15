@@ -198,7 +198,7 @@ function handleTabClick(e) {
         <div class="__form col-span-12 flex flex-col justify-between w-full">
           <div class="flex">
             <!-- image carousel container -->
-            <div class="mr-[24px] h-[160px] min-w-[160px]">
+            <div class="mr-[24px] h-[180px] min-w-[180px]">
               <div class="relative">
                 <div
                   class="__vehicle-logo z-50 absolute my-[0px] mx-[12px] w-[80px] bg-transparent center-content text-[9px] rounded-round"
@@ -209,7 +209,7 @@ function handleTabClick(e) {
                   />
                 </div>
               </div>
-              <n-carousel class="max-w-[160px] rounded-round" show-arrow>
+              <n-carousel class="max-w-[180px] rounded-round" show-arrow>
                 <img
                   v-if="!images || images.length == 0"
                   class="carousel-img object-cover rounded-round h-full z-[-1]"
@@ -430,14 +430,15 @@ function handleTabClick(e) {
 
 <style lang="scss" scoped>
 .__lights {
-  margin-top: 12px;
-  padding-bottom: 24px;
+  margin-top: 24px;
   width: 100%;
 }
 .__lights-item {
   width: 100%;
   margin-top: 4px;
-  @apply flex items-center w-full;
+  padding-bottom: 3px;
+  border-bottom: 1px solid #ffffff21;
+  @apply flex text-[12px] items-center w-full;
 }
 .__lights-icon {
   width: 10px !important;

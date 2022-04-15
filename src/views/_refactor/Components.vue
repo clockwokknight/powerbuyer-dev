@@ -12,23 +12,14 @@ const form = reactive({
   error: "",
   textarea: "",
   resize: "",
+  editable: "edit me plz",
 });
 
 const query = ref("");
 const searchStatus = ref("Ready to search");
 
 function fetchStuff() {
-  // mock fetch (4s)
-  searchStatus.value = "(3) Searching...";
-  setTimeout(() => {
-    searchStatus.value = "(2) Searching...";
-  }, 1000);
-  setTimeout(() => {
-    searchStatus.value = "(1) Searching...";
-  }, 2000);
-  setTimeout(() => {
-    searchStatus.value = "Fetched data: { ... }";
-  }, 3000);
+  searchStatus.value = "Fetched data: { ... }";
 }
 </script>
 
@@ -40,6 +31,7 @@ function fetchStuff() {
         label="Basic input"
         placeholder="Type here"
         v-model:value="form.basic"
+        :rules="['required']"
       />
       <Input
         class="mt-[24px] w-[400px]"
@@ -92,6 +84,15 @@ function fetchStuff() {
           <span class="ml-[6px]">{{ searchStatus }}</span>
         </div>
       </Card>
+      <Input
+        class="mt-[24px] w-[400px] rounded-b-none"
+        label="Editable Input"
+        placeholder="Edit me"
+        :value="form.editable"
+        v-model:value="form.editable"
+        editable
+        :rules="['required']"
+      />
     </Card>
   </main>
 </template>
