@@ -6,6 +6,7 @@ import { useRoute } from "vue-router";
 import { useQueryClient } from "vue-query";
 import axios from "axios";
 import Filter from "@/components/lanes/Filter.vue";
+import { ShowOrEdit } from "@/components/lanes/ShowOrEdit.jsx";
 
 const route = useRoute();
 const queryClient = useQueryClient();
@@ -28,54 +29,6 @@ const sortKeyMapOrderRef = computed(() =>
     return result;
   }, {})
 );
-
-const ShowOrEdit = defineComponent({
-  props: {
-    value: [String, Number],
-    onUpdateValue: [Function, Array],
-    inputType: {
-      type: String,
-      default: "text",
-    },
-  },
-  setup(props) {
-    const isEdit = ref(false);
-    const inputRef = ref(null);
-    const inputValue = ref(props.value);
-    function handleOnClick() {
-      console.log("clicking");
-      isEdit.value = true;
-      nextTick(() => {
-        inputRef.value.focus();
-      });
-    }
-    function handleChange() {
-      props.onUpdateValue(inputValue.value);
-      isEdit.value = false;
-    }
-    return () =>
-      h(
-        "div",
-        {
-          onClick: handleOnClick,
-        },
-        isEdit.value
-          ? h(NInput, {
-              type: props.inputType,
-              ref: inputRef,
-              value: inputValue.value,
-              onUpdateValue: (v) => {
-                inputValue.value = v;
-              },
-              onChange: handleChange,
-              onBlur: handleChange,
-            })
-          : props.value
-          ? props.value
-          : h("span", { style: "padding: 10px 20px; display: block;" })
-      );
-  },
-});
 
 const columns = computed(() => [
   {
