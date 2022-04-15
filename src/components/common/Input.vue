@@ -54,7 +54,7 @@ const emit = defineEmits([
 
 const global = useGlobalState();
 const message = useMessage();
-const { text, copy } = useClipboard();
+const { copy } = useClipboard();
 
 const inputEl = ref();
 
@@ -66,7 +66,7 @@ const inputState = reactive({
   status: null,
 });
 
-// editable shares the same state as inputState, but not vice versa
+// `editableState` shares the same state as `inputState`, but not vice versa
 const editableState = reactive({
   hovering: false,
   editing: false,
@@ -76,11 +76,7 @@ const editableState = reactive({
   lastSaved: null,
 });
 
-const maskState = reactive({
-  mask: props.mask || "",
-  display: "",
-});
-
+// Debounce can be set as prop and handled on emit `@debounced`
 watchEffect((onInvalidate) => {
   if (props.value?.length > 0 && hasProp("debounce")) {
     inputState.typing = true;
@@ -111,7 +107,7 @@ onMounted(() => {
 });
 
 function validate(input) {
-  if (props.rules) {
+  if (props.rules && props.rules.length > 0) {
     let tests = [];
     props.rules?.forEach((test) => tests.push(global.validators[test](input)));
     return props.rules?.length === tests.filter((test) => test)?.length;
@@ -126,15 +122,15 @@ function hasProp(prop) {
 // --- masks ---
 
 function refreshMask(value) {
-  maskState.display = value;
-  const val = masker(value, maskState.mask, true, tokens);
+  const val = masker(value, props.mask, true, tokens);
+  log.yellow("val", val);
   emit("update:value", val);
 }
 
 // --- handle enter key press ---
 
 function onKeyUp(e) {
-  if (e.keyCode === 13) {
+  if (props.editable && e.keyCode === 13) {
     save();
   }
 }
@@ -161,10 +157,15 @@ function onEditableMouseEnter() {
 
 // --- handle n-input events ---
 
-function onInput(e) {
-  emit("input", e);
-  if (hasProp("mask")) refreshMask(e);
-  inputState.isValid = validate(e);
+function onUpdate(e) {
+  if (hasProp("mask")) {
+    const val = masker(e, props.mask, true, tokens);
+    inputState.isValid = validate(val);
+    emit("update:value", val);
+  } else {
+    inputState.isValid = validate(e);
+    emit("update:value", e);
+  }
 }
 
 function onFocus(e) {
@@ -404,7 +405,7 @@ const shiftEditableOverlay = computed(() => {
       :minlength="minlength"
       :pair="pair"
       :passively-activated="passivelyActivated"
-      :placeholder="placeholder || ''"
+      :placeholder="placeholder || mask || ''"
       :readonly="readonly"
       :round="round"
       :rows="rows"
@@ -420,10 +421,10 @@ const shiftEditableOverlay = computed(() => {
       @keyup="onKeyUp"
       @mouseenter="onMouseEnter"
       @mouseleave="onMouseLeave"
-      @input="onInput"
+      @update:value="onUpdate"
+      @input="(e) => $emit('input', e)"
       @clear="(e) => $emit('clear', e)"
       @change="(e) => $emit('change', e)"
-      @update:value="(e) => $emit('update:value', e)"
     />
   </div>
 </template>
