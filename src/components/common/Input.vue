@@ -1,9 +1,10 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch, watchEffect } from "vue";
+import { useGlobalState } from "@/store/global";
+import { masker, tokens } from "@/directives/mask";
+import { useClipboard } from "@vueuse/core";
 import { NInput, NSelect, NConfigProvider } from "naive-ui";
 import { useMessage } from "naive-ui";
-import { useClipboard } from "@vueuse/core";
-import { useGlobalState } from "@/store/global";
 import { log } from "@/lib/utils";
 
 const props = defineProps({
@@ -75,28 +76,18 @@ const inputState = reactive({
   hovering: false,
   focused: false,
   typing: false,
-  status: "",
-  isValid: true,
+  isValid: null,
+  status: null,
 });
 
+// editable shares the same state as inputState, but not vice versa
 const editableState = reactive({
   hovering: false,
   editing: false,
   focused: false,
   done: false,
   saved: false,
-});
-
-const statusColor = computed(() => {
-  const darkLight = (d, l) => (global.isDark ? (inputState.focused ? d : "#303033") : l);
-  switch (props.status) {
-    case "warning":
-      return darkLight("#2E2A26", "#ffffff");
-    case "error":
-      return darkLight("#2D2226", "#ffffff");
-    default:
-      return darkLight("#202C2C", "#ffffff");
-  }
+  lastSaved: null,
 });
 
 watchEffect((onInvalidate) => {
@@ -104,12 +95,10 @@ watchEffect((onInvalidate) => {
     inputState.typing = true;
     emit("typing");
     const updateTypingStatus = setTimeout(() => {
-      log.cyan("waiting to fetch...");
       inputState.typing = false;
       emit("debounced");
     }, props.debounce);
     onInvalidate(() => {
-      log.yellow("invalidated");
       clearTimeout(updateTypingStatus);
     });
   }
@@ -126,18 +115,14 @@ onMounted(() => {
   if (hasProp("status")) {
     inputState.status = props.status;
   }
-  // validate input on mount
   inputState.isValid = validate(props.value);
+  editableState.lastSaved = props.value;
 });
 
 function validate(input) {
   if (props.rules) {
     let tests = [];
     props.rules?.forEach((test) => tests.push(validators[test](input)));
-    log.yellow(
-      "validating...",
-      props.rules?.length === tests.filter((test) => test)?.length
-    );
     return props.rules?.length === tests.filter((test) => test)?.length;
   }
   return true;
@@ -147,22 +132,15 @@ function hasProp(prop) {
   return props[prop] ?? props[prop]?.length > 0;
 }
 
-function onBlur(e) {
-  inputState.focused = false;
-  emit("blur", e);
-}
-
-function onFocus(e) {
-  inputState.focused = true;
-  emit("focus", e);
-}
+// --- handle enter key press ---
 
 function onKeyUp(e) {
   if (e.keyCode === 13) {
-    log.green("pressed enter key: ", e.target.value);
     save();
   }
 }
+
+// --- handle hover events ---
 
 function onMouseLeave() {
   inputState.hovering = false;
@@ -182,14 +160,38 @@ function onEditableMouseEnter() {
   editableState.hovering = true;
 }
 
+// --- handle n-input events ---
+
 function onInput(e) {
   emit("input", e);
   inputState.isValid = validate(e);
 }
 
-function handleCopy() {
-  copy(props.value);
-  message.success("Copied to clipboard");
+function onFocus(e) {
+  emit("focus", e);
+  inputState.focused = true;
+}
+
+function onBlur(e) {
+  log(e);
+  if (e.relatedTarget?.classList.contains("__save")) {
+    save();
+  } else {
+    emit("blur", e);
+    cancel();
+  }
+}
+
+// --- handle editable events ---
+
+function cancel() {
+  emit("cancel");
+  emit("update:value", editableState.lastSaved); // setting last saved value at Input level
+  inputEl.value.blur();
+  editableState.focused = false;
+  editableState.editing = false;
+  editableState.done = true;
+  setTimeout(() => (editableState.done = false), 500);
 }
 
 function edit() {
@@ -200,42 +202,68 @@ function edit() {
   editableState.saved = false;
 }
 
-function cancel() {
-  emit("cancel");
-  inputEl.value.blur();
-  editableState.focused = false;
-  editableState.editing = false;
-  editableState.done = true;
-  setTimeout(() => (editableState.done = false), 500);
-  //caretX.value = "18px";
-  //caretFill.value = hoverInput.value ? "#bdbdbd00" : "#bdbdbd";
-}
-
 function save() {
-  editableState.editing = false;
-  if (validation(props.value)) {
+  if (inputState.isValid) {
     emit("save");
-    inputEl.value.blur();
     editableState.saved = true;
+    editableState.lastSaved = props.value;
+    inputEl.value.blur();
     setTimeout(() => (editableState.saved = false), 1000);
     editableState.done = true;
     setTimeout(() => (editableState.saved = false), 500);
-    //caretX.value = "18px";
-    //caretFill.value = editableState.saved ? "#bdbdbd00" : "#bdbdbd";
+    editableState.editing = false;
   } else {
     message.error("Invalid input");
     inputState.status = "error";
     setTimeout(edit(), 300);
   }
 }
+
+function handleCopy() {
+  copy(props.value);
+  message.success("Copied to clipboard");
+}
+
+// --- dynamic classes/styles ---
+
+const statusColor = computed(() => {
+  const darkLight = (d, l) => (global.isDark ? (inputState.focused ? d : "#303033") : l);
+  switch (inputState.status) {
+    case "warning":
+      return darkLight("#2E2A26", "#ffffff");
+    case "error":
+      return darkLight("#2D2226", "#ffffff");
+    default:
+      return darkLight("#202C2C", "#ffffff");
+  }
+});
+
+const hideUntilActive = computed(() => {
+  return `
+    ${
+      editableState.editing || !editableState.hovering
+        ? "pointer-events-none scale-0 !opacity-0 duration-200"
+        : "opacity-100 duration-100"
+    }
+  `;
+});
+
+const shiftEditableOverlay = computed(() => {
+  return `
+    ${
+      editableState.editing || editableState.focused
+        ? "translate-x-[-72px] w-[72px]"
+        : "translate-x-[0px] w-full"
+    }
+    ${editableState.saved && "ping"}
+  `;
+});
 </script>
 
 <template>
   <div>
     <div class="relative">
-      <label
-        class="absolute z-40 translate-x-[8px] translate-y-[-6px] bg-transparent px-2 text-[9px] font-medium uppercase tracking-widest text-gray-600 dark:text-background_light"
-      >
+      <label class="__label">
         <b
           class="text-red-600 duration-[300ms]"
           :class="
@@ -248,42 +276,37 @@ function save() {
         <span>{{ label || "Label" }}</span>
         <div
           style="z-index: -2; width: calc(100% + 2px)"
-          class="absolute h-[2px] translate-x-[-9px] translate-y-[-10px] dark:translate-y-[-8px]"
+          :style="`background: ${statusColor}`"
+          class="absolute h-[2px] translate-x-[-9px] translate-y-[-8px]"
           :class="
             hasProp('status') ||
             !inputState.isValid ||
             inputState.focused ||
             inputState.hovering
               ? 'opacity-1 duration-[200ms]'
-              : 'opacity-0 duration-[0ms] delay-[200ms]'
+              : global.isDark && 'opacity-0 duration-[0ms] delay-[200ms]'
           "
-          :style="`background: ${statusColor}`"
         ></div>
       </label>
     </div>
-    <div v-if="hasProp('editable')" class="relative">
+    <div
+      v-if="hasProp('editable')"
+      class="relative z-50"
+      :class="(editableState.editing || editableState.focused) && 'float-right'"
+    >
       <div
-        class="__editable-overlay absolute w-full h-[42px] pl-[12px] flex items-center justify-end"
+        class="absolute h-[42px] pl-[12px] flex items-center justify-end"
+        :class="shiftEditableOverlay"
         @mouseenter="onEditableMouseEnter"
         @mouseleave="onEditableMouseLeave"
       >
-        <div
-          class="mr-[12px] duration-[200ms]"
-          :class="!editableState.hovering && 'opacity-0 pointer-events-none'"
-        >
+        <div class="mr-[12px] flex items-center">
           <!-- copy -->
           <button
             ref="copyButton"
             @click="handleCopy"
             class="__edit h-3 w-3 -translate-x-3 rounded-full dark:hover:opacity-50"
-            :class="`
-                      ${
-                        editableState.editing
-                          ? 'pointer-events-none scale-0 !opacity-0 duration-200'
-                          : 'opacity-100 duration-100'
-                      }
-                      ${editableState.done && 'delay-[250ms]'}
-                  `"
+            :class="hideUntilActive"
           >
             <svg
               class="fill-black dark:fill-white hover:fill-success"
@@ -299,14 +322,7 @@ function save() {
             ref="editButton"
             @click="edit"
             class="__edit h-3 w-3 -translate-x-1 rounded-full dark:hover:opacity-50"
-            :class="`
-                      ${
-                        editableState.editing
-                          ? 'pointer-events-none scale-50 opacity-0 duration-200'
-                          : 'opacity-100 duration-100'
-                      }
-                      ${editableState.done && 'delay-[250ms]'}
-                  `"
+            :class="hideUntilActive"
           >
             <svg
               class="fill-black dark:fill-white hover:fill-success"
@@ -372,12 +388,14 @@ function save() {
     </div>
     <n-input
       ref="inputEl"
-      class="py-[4px] pr-[4px] pl-[4px] w-full"
-      :class="
-        hasProp('editable') && !editableState.editing
-          ? 'pointer-events-none'
-          : 'pointer-events-all'
-      "
+      class="py-[4px] pl-[4px] w-full truncate"
+      :class="`
+        ${
+          editable && !editableState.editing
+            ? 'pointer-events-none pr-[24px]'
+            : 'pointer-events-all pr-[4px]'
+        }
+      `"
       :autofocus="autofocus"
       :autosize="autosize"
       :clearable="clearable"
@@ -412,3 +430,23 @@ function save() {
     />
   </div>
 </template>
+
+<style lang="scss" scoped>
+.__label {
+  @apply absolute z-40 translate-x-[8px] translate-y-[-6px] bg-transparent px-2 text-[9px] font-medium uppercase tracking-widest text-gray-600 dark:text-background_light;
+}
+button {
+  cursor: pointer;
+}
+.ping {
+  animation: ping 1s ease forwards;
+}
+@keyframes ping {
+  from {
+    @apply bg-[#ffee0022];
+  }
+  to {
+    @apply bg-transparent;
+  }
+}
+</style>

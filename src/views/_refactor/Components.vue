@@ -7,12 +7,13 @@ import Card from "@/components/_refactor/Card.vue";
 
 const form = reactive({
   basic: "",
+  phone: "",
   disabled: "",
   warning: "",
   error: "",
   textarea: "",
   resize: "",
-  editable: "edit me plz",
+  editable: "some data for you",
 });
 
 const query = ref("");
@@ -25,67 +26,60 @@ function fetchStuff() {
 
 <template>
   <main class="fill-screen center-content p-[120px]">
-    <Card class="p-[24px]">
+    <Card class="__main p-[64px] h-[60vh]">
       <Input
-        class="w-[400px]"
-        label="Basic input"
+        class="__input"
+        label="Required input"
         placeholder="Type here"
         v-model:value="form.basic"
         :rules="['required']"
       />
       <Input
-        class="mt-[24px] w-[400px]"
+        class="__input"
+        label="Phone number"
+        v-model:value="form.phone"
+        :rules="['required', 'phone']"
+      />
+      <Input
+        class="__input"
         label="Disabled Input"
         placeholder="You can't type here"
         v-model:value="form.disabled"
         disabled
       />
       <Input
-        class="mt-[24px] w-[400px]"
-        label="Warning state"
-        placeholder="Something isn't quite right"
-        v-model:value="form.warning"
-        status="warning"
-      />
-      <Input
-        class="mt-[24px] w-[400px]"
-        label="Error state"
-        placeholder="Invalid input"
-        v-model:value="form.error"
-        status="error"
-      />
-      <Input
-        class="mt-[24px] w-[400px]"
+        class="__input"
         label="Textarea"
         placeholder="Notes"
         v-model:value="form.textarea"
         type="textarea"
       />
       <Input
-        class="mt-[24px] min-w-[100px]"
+        class="mb-[24px] min-w-[150px]"
         label="Autosize"
         placeholder="Title"
         v-model:value="form.resize"
         autosize
       />
+      <div class="relative">
+        <Input
+          class="__input !mb-0"
+          label="Debounce (1500ms)"
+          placeholder="Search"
+          v-model:value="query"
+          :debounce="1500"
+          @debounced="fetchStuff"
+          @typing="searchStatus = 'Typing...'"
+        />
+        <Card class="w-[400px] mb-[36px] rounded-t-none">
+          <div class="flex">
+            <span class="opacity-50">Status:</span>
+            <span class="ml-[6px]">{{ searchStatus }}</span>
+          </div>
+        </Card>
+      </div>
       <Input
-        class="mt-[24px] w-[400px] rounded-b-none"
-        label="Debounce (1500ms)"
-        placeholder="Search"
-        v-model:value="query"
-        :debounce="1500"
-        @debounced="fetchStuff"
-        @typing="searchStatus = 'Typing...'"
-      />
-      <!-- ☝️ @typing could be @change, @input, etc -->
-      <Card class="w-[400px] rounded-t-none">
-        <div class="flex">
-          <span class="opacity-50">Status:</span>
-          <span class="ml-[6px]">{{ searchStatus }}</span>
-        </div>
-      </Card>
-      <Input
-        class="mt-[24px] w-[400px] rounded-b-none"
+        class="__input"
         label="Editable Input"
         placeholder="Edit me"
         :value="form.editable"
@@ -96,3 +90,14 @@ function fetchStuff() {
     </Card>
   </main>
 </template>
+
+<style lang="scss" scoped>
+.__main {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-gap: 32px;
+}
+.__input {
+  width: 400px;
+}
+</style>
