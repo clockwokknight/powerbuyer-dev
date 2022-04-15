@@ -6,6 +6,7 @@ import { useRoute } from "vue-router";
 import { useQueryClient } from "vue-query";
 import axios from "axios";
 import Filter from "@/components/lanes/Filter.vue";
+import { ShowOrEdit } from "@/components/lanes/ShowOrEdit.jsx";
 
 const route = useRoute();
 const queryClient = useQueryClient();
@@ -13,7 +14,7 @@ const filter = ref({
   page: 1,
   per_page: 20,
 });
-const { data: lanes, isFetching } = getAllLanes(filter);
+const { data: lanes, isFetching: isLanesLoading } = getAllLanes(filter);
 const pagination = computed(() => ({
   pageSize: filter.value.per_page,
   page: filter.value.page,
@@ -29,46 +30,6 @@ const sortKeyMapOrderRef = computed(() =>
   }, {})
 );
 
-const ShowOrEdit = defineComponent({
-  props: {
-    value: [String, Number],
-    onUpdateValue: [Function, Array],
-  },
-  setup(props) {
-    const isEdit = ref(false);
-    const inputRef = ref(null);
-    const inputValue = ref(props.value);
-    function handleOnClick() {
-      isEdit.value = true;
-      nextTick(() => {
-        inputRef.value.focus();
-      });
-    }
-    function handleChange() {
-      props.onUpdateValue(inputValue.value);
-      isEdit.value = false;
-    }
-    return () =>
-      h(
-        "div",
-        {
-          onClick: handleOnClick,
-        },
-        isEdit.value
-          ? h(NInput, {
-              ref: inputRef,
-              value: String(inputValue.value),
-              onUpdateValue: (v) => {
-                inputValue.value = v;
-              },
-              onChange: handleChange,
-              onBlur: handleChange,
-            })
-          : props.value
-      );
-  },
-});
-
 const columns = computed(() => [
   {
     title: "Lane #",
@@ -77,9 +38,12 @@ const columns = computed(() => [
     width: 100,
     render(row) {
       return h(ShowOrEdit, {
-        value: row.lane_number,
-        onUpdateValue: (val) => {
-          console.log(val);
+        value: String(row.lane_number),
+        onUpdateValue: async (val) => {
+          if (parseInt(val) !== row.lane_number) {
+            await axios.put("/lanes/" + row.id, { lane_number: val });
+            await queryClient.invalidateQueries(["lanes"]);
+          }
         },
       });
     },
@@ -90,9 +54,26 @@ const columns = computed(() => [
     // },
   },
   {
+    title: "Notes",
+    key: "deal.notes",
+    width: 300,
+    render(row) {
+      return h(ShowOrEdit, {
+        value: row["deal.notes"] ?? "",
+        inputType: "textarea",
+        onUpdateValue: async (val) => {
+          if (val && row["deal.notes"] !== val) {
+            await axios.put("/deals/" + row["deal.id"], { notes: val });
+            await queryClient.invalidateQueries(["lanes"]);
+          }
+        },
+      });
+    },
+  },
+  {
     title: "Sale Number",
     key: "sale_number",
-    fixed: "left",
+    // fixed: "left",
     width: 150,
     // sortOrder: sortKeyMapOrderRef.value.sale_number || false,
     // sorter: {
@@ -173,46 +154,10 @@ const columns = computed(() => [
     title: "Auction Company",
     key: "auction.auction_company",
   },
-  // {
-  //   title: "Designation Code",
-  //   key: "age",
-  // },
-  // {
-  //   title: "Buyer Code",
-  //   key: "address",
-  // },
   {
     title: "Grade",
     key: "deal.grade",
   },
-  // {
-  //   title: "BCF",
-  //   key: "address",
-  // },
-  // {
-  //   title: "Car Notes",
-  //   key: "name",
-  // },
-  // {
-  //   title: "Inv. ID",
-  //   key: "age",
-  // },
-  // {
-  //   title: "Enable OVE",
-  //   key: "address",
-  // },
-  // {
-  //   title: "T. Notes",
-  //   key: "notes",
-  // },
-  // {
-  //   title: "W",
-  //   key: "W",
-  // },
-  // {
-  //   title: "V",
-  //   key: "V",
-  // },
 ]);
 
 const handleSortChange = (sorters) => {
@@ -240,13 +185,12 @@ const OnFilterTrigger = (obj) => {
 
     <!-- Body Content -->
     <aside
-      class="h-full w-full max-w-[350px] pt-5 pl-5 pr-5 dark:bg-foreground_dark"
+      class="pageItemsList relative flex h-full w-full max-w-[275px] flex-col pt-5 pl-5 pr-5 dark:bg-foreground_dark"
     >
-      <h3 class="mb-3 text-lg font-bold">Lane Filters</h3>
       <Filter @filter="OnFilterTrigger" />
     </aside>
     <main
-      class="h-full w-[calc(100vw-410px)] overflow-y-auto overflow-x-hidden overscroll-contain pr-5 pt-5"
+      class="h-full w-[calc(100vw-335px)] overflow-y-auto overflow-x-hidden overscroll-contain pr-5 pt-5"
     >
       <div class="mb-3">
         <h1 class="text-xl font-bold uppercase">Lane Numberings</h1>
@@ -260,7 +204,7 @@ const OnFilterTrigger = (obj) => {
           :pagination="pagination"
           :max-height="900"
           :scroll-x="3000"
-          :loading="isFetching"
+          :loading="isLanesLoading"
           @update:page="handlePageChange"
           @update:sorter="handleSortChange"
         />

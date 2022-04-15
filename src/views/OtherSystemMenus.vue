@@ -1,11 +1,12 @@
 <script setup>
-import CommissionTypesModal from "@/components/modals/CommissionTypesModal.vue";
-import BuyerTypesModal from "@/components/modals/BuyerTypesModal.vue";
-import ExpenseTypesModal from "@/components/modals/ExpenseTypesModal.vue";
-import GmtvLocationsModal from "@/components/modals/GmtvLocationsModal.vue";
-import PaymentTermsModal from "@/components/modals/PaymentTermsModal.vue";
-import DealStatusModal from "@/components/modals/DealStatusModal.vue";
-import { useDealers } from "../store/dealers";
+import CommissionTypesModal from "@/components/system/CommissionTypesModal.vue";
+import BuyerTypesModal from "@/components/system/BuyerTypesModal.vue";
+import ExpenseTypesModal from "@/components/system/ExpenseTypesModal.vue";
+import GmtvLocationsModal from "@/components/system/GmtvLocationsModal.vue";
+import PaymentTermsModal from "@/components/system/PaymentTermsModal.vue";
+import DealStatusModal from "@/components/system/DealStatusModal.vue";
+import { useDealers } from "@/store/dealers";
+import LaneReport from "@/components/system/LaneReport.vue";
 const dealerStore = useDealers();
 </script>
 
@@ -52,6 +53,8 @@ const dealerStore = useDealers();
         <!-- Deal Status -->
 
         <DealStatusModal class="single-card" />
+
+        <lane-report class="single-card" />
       </div>
     </section>
 

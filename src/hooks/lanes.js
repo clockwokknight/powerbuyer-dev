@@ -24,3 +24,8 @@ export const getAllLanes = (filter = { page: 1 }) => {
     }
   );
 };
+
+export const getLaneReports = () =>
+  useQuery("lanes_reports", () =>
+    axios.get("/lanes_reports").then((res) => res.data)
+  );
