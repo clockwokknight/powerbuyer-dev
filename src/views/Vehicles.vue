@@ -3,7 +3,7 @@ import axios from "axios";
 import { fetchPaginatedData } from "@/hooks";
 import { utils, log } from "@/lib/utils";
 
-import { ref, watch } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { useQuery } from "vue-query";
 import { useDebounce } from "@vueuse/core";
 import { useRoute } from "vue-router";
@@ -56,6 +56,10 @@ const { data: vendorSearchResults, isFetching: isVendorSearchFetching } = useQue
   }
 );
 
+onMounted(() => {
+  console.clear();
+});
+
 function toggleListSlide() {
   listActive.value = !listActive.value;
 }
@@ -64,13 +68,6 @@ watch(
   () => listActive.value,
   (val) => {
     global.setListActive(val, "vehicle");
-  }
-);
-
-watch(
-  () => vendorSearchResults.value,
-  (val) => {
-    console.log(val);
   }
 );
 </script>

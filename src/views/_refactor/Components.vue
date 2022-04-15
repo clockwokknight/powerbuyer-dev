@@ -1,148 +1,97 @@
 <script setup>
-import { ref, computed, watchEffect, onMounted } from "vue";
-import { useGlobalState } from "@/store/global";
+import { ref, reactive, watchEffect } from "vue";
 import { utils, log } from "@/lib/utils";
 
-import Input from "@/components/_refactor/Input.vue";
-import CustomInput from "@/components/common/CustomInput.vue";
+import Input from "@/components/common/Input.vue";
 import Card from "@/components/_refactor/Card.vue";
 
-const form = ref({
+const form = reactive({
   basic: "",
-  cost: "",
-  phone: "",
-  select: "",
+  disabled: "",
+  warning: "",
+  error: "",
+  textarea: "",
+  resize: "",
 });
 
-const code = ref([
-  `       
-  <CustomInput
-    basic
-    label="Basic Input"
-    :validate="['required']"
-    v-model:value="form.basic"
-  />
-  `,
-  `       
-  <CustomInput
-    basic
-    currency
-    label="Cost"
-    v-model:value="form.cost"
-  />
-  `,
-  `       
-  <CustomInput
-    basic
-    label="Phone"
-    mask="(###) ### ####"
-    :validate="['required', 'phone']"
-    v-model:value="form.phone"
-  />
-  `,
-  `       
-  <CustomInput
-    basic
-    type="select"
-    label="Pick an option"
-    v-model:value="form.select"
-  />
-  `,
-]);
+const query = ref("");
+const searchStatus = ref("Ready to search");
 
-const codeOpen = ref(false);
-const current = ref(0);
-
-watchEffect(() => {
-  console.clear();
-  log.cyan(" basic input: ", form.value.basic);
-  log.cyan("  cost input: ", form.value.cost);
-  log.cyan(" phone input: ", form.value.phone);
-  log.cyan("select input: ", form.value.select);
-});
-
-function handleClick(context) {
-  current.value = context;
-  codeOpen.value = true;
+function fetchStuff() {
+  // mock fetch (4s)
+  searchStatus.value = "(3) Searching...";
+  setTimeout(() => {
+    searchStatus.value = "(2) Searching...";
+  }, 1000);
+  setTimeout(() => {
+    searchStatus.value = "(1) Searching...";
+  }, 2000);
+  setTimeout(() => {
+    searchStatus.value = "Fetched data: { ... }";
+  }, 3000);
 }
 </script>
 
 <template>
   <main class="fill-screen center-content p-[120px]">
-    <Card>
-      <n-form :model="form" class="grid gap-[16px] grid-cols-1">
+    <Card class="p-[24px]">
+      <Input
+        class="w-[400px]"
+        label="Basic input"
+        placeholder="Type here"
+        v-model:value="form.basic"
+      />
+      <Input
+        class="mt-[24px] w-[400px]"
+        label="Disabled Input"
+        placeholder="You can't type here"
+        v-model:value="form.disabled"
+        disabled
+      />
+      <Input
+        class="mt-[24px] w-[400px]"
+        label="Warning state"
+        placeholder="Something isn't quite right"
+        v-model:value="form.warning"
+        status="warning"
+      />
+      <Input
+        class="mt-[24px] w-[400px]"
+        label="Error state"
+        placeholder="Invalid input"
+        v-model:value="form.error"
+        status="error"
+      />
+      <Input
+        class="mt-[24px] w-[400px]"
+        label="Textarea"
+        placeholder="Notes"
+        v-model:value="form.textarea"
+        type="textarea"
+      />
+      <Input
+        class="mt-[24px] min-w-[100px]"
+        label="Autosize"
+        placeholder="Title"
+        v-model:value="form.resize"
+        autosize
+      />
+      <Input
+        class="mt-[24px] w-[400px] rounded-b-none"
+        label="Debounce (1500ms)"
+        placeholder="Search"
+        v-model:value="query"
+        :debounce="1500"
+        @debounced="fetchStuff"
+        @typing="searchStatus = 'Typing...'"
+      />
+      <!-- ☝️ @typing could be @change, @input, etc -->
+      <Card class="w-[400px] rounded-t-none">
         <div class="flex">
-          <CustomInput
-            basic
-            label="Basic Input"
-            :validate="['required']"
-            v-model:value="form.basic"
-            class="__input"
-          />
-          <n-button @click="handleClick(0)" class="mt-[6px] ml-[16px]"
-            >view code</n-button
-          >
+          <span class="opacity-50">Status:</span>
+          <span class="ml-[6px]">{{ searchStatus }}</span>
         </div>
-        <div class="flex">
-          <CustomInput
-            basic
-            currency
-            label="Cost"
-            v-model:value="form.cost"
-            class="__input"
-          />
-          <n-button @click="handleClick(1)" class="mt-[6px] ml-[16px]"
-            >view code</n-button
-          >
-        </div>
-        <div class="flex">
-          <CustomInput
-            basic
-            label="Phone"
-            mask="(###) ### ####"
-            :validate="['required', 'phone']"
-            v-model:value="form.phone"
-            class="__input"
-          />
-          <n-button @click="handleClick(2)" class="mt-[6px] ml-[16px]"
-            >view code</n-button
-          >
-        </div>
-        <div class="flex">
-          <CustomInput
-            basic
-            type="select"
-            label="Pick an option"
-            v-model:value="form.select"
-            class="__input"
-          />
-          <n-button @click="handleClick(3)" class="mt-[6px] ml-[16px]"
-            >view code</n-button
-          >
-        </div>
-      </n-form>
+      </Card>
     </Card>
-    <div
-      class="h-[260px] duration-[300ms] ml-[24px] bg-black border-[1px] border-[#ffffff21] rounded-round overflow-hidden"
-      :class="codeOpen ? 'w-[400px]' : 'w-[0px] opacity-0 pointer-events-none'"
-    >
-      <div
-        @click="codeOpen = false"
-        class="py-[8px] px-[14px] float-right cursor-pointer truncate overflow-hidden bg-[#ffffff21] hover:bg-red-400"
-      >
-        X
-      </div>
-      <pre class="overflow-hidden">
-      <code class="overflow-hidden">
-        {{ code[current] }}
-      </code>
-    </pre>
-    </div>
   </main>
 </template>
-
-<style scoped>
-.__input {
-  @apply w-full;
-}
-</style>
