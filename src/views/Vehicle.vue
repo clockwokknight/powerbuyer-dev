@@ -74,7 +74,7 @@ const tabs = ref([
 
 const { data: vendor } = fetchById("/deals", routeParamId);
 
-//const { data: images } = fetchById("/images/deal", routeParamId);
+const { data: images } = fetchById("/images/deal", routeParamId);
 
 //const { data: logo } = fetchById("/images/deal/logo", vendor?.value?.id);
 
@@ -139,12 +139,12 @@ watch(
   }
 );
 
-/*watch(
+watch(
   () => images.value,
   (val) => {
     log.blue("images.value: ", val);
   }
-);*/
+);
 
 /*watch(
   () => logo?.value,
@@ -355,6 +355,7 @@ function handleTabClick(e) {
                   placeholder=""
                   :value="form.notes"
                   v-model:value="form.notes"
+                  editable
                 />
               </div>
               <div class="col-span-12 md:col-span-6">
@@ -364,10 +365,12 @@ function handleTabClick(e) {
                   placeholder=""
                   :value="form.recon"
                   v-model:value="form.recon"
+                  editable
                 />
               </div>
             </div>
           </div>
+          . n'kl-
           <!-- right side -->
         </div>
       </div>

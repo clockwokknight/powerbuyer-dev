@@ -54,6 +54,7 @@ function fetchStuff() {
         placeholder="Notes"
         v-model:value="form.textarea"
         type="textarea"
+        editable
       />
       <Input
         class="mb-[24px] min-w-[150px]"
@@ -72,7 +73,7 @@ function fetchStuff() {
           @debounced="fetchStuff"
           @typing="searchStatus = 'Typing...'"
         />
-        <Card class="w-[400px] mb-[36px] rounded-t-none">
+        <Card class="w-[250px] mb-[36px] rounded-t-none">
           <div class="flex">
             <span class="opacity-50">Status:</span>
             <span class="ml-[6px]">{{ searchStatus }}</span>
@@ -99,6 +100,6 @@ function fetchStuff() {
   grid-gap: 32px;
 }
 .__input {
-  width: 400px;
+  width: 250px;
 }
 </style>

@@ -74,6 +74,7 @@ const editableState = reactive({
   done: false,
   saved: false,
   lastSaved: null,
+  height: null,
 });
 
 // Debounce can be set as prop and handled on emit `@debounced`
@@ -104,6 +105,14 @@ onMounted(() => {
   }
   inputState.isValid = validate(props.value);
   editableState.lastSaved = props.value;
+
+  const target = inputEl.value.$el;
+
+  if (target.classList.contains("n-input--textarea")) {
+    editableState.height = target.offsetHeight + "px";
+  } else {
+    editableState.height = "42px";
+  }
 });
 
 function validate(input) {
@@ -137,21 +146,21 @@ function onKeyUp(e) {
 
 // --- handle hover events ---
 
-function onMouseLeave() {
+function onMouseLeave(e) {
   inputState.hovering = false;
 }
 
-function onMouseEnter() {
+function onMouseEnter(e) {
   if (!hasProp("disabled")) {
     inputState.hovering = true;
   }
 }
 
-function onEditableMouseLeave() {
+function onEditableMouseLeave(e) {
   editableState.hovering = false;
 }
 
-function onEditableMouseEnter() {
+function onEditableMouseEnter(e) {
   editableState.hovering = true;
 }
 
@@ -177,6 +186,28 @@ function onBlur(e) {
   if (props.editable) {
     if (e.relatedTarget?.classList.contains("__save")) save();
     else cancel();
+  }
+}
+
+function handleMousedown(e) {
+  const target = inputEl.value.$el;
+
+  if (target.classList.contains("n-input--textarea")) {
+    editableState.height = target.offsetHeight + "px";
+    log.cyan(target.offsetHeight);
+  } else {
+    editableState.height = "42px";
+  }
+}
+
+function handleMouseup(e) {
+  const target = inputEl.value.$el;
+
+  if (target.classList.contains("n-input--textarea")) {
+    editableState.height = target.offsetHeight + "px";
+    log.cyan(target.offsetHeight);
+  } else {
+    editableState.height = "42px";
   }
 }
 
@@ -250,7 +281,7 @@ const shiftEditableOverlay = computed(() => {
   return `
     ${
       editableState.editing || editableState.focused
-        ? "translate-x-[-72px] w-[72px]"
+        ? "translate-x-[-68px] w-[68px]"
         : "translate-x-[0px] w-full"
     }
     ${editableState.saved && "ping"}
@@ -260,7 +291,7 @@ const shiftEditableOverlay = computed(() => {
 
 <template>
   <div>
-    <div class="relative">
+    <div class="relative" style="height: inherit">
       <label class="__label">
         <b
           class="text-red-600 duration-[300ms]"
@@ -289,12 +320,13 @@ const shiftEditableOverlay = computed(() => {
     </div>
     <div
       v-if="hasProp('editable')"
-      class="relative z-50"
+      class="relative z-50 h-[inherit]"
       :class="(editableState.editing || editableState.focused) && 'float-right'"
     >
       <div
-        class="absolute h-[42px] pl-[12px] flex items-center justify-end"
+        class="absolute flex items-start pt-[10px] justify-end"
         :class="shiftEditableOverlay"
+        :style="`height:${editableState.height}`"
         @mouseenter="onEditableMouseEnter"
         @mouseleave="onEditableMouseLeave"
       >
@@ -336,7 +368,7 @@ const shiftEditableOverlay = computed(() => {
             ref="saveButton"
             @click="save"
             :style="!editableState.editing && 'width: 0px !important'"
-            class="__save h-5 w-5 -translate-x-2 duration-200"
+            class="__save h-5 w-5 duration-200"
             :class="`
                 ${!inputState.isValid && 'pointer-events-none'}
                 ${
@@ -351,7 +383,7 @@ const shiftEditableOverlay = computed(() => {
               :class="
                 !inputState.isValid
                   ? 'fill-gray-200 dark:opacity-[0.1]'
-                  : 'fill-success hover:opacity-60'
+                  : 'fill-success hover:brightness-[1.5]'
               "
               viewBox="0 0 24 24"
             >
@@ -365,7 +397,7 @@ const shiftEditableOverlay = computed(() => {
             ref="cancelButton"
             @click="cancel"
             :style="!editableState.editing && 'width: 0px !important'"
-            class="__cancel ml-1 h-5 w-5 -translate-x-2 duration-200"
+            class="__cancel ml-1 h-5 w-5 duration-200"
             :class="
               !editableState.editing
                 ? 'pointer-events-none !scale-50 opacity-0 delay-100'
@@ -386,19 +418,19 @@ const shiftEditableOverlay = computed(() => {
     </div>
     <n-input
       ref="inputEl"
-      class="py-[4px] pl-[4px] w-full truncate"
+      class="py-[4px] pl-[4px] pr-[4px] w-full truncate"
       :class="`
         ${
           editable && !editableState.editing
-            ? 'pointer-events-none pr-[24px]'
-            : 'pointer-events-all pr-[4px]'
+            ? 'pointer-events-none'
+            : 'pointer-events-all'
         }
       `"
       :autofocus="autofocus"
       :autosize="autosize"
       :clearable="clearable"
       :default-value="defaultValue"
-      :disabled="disabled"
+      :disabled="disabled || (editable && !editableState.editing)"
       :input-props="inputProps"
       :loading="loading"
       :maxlength="maxlength"
@@ -422,6 +454,8 @@ const shiftEditableOverlay = computed(() => {
       @mouseenter="onMouseEnter"
       @mouseleave="onMouseLeave"
       @update:value="onUpdate"
+      @mousedown="handleMousedown"
+      @mouseup="handleMouseup"
       @input="(e) => $emit('input', e)"
       @clear="(e) => $emit('clear', e)"
       @change="(e) => $emit('change', e)"
