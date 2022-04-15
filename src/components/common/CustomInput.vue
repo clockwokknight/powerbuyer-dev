@@ -113,6 +113,7 @@ const validators = {
       input
     );
   },
+  // add further validators here
 };
 
 onMounted(() => {
