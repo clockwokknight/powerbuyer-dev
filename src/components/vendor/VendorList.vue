@@ -14,7 +14,7 @@ const route = useRoute();
   <li
     v-for="vendor in vendors"
     :key="vendor?.id"
-    class="relative px-3 py-2 mb-[12px] ml-[13px] mr-[13px] rounded-round duration-100 border-b-[1px] border-b-transparent odd:bg-white hover:bg-background_light dark:border-b-transparent dark:odd:bg-foreground_dark dark:even:bg-foreground_dark dark:hover:bg-background_dark"
+    class="relative mb-[12px] ml-[13px] mr-[13px] rounded-round border-b-[1px] border-b-transparent px-3 py-2 duration-100 odd:bg-white hover:bg-background_light dark:border-b-transparent dark:odd:bg-foreground_dark dark:even:bg-foreground_dark dark:hover:bg-background_dark"
     @click="$emit('click:tab', vendor)"
   >
     <router-link
@@ -24,19 +24,19 @@ const route = useRoute();
     >
       <div>
         <h2
-          class="max-w-[250px] truncate whitespace-nowrap mb-1 text-sm font-bold"
+          class="mb-1 max-w-[250px] truncate whitespace-nowrap text-sm font-bold"
           :class="
             vendor.id === route.params.id
-              ? 'text-primary !font-bold'
+              ? '!font-bold text-primary'
               : 'text-black dark:text-white'
           "
         >
           {{ vendor.name }}
         </h2>
       </div>
-      <div class="__subtext text-[10px] mb-1 flex">
+      <div class="__subtext mb-1 flex text-[10px]">
         <svg
-          class="__subtext-icon w-[10px] h-[10px] mr-[6px] mt-[2px]"
+          class="__subtext-icon mr-[6px] mt-[2px] h-[10px] w-[10px]"
           viewBox="0 0 16 16"
         >
           <g fill="gray">
@@ -56,9 +56,9 @@ const route = useRoute();
           }}
         </span>
       </div>
-      <div class="__subtext text-[10px] flex">
+      <div class="__subtext flex text-[10px]">
         <svg
-          class="__subtext-icon w-[10px] h-[10px] mr-[6px] mt-[2px]"
+          class="__subtext-icon mr-[6px] mt-[2px] h-[10px] w-[10px]"
           viewBox="0 0 16 16"
         >
           <g fill="gray">
@@ -78,9 +78,9 @@ const route = useRoute();
     </router-link>
     <div
       id="mask"
-      class="absolute inset-0 rounded-round cursor-pointer"
+      class="absolute inset-0 cursor-pointer rounded-round"
       :class="
-        vendor.id === route.params.id
+        vendor.id === $route.params.id
           ? 'bg-accent dark:border-[0px] dark:border-primary'
           : 'bg-transparent'
       "
@@ -90,7 +90,7 @@ const route = useRoute();
 
 <style scoped>
 .__subtext {
-  @apply text-black/[0.6] dark:text-white/[0.4] flex uppercase;
+  @apply flex uppercase text-black/[0.6] dark:text-white/[0.4];
 }
 .__subtext-icon {
   @apply opacity-50;

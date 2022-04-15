@@ -20,7 +20,7 @@ import {
 } from "@/components/lanes/lanes.helper";
 import CustomInput from "@/components/common/CustomInput.vue";
 import dayjs from "dayjs";
-import { NFormItem, NInput, useDialog, useMessage } from "naive-ui";
+import { NFormItem, NInput, NTooltip, useDialog, useMessage } from "naive-ui";
 
 const emits = defineEmits(["filter"]);
 const dialog = useDialog();
@@ -81,7 +81,7 @@ const { data: vehicleModels, isLoading: vehicleModelLoading } =
         .get(
           "/vehicle_models?page=" +
             pageParam +
-            "&vehicle_make_id=" +
+            "&vehicle_make_master_id=" +
             queryKey[2]
         )
         .then((res) => res.data),
@@ -236,81 +236,104 @@ const onLaneReportSelect = (val) => {
 </script>
 
 <template>
-  <div class="py-2">
-    <CustomInput
-      type="select"
-      label="Select Filter"
-      basic
-      :options="lanes_report_options"
-      @update:value="onLaneReportSelect"
-      :value="selectedLaneReport"
-    />
-  </div>
-  <n-dynamic-input
-    class="custom-dynamic-input"
-    v-model:value="filters"
-    @create="() => ({ type: null })"
-    #="{ value, index }"
-    :min="1"
-  >
-    <div style="grid-area: a">
+  <div class="flex justify-between py-2">
+    <h3 class="mb-3 text-lg font-bold">Lane Filters</h3>
+    <n-popover trigger="click" placement="bottom">
+      <template #trigger>
+        <n-button>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+            />
+          </svg>
+        </n-button>
+      </template>
       <CustomInput
-        basic
         type="select"
-        label="Filter By"
-        @update:value="(value) => onFilterSelect(value, index)"
-        :options="filterOptions"
-        :value="value.type"
+        label="Select Filter"
+        basic
+        :options="lanes_report_options"
+        @update:value="onLaneReportSelect"
+        :value="selectedLaneReport"
       />
-    </div>
-    <div style="grid-area: c" class="flex flex-col gap-y-3">
-      <n-input
-        :value="value?.field"
-        v-if="value?.filter_type === 'input'"
-        @update:value="(val) => (value.field = val)"
-      />
-      <n-date-picker
-        type="daterange"
-        :value="value?.fields"
-        format="MM/dd/yyyy"
-        @update:value="(val) => (value.fields = val)"
-        v-if="value?.filter_type === 'date_picker_range'"
-      />
-      <n-input
-        pair
-        separator="-"
-        :value="value?.fields"
-        @update:value="(val) => (value.fields = val)"
-        v-if="value?.filter_type === 'input_range'"
-      />
-      <n-select
-        :value="value?.field"
-        :options="value?.options"
-        filterable
-        @update:value="(val) => (value.field = val)"
-        v-if="value?.filter_type === 'select' && value?.id !== 'order_by'"
-      />
-      <div
-        v-if="value?.filter_type === 'select' && value?.id === 'order_by'"
-        class="flex gap-x-1"
-      >
-        <n-select
-          :value="value?.field"
-          filterable
-          @update:value="(val) => (value.field = val)"
-          :options="value?.options"
-        />
-        <n-select
-          v-model:value="order_dir"
-          :options="[
-            { label: 'Ascending', value: 'asc' },
-            { label: 'Descending', value: 'desc' },
-          ]"
+    </n-popover>
+  </div>
+  <div style="flex: 1 0 0" class="overflow-hidden">
+    <n-dynamic-input
+      class="custom-dynamic-input h-full overflow-auto"
+      v-model:value="filters"
+      @create="() => ({ type: null })"
+      #="{ value, index }"
+      :min="1"
+    >
+      <div style="grid-area: a">
+        <CustomInput
+          basic
+          type="select"
+          label="Filter By"
+          @update:value="(value) => onFilterSelect(value, index)"
+          :options="filterOptions"
+          :value="value.type"
         />
       </div>
-    </div>
-  </n-dynamic-input>
-  <div class="mt-6 flex gap-x-5">
+      <div style="grid-area: c" class="flex flex-col gap-y-3">
+        <n-input
+          :value="value?.field"
+          v-if="value?.filter_type === 'input'"
+          @update:value="(val) => (value.field = val)"
+        />
+        <n-date-picker
+          type="daterange"
+          :value="value?.fields"
+          format="MM/dd/yyyy"
+          @update:value="(val) => (value.fields = val)"
+          v-if="value?.filter_type === 'date_picker_range'"
+        />
+        <n-input
+          pair
+          separator="-"
+          :value="value?.fields"
+          @update:value="(val) => (value.fields = val)"
+          v-if="value?.filter_type === 'input_range'"
+        />
+        <n-select
+          :value="value?.field"
+          :options="value?.options"
+          filterable
+          @update:value="(val) => (value.field = val)"
+          v-if="value?.filter_type === 'select' && value?.id !== 'order_by'"
+        />
+        <div
+          v-if="value?.filter_type === 'select' && value?.id === 'order_by'"
+          class="flex gap-x-1"
+        >
+          <n-select
+            :value="value?.field"
+            filterable
+            @update:value="(val) => (value.field = val)"
+            :options="value?.options"
+          />
+          <n-select
+            v-model:value="order_dir"
+            :options="[
+              { label: 'Ascending', value: 'asc' },
+              { label: 'Descending', value: 'desc' },
+            ]"
+          />
+        </div>
+      </div>
+    </n-dynamic-input>
+  </div>
+  <div class="mt-6 flex gap-x-5 border-t border-gray-500 py-5">
     <n-button type="primary" @click="onFilter"> Filter </n-button>
     <n-button @click="onFilterSave"> Save</n-button>
   </div>

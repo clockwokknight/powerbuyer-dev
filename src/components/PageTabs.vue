@@ -6,7 +6,7 @@ import { useTabsViewStore } from "@/store/tabs";
 import { Tab, TabGroup, TabList } from "@headlessui/vue";
 import { useDebounceFn } from "@vueuse/core";
 import axios from "axios";
-import { nextTick, ref, watch } from "vue";
+import { nextTick, onMounted, ref, watch } from "vue";
 import { useMutation, useQueryClient } from "vue-query";
 import { useRoute, useRouter } from "vue-router";
 
@@ -29,7 +29,8 @@ const showScrollArrow = ref(false);
 
 // Left and right Click Arrow Scroll
 const ifScrollArrowNeeded = useDebounceFn(() => {
-  const wrapperWidth = tabListButtonWrapper.value?.getBoundingClientRect().width;
+  const wrapperWidth =
+    tabListButtonWrapper.value?.getBoundingClientRect().width;
   const tabWidth = tabListButton.value?.getBoundingClientRect().width;
   showScrollArrow.value = wrapperWidth < tabWidth;
 }, 100);
@@ -136,13 +137,13 @@ const tabChanged = (index) => {
 watch(
   () => tabStore.selectedIndex,
   (newValue) => {
+    console.log(newValue);
     scrollTabToView();
     if (
       newValue !== -1 &&
       route.path !== props.pageName &&
       route.params?.id !== tabStore.tabs[newValue]?.id
     ) {
-      console.log(newValue);
       router.push(`/${props.pageName}/${tabStore.tabs[newValue]?.id}`);
     }
   }
@@ -152,9 +153,6 @@ watch(
   () => route.params?.id,
   (val) => {
     if (utils.getKeys(global.latest).includes(props.pageName)) {
-      console.log(val);
-      console.log(route.path, "===", props.pageName, route.path === props.pageName);
-      console.log(`setting latest for ${props.pageName}: ${val}`);
       global.setLatest(val, props.pageName);
       tabChanged(tabStore?.selectedIndex);
     }
@@ -198,7 +196,11 @@ const afterAnimated = () => {
           v-if="hasHome"
           :to="`/${props.pageName}`"
           class="px-[24px] duration-[250ms] active:scale-[0.8]"
-          :style="route.path == `/${props.pageName}` ? 'color: #007AFF' : 'color: white'"
+          :style="
+            route.path == `/${props.pageName}`
+              ? 'color: #007AFF'
+              : 'color: white'
+          "
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"

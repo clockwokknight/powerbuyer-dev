@@ -48,7 +48,7 @@ onMounted(() => {
       },
     });
   });
-  gsap.to("#main", { scrollTo: 0 });
+  // gsap.to("#main", { scrollTo: 0 });
 });
 
 onUpdated(() => {

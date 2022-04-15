@@ -13,7 +13,7 @@ const filter = ref({
   page: 1,
   per_page: 20,
 });
-const { data: lanes, isLoading: isLanesLoading } = getAllLanes(filter);
+const { data: lanes, isFetching: isLanesLoading } = getAllLanes(filter);
 const pagination = computed(() => ({
   pageSize: filter.value.per_page,
   page: filter.value.page,
@@ -72,7 +72,7 @@ const ShowOrEdit = defineComponent({
             })
           : props.value
           ? props.value
-          : h("span", { style: "padding: 10px 20px" })
+          : h("span", { style: "padding: 10px 20px; display: block;" })
       );
   },
 });
@@ -103,16 +103,13 @@ const columns = computed(() => [
   {
     title: "Notes",
     key: "deal.notes",
-    ellipsis: {
-      tooltip: true,
-    },
     width: 300,
     render(row) {
       return h(ShowOrEdit, {
         value: row["deal.notes"] ?? "",
         inputType: "textarea",
         onUpdateValue: async (val) => {
-          if (row["deal.notes"] !== val) {
+          if (val && row["deal.notes"] !== val) {
             await axios.put("/deals/" + row["deal.id"], { notes: val });
             await queryClient.invalidateQueries(["lanes"]);
           }
@@ -204,47 +201,10 @@ const columns = computed(() => [
     title: "Auction Company",
     key: "auction.auction_company",
   },
-  // {
-  //   title: "Designation Code",
-  //   key: "age",
-  // },
-  // {
-  //   title: "Buyer Code",
-  //   key: "address",
-  // },
   {
     title: "Grade",
     key: "deal.grade",
   },
-
-  // {
-  //   title: "BCF",
-  //   key: "address",
-  // },
-  // {
-  //   title: "Car Notes",
-  //   key: "name",
-  // },
-  // {
-  //   title: "Inv. ID",
-  //   key: "age",
-  // },
-  // {
-  //   title: "Enable OVE",
-  //   key: "address",
-  // },
-  // {
-  //   title: "T. Notes",
-  //   key: "notes",
-  // },
-  // {
-  //   title: "W",
-  //   key: "W",
-  // },
-  // {
-  //   title: "V",
-  //   key: "V",
-  // },
 ]);
 
 const handleSortChange = (sorters) => {
@@ -272,13 +232,12 @@ const OnFilterTrigger = (obj) => {
 
     <!-- Body Content -->
     <aside
-      class="h-full w-full max-w-[350px] pt-5 pl-5 pr-5 dark:bg-foreground_dark"
+      class="pageItemsList relative flex h-full w-full max-w-[275px] flex-col pt-5 pl-5 pr-5 dark:bg-foreground_dark"
     >
-      <h3 class="mb-3 text-lg font-bold">Lane Filters</h3>
       <Filter @filter="OnFilterTrigger" />
     </aside>
     <main
-      class="h-full w-[calc(100vw-410px)] overflow-y-auto overflow-x-hidden overscroll-contain pr-5 pt-5"
+      class="h-full w-[calc(100vw-335px)] overflow-y-auto overflow-x-hidden overscroll-contain pr-5 pt-5"
     >
       <div class="mb-3">
         <h1 class="text-xl font-bold uppercase">Lane Numberings</h1>
