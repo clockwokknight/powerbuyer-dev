@@ -39,6 +39,7 @@ function fetchStuff() {
         label="Phone number"
         v-model:value="form.phone"
         :rules="['required', 'phone']"
+        mask="(###) ###-####"
       />
       <Input
         class="__input"

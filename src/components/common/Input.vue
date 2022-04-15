@@ -8,7 +8,6 @@ import { useMessage } from "naive-ui";
 import { log } from "@/lib/utils";
 
 const props = defineProps({
-  label: String,
   autofocus: Boolean,
   autosize: Boolean,
   editable: Boolean,
@@ -17,7 +16,9 @@ const props = defineProps({
   debounce: Number,
   disabled: Boolean,
   inputProps: Object,
+  label: String,
   loading: Boolean,
+  mask: String,
   maxlength: Number,
   minlength: Number,
   pair: Boolean,
@@ -55,21 +56,6 @@ const global = useGlobalState();
 const message = useMessage();
 const { text, copy } = useClipboard();
 
-const validators = {
-  required: (input) => {
-    return input && input !== "";
-  },
-  phone: (input) => {
-    return /^(\+\d{1,2}\s?)?1?\-?\.?\s?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}$/.test(input);
-  },
-  email: (input) => {
-    return /(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])/.test(
-      input
-    );
-  },
-  // add further validators here
-};
-
 const inputEl = ref();
 
 const inputState = reactive({
@@ -88,6 +74,11 @@ const editableState = reactive({
   done: false,
   saved: false,
   lastSaved: null,
+});
+
+const maskState = reactive({
+  mask: props.mask || "",
+  display: "",
 });
 
 watchEffect((onInvalidate) => {
@@ -122,7 +113,7 @@ onMounted(() => {
 function validate(input) {
   if (props.rules) {
     let tests = [];
-    props.rules?.forEach((test) => tests.push(validators[test](input)));
+    props.rules?.forEach((test) => tests.push(global.validators[test](input)));
     return props.rules?.length === tests.filter((test) => test)?.length;
   }
   return true;
@@ -130,6 +121,14 @@ function validate(input) {
 
 function hasProp(prop) {
   return props[prop] ?? props[prop]?.length > 0;
+}
+
+// --- masks ---
+
+function refreshMask(value) {
+  maskState.display = value;
+  const val = masker(value, maskState.mask, true, tokens);
+  emit("update:value", val);
 }
 
 // --- handle enter key press ---
@@ -164,6 +163,7 @@ function onEditableMouseEnter() {
 
 function onInput(e) {
   emit("input", e);
+  if (hasProp("mask")) refreshMask(e);
   inputState.isValid = validate(e);
 }
 
@@ -173,12 +173,9 @@ function onFocus(e) {
 }
 
 function onBlur(e) {
-  log(e);
-  if (e.relatedTarget?.classList.contains("__save")) {
-    save();
-  } else {
-    emit("blur", e);
-    cancel();
+  if (props.editable) {
+    if (e.relatedTarget?.classList.contains("__save")) save();
+    else cancel();
   }
 }
 
@@ -187,10 +184,10 @@ function onBlur(e) {
 function cancel() {
   emit("cancel");
   emit("update:value", editableState.lastSaved); // setting last saved value at Input level
-  inputEl.value.blur();
   editableState.focused = false;
   editableState.editing = false;
   editableState.done = true;
+  inputEl.value.blur();
   setTimeout(() => (editableState.done = false), 500);
 }
 
