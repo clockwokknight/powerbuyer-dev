@@ -137,18 +137,38 @@ export const allFilterPossibleOptions = [
 export const sortOptions = [
   {
     label: "Mileage",
-    value: "deal.mileage",
+    value: "deals.mileage",
   },
   {
     label: "Vehicle Model",
-    value: "vehicle_model.name",
+    value: "vehicle_models.name",
   },
   {
     label: "Vehicle Make",
-    value: "vehicle_make.name",
+    value: "vehicle_makes.name",
+  },
+  {
+    label: "Vehicle Year",
+    value: "vehicle_makes.vehicle_make_year",
   },
   {
     label: "Purchase Price",
-    value: "deal.purchase_price",
+    value: "deals.purchase_price",
+  },
+  {
+    label: "VIN",
+    value: "deals.vin",
+  },
+  {
+    label: "Sale Price",
+    value: "deals.sale_price",
+  },
+  {
+    label: "Market Price",
+    value: "deals.market_price",
+  },
+  {
+    label: "Date Sold",
+    value: "deals.date_sold",
   },
 ];
