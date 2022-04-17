@@ -29,6 +29,7 @@ import Tabs from "@/components/common/Tabs.vue";
 import Card from "@/components/_refactor/Card.vue";
 import CustomInput from "@/components/common/CustomInput.vue";
 import Input from "@/components/common/Input.vue";
+import Documents from "@/components/vehicle/Documents.vue";
 
 const instance = getCurrentInstance();
 
@@ -65,6 +66,10 @@ const tabs = ref([
   {
     title: "HISTORY",
     value: "#history",
+  },
+  {
+    title: "DOCUMENTS",
+    value: "#documents",
   },
   {
     title: "REPORTS",
@@ -428,6 +433,10 @@ function handleTabClick(e) {
       <Card class="h-[420px]"></Card>
       <Card class="h-[420px]"></Card>
     </div>
+    <div id="documents" class="mt-[24px]">
+      <Documents />
+    </div>
+
   </main>
 </template>
 
