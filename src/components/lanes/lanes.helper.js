@@ -137,18 +137,74 @@ export const allFilterPossibleOptions = [
 export const sortOptions = [
   {
     label: "Mileage",
-    value: "deal.mileage",
+    value: "deals.mileage",
+  },
+  {
+    label: "Lane Number",
+    value: "lanes.lane_number",
+  },
+  {
+    label: "Sale Year",
+    value: "lanes.sale_year",
+  },
+  {
+    label: "Red Light",
+    value: "lanes.red_light",
+  },
+  {
+    label: "Green Light",
+    value: "lanes.green_light",
   },
   {
     label: "Vehicle Model",
-    value: "vehicle_model.name",
+    value: "vehicle_models.name",
   },
   {
     label: "Vehicle Make",
-    value: "vehicle_make.name",
+    value: "vehicle_makes.name",
+  },
+  {
+    label: "Vehicle Year",
+    value: "vehicle_makes.vehicle_make_year",
   },
   {
     label: "Purchase Price",
-    value: "deal.purchase_price",
+    value: "deals.purchase_price",
+  },
+  {
+    label: "VIN",
+    value: "deals.vin",
+  },
+  {
+    label: "Sale Price",
+    value: "deals.sale_price",
+  },
+  {
+    label: "Market Price",
+    value: "deals.market_price",
+  },
+  {
+    label: "Date Sold",
+    value: "deals.date_sold",
+  },
+  {
+    label: "Grade",
+    value: "deals.grade",
+  },
+  {
+    label: "Auction Company",
+    value: "auctions.auction_company",
+  },
+  {
+    label: "Lenders City",
+    value: "lenders.city",
+  },
+  {
+    label: "Lenders Company",
+    value: "lenders.company",
+  },
+  {
+    label: "Lenders Zipcode",
+    value: "lenders.zipcode",
   },
 ];

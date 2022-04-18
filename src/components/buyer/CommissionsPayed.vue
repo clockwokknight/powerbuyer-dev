@@ -3,6 +3,8 @@ import { computed, h, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { getCommissions, COMMISSION_STATUS } from "@/hooks/commission";
 import { BUYER_TYPE } from "@/hooks/buyer";
+import { useQuery } from "vue-query";
+import axios from "axios";
 
 const route = useRoute();
 
@@ -19,7 +21,11 @@ const { data: commissionData } = getCommissions(
   COMMISSION_STATUS.Sold,
   BUYER_TYPE.Buyer
 );
-
+const { data: commissionPayedData } = useQuery(
+  ["commission", "paid/buyer", routeParamId],
+  ({ queryKey }) =>
+    axios.get("/commission/paid/buyer/" + queryKey[2]).then((res) => res.data)
+);
 const columns = [
   {
     title: "First Name",
