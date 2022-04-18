@@ -2,9 +2,12 @@
   "name": "powerbuyer",
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "ncp node_modules/dwt/dist public/dwt-resources && vite",
+    "build": "vite build && ncp node_modules/dwt/dist build/dwt-resources",
+    "preview": "ncp node_modules/dwt/dist public/dwt-resources && vite preview"
+  },
+  "optionalDependencies": {
+    "fsevents": "*"
   },
   "dependencies": {
     "@headlessui/vue": "^1.5.0",
@@ -12,8 +15,10 @@
     "@vueuse/core": "^7.7.1",
     "axios": "^0.25.0",
     "dayjs": "^1.10.7",
+    "dwt": "^17.2.5",
     "gsap": "^3.10.2",
     "just-compare": "^2.0.1",
+    "ncp": "^2.0.0",
     "pinia": "^2.0.13",
     "v-money3": "^3.21.0",
     "vue": "^3.2.32",
