@@ -9,11 +9,6 @@ export default defineConfig({
   build: {
     target: "esnext",
   },
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "src"),
-    },
-  },
   // css: {
   //   preprocessorOptions: {
   //     scss: {
@@ -22,4 +17,23 @@ export default defineConfig({
   //   },
   // },
   plugins: [vue(), vueJsx()],
+  define: {
+    global: {},
+  },
+  resolve: {
+    alias: [
+      {
+        // https://github.com/vitejs/vite/issues/2329
+        find: "@",
+        replacement: path.resolve(__dirname, "src"),
+      },
+      {
+        // https://github.com/vitejs/vite/issues/2329
+        find: "dynamsoft-javascript-barcode",
+        replacement: require.resolve(
+          "dynamsoft-javascript-barcode/dist/dbr.browser.mjs"
+        ),
+      },
+    ],
+  },
 });
