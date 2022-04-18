@@ -28,6 +28,7 @@ import VendorList from "@/components/vendor/VendorList.vue";
 import Tabs from "@/components/common/Tabs.vue";
 import Card from "@/components/_refactor/Card.vue";
 import CustomInput from "@/components/common/CustomInput.vue";
+import Input from "@/components/common/Input.vue";
 
 const instance = getCurrentInstance();
 
@@ -73,7 +74,7 @@ const tabs = ref([
 
 const { data: vendor } = fetchById("/deals", routeParamId);
 
-//const { data: images } = fetchById("/images/deal", routeParamId);
+const { data: images } = fetchById("/images/deal", routeParamId);
 
 //const { data: logo } = fetchById("/images/deal/logo", vendor?.value?.id);
 
@@ -82,6 +83,7 @@ const vendorData = ref({});
 const form = ref({
   vin: null,
   lane: null,
+  code: null,
   grade: null,
   year: null,
   make: null,
@@ -137,12 +139,12 @@ watch(
   }
 );
 
-/*watch(
+watch(
   () => images.value,
   (val) => {
     log.blue("images.value: ", val);
   }
-);*/
+);
 
 /*watch(
   () => logo?.value,
@@ -196,7 +198,7 @@ function handleTabClick(e) {
         <div class="__form col-span-12 flex flex-col justify-between w-full">
           <div class="flex">
             <!-- image carousel container -->
-            <div class="mr-[24px] h-[160px] min-w-[160px]">
+            <div class="mr-[24px] h-[180px] min-w-[180px]">
               <div class="relative">
                 <div
                   class="__vehicle-logo z-50 absolute my-[0px] mx-[12px] w-[80px] bg-transparent center-content text-[9px] rounded-round"
@@ -207,7 +209,7 @@ function handleTabClick(e) {
                   />
                 </div>
               </div>
-              <n-carousel class="max-w-[160px] rounded-round" show-arrow>
+              <n-carousel class="max-w-[180px] rounded-round" show-arrow>
                 <img
                   v-if="!images || images.length == 0"
                   class="carousel-img object-cover rounded-round h-full z-[-1]"
@@ -304,168 +306,71 @@ function handleTabClick(e) {
             <div class="__form grid grid-cols-12 gap-4">
               <!-- header info -->
               <div class="col-span-12 md:col-span-6">
-                <CustomInput
-                  class="pointer-events-none"
-                  label="Vin"
-                  placeholder="3FADP4AJ2EM100154"
-                  :value="form.vin"
-                  @update:value="(val) => (form.vin = val)"
-                  @save="submitValue('vin')"
-                  @cancel="resetValue('vin')"
-                  @focus="currentActiveField = 'vin'"
-                />
+                <Input label="Vin" :value="form.vin" disabled />
               </div>
-              <div class="col-span-12 md:col-span-3">
-                <CustomInput
-                  class="pointer-events-none"
-                  label="Lane"
-                  placeholder="20"
-                  :value="form.lane"
-                  @update:value="(val) => (form.lane = val)"
-                  @save="submitValue('lane')"
-                  @cancel="resetValue('lane')"
-                  @focus="currentActiveField = 'lane'"
-                />
+
+              <div class="col-span-12 md:col-span-2">
+                <Input label="Lane" :value="form.lane" disabled />
               </div>
-              <div class="col-span-12 md:col-span-3">
-                <CustomInput
-                  class="pointer-events-none"
-                  label="Grade"
-                  placeholder="4"
-                  :value="form.grade"
-                  @update:value="(val) => (form.grade = val)"
-                  @save="submitValue('grade')"
-                  @cancel="resetValue('grade')"
-                  @focus="currentActiveField = 'grade'"
-                />
+              <div class="col-span-12 md:col-span-2">
+                <Input label="Code" :value="form.code" disabled />
+              </div>
+              <div class="col-span-12 md:col-span-2">
+                <Input label="Grade" :value="form.grade" disabled />
               </div>
               <!-- horizontal divider -->
               <hr class="col-span-12 dark:border-dark_border border-background_light" />
               <!-- row 1 -->
               <div class="col-span-12 md:col-span-3">
-                <CustomInput
-                  class="pointer-events-none"
-                  label="Year"
-                  placeholder=""
-                  :value="form.year"
-                  @update:value="(val) => (form.year = val)"
-                  @save="submitValue('year')"
-                  @cancel="resetValue('year')"
-                  @focus="currentActiveField = 'year'"
-                />
+                <Input label="Year" :value="form.year" disabled />
               </div>
               <div class="col-span-12 md:col-span-3">
-                <CustomInput
-                  class="pointer-events-none"
-                  label="Make"
-                  placeholder=""
-                  :value="form.make"
-                  @update:value="(val) => (form.make = val)"
-                  @save="submitValue('make')"
-                  @cancel="resetValue('make')"
-                  @focus="currentActiveField = 'make'"
-                />
+                <Input label="Make" :value="form.make" disabled />
               </div>
               <!-- row 2 -->
               <div class="col-span-12 md:col-span-3">
-                <CustomInput
-                  class="pointer-events-none"
-                  label="Model"
-                  placeholder=""
-                  :value="form.model"
-                  @update:value="(val) => (form.model = val)"
-                  @save="submitValue('model')"
-                  @cancel="resetValue('model')"
-                  @focus="currentActiveField = 'model'"
-                />
+                <Input label="Model" :value="form.model" disabled />
               </div>
               <div class="col-span-12 md:col-span-3">
-                <CustomInput
-                  class="pointer-events-none"
-                  label="Trim"
-                  placeholder=""
-                  :value="form.trim"
-                  @update:value="(val) => (form.trim = val)"
-                  @save="submitValue('trim')"
-                  @cancel="resetValue('trim')"
-                  @focus="currentActiveField = 'trim'"
-                />
+                <Input label="Trim" :value="form.trim" disabled />
               </div>
               <div class="col-span-12 md:col-span-3">
-                <CustomInput
-                  class="pointer-events-none"
-                  label="Body"
-                  :value="form.body"
-                  @update:value="(val) => (form.body = val)"
-                  @save="submitValue('body')"
-                  @cancel="resetValue('body')"
-                  @focus="currentActiveField = 'body'"
-                />
+                <Input label="Body" :value="form.body" disabled />
               </div>
               <!-- row 3 -->
               <div class="col-span-12 md:col-span-3">
-                <CustomInput
-                  class="pointer-events-none"
-                  label="Ext. Color"
-                  placeholder=""
-                  :value="form.ext_color"
-                  @update:value="(val) => (form.ext_color = val)"
-                  @save="submitValue('ext_color')"
-                  @cancel="resetValue('ext_color')"
-                  @focus="currentActiveField = 'ext_color'"
-                />
+                <Input label="Ext. Color" :value="form.ext_color" disabled />
               </div>
               <div class="col-span-12 md:col-span-3">
-                <CustomInput
-                  class="pointer-events-none"
-                  label="Int. Color"
-                  placeholder=""
-                  :value="form.int_color"
-                  @update:value="(val) => (form.int_color = val)"
-                  @save="submitValue('init_color')"
-                  @cancel="resetValue('int_color')"
-                  @focus="currentActiveField = 'int_color'"
-                />
+                <Input label="Int. Color" :value="form.int_color" disabled />
               </div>
               <div class="col-span-12 md:col-span-3">
-                <CustomInput
-                  class="pointer-events-none"
-                  label="Miles"
-                  placeholder=""
-                  :value="form.miles"
-                  @update:value="(val) => (form.miles = val)"
-                  @save="submitValue('miles')"
-                  @cancel="resetValue('miles')"
-                  @focus="currentActiveField = 'miles'"
-                />
+                <Input label="Miles" :value="form.miles" disabled />
               </div>
               <!-- row 4 -->
               <div class="col-span-12 md:col-span-6">
-                <CustomInput
-                  class="pointer-events-none"
+                <Input
                   label="Notes"
+                  type="textarea"
                   placeholder=""
                   :value="form.notes"
-                  @update:value="(val) => (form.notes = val)"
-                  @save="submitValue('notes')"
-                  @cancel="resetValue('notes')"
-                  @focus="currentActiveField = 'notes'"
+                  v-model:value="form.notes"
+                  editable
                 />
               </div>
               <div class="col-span-12 md:col-span-6">
-                <CustomInput
-                  class="pointer-events-none"
+                <Input
                   label="Recon"
+                  type="textarea"
                   placeholder=""
                   :value="form.recon"
-                  @update:value="(val) => (form.recon = val)"
-                  @save="submitValue('recon')"
-                  @cancel="resetValue('recon')"
-                  @focus="currentActiveField = 'recon'"
+                  v-model:value="form.recon"
+                  editable
                 />
               </div>
             </div>
           </div>
+          . n'kl-
           <!-- right side -->
         </div>
       </div>
@@ -528,14 +433,15 @@ function handleTabClick(e) {
 
 <style lang="scss" scoped>
 .__lights {
-  margin-top: 12px;
-  padding-bottom: 24px;
+  margin-top: 24px;
   width: 100%;
 }
 .__lights-item {
   width: 100%;
   margin-top: 4px;
-  @apply flex items-center w-full;
+  padding-bottom: 3px;
+  border-bottom: 1px solid #ffffff21;
+  @apply flex text-[12px] items-center w-full;
 }
 .__lights-icon {
   width: 10px !important;
