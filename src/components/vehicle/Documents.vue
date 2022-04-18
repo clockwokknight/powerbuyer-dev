@@ -16,7 +16,7 @@ onMounted(()=>{
   /**
    * ResourcesPath & ProductKey must be set in order to use the library!
    */
-  Dynamsoft.DWT.ResourcesPath = "dwt-resources";
+  Dynamsoft.DWT.ResourcesPath = "../dwt-resources";
   Dynamsoft.DWT.ProductKey = "t00891wAAAKFs7VjcTP0UG20tzpw0mVsqmlIukOMDImLaclVr8l5ReM0df50rg9RNaH7A9mwLt6khlmvJyIqEixQeDZAz0iBvgzHPOXcQA/gbSOY51F46ANDILMM=";
   Dynamsoft.DWT.Containers = [{
     WebTwainId: "dwtObject",
@@ -193,4 +193,8 @@ const handleUpload = () => {};
   </n-modal>
 </template>
 
-<style scoped></style>
+<style>
+  .dynamsoft-dialog img {
+    display: inline;
+  }
+</style>
