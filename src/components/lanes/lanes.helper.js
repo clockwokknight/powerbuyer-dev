@@ -140,6 +140,22 @@ export const sortOptions = [
     value: "deals.mileage",
   },
   {
+    label: "Lane Number",
+    value: "lanes.lane_number",
+  },
+  {
+    label: "Sale Year",
+    value: "lanes.sale_year",
+  },
+  {
+    label: "Red Light",
+    value: "lanes.red_light",
+  },
+  {
+    label: "Green Light",
+    value: "lanes.green_light",
+  },
+  {
     label: "Vehicle Model",
     value: "vehicle_models.name",
   },
@@ -170,5 +186,25 @@ export const sortOptions = [
   {
     label: "Date Sold",
     value: "deals.date_sold",
+  },
+  {
+    label: "Grade",
+    value: "deals.grade",
+  },
+  {
+    label: "Auction Company",
+    value: "auctions.auction_company",
+  },
+  {
+    label: "Lenders City",
+    value: "lenders.city",
+  },
+  {
+    label: "Lenders Company",
+    value: "lenders.company",
+  },
+  {
+    label: "Lenders Zipcode",
+    value: "lenders.zipcode",
   },
 ];

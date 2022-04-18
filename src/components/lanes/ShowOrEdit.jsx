@@ -42,3 +42,22 @@ export const ShowOrEdit = defineComponent({
     );
   },
 });
+
+export const Lights = defineComponent({
+  props: ["row"],
+  setup(props) {
+    return () => (
+      <div class="flex items-center justify-center gap-x-1">
+        {props.row.green_light ? (
+          <span className="h-2 w-2 rounded-full bg-green-500"></span>
+        ) : null}
+        {props.row.yellow_light ? (
+          <span className="h-2 w-2 rounded-full bg-amber-500"></span>
+        ) : null}
+        {props.row.red_light ? (
+          <span className="h-2 w-2 rounded-full bg-red-500"></span>
+        ) : null}
+      </div>
+    );
+  },
+});

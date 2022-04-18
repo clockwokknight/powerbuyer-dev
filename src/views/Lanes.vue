@@ -6,7 +6,7 @@ import { useRoute } from "vue-router";
 import { useQueryClient } from "vue-query";
 import axios from "axios";
 import Filter from "@/components/lanes/Filter.vue";
-import { ShowOrEdit } from "@/components/lanes/ShowOrEdit.jsx";
+import { Lights, ShowOrEdit } from "@/components/lanes/ShowOrEdit.jsx";
 
 const route = useRoute();
 const queryClient = useQueryClient();
@@ -129,6 +129,13 @@ const columns = computed(() => [
   {
     title: "P. Price",
     key: "deal.purchase_price",
+  },
+  {
+    title: "Lights",
+    key: "green_light",
+    render(row) {
+      return h(Lights, { row });
+    },
   },
   {
     title: "Interior Color",
