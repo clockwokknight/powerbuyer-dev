@@ -1,7 +1,7 @@
 <script setup>
 import axios from "axios";
 import ActionButtons from "@/components/vehicle/DocumentActionButtons.vue";
-import { h, ref, computed, watch, onMounted } from "vue";
+import { h, ref, computed, watch, onMounted, onUpdated } from "vue";
 import { useRoute } from "vue-router";
 import { utils, log } from "@/lib/utils";
 import { fetchById } from "@/hooks";
@@ -9,27 +9,6 @@ import Dynamsoft from "dwt";
 
 const containerId = "dwtControlContainer";
 const bWASM = ref(false);
-
-onMounted(() => {
-  /**
-   * ResourcesPath & ProductKey must be set in order to use the library!
-   */
-  Dynamsoft.DWT.ResourcesPath = "../dwt-resources";
-  Dynamsoft.DWT.ProductKey =
-    "t00891wAAAKFs7VjcTP0UG20tzpw0mVsqmlIukOMDImLaclVr8l5ReM0df50rg9RNaH7A9mwLt6khlmvJyIqEixQeDZAz0iBvgzHPOXcQA/gbSOY51F46ANDILMM=";
-  Dynamsoft.DWT.Containers = [
-    {
-      WebTwainId: "dwtObject",
-      ContainerId: containerId,
-      Width: "100%",
-      Height: "400px",
-    },
-  ];
-  Dynamsoft.DWT.RegisterEvent("OnWebTwainReady", () => {
-    Dynamsoft_OnReady();
-  });
-  Dynamsoft.DWT.Load();
-});
 
 let DWObject;
 let selectSources;
@@ -55,7 +34,6 @@ const Dynamsoft_OnReady = () => {
  * Acquire images from scanners or cameras or local files
  */
 const acquireImage = () => {
-  debugger;
   if (!DWObject) DWObject = Dynamsoft.DWT.GetWebTwain();
   if (bWASM.value) {
     alert("Scanning is not supported under the WASM mode!");
@@ -96,6 +74,24 @@ const openImage = () => {
     }
   );
 };
+
+onUpdated(() => {
+  Dynamsoft.DWT.ResourcesPath = "../dwt-resources";
+  Dynamsoft.DWT.ProductKey =
+    "t00891wAAAKFs7VjcTP0UG20tzpw0mVsqmlIukOMDImLaclVr8l5ReM0df50rg9RNaH7A9mwLt6khlmvJyIqEixQeDZAz0iBvgzHPOXcQA/gbSOY51F46ANDILMM=";
+  Dynamsoft.DWT.Containers = [
+    {
+      WebTwainId: "dwtObject",
+      ContainerId: containerId,
+      Width: "100%",
+      Height: "400px",
+    },
+  ];
+  Dynamsoft.DWT.RegisterEvent("OnWebTwainReady", () => {
+    Dynamsoft_OnReady();
+  });
+  Dynamsoft.DWT.Load();
+})
 
 const columns = [
   {
@@ -148,6 +144,7 @@ const showScanModal = ref(false);
 
 const handleScan = () => {
   showScanModal.value = true;
+  console.log(showScanModal.value);
 };
 
 const handleUpload = () => {};
@@ -181,12 +178,12 @@ const handleUpload = () => {};
     >
       <template #header-extra> </template>
       <!-- Content -->
-      <n-select v-if="!bWASM" class="" id="sources"></n-select>
+      <select v-if="!bWASM" class="" id="sources"></select>
       <n-button v-if="!bWASM" class="" @click="acquireImage()"
         >Scan Image</n-button
       >
       <n-button class="mt-[10px] ml-[10px]" @click="openImage()">Open Image</n-button>
-      <div :id="containerId"></div>
+      <div :id="containerId" v-once></div>
       <template #footer> </template>
     </n-card>
   </n-modal>
