@@ -1,5 +1,4 @@
 <script setup>
-
 import axios from "axios";
 import ActionButtons from "@/components/vehicle/DocumentActionButtons.vue";
 import { h, ref, computed, watch, onMounted } from "vue";
@@ -8,24 +7,26 @@ import { utils, log } from "@/lib/utils";
 import { fetchById } from "@/hooks";
 import Dynamsoft from "dwt";
 
-
-const containerId = "dwtControlContainer"
+const containerId = "dwtControlContainer";
 const bWASM = ref(false);
 
-onMounted(()=>{
+onMounted(() => {
   /**
    * ResourcesPath & ProductKey must be set in order to use the library!
    */
   Dynamsoft.DWT.ResourcesPath = "../dwt-resources";
-  Dynamsoft.DWT.ProductKey = "t00891wAAAKFs7VjcTP0UG20tzpw0mVsqmlIukOMDImLaclVr8l5ReM0df50rg9RNaH7A9mwLt6khlmvJyIqEixQeDZAz0iBvgzHPOXcQA/gbSOY51F46ANDILMM=";
-  Dynamsoft.DWT.Containers = [{
-    WebTwainId: "dwtObject",
-    ContainerId: containerId,
-    Width: "100%",
-    Height: "400px",
-  }, ];
+  Dynamsoft.DWT.ProductKey =
+    "t00891wAAAKFs7VjcTP0UG20tzpw0mVsqmlIukOMDImLaclVr8l5ReM0df50rg9RNaH7A9mwLt6khlmvJyIqEixQeDZAz0iBvgzHPOXcQA/gbSOY51F46ANDILMM=";
+  Dynamsoft.DWT.Containers = [
+    {
+      WebTwainId: "dwtObject",
+      ContainerId: containerId,
+      Width: "100%",
+      Height: "400px",
+    },
+  ];
   Dynamsoft.DWT.RegisterEvent("OnWebTwainReady", () => {
-      Dynamsoft_OnReady();
+    Dynamsoft_OnReady();
   });
   Dynamsoft.DWT.Load();
 });
@@ -36,7 +37,7 @@ let selectSources;
  * Dynamsoft_OnReady is called when a WebTwain instance is ready to use.
  * In this callback we do some initialization.
  */
-const Dynamsoft_OnReady = ()=>{
+const Dynamsoft_OnReady = () => {
   DWObject = Dynamsoft.DWT.GetWebTwain(containerId);
   bWASM.value = Dynamsoft.Lib.env.bMobile || !Dynamsoft.DWT.UseLocalService;
   if (bWASM.value) {
@@ -53,51 +54,48 @@ const Dynamsoft_OnReady = ()=>{
 /**
  * Acquire images from scanners or cameras or local files
  */
-const acquireImage = ()=>{
-    if (!DWObject) DWObject = Dynamsoft.DWT.GetWebTwain();
-    if (bWASM.value) {
-      alert("Scanning is not supported under the WASM mode!");
-    } else if (
-      DWObject.SourceCount > 0 &&
-      DWObject.SelectSourceByIndex(selectSources.selectedIndex)
-    ) {
-      const onAcquireImageSuccess = () => {
-        DWObject.CloseSource();
-      };
-      const onAcquireImageFailure = onAcquireImageSuccess;
-      DWObject.OpenSource();
-      DWObject.AcquireImage({},
-        onAcquireImageSuccess,
-        onAcquireImageFailure
-      );
-    } else {
-      alert("No Source Available!");
-    }
+const acquireImage = () => {
+  debugger;
+  if (!DWObject) DWObject = Dynamsoft.DWT.GetWebTwain();
+  if (bWASM.value) {
+    alert("Scanning is not supported under the WASM mode!");
+  } else if (
+    DWObject.SourceCount > 0 &&
+    DWObject.SelectSourceByIndex(selectSources.selectedIndex)
+  ) {
+    const onAcquireImageSuccess = () => {
+      DWObject.CloseSource();
+    };
+    const onAcquireImageFailure = onAcquireImageSuccess;
+    DWObject.OpenSource();
+    DWObject.AcquireImage({}, onAcquireImageSuccess, onAcquireImageFailure);
+  } else {
+    alert("No Source Available!");
+  }
 };
 /**
  * Open local images.
  */
-const openImage = ()=>{
-    if (!DWObject) DWObject = Dynamsoft.DWT.GetWebTwain();
-    DWObject.IfShowFileDialog = true;
-    /**
-     * Note, this following line of code uses the PDF Rasterizer which is an extra add-on that is licensed seperately
-     */
-    DWObject.Addon.PDF.SetConvertMode(
-        Dynamsoft.DWT.EnumDWT_ConvertMode.CM_RENDERALL
-    );
-    DWObject.LoadImageEx(
-        "",
-        Dynamsoft.DWT.EnumDWT_ImageType.IT_ALL,
-        () => {
-            //success
-        },
-        () => {
-            //failure
-        }
-    );
+const openImage = () => {
+  if (!DWObject) DWObject = Dynamsoft.DWT.GetWebTwain();
+  DWObject.IfShowFileDialog = true;
+  /**
+   * Note, this following line of code uses the PDF Rasterizer which is an extra add-on that is licensed seperately
+   */
+  DWObject.Addon.PDF.SetConvertMode(
+    Dynamsoft.DWT.EnumDWT_ConvertMode.CM_RENDERALL
+  );
+  DWObject.LoadImageEx(
+    "",
+    Dynamsoft.DWT.EnumDWT_ImageType.IT_ALL,
+    () => {
+      //success
+    },
+    () => {
+      //failure
+    }
+  );
 };
-
 
 const columns = [
   {
@@ -159,8 +157,7 @@ const handleUpload = () => {};
   <div
     class="rounded-round dark:bg-foreground_dark w-full border-[1px] bg-white p-[24px] dark:border-0"
   >
-    <n-button class="w-[220px]" @click="handleScan"> SCAN NEW </n-button>
-    <n-button class="w-[220px]" @click="handleUpload"> UPLOAD NEW </n-button>
+    <n-button class="w-[220px]" @click="handleScan">Upload Document</n-button>
 
     <n-data-table
       class="rounded-round mt-[24px]"
@@ -176,7 +173,7 @@ const handleUpload = () => {};
   <n-modal v-model:show="showScanModal">
     <n-card
       style="width: 600px"
-      title="Scan Document"
+      title="Upload Document"
       :bordered="false"
       size="huge"
       role="dialog"
@@ -184,9 +181,11 @@ const handleUpload = () => {};
     >
       <template #header-extra> </template>
       <!-- Content -->
-      <select v-if="!bWASM" id="sources"></select>
-      <button v-if="!bWASM" @click="acquireImage()">Acquire Images</button>
-      <button @click="openImage()">Open Documents</button>
+      <n-select v-if="!bWASM" class="" id="sources"></n-select>
+      <n-button v-if="!bWASM" class="" @click="acquireImage()"
+        >Scan Image</n-button
+      >
+      <n-button class="mt-[10px] ml-[10px]" @click="openImage()">Open Image</n-button>
       <div :id="containerId"></div>
       <template #footer> </template>
     </n-card>
@@ -194,7 +193,7 @@ const handleUpload = () => {};
 </template>
 
 <style>
-  .dynamsoft-dialog img {
-    display: inline;
-  }
+.dynamsoft-dialog img {
+  display: inline;
+}
 </style>
