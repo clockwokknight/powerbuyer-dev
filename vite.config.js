@@ -6,34 +6,28 @@ const path = require("path");
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  build: {
-    target: "esnext",
-  },
-  // css: {
-  //   preprocessorOptions: {
-  //     scss: {
-  //       additionalData: `@import "@/scss/_variables.scss";`
-  //     },
-  //   },
-  // },
-  plugins: [vue(), vueJsx()],
-  define: {
-    global: {},
-  },
-  resolve: {
-    alias: [
-      {
-        // https://github.com/vitejs/vite/issues/2329
-        find: "@",
-        replacement: path.resolve(__dirname, "src"),
-      },
-      {
-        // https://github.com/vitejs/vite/issues/2329
-        find: "dynamsoft-javascript-barcode",
-        replacement: require.resolve(
-          "dynamsoft-javascript-barcode/dist/dbr.browser.mjs"
-        ),
-      },
-    ],
-  },
+    build: {
+        target: "esnext",
+    },
+    // css: {
+    //   preprocessorOptions: {
+    //     scss: {
+    //       additionalData: `@import "@/scss/_variables.scss";`
+    //     },
+    //   },
+    // },
+    plugins: [vue(), vueJsx()],
+    resolve: {
+        alias: [{
+                find: "@",
+                replacement: path.resolve(__dirname, "src"),
+            },
+            {
+                find: "dynamsoft-javascript-barcode",
+                replacement: require.resolve(
+                    "dynamsoft-javascript-barcode/dist/dbr.browser.mjs"
+                ),
+            },
+        ],
+    },
 });
