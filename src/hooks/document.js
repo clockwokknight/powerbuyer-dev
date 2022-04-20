@@ -3,7 +3,17 @@ import axios from "axios";
 
 export const getDocuments = (dealId) =>
     useQuery(["documents", dealId], ({ queryKey }) =>
-        axios.get(`documents/deal/${queryKey[1]}`).then((res) => res.data)
+        queryKey[1] ?
+        axios.get(`documents/deal/${queryKey[1]}`).then((res) => res.data) :
+        []
+    );
+
+export const getDealIdByVin = (vin) =>
+    useQuery(["dealsByVin", vin], ({ queryKey }) =>
+        axios.get(`deals/search_by_vin/${queryKey[1]}`).then((res) => {
+            if (res.data.length > 0) return res.data[0].id;
+            return null;
+        })
     );
 
 export const getDocumentTypeOptions = () =>
@@ -12,7 +22,7 @@ export const getDocumentTypeOptions = () =>
             res.data.map((opt) => {
                 return {
                     label: opt.name,
-                    value: opt.id,
+                    value: `${opt.id}`,
                 };
             })
         )

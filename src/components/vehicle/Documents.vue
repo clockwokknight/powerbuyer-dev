@@ -7,10 +7,23 @@ import { utils, log } from "@/lib/utils";
 import { useMutation } from "vue-query";
 import Dynamsoft from "dwt";
 import { useMessage } from "naive-ui";
-import { getDocuments, getDocumentTypeOptions } from "@/hooks/document";
+import {
+  getDealIdByVin,
+  getDocuments,
+  getDocumentTypeOptions,
+} from "@/hooks/document";
 
 const route = useRoute();
 const routeParamId = ref(route.params?.id);
+
+const { data: dealId, isLoading: isDealsLoading } =
+  getDealIdByVin(routeParamId);
+const {
+  data: documents,
+  isLoading: isDocsLoading,
+  refetch,
+} = getDocuments(dealId);
+
 watch(
   () => route.params?.id,
   (val) => {
@@ -29,28 +42,24 @@ const bWASM = ref(false);
 const saveFileFormRef = ref(null);
 const saveFileFormMessage = useMessage();
 const saveFileFormValue = ref({
-  name: "",
-  type: "pdf",
+  title: "",
+  file_type: "pdf",
   description: "",
-  // doc_type: 1,
+  doc_type: "1",
 });
 
 const saveFileFormRules = {
-  name: {
-    required: true,
-    message: "Please input file name",
-    trigger: "blur",
-  },
-  type: {
+  file_type: {
     required: true,
     message: "Please select file type",
     trigger: "blur",
   },
-  // doc_type: {
-  //   required: true,
-  //   message: "Please select Document Type",
-  //   trigger: "blur",
-  // },
+  doc_type: {
+    required: true,
+
+    message: "Please select type",
+    trigger: "blur",
+  },
 };
 
 const fileTypes = [
@@ -73,7 +82,7 @@ const fileTypes = [
     value: "bmp",
   },
 ];
-const { data: documentTypeOptions, isLoading: isVendorLoading } =
+const { data: documentTypeOptions, isLoading: isDocTypeLoading } =
   getDocumentTypeOptions();
 
 let DWObject;
@@ -81,10 +90,10 @@ let selectSources;
 
 const initFormValue = () => {
   saveFileFormValue.value = {
-    name: "",
-    type: "pdf",
+    title: "",
+    file_type: "pdf",
     description: "",
-    // doc_type: 1,
+    doc_type: "1",
   };
 };
 
@@ -107,13 +116,13 @@ const uploadToServer = () => {
   const formValue = saveFileFormValue.value;
   var strHTTPServer, strActionPage, strImageType;
 
-  var fileName = formValue.name;
+  var fileName = formValue.title;
 
   strHTTPServer = "https://gmtvinventory.com";
   DWObject.IfSSL = Dynamsoft.Lib.detect.ssl;
 
   strActionPage = "/api/documents";
-  var strPageType = formValue.type;
+  var strPageType = formValue.file_type;
   switch (strPageType) {
     case "bmp":
       strImageType = 0;
@@ -139,6 +148,7 @@ const uploadToServer = () => {
   const OnSuccess = (httpResponse) => {
     saveFileFormMessage.success("Successfully uploaded");
     initFormValue();
+    refetch.value();
   };
 
   var OnFailure = (errorCode, errorString, httpResponse) => {
@@ -147,12 +157,13 @@ const uploadToServer = () => {
     else {
       saveFileFormMessage.success("Successfully uploaded");
       initFormValue();
+      refetch.value();
     }
   };
 
-  DWObject.SetHTTPFormField("deal_id", routeParamId.value);
-  DWObject.SetHTTPFormField("title ", formValue.name);
-  DWObject.SetHTTPFormField("type", strImageType);
+  DWObject.SetHTTPFormField("deal_id", dealId.value);
+  DWObject.SetHTTPFormField("title", formValue.title);
+  DWObject.SetHTTPFormField("type", parseInt(formValue.doc_type));
   DWObject.SetHTTPFormField("description", formValue.description);
 
   DWObject.HTTPUploadThroughPostEx(
@@ -176,6 +187,7 @@ const Dynamsoft_OnReady = () => {
   if (bWASM.value) {
     DWObject.Viewer.cursor = "pointer";
   } else {
+    if (!DWObject) return;
     let sources = DWObject.GetSourceNames();
     selectSources = document.getElementById("sources");
     selectSources.options.length = 0;
@@ -262,6 +274,9 @@ const columns = [
     title: "TYPE",
     key: "type",
     //fixed: 'left'
+    render(row) {
+      return row?.document_type?.name || "";
+    },
   },
   {
     title: "",
@@ -270,22 +285,26 @@ const columns = [
       return h(ActionButtons, {
         // onClick: () => console.log(row),
         onDelete: () => console.log("delete"),
-        onView: () => console.log("view"),
+        onView: () => {
+          viewDocumentModal.value = row;
+        },
       });
     },
   },
 ];
 
-// Need API endpoints
-const { data: documents, isLoading: isLoading } = getDocuments(routeParamId);
-
 const showScanModal = ref(false);
+const viewDocumentModal = ref(false);
 
 const handleScan = () => {
   showScanModal.value = true;
 };
 
 const handleUpload = () => {};
+
+const download = (url) => {
+  window.open(url, "_blank");
+};
 </script>
 
 <template>
@@ -306,7 +325,7 @@ const handleUpload = () => {};
       class="rounded-round mt-[24px]"
       :columns="columns"
       :data="documents"
-      :loading="isLoading"
+      :loading="isDocsLoading"
       :pagination="pagination"
       :bordered="false"
       :max-height="400"
@@ -338,7 +357,12 @@ const handleUpload = () => {};
               >Import Local Image</n-button
             >
           </div>
-          <n-card title="Save Documents" size="small" class="mt-4">
+          <n-card
+            title="Save Documents"
+            size="small"
+            class="mt-4"
+            v-if="!isDocTypeLoading"
+          >
             <n-form
               ref="saveFileFormRef"
               :label-width="80"
@@ -346,32 +370,32 @@ const handleUpload = () => {};
               :rules="saveFileFormRules"
               class="grid grid-cols-3 gap-2"
             >
-              <n-form-item label="File Name" path="name" class="col-span-2">
+              <n-form-item label="Title" path="title" class="col-span-2">
                 <n-input
-                  v-model:value="saveFileFormValue.name"
-                  placeholder="File Name"
+                  v-model:value="saveFileFormValue.title"
+                  placeholder="Title"
                 />
               </n-form-item>
-              <n-form-item label="File Type" path="type" class="col-span-1">
+              <n-form-item
+                label="File Type"
+                path="file_type"
+                class="col-span-1"
+              >
                 <n-select
                   class="w-full"
-                  v-model:value="saveFileFormValue.type"
+                  v-model:value="saveFileFormValue.file_type"
                   :options="fileTypes"
                   clearable
                 />
               </n-form-item>
-              <!-- <n-form-item
-                label="Document Type"
-                path="doc_type"
-                class="col-span-3"
-              >
+              <n-form-item label="Type" path="doc_type" class="col-span-3">
                 <n-select
                   class="w-full"
                   v-model:value="saveFileFormValue.doc_type"
                   :options="documentTypeOptions"
                   clearable
                 />
-              </n-form-item> -->
+              </n-form-item>
               <n-form-item
                 label="Description"
                 path="description"
@@ -388,6 +412,62 @@ const handleUpload = () => {};
             </n-form>
           </n-card>
         </div>
+      </div>
+      <template #footer> </template>
+    </n-card>
+  </n-modal>
+  <n-modal v-model:show="viewDocumentModal">
+    <n-card
+      style="max-width: 1248px"
+      title="View Document"
+      :bordered="false"
+      size="huge"
+      role="dialog"
+      aria-modal="true"
+    >
+      <template #header-extra> </template>
+      <!-- Content -->
+      <n-image :src="viewDocumentModal.url" preview-disabled />
+      <div
+        class="content-center justify-center flex items-stretch"
+        v-if="!['pdf'].includes(viewDocumentModal.extension)"
+      >
+        <n-button
+          class="self-auto mt-2"
+          @click.prevent="download(viewDocumentModal.url)"
+        >
+          <n-icon
+            ><svg
+              class="
+                group-hover:text-primary
+                h-6
+                w-6
+                text-gray-300
+                transition-colors
+              "
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              x="0px"
+              y="0px"
+              viewBox="0 0 227 227"
+              style="enable-background: new 0 0 227 227"
+              xml:space="preserve"
+            >
+              <path
+                d="M196.395,212V100.5h7.5h7.5V227H15.606V100.5h7.5h7.5V212H196.395z M68.231,0h90.531v78.188h41.735L181.64,100.5
+	l-68.14,80.618L45.36,100.5L26.501,78.187h41.73V0z M83.231,93.187H58.819l54.681,64.695l54.68-64.693h-24.417V15H83.231V93.187z"
+              /></svg
+          ></n-icon>
+        </n-button>
+      </div>
+      <div v-else>
+        <object
+          :data="viewDocumentModal.url"
+          type="application/pdf"
+          style="width: 100%; height: 700px"
+        >
+          <div>No online PDF viewer installed</div>
+        </object>
       </div>
       <template #footer> </template>
     </n-card>
