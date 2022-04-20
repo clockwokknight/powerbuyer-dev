@@ -233,6 +233,11 @@ const onLaneReportSelect = (val) => {
   selectedLaneReport.value = val;
   filters.value = JSON.parse(val);
 };
+const selectRenderOption = ({ node, option }) =>
+  h(NTooltip, null, {
+    trigger: () => node,
+    default: () => option.label,
+  });
 </script>
 
 <template>
@@ -276,6 +281,7 @@ const onLaneReportSelect = (val) => {
       :min="1"
     >
       <div style="grid-area: a">
+        <!--    TODO: add tool tip on select option using :render-option -->
         <CustomInput
           basic
           type="select"
@@ -308,6 +314,7 @@ const onLaneReportSelect = (val) => {
         <n-select
           :value="value?.field"
           :options="value?.options"
+          :render-option="selectRenderOption"
           filterable
           @update:value="(val) => (value.field = val)"
           v-if="value?.filter_type === 'select' && value?.id !== 'order_by'"
@@ -320,13 +327,15 @@ const onLaneReportSelect = (val) => {
             :value="value?.field"
             filterable
             @update:value="(val) => (value.field = val)"
+            :render-option="selectRenderOption"
             :options="value?.options"
           />
           <n-select
             v-model:value="order_dir"
+            class="max-w-[62px]"
             :options="[
-              { label: 'Ascending', value: 'asc' },
-              { label: 'Descending', value: 'desc' },
+              { label: 'Asc', value: 'asc' },
+              { label: 'Desc', value: 'desc' },
             ]"
           />
         </div>

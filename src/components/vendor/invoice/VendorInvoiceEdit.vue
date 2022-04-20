@@ -324,23 +324,6 @@ const submitForm = async () => {
 const onInvoiceDelete = () => {
   deleteInvoiceModal.value = true;
 };
-
-// const themeOverrides = {
-//   Input: {
-//     border: "none",
-//     groupLabelColor: "rgba(255, 255, 255, 0.1)",
-//     color: "rgba(255, 255, 255, 0)",
-//     borderHover: "1px solid transparent",
-//     borderHoverWarning: "none",
-//     borderHoverError: "none",
-//     boxShadowFocus: "none",
-//     borderFocus: "none",
-//     colorFocus: "rgba(99, 226, 183, 0)",
-//   },
-//   Form: {
-//     labelPaddingVertical: "0 0 0 0",
-//   },
-// };
 </script>
 <template>
   <n-modal
@@ -351,10 +334,7 @@ const onInvoiceDelete = () => {
     @update:show="(val) => $emit('update:show', val)"
   >
     <n-form ref="formRef" :model="form" :rules="rules">
-      <n-config-provider
-        :theme-overrides="themeOverrides"
-        inline-theme-disabled
-      >
+      <n-config-provider :theme-overrides="themeOverrides" inline-theme-disabled>
         <header class="flex content-center justify-between">
           <section class="space-y-4">
             <div class="font-bold">
@@ -380,73 +360,71 @@ const onInvoiceDelete = () => {
               <span class="text-sm font-bold">
                 {{ initialData?.vendor[0]?.name }}
               </span>
-          </div>
-        </section>
-        <section class="flex flex-col items-end gap-y-3">
-          <div>
-            <n-select
-              :options="invoiceStatusOptions"
-              class="custom-select max-w-[90px]"
-              v-model:value="form.status"
-              filterable
-            />
-          </div>
-          <div class="text-right">
-            <!-- <span class="block text-xs uppercase">Due Date</span>
-          <span class="text-sm font-bold">{{ initialData.due_date }}</span> -->
-            <n-form-item
-              size="small"
-              label-align="right"
-              label="Due Date"
-              path="due_date"
-            >
-              <n-date-picker
-                format="MM/dd/yyyy"
-                class="custom-date-picker max-w-[130px]"
-                v-model:value="form.due_date"
+            </div>
+          </section>
+          <section class="flex flex-col items-end gap-y-3">
+            <div>
+              <n-select
+                :options="invoiceStatusOptions"
+                class="custom-select max-w-[90px]"
+                v-model:value="form.status"
+                filterable
               />
-            </n-form-item>
-          </div>
-          <div class="text-right">
-            <span class="block text-xs uppercase">Terms</span>
-            <span class="text-sm font-bold">{{ current_vendor?.payment_terms.name }}</span>
-          </div>
-        </section>
-      </header>
-    </n-config-provider>
-    <main class="mt-4">
-      <h3 class="text-sm font-bold">Expenses</h3>
-      <n-data-table
-        :data="form.expenses"
-        :columns="columns"
-        striped
-        class="pt-2"
-        :max-height="500"
-        :scroll-x="1300"
-        row-class-name="group py-2"
-        v-if="form.expenses.length > 0"
-      />
-      <div v-else class="mt-4">
-        <n-button @click="onAddExpense" dashed type="primary" class="w-full">
-          + Create</n-button
-        >
-      </div>
+            </div>
+            <div class="text-right">
+              <!-- <span class="block text-xs uppercase">Due Date</span>
+          <span class="text-sm font-bold">{{ initialData.due_date }}</span> -->
+              <n-form-item
+                size="small"
+                label-align="right"
+                label="Due Date"
+                path="due_date"
+              >
+                <n-date-picker
+                  format="MM/dd/yyyy"
+                  class="custom-date-picker max-w-[130px]"
+                  v-model:value="form.due_date"
+                />
+              </n-form-item>
+            </div>
+            <div class="text-right">
+              <span class="block text-xs uppercase">Terms</span>
+              <span class="text-sm font-bold">{{
+                current_vendor?.payment_terms.name
+              }}</span>
+            </div>
+          </section>
+        </header>
+      </n-config-provider>
+      <main class="mt-4">
+        <h3 class="text-sm font-bold">Expenses</h3>
+        <n-data-table
+          :data="form.expenses"
+          :columns="columns"
+          striped
+          class="pt-2"
+          :max-height="500"
+          :scroll-x="1300"
+          row-class-name="group py-2"
+          v-if="form.expenses.length > 0"
+        />
+        <div v-else class="mt-4">
+          <n-button @click="onAddExpense" dashed type="primary" class="w-full">
+            + Create</n-button
+          >
+        </div>
 
         <section
           class="mt-5 ml-auto w-full max-w-xs rounded bg-gray-100 p-4 dark:bg-dark_border"
         >
           <div class="bg-foreground_light p-4 dark:bg-foreground_dark">
             <h5 class="font-medium uppercase">Inv Total</h5>
-            <span class="text-lg font-bold">
-              ${{ format(form.amount_due) }}
-            </span>
+            <span class="text-lg font-bold"> ${{ format(form.amount_due) }} </span>
           </div>
           <div class="space-y-2 px-4 pt-5">
             <div>
               <h5 class="font-medium uppercase">Payments</h5>
-              <span class="text-lg font-bold"
-                >${{ initialData.amount_paid }}</span
-              >
+              <span class="text-lg font-bold">${{ initialData.amount_paid }}</span>
             </div>
             <div>
               <h5 class="font-medium uppercase">Balance</h5>
@@ -455,7 +433,10 @@ const onInvoiceDelete = () => {
           </div>
         </section>
       </main>
-      <div class="sticky bottom-2 flex gap-x-5" v-if="!disabled && form.amount_paid === 0">
+      <div
+        class="sticky bottom-2 flex gap-x-5"
+        v-if="!disabled && form.amount_paid === 0"
+      >
         <n-button
           size="medium"
           type="primary"
@@ -464,12 +445,7 @@ const onInvoiceDelete = () => {
         >
           SAVE
         </n-button>
-        <n-button
-          type="error"
-          size="medium"
-          ghost
-          @click.prevent="onInvoiceDelete"
-        >
+        <n-button type="error" size="medium" ghost @click.prevent="onInvoiceDelete">
           DELETE
         </n-button>
       </div>
