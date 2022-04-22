@@ -1,10 +1,8 @@
 <script setup>
 import axios from "axios";
 import ActionButtons from "@/components/vehicle/DocumentActionButtons.vue";
-import { h, ref, computed, watch, onMounted, onUpdated } from "vue";
+import { h, ref, watch } from "vue";
 import { useRoute } from "vue-router";
-import { utils, log } from "@/lib/utils";
-import { useMutation } from "vue-query";
 import Dynamsoft from "dwt";
 import { useMessage, useDialog } from "naive-ui";
 import {
@@ -12,18 +10,16 @@ import {
   getDocuments,
   getDocumentTypeOptions,
 } from "@/hooks/document";
+import {
+  SAVE_FILE_FORM_RULES,
+  FILE_TYPES,
+  PIXEL_TYPE_OPTIONS,
+  RESOLUTION_OPTIONS,
+} from "./util";
+import DirectUploadModal from "./DirectUploadModal.vue";
 
 const route = useRoute();
 const routeParamId = ref(route.params?.id);
-
-const { data: dealId, isLoading: isDealsLoading } =
-  getDealIdByVin(routeParamId);
-const {
-  data: documents,
-  isLoading: isDocsLoading,
-  refetch,
-} = getDocuments(dealId);
-
 watch(
   () => route.params?.id,
   (val) => {
@@ -36,47 +32,77 @@ watch(
   }
 );
 
+const { data: dealId, isLoading: isDealsLoading } =
+  getDealIdByVin(routeParamId);
+const {
+  data: documents,
+  isLoading: isDocsLoading,
+  refetch,
+} = getDocuments(dealId);
+const { data: documentTypeOptions, isLoading: isDocTypeLoading } =
+  getDocumentTypeOptions();
+
+const showScanModal = ref(false);
+const viewDocumentModal = ref(false);
+const showDirectUploadModal = ref(false);
+
+const columns = [
+  {
+    title: "TITLE",
+    key: "title",
+  },
+  {
+    title: "DESCRIPTION",
+    key: "description",
+  },
+  {
+    title: "TYPE",
+    key: "type",
+    render(row) {
+      return row?.document_type?.name || "";
+    },
+  },
+  {
+    title: "",
+    fixed: "right",
+    render(row) {
+      return h(ActionButtons, {
+        onDelete: () => {
+          confirmDialog.error({
+            title: "Delete",
+            content: "Are you sure you want to delete?",
+            positiveText: "Yes",
+            negativeText: "No",
+            onPositiveClick: async () => {
+              await axios.delete(`/documents/${row.id}`);
+              refetch.value();
+            },
+            onNegativeClick: () => {},
+          });
+        },
+        onView: () => {
+          viewDocumentModal.value = row;
+        },
+      });
+    },
+  },
+];
+
 const containerId = "dwtControlContainer";
 const bWASM = ref(false);
+const DWObject = ref({
+  CurrentImageIndexInBuffer: -1,
+});
+let selectSources;
 
 const showScannerUI = ref(false);
 const useAdf = ref(true);
 const autoRemoveBlankPage = ref(false);
 const twoSidedScan = ref(false);
 const pixelType = ref("Gray");
-const pixelTypeOptions = [
-  {
-    value: "BW",
-    label: "B&W ",
-  },
-  {
-    value: "Gray",
-    label: "Gray ",
-  },
-  {
-    value: "RGB",
-    label: "Color ",
-  },
-];
+const pixelTypeOptions = PIXEL_TYPE_OPTIONS;
 const resolution = ref(200);
-const resoultionOptions = [
-  {
-    label: "100",
-    value: 100,
-  },
-  {
-    label: "150",
-    value: 150,
-  },
-  {
-    label: "200",
-    value: 200,
-  },
-  {
-    label: "300",
-    value: 300,
-  },
-];
+const resoultionOptions = RESOLUTION_OPTIONS;
 
 const saveFileFormRef = ref(null);
 const saveFileFormMessage = useMessage();
@@ -87,135 +113,33 @@ const saveFileFormValue = ref({
   doc_type: "1",
 });
 
-const saveFileFormRules = {
-  file_type: {
-    required: true,
-    message: "Please select file type",
-    trigger: "blur",
-  },
-  doc_type: {
-    required: true,
+const saveFileFormRules = SAVE_FILE_FORM_RULES;
+const fileTypes = FILE_TYPES;
 
-    message: "Please select type",
-    trigger: "blur",
-  },
+const handleScan = () => {
+  initDynamSoft();
+  showScanModal.value = true;
 };
 
-const fileTypes = [
-  {
-    label: "PDF",
-    value: "pdf",
-  },
-  {
-    label: "JPG",
-    value: "jpg",
-  },
-  ,
-  {
-    label: "PNG",
-    value: "png",
-  },
-  ,
-  {
-    label: "BMP",
-    value: "bmp",
-  },
-];
-const { data: documentTypeOptions, isLoading: isDocTypeLoading } =
-  getDocumentTypeOptions();
-
-const DWObject = ref({
-  CurrentImageIndexInBuffer: -1,
-});
-let selectSources;
-
-const initFormValue = () => {
-  saveFileFormValue.value = {
-    title: "",
-    file_type: "pdf",
-    description: "",
-    doc_type: "1",
-  };
+const handleDirectUpload = () => {
+  showDirectUploadModal.value = true;
 };
 
-const saveFile = (e) => {
-  e.preventDefault();
-  if (DWObject.value.HowManyImagesInBuffer == 0) {
-    saveFileFormMessage.error("There is no image in buffer.");
-    return;
-  }
-  saveFileFormRef.value?.validate((errors) => {
-    if (!errors) {
-      uploadToServer();
-    } else {
-      return;
-    }
+const initDynamSoft = () => {
+  Dynamsoft.DWT.ResourcesPath = "../dwt-resources";
+  Dynamsoft.DWT.ProductKey = import.meta.env.VITE_DWT_LICENSE_Key;
+  Dynamsoft.DWT.Containers = [
+    {
+      WebTwainId: "dwtObject",
+      ContainerId: containerId,
+      Width: "100%",
+      Height: "700px",
+    },
+  ];
+  Dynamsoft.DWT.RegisterEvent("OnWebTwainReady", () => {
+    Dynamsoft_OnReady();
   });
-};
-
-const uploadToServer = () => {
-  const formValue = saveFileFormValue.value;
-  var strHTTPServer, strActionPage, strImageType;
-
-  var fileName = formValue.title;
-
-  strHTTPServer = "https://gmtvinventory.com";
-  DWObject.value.IfSSL = Dynamsoft.Lib.detect.ssl;
-
-  strActionPage = "/api/documents";
-  var strPageType = formValue.file_type;
-  switch (strPageType) {
-    case "bmp":
-      strImageType = 0;
-      break;
-    case "jpg":
-      strImageType = 1;
-      break;
-    case "tif":
-      strImageType = 2;
-      break;
-    case "png":
-      strImageType = 3;
-      break;
-    case "pdf":
-      strImageType = 4;
-      break;
-  }
-
-  var replaceStr = "<";
-  fileName = fileName.replace(new RegExp(replaceStr, "gm"), "&lt;");
-  var uploadfilename = fileName + "." + strPageType;
-
-  const OnSuccess = (httpResponse) => {
-    saveFileFormMessage.success("Successfully uploaded");
-    initFormValue();
-    refetch.value();
-  };
-
-  var OnFailure = (errorCode, errorString, httpResponse) => {
-    if (errorCode != 0 && errorCode != -2003)
-      saveFileFormMessage.error(errorString);
-    else {
-      saveFileFormMessage.success("Successfully uploaded");
-      initFormValue();
-      refetch.value();
-    }
-  };
-
-  DWObject.value.SetHTTPFormField("deal_id", dealId.value);
-  DWObject.value.SetHTTPFormField("title", formValue.title);
-  DWObject.value.SetHTTPFormField("type", parseInt(formValue.doc_type));
-  DWObject.value.SetHTTPFormField("description", formValue.description);
-
-  DWObject.value.HTTPUploadThroughPostEx(
-    strHTTPServer,
-    DWObject.value.CurrentImageIndexInBuffer,
-    strActionPage,
-    uploadfilename,
-    strImageType,
-    OnSuccess,
-    OnFailure
-  );
+  Dynamsoft.DWT.Load();
 };
 
 /**
@@ -251,27 +175,12 @@ const Dynamsoft_OnReady = () => {
       thumbnailViewer.on("click", Dynamsoft_OnMouseClick);
       thumbnailViewer.on("dragdone", Dynamsoft_OnIndexChangeDragDropDone);
       thumbnailViewer.on("keydown", Dynamsoft_OnKeyDown);
+
       DWObject.value.Viewer.on("wheel", Dynamsoft_OnMouseWheel); //H5 only
       DWObject.value.Viewer.on("OnPaintDone", Dynamsoft_OnMouseWheel); //ActiveX only
-
       DWObject.value.Viewer.allowSlide = false;
-
       DWObject.value.IfAllowLocalCache = true;
       DWObject.value.ImageCaptureDriverType = 4;
-
-      var vCount = DWObject.value.SourceCount;
-
-      // if (vCount > 0) {
-      //   source_onchange(false);
-      // }
-
-      // if (document.getElementById("ddl_barcodeFormat")) {
-      //   for (var index = 0; index < BarcodeInfo.length; index++)
-      //     document
-      //       .getElementById("ddl_barcodeFormat")
-      //       .options.add(new Option(BarcodeInfo[index].desc, index));
-      //   document.getElementById("ddl_barcodeFormat").selectedIndex = 0;
-      // }
 
       cropRect.value = {
         _iLeft: 0,
@@ -333,7 +242,7 @@ const acquireImage = () => {
     }
     DWObject.value.AcquireImage(
       {
-        IfShowUI: showScannerUI.value, //false,
+        IfShowUI: showScannerUI.value,
         PixelType: iPixelType,
         Resolution: resolution.value,
         IfFeederEnabled: useAdf.value,
@@ -348,6 +257,7 @@ const acquireImage = () => {
     alert("No Source Available!");
   }
 };
+
 /**
  * Open local images.
  */
@@ -364,73 +274,12 @@ const openImage = () => {
     "",
     Dynamsoft.DWT.EnumDWT_ImageType.IT_ALL,
     () => {
-      //success
       updatePageInfo();
     },
     () => {
-      //failure
       updatePageInfo();
     }
   );
-};
-
-onUpdated(() => {
-  Dynamsoft.DWT.ResourcesPath = "../dwt-resources";
-  Dynamsoft.DWT.ProductKey =
-    "t00891wAAAKFs7VjcTP0UG20tzpw0mVsqmlIukOMDImLaclVr8l5ReM0df50rg9RNaH7A9mwLt6khlmvJyIqEixQeDZAz0iBvgzHPOXcQA/gbSOY51F46ANDILMM=";
-  Dynamsoft.DWT.Containers = [
-    {
-      WebTwainId: "dwtObject",
-      ContainerId: containerId,
-      Width: "100%",
-      Height: "400px",
-    },
-  ];
-  Dynamsoft.DWT.RegisterEvent("OnWebTwainReady", () => {
-    Dynamsoft_OnReady();
-  });
-  Dynamsoft.DWT.Load();
-});
-
-const columns = [
-  {
-    title: "TITLE",
-    key: "title",
-    //fixed: 'left'
-  },
-  {
-    title: "DESCRIPTION",
-    key: "description",
-    //fixed: 'left'
-  },
-  {
-    title: "TYPE",
-    key: "type",
-    //fixed: 'left'
-    render(row) {
-      return row?.document_type?.name || "";
-    },
-  },
-  {
-    title: "",
-    fixed: "right",
-    render(row) {
-      return h(ActionButtons, {
-        // onClick: () => console.log(row),
-        onDelete: () => console.log("delete"),
-        onView: () => {
-          viewDocumentModal.value = row;
-        },
-      });
-    },
-  },
-];
-
-const showScanModal = ref(false);
-const viewDocumentModal = ref(false);
-
-const handleScan = () => {
-  showScanModal.value = true;
 };
 
 const handleUpload = () => {};
@@ -479,6 +328,7 @@ const btnRemoveCurrentImage_onclick = () => {
     onNegativeClick: () => {},
   });
 };
+
 const btnRemoveAllImages_onclick = () => {
   if (!checkIfImagesInBuffer()) return;
   confirmDialog.error({
@@ -652,6 +502,7 @@ function btnPreImage_onclick() {
   DWObject.value.Viewer.previous();
   updatePageInfo();
 }
+
 function btnNextImage_onclick() {
   if (!checkIfImagesInBuffer()) {
     return;
@@ -705,6 +556,95 @@ const Dynamsoft_OnImageAreaDeselected = (index) => {
 };
 
 const Dynamsoft_OnGetFilePath = (bSave, count, index, path, name) => {};
+
+const initFormValue = () => {
+  saveFileFormValue.value = {
+    title: "",
+    file_type: "pdf",
+    description: "",
+    doc_type: "1",
+  };
+};
+
+const saveFile = (e) => {
+  e.preventDefault();
+  if (DWObject.value.HowManyImagesInBuffer == 0) {
+    saveFileFormMessage.error("There is no image in buffer.");
+    return;
+  }
+  saveFileFormRef.value?.validate((errors) => {
+    if (!errors) {
+      uploadToServer();
+    } else {
+      return;
+    }
+  });
+};
+
+const uploadToServer = () => {
+  const formValue = saveFileFormValue.value;
+  var strHTTPServer, strActionPage, strImageType;
+
+  var fileName = formValue.title;
+
+  strHTTPServer = "https://gmtvinventory.com";
+  DWObject.value.IfSSL = Dynamsoft.Lib.detect.ssl;
+
+  strActionPage = "/api/documents";
+  var strPageType = formValue.file_type;
+  switch (strPageType) {
+    case "bmp":
+      strImageType = 0;
+      break;
+    case "jpg":
+      strImageType = 1;
+      break;
+    case "tif":
+      strImageType = 2;
+      break;
+    case "png":
+      strImageType = 3;
+      break;
+    case "pdf":
+      strImageType = 4;
+      break;
+  }
+
+  var replaceStr = "<";
+  fileName = fileName.replace(new RegExp(replaceStr, "gm"), "&lt;");
+  var uploadfilename = fileName + "." + strPageType;
+
+  const OnSuccess = (httpResponse) => {
+    saveFileFormMessage.success("Successfully uploaded");
+    initFormValue();
+    refetch.value();
+  };
+
+  var OnFailure = (errorCode, errorString, httpResponse) => {
+    if (errorCode != 0 && errorCode != -2003)
+      saveFileFormMessage.error(errorString);
+    else {
+      saveFileFormMessage.success("Successfully uploaded");
+      initFormValue();
+      refetch.value();
+    }
+  };
+
+  DWObject.value.SetHTTPFormField("deal_id", dealId.value);
+  DWObject.value.SetHTTPFormField("title", formValue.title);
+  DWObject.value.SetHTTPFormField("type", parseInt(formValue.doc_type));
+  DWObject.value.SetHTTPFormField("description", formValue.description);
+
+  DWObject.value.HTTPUploadThroughPostEx(
+    strHTTPServer,
+    DWObject.value.CurrentImageIndexInBuffer,
+    strActionPage,
+    uploadfilename,
+    strImageType,
+    OnSuccess,
+    OnFailure
+  );
+};
 </script>
 
 <template>
@@ -720,6 +660,9 @@ const Dynamsoft_OnGetFilePath = (bSave, count, index, path, name) => {};
     "
   >
     <n-button class="w-[220px]" @click="handleScan">Upload Document</n-button>
+    <n-button class="w-[220px]" @click="handleDirectUpload"
+      >Direct Upload</n-button
+    >
 
     <n-data-table
       class="rounded-round mt-[24px]"
@@ -1075,6 +1018,7 @@ const Dynamsoft_OnGetFilePath = (bSave, count, index, path, name) => {};
       <template #footer> </template>
     </n-card>
   </n-modal>
+  <DirectUploadModal :showDirectUploadModal="showDirectUploadModal" />
 </template>
 
 <style>
