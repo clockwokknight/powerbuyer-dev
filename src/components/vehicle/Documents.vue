@@ -908,7 +908,7 @@ const Dynamsoft_OnGetFilePath = (bSave, count, index, path, name) => {};
         </div>
         <div class="col-span-1">
           <div class="grid grid-cols-2 gap-2">
-            <select v-if="!bWASM" class="col-span-2" id="sources"></select>
+            <select v-if="!bWASM" class="col-span-2 dark:bg-[#333333]" id="sources"></select>
             <n-checkbox v-model:checked="showScannerUI" class="col-span-1">
               Show Scanner UI
             </n-checkbox>
