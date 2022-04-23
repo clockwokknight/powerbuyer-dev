@@ -649,15 +649,7 @@ const uploadToServer = () => {
 
 <template>
   <div
-    class="
-      rounded-round
-      dark:bg-foreground_dark
-      w-full
-      border-[1px]
-      bg-white
-      p-[24px]
-      dark:border-0
-    "
+    class="w-full rounded-round border-[1px] bg-white p-[24px] dark:border-0 dark:bg-foreground_dark"
   >
     <n-button class="w-[220px]" @click="handleScan">Upload Document</n-button>
     <n-button class="w-[220px]" @click="handleDirectUpload"
@@ -665,7 +657,7 @@ const uploadToServer = () => {
     >
 
     <n-data-table
-      class="rounded-round mt-[24px]"
+      class="mt-[24px] rounded-round"
       :columns="columns"
       :data="documents"
       :loading="isDocsLoading"
@@ -675,292 +667,285 @@ const uploadToServer = () => {
       :scroll-x="900"
     />
   </div>
-  <n-modal v-model:show="showScanModal">
-    <n-card
-      style="max-width: 1248px"
-      title="Upload Document"
-      :bordered="false"
-      size="huge"
-      role="dialog"
-      aria-modal="true"
-    >
-      <template #header-extra> </template>
-      <!-- Content -->
-      <div id="DWTcontainer" class="grid grid-cols-3 gap-4">
-        <div class="col-span-2">
-          <div id="divEdit">
-            <n-button
-              :bordered="false"
-              @click="btnRemoveCurrentImage_onclick"
-              class="ml-1"
-            >
-              <img
-                class="menuIcon"
-                src="/images/RemoveSelectedImages.png"
-                title="Remove current page"
-                alt="Remove current page"
-                id="DW_btnRemoveCurrentImage"
-              />
-            </n-button>
-            <n-button
-              :bordered="false"
-              @click="btnRemoveAllImages_onclick"
-              class="ml-1 mr-3"
-            >
-              <img
-                class="menuIcon"
-                src="/images/RemoveAllImages.png"
-                title="Remove All pages"
-                alt="Remove All pages"
-                id="DW_btnRemoveAllImages"
-              />
-            </n-button>
-            <span style="width: 20px" />
-            <span class="page-detail"
-              >{{ currentPageNum }} / {{ totalPageNum }}</span
-            >
-            <n-button
-              :bordered="false"
-              @click="btnZoomOut_onclick"
-              class="ml-1 mr-3"
-            >
-              <img
-                class="menuIcon"
-                src="/images/ZoomOut.png"
-                title="ZoomOut"
-                alt="Erase"
-                id="btnZoomOut"
-              />
-            </n-button>
-            <span class="zoom-detail">{{ spanZoom }} </span>
-            <n-button
-              :bordered="false"
-              @click="btnZoomIn_onclick"
-              class="ml-1 mr-3"
-            >
-              <img
-                class="menuIcon"
-                src="/images/ZoomIn.png"
-                title="ZoomIn"
-                alt="ZoomIn"
-                id="btnZoomIn"
-              />
-            </n-button>
-            <n-button
-              :bordered="false"
-              v-if="orgBtn"
-              @click="btnOrigSize_onclick"
-              class="ml-1 mr-3"
-            >
-              <img
-                style="margin-left: 10px"
-                class="menuIcon"
-                src="/images/Orig_size.png"
-                title="1:1"
-                alt="1:1"
-                id="btnOrigSize"
-              />
-            </n-button>
-            <n-button
-              :bordered="false"
-              v-if="!orgBtn"
-              @click="btnFitWindow_onclick"
-              class="ml-1 mr-3"
-            >
-              <img
-                class="menuIcon"
-                src="/images/FitWindow.png"
-                title="Fit To Window"
-                alt="Fit To Window"
-                id="btnFitWindow"
-              />
-            </n-button>
-            <n-button
-              :bordered="false"
-              @click="btnRotateLeft_onclick"
-              class="ml-1 mr-3"
-            >
-              <img
-                class="menuIcon"
-                src="/images/RotateLeft.png"
-                title="Rotate Left"
-                alt="Rotate Left"
-                id="btnRotateL"
-              />
-            </n-button>
-            <n-button
-              :bordered="false"
-              @click="btnCrop_onclick"
-              class="ml-1 mr-3"
-            >
-              <img
-                class="menuIcon"
-                src="/images/Crop.png"
-                title="Crop"
-                alt="Crop"
-                id="btnCrop"
-              />
-            </n-button>
-            <n-button
-              :bordered="false"
-              @click="btnShowImageEditor_onclick"
-              class="ml-1 mr-3"
-            >
-              <img
-                class="menuIcon"
-                src="/images/ShowEditor.png"
-                title="Show Image Editor"
-                alt="Show Image Editor"
-                id="btnShowImageEditor"
-              />
-            </n-button>
-            <n-button
-              :bordered="false"
-              @click="btnSelect_onclick"
-              class="ml-2 mr-3"
-            >
-              <img
-                class="menuIcon"
-                :src="
-                  selectOnClick
-                    ? '/images/Select_selected.png'
-                    : '/images/Select.png'
-                "
-                title="Select"
-                alt="Select"
-                id="btnSelect"
-              />
-            </n-button>
-            <n-button
-              :bordered="false"
-              @click="btnHand_onclick"
-              class="ml-0 mr-3"
-            >
-              <img
-                class="menuIcon"
-                :src="
-                  handOnClick ? '/images/Hand_selected.png' : '/images/Hand.png'
-                "
-                title="Hand"
-                alt="Erase"
-                id="btnHand_selected"
-              />
-            </n-button>
-          </div>
-          <div :id="containerId" v-once></div>
-        </div>
-        <div class="col-span-1">
-          <div class="grid grid-cols-2 gap-2">
-            <select v-if="!bWASM" class="col-span-2 dark:bg-[#333333]" id="sources"></select>
-            <n-checkbox v-model:checked="showScannerUI" class="col-span-1">
-              Show Scanner UI
-            </n-checkbox>
-            <n-checkbox v-model:checked="useAdf" class="col-span-1">
-              Use ADF
-            </n-checkbox>
-            <n-checkbox
-              v-model:checked="autoRemoveBlankPage"
-              class="col-span-1"
-            >
-              Auto Remove Blank Page
-            </n-checkbox>
-            <n-checkbox v-model:checked="twoSidedScan" class="col-span-1">
-              2-sided Scan
-            </n-checkbox>
-
-            <div class="flex justify-start items-center col-span-2 mt-2">
-              <span class="mr-2">Pixel Type:</span>
-              <n-radio-group
-                v-model:value="pixelType"
-                name="pixelTypeGroup"
-                class=""
-              >
-                <n-space>
-                  <n-radio
-                    v-for="pt in pixelTypeOptions"
-                    :key="pt.value"
-                    :value="pt.value"
-                    :label="pt.label"
-                  />
-                </n-space>
-              </n-radio-group>
-            </div>
-            <div class="flex justify-start items-center col-span-2 mt-2">
-              <span class="mr-2">Resolution:</span>
-              <n-select
-                v-model:value="resolution"
-                :options="resoultionOptions"
-                placeholder="Please select Resolution"
-              />
-            </div>
-            <n-button
-              v-if="!bWASM"
-              class="col-span-1 mt-2"
-              @click="acquireImage()"
-              >Scan Image</n-button
-            >
-            <n-button class="col-span-1 mt-2" @click="openImage()"
-              >Import Local Image</n-button
-            >
-          </div>
-          <n-card
-            title="Save Documents"
-            size="small"
-            class="mt-4"
-            v-if="!isDocTypeLoading"
+  <n-modal
+    class="w-[1220px] min-w-[1220px]"
+    v-model:show="showScanModal"
+    preset="card"
+    title="Upload Document"
+  >
+    <template #header-extra> </template>
+    <!-- Content -->
+    <div id="DWTcontainer" class="grid grid-cols-3 gap-4">
+      <div class="col-span-2">
+        <div id="divEdit">
+          <n-button
+            :bordered="false"
+            @click="btnRemoveCurrentImage_onclick"
+            class="ml-1"
           >
-            <n-form
-              ref="saveFileFormRef"
-              :label-width="80"
-              :model="saveFileFormValue"
-              :rules="saveFileFormRules"
-              class="grid grid-cols-3 gap-2"
-            >
-              <n-form-item label="Title" path="title" class="col-span-2">
-                <n-input
-                  v-model:value="saveFileFormValue.title"
-                  placeholder="Title"
-                />
-              </n-form-item>
-              <n-form-item
-                label="File Type"
-                path="file_type"
-                class="col-span-1"
-              >
-                <n-select
-                  class="w-full"
-                  v-model:value="saveFileFormValue.file_type"
-                  :options="fileTypes"
-                  clearable
-                />
-              </n-form-item>
-              <n-form-item label="Type" path="doc_type" class="col-span-3">
-                <n-select
-                  class="w-full"
-                  v-model:value="saveFileFormValue.doc_type"
-                  :options="documentTypeOptions"
-                  clearable
-                />
-              </n-form-item>
-              <n-form-item
-                label="Description"
-                path="description"
-                class="col-span-3"
-              >
-                <n-input
-                  v-model:value="saveFileFormValue.description"
-                  placeholder="Description"
-                  type="textarea"
-                />
-              </n-form-item>
-
-              <n-button @click="saveFile"> Upload </n-button>
-            </n-form>
-          </n-card>
+            <img
+              class="menuIcon"
+              src="/images/RemoveSelectedImages.png"
+              title="Remove current page"
+              alt="Remove current page"
+              id="DW_btnRemoveCurrentImage"
+            />
+          </n-button>
+          <n-button
+            :bordered="false"
+            @click="btnRemoveAllImages_onclick"
+            class="ml-1 mr-3"
+          >
+            <img
+              class="menuIcon"
+              src="/images/RemoveAllImages.png"
+              title="Remove All pages"
+              alt="Remove All pages"
+              id="DW_btnRemoveAllImages"
+            />
+          </n-button>
+          <span style="width: 20px" />
+          <span class="page-detail"
+            >{{ currentPageNum }} / {{ totalPageNum }}</span
+          >
+          <n-button
+            :bordered="false"
+            @click="btnZoomOut_onclick"
+            class="ml-1 mr-3"
+          >
+            <img
+              class="menuIcon"
+              src="/images/ZoomOut.png"
+              title="ZoomOut"
+              alt="Erase"
+              id="btnZoomOut"
+            />
+          </n-button>
+          <span class="zoom-detail">{{ spanZoom }} </span>
+          <n-button
+            :bordered="false"
+            @click="btnZoomIn_onclick"
+            class="ml-1 mr-3"
+          >
+            <img
+              class="menuIcon"
+              src="/images/ZoomIn.png"
+              title="ZoomIn"
+              alt="ZoomIn"
+              id="btnZoomIn"
+            />
+          </n-button>
+          <n-button
+            :bordered="false"
+            v-if="orgBtn"
+            @click="btnOrigSize_onclick"
+            class="ml-1 mr-3"
+          >
+            <img
+              style="margin-left: 10px"
+              class="menuIcon"
+              src="/images/Orig_size.png"
+              title="1:1"
+              alt="1:1"
+              id="btnOrigSize"
+            />
+          </n-button>
+          <n-button
+            :bordered="false"
+            v-if="!orgBtn"
+            @click="btnFitWindow_onclick"
+            class="ml-1 mr-3"
+          >
+            <img
+              class="menuIcon"
+              src="/images/FitWindow.png"
+              title="Fit To Window"
+              alt="Fit To Window"
+              id="btnFitWindow"
+            />
+          </n-button>
+          <n-button
+            :bordered="false"
+            @click="btnRotateLeft_onclick"
+            class="ml-1 mr-3"
+          >
+            <img
+              class="menuIcon"
+              src="/images/RotateLeft.png"
+              title="Rotate Left"
+              alt="Rotate Left"
+              id="btnRotateL"
+            />
+          </n-button>
+          <n-button
+            :bordered="false"
+            @click="btnCrop_onclick"
+            class="ml-1 mr-3"
+          >
+            <img
+              class="menuIcon"
+              src="/images/Crop.png"
+              title="Crop"
+              alt="Crop"
+              id="btnCrop"
+            />
+          </n-button>
+          <n-button
+            :bordered="false"
+            @click="btnShowImageEditor_onclick"
+            class="ml-1 mr-3"
+          >
+            <img
+              class="menuIcon"
+              src="/images/ShowEditor.png"
+              title="Show Image Editor"
+              alt="Show Image Editor"
+              id="btnShowImageEditor"
+            />
+          </n-button>
+          <n-button
+            :bordered="false"
+            @click="btnSelect_onclick"
+            class="ml-2 mr-3"
+          >
+            <img
+              class="menuIcon"
+              :src="
+                selectOnClick
+                  ? '/images/Select_selected.png'
+                  : '/images/Select.png'
+              "
+              title="Select"
+              alt="Select"
+              id="btnSelect"
+            />
+          </n-button>
+          <n-button
+            :bordered="false"
+            @click="btnHand_onclick"
+            class="ml-0 mr-3"
+          >
+            <img
+              class="menuIcon"
+              :src="
+                handOnClick ? '/images/Hand_selected.png' : '/images/Hand.png'
+              "
+              title="Hand"
+              alt="Erase"
+              id="btnHand_selected"
+            />
+          </n-button>
         </div>
+        <div :id="containerId" v-once></div>
       </div>
-      <template #footer> </template>
-    </n-card>
+      <div class="col-span-1">
+        <div class="grid grid-cols-2 gap-2">
+          <select
+            v-if="!bWASM"
+            class="col-span-2 dark:bg-[#333333]"
+            id="sources"
+          ></select>
+          <n-checkbox v-model:checked="showScannerUI" class="col-span-1">
+            Show Scanner UI
+          </n-checkbox>
+          <n-checkbox v-model:checked="useAdf" class="col-span-1">
+            Use ADF
+          </n-checkbox>
+          <n-checkbox v-model:checked="autoRemoveBlankPage" class="col-span-1">
+            Auto Remove Blank Page
+          </n-checkbox>
+          <n-checkbox v-model:checked="twoSidedScan" class="col-span-1">
+            2-sided Scan
+          </n-checkbox>
+
+          <div class="col-span-2 mt-2 flex items-center justify-start">
+            <span class="mr-2">Pixel Type:</span>
+            <n-radio-group
+              v-model:value="pixelType"
+              name="pixelTypeGroup"
+              class=""
+            >
+              <n-space>
+                <n-radio
+                  v-for="pt in pixelTypeOptions"
+                  :key="pt.value"
+                  :value="pt.value"
+                  :label="pt.label"
+                />
+              </n-space>
+            </n-radio-group>
+          </div>
+          <div class="col-span-2 mt-2 flex items-center justify-start">
+            <span class="mr-2">Resolution:</span>
+            <n-select
+              v-model:value="resolution"
+              :options="resoultionOptions"
+              placeholder="Please select Resolution"
+            />
+          </div>
+          <n-button
+            v-if="!bWASM"
+            class="col-span-1 mt-2"
+            @click="acquireImage()"
+            >Scan Image</n-button
+          >
+          <n-button class="col-span-1 mt-2" @click="openImage()"
+            >Import Local Image</n-button
+          >
+        </div>
+        <n-card
+          title="Save Documents"
+          size="small"
+          class="mt-4"
+          v-if="!isDocTypeLoading"
+        >
+          <n-form
+            ref="saveFileFormRef"
+            :label-width="80"
+            :model="saveFileFormValue"
+            :rules="saveFileFormRules"
+            class="grid grid-cols-3 gap-2"
+          >
+            <n-form-item label="Title" path="title" class="col-span-2">
+              <n-input
+                v-model:value="saveFileFormValue.title"
+                placeholder="Title"
+              />
+            </n-form-item>
+            <n-form-item label="File Type" path="file_type" class="col-span-1">
+              <n-select
+                class="w-full"
+                v-model:value="saveFileFormValue.file_type"
+                :options="fileTypes"
+                clearable
+              />
+            </n-form-item>
+            <n-form-item label="Type" path="doc_type" class="col-span-3">
+              <n-select
+                class="w-full"
+                v-model:value="saveFileFormValue.doc_type"
+                :options="documentTypeOptions"
+                clearable
+              />
+            </n-form-item>
+            <n-form-item
+              label="Description"
+              path="description"
+              class="col-span-3"
+            >
+              <n-input
+                v-model:value="saveFileFormValue.description"
+                placeholder="Description"
+                type="textarea"
+              />
+            </n-form-item>
+
+            <n-button @click="saveFile"> Upload </n-button>
+          </n-form>
+        </n-card>
+      </div>
+    </div>
+    <template #footer> </template>
   </n-modal>
   <n-modal v-model:show="viewDocumentModal">
     <n-card
@@ -975,22 +960,16 @@ const uploadToServer = () => {
       <!-- Content -->
       <n-image :src="viewDocumentModal.url" preview-disabled />
       <div
-        class="content-center justify-center flex items-stretch"
+        class="flex content-center items-stretch justify-center"
         v-if="!['pdf'].includes(viewDocumentModal.extension)"
       >
         <n-button
-          class="self-auto mt-2"
+          class="mt-2 self-auto"
           @click.prevent="download(viewDocumentModal.url)"
         >
           <n-icon
             ><svg
-              class="
-                group-hover:text-primary
-                h-6
-                w-6
-                text-gray-300
-                transition-colors
-              "
+              class="h-6 w-6 text-gray-300 transition-colors group-hover:text-primary"
               xmlns="http://www.w3.org/2000/svg"
               xmlns:xlink="http://www.w3.org/1999/xlink"
               x="0px"
