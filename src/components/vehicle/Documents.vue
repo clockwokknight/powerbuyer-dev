@@ -44,7 +44,6 @@ const { data: documentTypeOptions, isLoading: isDocTypeLoading } =
 
 const showScanModal = ref(false);
 const viewDocumentModal = ref(false);
-const showDirectUploadModal = ref(false);
 
 const columns = [
   {
@@ -88,6 +87,10 @@ const columns = [
   },
 ];
 
+const refreshTbl = () => {
+  refetch.value();
+};
+
 const containerId = "dwtControlContainer";
 const bWASM = ref(false);
 const DWObject = ref({
@@ -119,10 +122,6 @@ const fileTypes = FILE_TYPES;
 const handleScan = () => {
   initDynamSoft();
   showScanModal.value = true;
-};
-
-const handleDirectUpload = () => {
-  showDirectUploadModal.value = true;
 };
 
 const initDynamSoft = () => {
@@ -281,8 +280,6 @@ const openImage = () => {
     }
   );
 };
-
-const handleUpload = () => {};
 
 const download = (url) => {
   window.open(url, "_blank");
@@ -660,10 +657,7 @@ const uploadToServer = () => {
     "
   >
     <n-button class="w-[220px]" @click="handleScan">Upload Document</n-button>
-    <n-button class="w-[220px]" @click="handleDirectUpload"
-      >Direct Upload</n-button
-    >
-
+    <DirectUploadModal :deal-id="dealId" @refetch="refreshTbl" />
     <n-data-table
       class="rounded-round mt-[24px]"
       :columns="columns"
@@ -851,7 +845,11 @@ const uploadToServer = () => {
         </div>
         <div class="col-span-1">
           <div class="grid grid-cols-2 gap-2">
-            <select v-if="!bWASM" class="col-span-2 dark:bg-[#333333]" id="sources"></select>
+            <select
+              v-if="!bWASM"
+              class="col-span-2 dark:bg-[#333333]"
+              id="sources"
+            ></select>
             <n-checkbox v-model:checked="showScannerUI" class="col-span-1">
               Show Scanner UI
             </n-checkbox>
@@ -1018,7 +1016,6 @@ const uploadToServer = () => {
       <template #footer> </template>
     </n-card>
   </n-modal>
-  <DirectUploadModal :showDirectUploadModal="showDirectUploadModal" />
 </template>
 
 <style>
