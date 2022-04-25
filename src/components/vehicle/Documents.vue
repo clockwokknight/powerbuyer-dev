@@ -1,7 +1,8 @@
 <script setup>
+import { format } from "date-fns";
 import axios from "axios";
 import ActionButtons from "@/components/vehicle/DocumentActionButtons.vue";
-import { h, ref, watch } from "vue";
+import { h, ref, watch, computed } from "vue";
 import { useRoute } from "vue-router";
 import Dynamsoft from "dwt";
 import { useMessage, useDialog } from "naive-ui";
@@ -39,6 +40,7 @@ const {
   isLoading: isDocsLoading,
   refetch,
 } = getDocuments(dealId);
+
 const { data: documentTypeOptions, isLoading: isDocTypeLoading } =
   getDocumentTypeOptions();
 
@@ -53,6 +55,17 @@ const columns = [
   {
     title: "DESCRIPTION",
     key: "description",
+  },
+  {
+    title: "DATE",
+    key: "created_at",
+    sortOrder: "descend",
+    sorter(rowA, rowB) {
+      return rowA.created_at > rowB.created_at ? 1 : -1;
+    },
+    render(row) {
+      return format(new Date(row?.created_at), "MM/dd/yyyy");
+    },
   },
   {
     title: "TYPE",
@@ -646,14 +659,7 @@ const uploadToServer = () => {
 
 <template>
   <div
-    class="
-      w-full
-      rounded-round
-      border-[1px]
-      bg-white
-      p-[24px]
-      dark:border-0 dark:bg-foreground_dark
-    "
+    class="w-full rounded-round border-[1px] bg-white p-[24px] dark:border-0 dark:bg-foreground_dark"
   >
     <n-button class="w-[220px]" @click="handleScan">Upload Document</n-button>
     <DirectUploadModal :deal-id="dealId" @refetch="refreshTbl" />
@@ -662,7 +668,7 @@ const uploadToServer = () => {
       :columns="columns"
       :data="documents"
       :loading="isDocsLoading"
-      :pagination="pagination"
+      :pagination="{ pageSize: 25 }"
       :bordered="false"
       :max-height="400"
       :scroll-x="900"
@@ -970,13 +976,7 @@ const uploadToServer = () => {
         >
           <n-icon
             ><svg
-              class="
-                h-6
-                w-6
-                text-gray-300
-                transition-colors
-                group-hover:text-primary
-              "
+              class="h-6 w-6 text-gray-300 transition-colors group-hover:text-primary"
               xmlns="http://www.w3.org/2000/svg"
               xmlns:xlink="http://www.w3.org/1999/xlink"
               x="0px"
