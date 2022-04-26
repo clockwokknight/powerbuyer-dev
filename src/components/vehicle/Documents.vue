@@ -145,7 +145,7 @@ const initDynamSoft = () => {
       WebTwainId: "dwtObject",
       ContainerId: containerId,
       Width: "100%",
-      Height: "700px",
+      Height: "500px",
     },
   ];
   Dynamsoft.DWT.RegisterEvent("OnWebTwainReady", () => {
@@ -659,7 +659,14 @@ const uploadToServer = () => {
 
 <template>
   <div
-    class="w-full rounded-round border-[1px] bg-white p-[24px] dark:border-0 dark:bg-foreground_dark"
+    class="
+      w-full
+      rounded-round
+      border-[1px]
+      bg-white
+      p-[24px]
+      dark:border-0 dark:bg-foreground_dark
+    "
   >
     <n-button class="w-[220px]" @click="handleScan">Upload Document</n-button>
     <DirectUploadModal :deal-id="dealId" @refetch="refreshTbl" />
@@ -675,7 +682,7 @@ const uploadToServer = () => {
     />
   </div>
   <n-modal
-    class="w-[1220px] min-w-[1220px]"
+    class="max-w-[1220px]"
     v-model:show="showScanModal"
     preset="card"
     title="Upload Document"
@@ -846,110 +853,128 @@ const uploadToServer = () => {
         <div :id="containerId" v-once></div>
       </div>
       <div class="col-span-1">
-        <div class="grid grid-cols-2 gap-2">
-          <select
-            v-if="!bWASM"
-            class="col-span-2 dark:bg-[#333333]"
-            id="sources"
-          ></select>
-          <n-checkbox v-model:checked="showScannerUI" class="col-span-1">
-            Show Scanner UI
-          </n-checkbox>
-          <n-checkbox v-model:checked="useAdf" class="col-span-1">
-            Use ADF
-          </n-checkbox>
-          <n-checkbox v-model:checked="autoRemoveBlankPage" class="col-span-1">
-            Auto Remove Blank Page
-          </n-checkbox>
-          <n-checkbox v-model:checked="twoSidedScan" class="col-span-1">
-            2-sided Scan
-          </n-checkbox>
-
-          <div class="col-span-2 mt-2 flex items-center justify-start">
-            <span class="mr-2">Pixel Type:</span>
-            <n-radio-group
-              v-model:value="pixelType"
-              name="pixelTypeGroup"
-              class=""
-            >
-              <n-space>
-                <n-radio
-                  v-for="pt in pixelTypeOptions"
-                  :key="pt.value"
-                  :value="pt.value"
-                  :label="pt.label"
-                />
-              </n-space>
-            </n-radio-group>
-          </div>
-          <div class="col-span-2 mt-2 flex items-center justify-start">
-            <span class="mr-2">Resolution:</span>
-            <n-select
-              v-model:value="resolution"
-              :options="resoultionOptions"
-              placeholder="Please select Resolution"
-            />
-          </div>
-          <n-button
-            v-if="!bWASM"
-            class="col-span-1 mt-2"
-            @click="acquireImage()"
-            >Scan Image</n-button
-          >
-          <n-button class="col-span-1 mt-2" @click="openImage()"
-            >Import Local Image</n-button
-          >
-        </div>
-        <n-card
-          title="Save Documents"
-          size="small"
-          class="mt-4"
-          v-if="!isDocTypeLoading"
+        <n-tabs
+          default-value="save-documents"
+          justify-content="space-evenly"
+          type="line"
         >
-          <n-form
-            ref="saveFileFormRef"
-            :label-width="80"
-            :model="saveFileFormValue"
-            :rules="saveFileFormRules"
-            class="grid grid-cols-3 gap-2"
+          <n-tab-pane
+            name="save-documents"
+            tab="Save Document(s)"
+            v-if="!isDocTypeLoading"
           >
-            <n-form-item label="Title" path="title" class="col-span-2">
-              <n-input
-                v-model:value="saveFileFormValue.title"
-                placeholder="Title"
-              />
-            </n-form-item>
-            <n-form-item label="File Type" path="file_type" class="col-span-1">
-              <n-select
-                class="w-full"
-                v-model:value="saveFileFormValue.file_type"
-                :options="fileTypes"
-                clearable
-              />
-            </n-form-item>
-            <n-form-item label="Type" path="doc_type" class="col-span-3">
-              <n-select
-                class="w-full"
-                v-model:value="saveFileFormValue.doc_type"
-                :options="documentTypeOptions"
-                clearable
-              />
-            </n-form-item>
-            <n-form-item
-              label="Description"
-              path="description"
-              class="col-span-3"
+            <n-form
+              ref="saveFileFormRef"
+              :label-width="80"
+              :model="saveFileFormValue"
+              :rules="saveFileFormRules"
+              class="grid grid-cols-3 gap-2"
             >
-              <n-input
-                v-model:value="saveFileFormValue.description"
-                placeholder="Description"
-                type="textarea"
-              />
-            </n-form-item>
+              <n-form-item label="Title" path="title" class="col-span-2">
+                <n-input
+                  v-model:value="saveFileFormValue.title"
+                  placeholder="Title"
+                />
+              </n-form-item>
+              <n-form-item
+                label="File Type"
+                path="file_type"
+                class="col-span-1"
+              >
+                <n-select
+                  class="w-full"
+                  v-model:value="saveFileFormValue.file_type"
+                  :options="fileTypes"
+                  clearable
+                />
+              </n-form-item>
+              <n-form-item label="Type" path="doc_type" class="col-span-3">
+                <n-select
+                  class="w-full"
+                  v-model:value="saveFileFormValue.doc_type"
+                  :options="documentTypeOptions"
+                  clearable
+                />
+              </n-form-item>
+              <n-form-item
+                label="Description"
+                path="description"
+                class="col-span-3"
+              >
+                <n-input
+                  v-model:value="saveFileFormValue.description"
+                  placeholder="Description"
+                  type="textarea"
+                />
+              </n-form-item>
 
-            <n-button @click="saveFile"> Upload </n-button>
-          </n-form>
-        </n-card>
+              <n-button @click="saveFile"> Upload </n-button>
+            </n-form>
+          </n-tab-pane>
+          <n-tab-pane
+            name="scan-options"
+            tab="Scan Options"
+            display-directive="show"
+          >
+            <div class="grid grid-cols-2 gap-2">
+              <select
+                v-if="!bWASM"
+                class="col-span-2 dark:bg-[#333333]"
+                id="sources"
+              ></select>
+              <n-checkbox v-model:checked="showScannerUI" class="col-span-1">
+                Show Scanner UI
+              </n-checkbox>
+              <n-checkbox v-model:checked="useAdf" class="col-span-1">
+                Use ADF
+              </n-checkbox>
+              <n-checkbox
+                v-model:checked="autoRemoveBlankPage"
+                class="col-span-1"
+              >
+                Auto Remove Blank Page
+              </n-checkbox>
+              <n-checkbox v-model:checked="twoSidedScan" class="col-span-1">
+                2-sided Scan
+              </n-checkbox>
+
+              <div class="col-span-2 mt-2 flex items-center justify-start">
+                <span class="mr-2">Pixel Type:</span>
+                <n-radio-group
+                  v-model:value="pixelType"
+                  name="pixelTypeGroup"
+                  class=""
+                >
+                  <n-space>
+                    <n-radio
+                      v-for="pt in pixelTypeOptions"
+                      :key="pt.value"
+                      :value="pt.value"
+                      :label="pt.label"
+                    />
+                  </n-space>
+                </n-radio-group>
+              </div>
+              <div class="col-span-2 mt-2 flex items-center justify-start">
+                <span class="mr-2">Resolution:</span>
+                <n-select
+                  v-model:value="resolution"
+                  :options="resoultionOptions"
+                  placeholder="Please select Resolution"
+                />
+              </div>
+              <n-button
+                v-if="!bWASM"
+                class="col-span-1 mt-2"
+                @click="acquireImage()"
+                >Scan Image</n-button
+              >
+              <n-button class="col-span-1 mt-2" @click="openImage()"
+                >Import Local Image</n-button
+              >
+            </div>
+          </n-tab-pane>
+        </n-tabs>
       </div>
     </div>
     <template #footer> </template>
@@ -976,7 +1001,13 @@ const uploadToServer = () => {
         >
           <n-icon
             ><svg
-              class="h-6 w-6 text-gray-300 transition-colors group-hover:text-primary"
+              class="
+                h-6
+                w-6
+                text-gray-300
+                transition-colors
+                group-hover:text-primary
+              "
               xmlns="http://www.w3.org/2000/svg"
               xmlns:xlink="http://www.w3.org/1999/xlink"
               x="0px"
@@ -1016,8 +1047,7 @@ const uploadToServer = () => {
   float: left;
   margin: 0;
   padding: 0;
-  width: 774px;
-  height: 40px;
+  width: calc(100% - 2px);
   background: #fff;
   border: 1px solid #ccc;
   background: #323234 0% 0% no-repeat padding-box;
@@ -1027,6 +1057,8 @@ const uploadToServer = () => {
   box-sizing: unset;
   margin-top: -1px;
   cursor: default;
+  flex-wrap: wrap;
+  flex-direction: row;
 }
 #divEdit .page-detail {
   height: 100%;

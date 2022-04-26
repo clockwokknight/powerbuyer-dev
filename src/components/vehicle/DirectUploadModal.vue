@@ -124,7 +124,7 @@ const handleClose = () => {
   >
   <n-modal
     v-model:show="showDirectUploadModal"
-    class="w-[1220px] min-w-[1220px]"
+    class="max-w-[1220px]"
     preset="card"
     title="Direct Upload"
   >
